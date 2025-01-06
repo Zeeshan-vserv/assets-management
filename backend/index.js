@@ -25,5 +25,5 @@ mongoose.connect(process.env.MONGODB, {useNewUrlParser: true, useUnifiedTopology
     console.error('MongoDB Connection Error',error)
 })
 
-app.use('/user', authRoute)
+app.use('/auth', authRoute)
 app.use('/asset', assetRoute)

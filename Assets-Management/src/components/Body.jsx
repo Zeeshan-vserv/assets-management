@@ -6,11 +6,10 @@ import DashboardAsset from './Dashboard/DashboardAsset'
 
 const Body = ({nav,setNav}) => {
   return (
-    <div className='flex'>
+    <div className='flex 100vh'>
         <Navigation nav={nav} setNav={setNav}/>
         {/* <AddFixedAssets/> */}
-        {/* <AddUsers/> */}
-        <DashboardAsset/>
+        <AddUsers/>
     </div>
   )
 }

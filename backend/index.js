@@ -5,7 +5,9 @@ import bodyParser from 'body-parser'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import path from 'path'
-import { error } from 'console'
+
+// import authRoute from './routes/authRoute'
+import authRoute from './routes/authRoute.js'
 
 const app = express()
 
@@ -21,3 +23,5 @@ mongoose.connect(process.env.MONGODB, {useNewUrlParser: true, useUnifiedTopology
 .catch((error)=>{
     console.error('MongoDB Connection Error',error)
 })
+
+app.use('/user', authRoute)

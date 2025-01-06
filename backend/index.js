@@ -8,6 +8,7 @@ import path from 'path'
 
 // import authRoute from './routes/authRoute'
 import authRoute from './routes/authRoute.js'
+import assetRoute from './routes/assetRoute.js'
 
 const app = express()
 
@@ -25,3 +26,4 @@ mongoose.connect(process.env.MONGODB, {useNewUrlParser: true, useUnifiedTopology
 })
 
 app.use('/user', authRoute)
+app.use('/asset', assetRoute)

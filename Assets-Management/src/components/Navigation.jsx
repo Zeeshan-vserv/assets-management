@@ -166,8 +166,8 @@ const Navigation = ({ nav, setNav }) => {
   };
 
   return (
-    <div className='flex'>
-      <div className='w-fit h-full p-5 flex flex-col gap-8 text-2xl bg-gray-800 text-white'>
+    <div className='flex h-full'>
+      <div className='w-fit h-[94vh] p-5 flex flex-col gap-8 text-2xl bg-gray-800 text-white'>
         <RxDashboard className={`${activeMenu == 'dashboard'? "text-blue-400" :"" } cursor-pointer`} onClick={() => {setActiveMenu('dashboard'); setNav(true)}} />
         <LiaToolsSolid className={`${activeMenu == 'servicedesk'? "text-blue-400" :"" } cursor-pointer`} onClick={() => {setActiveMenu('servicedesk'); setNav(true)}} />
         <GrCubes className={`${activeMenu == 'assets'? "text-blue-400" :"" } cursor-pointer`}  onClick={() => {setActiveMenu('assets'); setNav(true)}} />
@@ -175,7 +175,7 @@ const Navigation = ({ nav, setNav }) => {
         <MdOutlineAdminPanelSettings className={`${activeMenu == 'configuration'? "text-blue-400" :"" } cursor-pointer`}  onClick={() => {setActiveMenu('configuration'); setNav(true)}} />
       </div>
 
-      <div className={`w-40 h-full p-7 text-xs flex flex-col gap-3 bg-gray-900 text-white uppercase overflow-y-auto ${nav ? "" : "hidden"} `}>
+      <div className={`w-40 h-[94vh] p-7 text-xs flex flex-col gap-3 bg-gray-900 text-white uppercase overflow-y-auto ${nav ? "" : "hidden"} `}>
         {renderSubMenu()}
       </div>
     </div>

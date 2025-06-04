@@ -1,20 +1,14 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-// import { signup } from "../../action/AuthAction";
-import { signup } from "../../../action/AuthAction";
 import { NavLink } from "react-router-dom";
 import "../../Table.css";
+import { signup } from "../../../api/AuthRequest";
 const AddUser = () => {
-  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
-    businessUnit: "",
     employeeName: "",
     employeeCode: "",
-    grade: "",
     emailAddress: "",
     mobileNumber: "",
     designation: "",
-    costCenter: "",
     location: "",
     subLocation: "",
     department: "",
@@ -22,18 +16,123 @@ const AddUser = () => {
     reportingManager: "",
     departmentHead: "",
     businessHead: "",
-    vipUser: "",
     password: "",
     confirmPassword: "",
+    users: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    components: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    departments: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    subDepartments: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    locations: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    subLocations: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    assets: {
+      isView: "",
+    },
+    tickets: {
+      isView: "",
+    },
+    showUsers: {
+      isView: "",
+    },
+    summary: {
+      isView: "",
+    },
+    importAsset: {
+      isView: "",
+    },
   });
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(signup(formData));
+    // console.log("Form Data:", formData);
+    
+    await signup(formData);
+    setFormData({ employeeName: "",
+    employeeCode: "",
+    emailAddress: "",
+    mobileNumber: "",
+    designation: "",
+    location: "",
+    subLocation: "",
+    department: "",
+    subDepartment: "",
+    reportingManager: "",
+    departmentHead: "",
+    businessHead: "",
+    password: "",
+    confirmPassword: "",
+    users: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    components: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    departments: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    subDepartments: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    locations: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    subLocations: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    assets: {
+      isView: "",
+    },
+    tickets: {
+      isView: "",
+    },
+    showUsers: {
+      isView: "",
+    },
+    summary: {
+      isView: "",
+    },
+    importAsset: {
+      isView: "",
+    },})
   };
   return (
     <div className="w-[100%] p-6 flex flex-col gap-5 bg-slate-200">
@@ -89,7 +188,7 @@ const AddUser = () => {
                 id="employeeCode"
                 name="employeeCode"
                 value={formData.employeeCode}
-                onChange={handleSubmit}
+                onChange={handleChange}
               />
             </div>
             {/* <div className="flex items-center w-[46%]">
@@ -121,16 +220,16 @@ const AddUser = () => {
             </div> */}
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeAddress"
+                htmlFor="emailAddress"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Employee Address
+                Email Address
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="email"
-                id="employeeAddress"
-                name="employeeAddress"
+                id="emailAddress"
+                name="emailAddress"
                 value={formData.emailAddress}
                 onChange={handleChange}
               />
@@ -167,24 +266,6 @@ const AddUser = () => {
                 onChange={handleChange}
               />
             </div>
-            {/* <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="costCentre"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Cost Centre
-              </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="costCentre"
-                id="costCentre"
-                value={formData.costCenter}
-                onChange={handleChange}
-              >
-                <option value="">Select</option>
-                <option value="N/A">N/A</option>
-              </select>
-            </div> */}
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="location"
@@ -341,22 +422,6 @@ const AddUser = () => {
                 onChange={handleChange}
               />
             </div>
-            {/* <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="vipUser"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                VIP User
-              </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="vipUser"
-                name="vipUser"
-                value={formData.vipUser}
-                onChange={handleChange}
-              />
-            </div> */}
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="password"
@@ -409,15 +474,18 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    //   checked={formData.dashboardView || false}
-                    //   onChange={(e) =>
-                    //     setFormData({
-                    //       ...formData,
-                    //       dashboardView: e.target.checked,
-                    //     })
-                    //   }
+                    id="assets"
+                    name="assets"
+                    checked={formData.assets.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        assets: {
+                          ...formData.assets,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -427,15 +495,18 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    //   checked={formData.dashboardView || false}
-                    //   onChange={(e) =>
-                    //     setFormData({
-                    //       ...formData,
-                    //       dashboardView: e.target.checked,
-                    //     })
-                    //   }
+                    id="tickets"
+                    name="tickets"
+                    checked={formData.tickets.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        tickets: {
+                          ...formData.tickets,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -445,15 +516,18 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    //   checked={formData.dashboardView || false}
-                    //   onChange={(e) =>
-                    //     setFormData({
-                    //       ...formData,
-                    //       dashboardView: e.target.checked,
-                    //     })
-                    //   }
+                    id="showUsers"
+                    name="showUsers"
+                    checked={formData.showUsers.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        showUsers: {
+                          ...formData.showUsers,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -463,15 +537,39 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    //   checked={formData.dashboardView || false}
-                    //   onChange={(e) =>
-                    //     setFormData({
-                    //       ...formData,
-                    //       dashboardView: e.target.checked,
-                    //     })
-                    //   }
+                    id="importAsset"
+                    name="importAsset"
+                    checked={formData.importAsset.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        importAsset: {
+                          ...formData.importAsset,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
+                  />
+                </td>
+              </tr>
+              <tr>
+                <td>Assets - Import</td>
+                <td>
+                  <input
+                    className="w-5 h-5"
+                    type="checkbox"
+                    id="summary"
+                    name="summary"
+                    checked={formData.summary.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        summary: {
+                          ...formData.summary,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -494,45 +592,51 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="users"
+                    checked={formData.users.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        users: {
+                          ...formData.users,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="users"
+                    checked={formData.users.isEdit || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        users: {
+                          ...formData.users,
+                          isEdit: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="users"
+                    checked={formData.users.isDelete || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        users: {
+                          ...formData.users,
+                          isDelete: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -542,45 +646,51 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="components"
+                    checked={formData.components.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        components: {
+                          ...formData.components,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="components"
+                    checked={formData.components.isEdit || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        components: {
+                          ...formData.components,
+                          isEdit: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="components"
+                    checked={formData.components.isDelete || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        components: {
+                          ...formData.components,
+                          isDelete: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -590,45 +700,51 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="departments"
+                    checked={formData.departments.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        departments: {
+                          ...formData.departments,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="departments"
+                    checked={formData.departments.isEdit || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        departments: {
+                          ...formData.departments,
+                          isEdit: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="departments"
+                    checked={formData.departments.isDelete || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        departments: {
+                          ...formData.departments,
+                          isDelete: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -638,45 +754,51 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="subDepartments"
+                    checked={formData.subDepartments.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        subDepartments: {
+                          ...formData.subDepartments,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="subDepartments"
+                    checked={formData.subDepartments.isEdit || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        subDepartments: {
+                          ...formData.subDepartments,
+                          isEdit: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="subDepartments"
+                    checked={formData.subDepartments.isDelete || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        subDepartments: {
+                          ...formData.subDepartments,
+                          isDelete: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -686,45 +808,51 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="locations"
+                    checked={formData.locations.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        locations: {
+                          ...formData.locations,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="locations"
+                    checked={formData.locations.isEdit || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        locations: {
+                          ...formData.locations,
+                          isEdit: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="locations"
+                    checked={formData.locations.isDelete || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        locations: {
+                          ...formData.locations,
+                          isDelete: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -734,45 +862,51 @@ const AddUser = () => {
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="subLocations"
+                    checked={formData.subLocations.isView || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        subLocations: {
+                          ...formData.subLocations,
+                          isView: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="subLocations"
+                    checked={formData.subLocations.isEdit || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        subLocations: {
+                          ...formData.subLocations,
+                          isEdit: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
                 <td>
                   <input
                     className="w-5 h-5"
                     type="checkbox"
-                    id="dashboardView"
-                    name="dashboardView"
-                    // checked={formData.dashboardView || false}
-                    // onChange={(e) =>
-                    //   setFormData({
-                    //     ...formData,
-                    //     dashboardView: e.target.checked,
-                    //   })
-                    // }
+                    name="subLocations"
+                    checked={formData.subLocations.isDelete || false}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        subLocations: {
+                          ...formData.subLocations,
+                          isDelete: e.target.checked,
+                        },
+                      })
+                    }
                   />
                 </td>
               </tr>
@@ -780,7 +914,6 @@ const AddUser = () => {
           </div>
         </div>
         <div className="my-2 flex gap-2 justify-end">
-
           <button
             type="submit"
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white"

@@ -4,7 +4,7 @@ function Components() {
   return (
     <>
       <div>
-        <h2>ALL COMPONENTS</h2>
+        <h2>ALL COMPONENTSS</h2>
       </div>
     </>
   );

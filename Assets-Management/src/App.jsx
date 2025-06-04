@@ -11,11 +11,10 @@ function App() {
   return (
     <>
        <Routes>
-        <Route path='/auth' element={user ? <Navigate to='/main' /> : <Login />} />
-        <Route path='/dashboardAsset' element={user ? <DashboardAsset /> : <Navigate to='/auth' />} />
-        <Route path='/main' element={user ? <Main /> : <Navigate to='/auth' />} />
-        <Route path='/' element={<Navigate to='/auth' />} />
-      </Routes>
+  <Route path='/auth' element={user ? <Navigate to='/main' /> : <Login />} />
+  <Route path='/main' element={user ? <Main /> : <Navigate to='/auth' />} />
+  <Route path='/' element={<Navigate to='/auth' />} />
+</Routes>
     </>
   )
 }

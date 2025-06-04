@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
-import { signup } from "../../action/AuthAction";
+import { signup } from "../../api/AuthRequest";
 
 const AddUsers = () => {
 
-  const dispatch = useDispatch()
   const [formData, setFormData] = useState({businessUnit:"", employeeName:"", employeeCode:"", grade:"", emailAddress:"", mobileNumber:"", designation:"", costCenter:"", location:"", subLocation:"", department:"", subDepartment:"", reportingManager:"", departmentHead:"", businessHead:"", vipUser:"", password:"", confirmPassword:""})
 
   const handleChange = (e) => {
@@ -13,7 +12,7 @@ const AddUsers = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(signup(formData))
+    signup(formData)
   }
   return (
     <div className="w-[100%] p-6 flex flex-col gap-5 bg-slate-200">

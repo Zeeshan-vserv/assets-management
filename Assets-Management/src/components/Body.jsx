@@ -3,14 +3,18 @@ import Navigation from './Navigation'
 import AddFixedAssets from './Asset-Pages/AddFixedAssets'
 import AddUsers from './Configuration-Pages/AddUsers'
 import DashboardAsset from './Dashboard/DashboardAsset'
-
+import ConfigurationRoute from './Configuration/ConfigurationRoute'
+import {Routes,Route} from "react-router-dom"
 const Body = ({nav,setNav}) => {
   return (
     <div className='flex'>
         <Navigation nav={nav} setNav={setNav}/>
-        <AddFixedAssets/>
+        {/* <AddFixedAssets/> */}
         {/* <AddUsers/> */}
         {/* <DashboardAsset/> */}
+        <Routes>
+          <Route path="/configuration/*"element={<ConfigurationRoute/>} />
+        </Routes>
     </div>
   )
 }

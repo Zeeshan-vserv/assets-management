@@ -93,7 +93,8 @@ const Navigation = ({ nav, setNav }) => {
             {expandedSubMenus.global && (
               <ul className='flex flex-col gap-2 list-disc pl-5 '>
                 <li className='text-[11px] hover:underline'>vip users</li>
-                <li className='text-[11px] hover:underline'>users</li>
+                {/* <li className='text-[11px] hover:underline'>users</li> */}
+                <li className='text-[11px] hover:underline'><NavLink to="/main/configuration/Users" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Users</NavLink></li>
                 <li className='text-[11px] hover:underline'>technicians</li> 
                 <li className='text-[11px] hover:underline'><NavLink to="/main/configuration/components" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>components</NavLink></li>
                 <li className='text-[11px] hover:underline'>business units</li>

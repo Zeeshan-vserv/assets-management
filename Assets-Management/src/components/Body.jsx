@@ -14,6 +14,7 @@ const Body = ({nav,setNav}) => {
         {/* <DashboardAsset/> */}
         <Routes>
           <Route path="/configuration/*"element={<ConfigurationRoute/>} />
+          <Route path="/test"element={<AddUsers/>} />
         </Routes>
     </div>
   )

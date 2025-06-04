@@ -2,11 +2,10 @@ import AssetModel from "../models/assetModel.js";
 
 export const createAsset = async (req, res) => {
 
-    const { businessUnit, category, assetTag,criticality, make, model, serialNumber,expressServiceCode, ipAddress, operatingSystem, cpu,hardDisk, ram,assetImage, location, subLocation,storeLocation, vendor, assetType, supportType, poNo,poDate, invoiceNo, invoiceDate, assetCost,residualCost, assetLife, depreciation, hsnCode,costCenter,pmCycle, schedule, istPmDate } = req.body
+    const { ...assetData } = req.body
 
     try{
-        const newAsset = new AssetModel({businessUnit, category, assetTag, criticality, make, model, serialNumber,expressServiceCode, ipAddress, operatingSystem, cpu,
-        hardDisk, ram, assetImage, location,subLocation, storeLocation, vendor, assetType,supportType, poNo, poDate, invoiceNo,invoiceDate, assetCost, residualCost, assetLife,depreciation, hsnCode, costCenter, pmCycle,schedule, istPmDate})
+        const newAsset = new AssetModel({...assetData})
 
        const asset = await newAsset.save()
        res.status(201).json({asset, message: "Asset Created"}) 

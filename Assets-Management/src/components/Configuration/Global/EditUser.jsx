@@ -1,166 +1,170 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink, useParams } from "react-router-dom";
 import "../../Table.css";
-import { signup } from "../../../api/AuthRequest";
+import { getUser, signup, updateUser } from "../../../api/AuthRequest";
 const EditUser = () => {
-      const [formData, setFormData] = useState({
-        employeeName: "",
-        employeeCode: "",
-        emailAddress: "",
-        mobileNumber: "",
-        designation: "",
-        location: "",
-        subLocation: "",
-        department: "",
-        subDepartment: "",
-        reportingManager: "",
-        departmentHead: "",
-        businessHead: "",
-        password: "",
-        confirmPassword: "",
-        users: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        components: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        departments: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        subDepartments: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        locations: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        subLocations: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        assets: {
-          isView: "",
-        },
-        tickets: {
-          isView: "",
-        },
-        showUsers: {
-          isView: "",
-        },
-        summary: {
-          isView: "",
-        },
-        importAsset: {
-          isView: "",
-        },
-      });
+  const { id } = useParams(); // Get vendor ID from the URL parameter
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    employeeName: "",
+    employeeCode: "",
+    emailAddress: "",
+    mobileNumber: "",
+    designation: "",
+    location: "",
+    subLocation: "",
+    department: "",
+    subDepartment: "",
+    reportingManager: "",
+    departmentHead: "",
+    businessHead: "",
+    users: {
+      isView: false,
+      isEdit: false,
+      isDelete: false,
+    },
+    components: {
+      isView: false,
+      isEdit: false,
+      isDelete: false,
+    },
+    departments: {
+      isView: false,
+      isEdit: false,
+      isDelete: false,
+    },
+    subDepartments: {
+      isView: false,
+      isEdit: false,
+      isDelete: false,
+    },
+    locations: {
+      isView: false,
+      isEdit: false,
+      isDelete: false,
+    },
+    subLocations: {
+      isView: false,
+      isEdit: false,
+      isDelete: false,
+    },
+    assets: {
+      isView: false,
+    },
+    tickets: {
+      isView: false,
+    },
+    showUsers: {
+      isView: false,
+    },
+    summary: {
+      isView: false,
+    },
+    importAsset: {
+      isView: false,
+    },
+  });
+
+//   console.log(id);
+
+  const fetchUser = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getUser(id);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setFormData(response?.data || []);
+      // setData(response);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    // console.log("Form Data:", formData);
+
+    await updateUser(id, formData);
+    console.log(id, formData);
     
-      const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-      };
-    
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-        // console.log("Form Data:", formData);
-    
-        await signup(formData);
-        setFormData({
-          employeeName: "",
-          employeeCode: "",
-          emailAddress: "",
-          mobileNumber: "",
-          designation: "",
-          location: "",
-          subLocation: "",
-          department: "",
-          subDepartment: "",
-          reportingManager: "",
-          departmentHead: "",
-          businessHead: "",
-          password: "",
-          confirmPassword: "",
-          users: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          components: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          departments: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          subDepartments: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          locations: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          subLocations: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          assets: {
-            isView: "",
-          },
-          tickets: {
-            isView: "",
-          },
-          showUsers: {
-            isView: "",
-          },
-          summary: {
-            isView: "",
-          },
-          importAsset: {
-            isView: "",
-          },
-        });
-      };
+    setFormData({
+      employeeName: "",
+      employeeCode: "",
+      emailAddress: "",
+      mobileNumber: "",
+      designation: "",
+      location: "",
+      subLocation: "",
+      department: "",
+      subDepartment: "",
+      reportingManager: "",
+      departmentHead: "",
+      businessHead: "",
+      users: {
+        isView: false,
+        isEdit: false,
+        isDelete: false,
+      },
+      components: {
+        isView: false,
+        isEdit: false,
+        isDelete: false,
+      },
+      departments: {
+        isView: false,
+        isEdit: false,
+        isDelete: false,
+      },
+      subDepartments: {
+        isView: false,
+        isEdit: false,
+        isDelete: false,
+      },
+      locations: {
+        isView: false,
+        isEdit: false,
+        isDelete: false,
+      },
+      subLocations: {
+        isView: false,
+        isEdit: false,
+        isDelete: false,
+      },
+      assets: {
+        isView: false,
+      },
+      tickets: {
+        isView: false,
+      },
+      showUsers: {
+        isView: false,
+      },
+      summary: {
+        isView: false,
+      },
+      importAsset: {
+        isView: false,
+      },
+    });
+  };
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
-      <form action="" onSubmit={handleSubmit} className="flex flex-col gap-5">
-        <h2 className="text-slate-700 font-semibold">ADD USER</h2>
+      <form action="" onSubmit={handleUpdate} className="flex flex-col gap-5">
+        <h2 className="text-slate-700 font-semibold">EDIT USER</h2>
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex flex-wrap gap-6 justify-between mt-3">
-            {/* <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="businessUnit"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Business Unit{" "}
-              </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="businessUnit"
-                id="businessUnit"
-                value={formData.businessUnit}
-                onChange={handleChange}
-              >
-                <option value="">Select</option>
-                <option value="1">Business Unit 1</option>
-                <option value="2">Business Unit 2</option>
-              </select>
-            </div> */}
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="employeeName"
@@ -193,33 +197,6 @@ const EditUser = () => {
                 onChange={handleChange}
               />
             </div>
-            {/* <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="grade"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Grade
-              </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="grade"
-                id="grade"
-                value={formData.grade}
-                onChange={handleChange}
-              >
-                <option value="">Select</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-              </select>
-            </div> */}
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="emailAddress"
@@ -424,42 +401,12 @@ const EditUser = () => {
                 onChange={handleChange}
               />
             </div>
-            <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="password"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Password
-              </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="confirmPassword"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Confirm Password
-              </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
           </div>
         </div>
 
-        <h2 className="text-slate-700 font-semibold">USER ROLE PERMISSIONS</h2>
+        <h2 className="text-slate-700 font-semibold">
+          EDIT USER ROLE PERMISSIONS
+        </h2>
         <div className="w-full flex gap-5 max-lg:flex-col">
           <div className="w-1/2 p-4 bg-white rounded-md shadow-md max-lg:w-full">
             <table>
@@ -936,7 +883,8 @@ const EditUser = () => {
           </NavLink>
         </div>
       </form>
-    </div>  )
-}
+    </div>
+  );
+};
 
-export default EditUser
+export default EditUser;

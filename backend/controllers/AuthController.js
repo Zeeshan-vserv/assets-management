@@ -23,7 +23,7 @@ export const signup = async (req, res) => {
             const token = jwt.sign({
                 emailAddress: user.emailAddress,
                 id: user._id,
-            }, process.env.JWT_KEY, { expiresIn: '2h' });
+            }, process.env.JWT_KEY, { expiresIn: '2m' });
 
             res.status(201).json({
                 user,
@@ -56,7 +56,7 @@ export const login = async (req, res) => {
         const token = jwt.sign({
             emailAddress: user.emailAddress,
             id: user._id,
-        }, process.env.JWT_KEY, { expiresIn: '2h' });
+        }, process.env.JWT_KEY, { expiresIn: '2m' });
 
         // Remove sensitive fields
         const { password: pwd, confirmPassword, ...safeUser } = user._doc;

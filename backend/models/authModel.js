@@ -61,6 +61,10 @@ const authSchema = mongoose.Schema(
         importAsset:{
             isView: { type: Boolean, default: false },
         }, 
+        isAdmin: {
+            type: Boolean,
+            default: false
+        },
         isActive: {type: Boolean, default: true}
     },
     { timestamps: true}

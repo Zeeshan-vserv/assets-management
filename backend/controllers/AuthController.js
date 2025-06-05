@@ -101,22 +101,21 @@ export const getUser = async (req, res) => {
 };
 
 export const updateUser = async (req, res) => {
-    const id = req.params.id;
-    const { currentUserId, currentAdminStatus, password } = req.body;
-    if (id === currentUserId || currentAdminStatus) { 
-        try {
-            if (password) {
-                const salt = await bcrypt.genSalt(10);
-                req.body.password = await bcrypt.hash(password, salt);
-            }
-            const user = await AuthModel.findByIdAndUpdate(id, req.body, { new: true });
-            res.status(200).json(user);
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
-    } else {
-        res.status(403).json({ message: 'Unauthorized' }); 
+  try {
+    const { id } = req.params;
+    const { _id, ...updateUserData } = req.body;
+    const updatedUser = await AuthModel.findByIdAndUpdate(id, updateUserData, {
+      new: true,
+    });
+    if (!updatedUser) {
+      return res.status(404).json({ success: false, message: "User not found" });
     }
+    res.status(200).json({ success: true, data: updatedUser });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Error updating PO: " + error.message });
+  }
 };
 
 export const deleteUser = async (req, res) => {

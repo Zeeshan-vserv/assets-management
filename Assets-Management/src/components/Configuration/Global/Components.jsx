@@ -27,6 +27,8 @@ function Components() {
   const [editComponents, setEditComponents] = useState(null);
   const [openAddModal, setOpenAddModal] = useState(false);
   const [newComponent, setNewComponent] = useState({ name: "" });
+  const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
+  const [deleteComponentsId, setDeleteComponentsId] = useState(null);
 
   const fetchUser = async () => {
     try {
@@ -101,9 +103,14 @@ function Components() {
   };
 
   const handleDeleteComponents = (id) => {
-    const filterData = data.filter((val) => val.id !== id);
+    setDeleteComponentsId(id);
+    setDeleteConfirmationModal(true);
+  };
+
+  const deleteComponentConfirmationHandler = () => {
+    const filterData = data.filter((val) => val.id !== deleteComponentsId);
     setData(filterData);
-    //call api
+    setDeleteConfirmationModal(false);
   };
 
   const componentsInputChangeHandler = (e) => {
@@ -300,6 +307,11 @@ function Components() {
       variant: "outlined",
     },
     enablePagination: true,
+    initialState: {
+      pagination: {
+        pageSize: 5,
+      },
+    },
 
     muiTableHeadCellProps: {
       sx: {
@@ -324,35 +336,43 @@ function Components() {
           </h2>
           <MaterialReactTable table={table} />
         </div>
+     
         {openModal && (
-          <div className="fixed inset-0 bg-black/60 bg-opacity-50 z-50 flex flex-col justify-center items-center">
-            <div className="bg-white rounded-md shadow-lg w-full max-w-md p-6">
-              <h2 className="text-md font-semibold text-start mb-4">
+          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 animate-fade-in">
+              <h2 className="text-xl font-bold text-gray-800 mb-6">
                 Edit Component
               </h2>
-              <form
-                onSubmit={updateComponentsHandler}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              >
-                <h2>Components*</h2>
-                <input
-                  type="text"
-                  name="name"
-                  value={editComponents?.name || ""}
-                  onChange={componentsInputChangeHandler}
-                  placeholder="Name"
-                  className="px-4 py-2 border-1 border-b border-gray-300 w-full outline-none rounded-sm"
-                />
-                <div className="md:col-span-2 flex justify-end gap-4 mt-4">
+              <form onSubmit={updateComponentsHandler} className="space-y-4">
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="name"
+                    className="text-sm font-medium text-gray-600 mb-1"
+                  >
+                    Component Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={editComponents?.name || ""}
+                    onChange={componentsInputChangeHandler}
+                    placeholder="Enter component name"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                   <button
+                    type="button"
                     onClick={() => setOpenModal(false)}
-                    className="px-3 py-2 border border-gray-400 rounded-md bg-gray-100 hover:text-blue-600 hover:border-blue-500 cursor-pointer"
+                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-3 py-2 border border-gray-400 rounded-md bg-gray-100 hover:text-blue-600 hover:border-blue-500 cursor-pointer"
+                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
                   >
                     Update
                   </button>
@@ -361,40 +381,79 @@ function Components() {
             </div>
           </div>
         )}
+
         {openAddModal && (
-          <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-            <div className="bg-white rounded-md shadow-lg w-full max-w-md p-6">
-              <h2 className="text-md font-semibold mb-4 text-start">
+          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 animate-fade-in">
+              <h2 className="text-xl font-bold text-gray-800 mb-6">
                 Add Component
               </h2>
-              <form
-                onSubmit={addNewComponentHandler}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-              >
-                <h2>Component*</h2>
-                <input
-                  type="text"
-                  name="name"
-                  value={newComponent?.name || ""}
-                  onChange={newComponentChangeHandler}
-                  required
-                  className="px-3 py-1 border-b border-gray-300 w-full outline-none rounded-sm"
-                />
-                <div className="md:col-span-2 flex justify-end gap-4 mt-4">
+              <form onSubmit={addNewComponentHandler} className="space-y-4">
+                <div className="flex flex-col">
+                  <label
+                    htmlFor="name"
+                    className="text-sm font-medium text-gray-600 mb-1"
+                  >
+                    Component Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    value={newComponent?.name || ""}
+                    onChange={newComponentChangeHandler}
+                    required
+                    placeholder="Enter component name"
+                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                   <button
                     type="button"
                     onClick={() => setOpenAddModal(false)}
-                    className="px-3 py-2 border border-gray-400 rounded-md bg-gray-100 hover:text-blue-600 hover:border-blue-500 cursor-pointer"
+                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-3 py-2 border border-gray-400 rounded-md bg-gray-100 hover:text-blue-600 hover:border-blue-500 cursor-pointer"
+                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
                   >
                     Add
                   </button>
                 </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {deleteConfirmationModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+              <h2 className="text-xl font-semibold text-red-600 mb-3">
+                Are you sure?
+              </h2>
+              <p className="text-gray-700 mb-6">
+                This action will permanently delete the component.
+              </p>
+              <form
+                onSubmit={deleteComponentConfirmationHandler}
+                className="flex justify-end gap-3"
+              >
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmationModal(false)}
+                  className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:border-gray-500 hover:bg-gray-100 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
               </form>
             </div>
           </div>

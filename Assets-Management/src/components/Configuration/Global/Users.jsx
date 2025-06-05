@@ -13,15 +13,17 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
+import { getAllUsers } from "../../../api/AuthRequest";
+import { NavLink } from "react-router-dom";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Components",
+  filename: "Assets-Management-Users",
 });
 
-function Components() {
+const Users = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
@@ -30,20 +32,16 @@ function Components() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteComponentsId, setDeleteComponentsId] = useState(null);
   const [newComponent, setNewComponent] = useState({ name: "" });
-  const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-  const [deleteComponentsId, setDeleteComponentsId] = useState(null);
 
   const fetchUser = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(
-        "https://jsonplaceholder.typicode.com/users"
-      );
-      const users = response.data.map((user) => ({
-        id: user.id,
-        name: user.name,
-      }));
-      setData(users);
+      const response = await getAllUsers();
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setData(response?.data || []);
+      // setData(response);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -55,15 +53,40 @@ function Components() {
     fetchUser();
   }, []);
 
+  console.log(data);
+
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
-        header: "Components Id",
+        accessorKey: "employeeName",
+        header: "Employee Name",
       },
       {
-        accessorKey: "name",
-        header: "Components Name",
+        accessorKey: "employeeCode",
+        header: "Employee Code",
+      },
+      {
+        accessorKey: "emailAddress",
+        header: "Email",
+      },
+      {
+        accessorKey: "designation",
+        header: "Designation",
+      },
+      {
+        accessorKey: "isActive",
+        header: "Status",
+        Cell: ({ row }) => {
+          const status = row.original.isActive;
+          let bgColor = "";
+          if (status === false) bgColor = "bg-red-400";
+          else if (status === true) bgColor = "bg-green-400";
+          return (
+            <span className={`${bgColor} px-4 py-2 rounded`}>
+              {status ? "Active" : "Unactive"}
+            </span>
+          );
+        },
       },
       {
         id: "edit",
@@ -72,11 +95,13 @@ function Components() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleEditComponents(row.original.id)}
+            // onClick={() => handleEditComponents(row.original.id)}
             color="primary"
             aria-label="edit"
           >
+            <NavLink to={`/main/configuration/${row.original._id}`}>
             <MdModeEdit />
+            </NavLink>
           </IconButton>
         ),
       },
@@ -99,52 +124,40 @@ function Components() {
     [isLoading]
   );
 
-  const handleEditComponents = (id) => {
-    const newComponents = data.find((val) => String(val?.id) === String(id));
-    setEditComponents(newComponents);
-    setOpenModal(true);
-  };
-
-  // const handleDeleteComponents = (id) => {
-  //   const filterData = data.filter((val) => val.id !== id);
-  //   setData(filterData);
-  //   //call api
+  // const componentsInputChangeHandler = (e) => {
+  //   const { name, value } = e.target;
+  //   setEditComponents((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
   // };
 
-  const componentsInputChangeHandler = (e) => {
-    const { name, value } = e.target;
-    setEditComponents((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const updateComponentsHandler = (e) => {
-    e.preventDefault();
-    const updatedComponentsData = data.map((user) =>
-      user.id === editComponents?.id ? editComponents : user
-    );
-    setData(updatedComponentsData);
-    //call api
-    setOpenModal(false);
-  };
+  // const updateComponentsHandler = (e) => {
+  //   e.preventDefault();
+  //   const updatedComponentsData = data.map((user) =>
+  //     user.id === editComponents?.id ? editComponents : user
+  //   );
+  //   setData(updatedComponentsData);
+  //   //call api
+  //   setOpenModal(false);
+  // };
 
   //Add New components
-  const newComponentChangeHandler = (e) => {
-    const { name, value } = e.target;
-    setNewComponent((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // const newComponentChangeHandler = (e) => {
+  //   const { name, value } = e.target;
+  //   setNewComponent((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+  // };
 
-  const addNewComponentHandler = (e) => {
-    e.preventDefault();
-    console.log("add new components");
-    //call api
-    setNewComponent({ name: "" });
-    setOpenAddModal(false);
-  };
+  // const addNewComponentHandler = (e) => {
+  //   e.preventDefault();
+  //   console.log("add new components");
+  //   //call api
+  //   setNewComponent({ name: "" });
+  //   setOpenAddModal(false);
+  // };
 
   const handleExportRows = (rows) => {
     const visibleColumns = table
@@ -267,85 +280,25 @@ function Components() {
       density: "compact",
     },
     renderTopToolbarCustomActions: ({ table }) => {
-      // const handleExportRows = (rows) => {
-      //   const excludedColumns = ["mrt-row-select", "edit", "delete"];
-      //   const visibleCols = table
-      //     .getVisibleLeafColumns()
-      //     .filter((col) => !excludedColumns.includes(col.id));
-
-      //   const rowData = rows.map((row) => {
-      //     const exportRow = {};
-      //     visibleCols.forEach((col) => {
-      //       const header = col.columnDef.header || col.id;
-      //       exportRow[header] = row.original[col.id];
-      //     });
-      //     return exportRow;
-      //   });
-      //   const csv = generateCsv(csvConfig)(rowData);
-      //   download(csvConfig)(csv);
-      // };
-
-      // const handleExportData = () => {
-      //   const excludedColumns = ["mrt-row-select", "edit", "delete"];
-      //   const visibleCols = table
-      //     .getVisibleLeafColumns()
-      //     .filter((col) => !excludedColumns.includes(col.id));
-
-      //   const exportData = data.map((item) => {
-      //     const exportRow = {};
-      //     visibleCols.forEach((col) => {
-      //       const header = col.columnDef.header || col.id;
-      //       exportRow[header] = item[col.id];
-      //     });
-      //     return exportRow;
-      //   });
-
-      //   const csv = generateCsv(csvConfig)(exportData);
-      //   download(csvConfig)(csv);
-      // };
-
-      // const handleExportPDF = () => {
-      //   const excludedColumns = ["mrt-row-select", "edit", "delete"];
-      //   const visibleColumns = table
-      //     .getAllLeafColumns()
-      //     .filter(
-      //       (col) => col.getIsVisible() && !excludedColumns.includes(col.id)
-      //     );
-
-      //   const headers = visibleColumns.map(
-      //     (col) => col.columnDef.header || col.id
-      //   );
-      //   const exportData = data.map((item) => [item.id, item.name]);
-
-      //   const doc = new jsPDF({ orientation: "landscape", format: "a3" });
-      //   autoTable(doc, {
-      //     head: [headers],
-      //     body: exportData,
-      //     styles: { fontSize: 12 },
-      //     headStyles: { fillColor: [66, 139, 202] },
-      //     margin: { top: 20 },
-      //   });
-
-      //   doc.save("exported_data.pdf");
-      // };
-
       return (
         <Box>
-          <Button
-            onClick={() => setOpenAddModal(true)}
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlineIcon />}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "#fff",
-              textTransform: "none",
-              mt: 1,
-              mb: 1,
-            }}
-          >
-            New
-          </Button>
+          <NavLink to="/main/configuration/AddUser">
+            <Button
+              // onClick={() => setOpenAddModal(true)}
+              variant="contained"
+              size="small"
+              startIcon={<AddCircleOutlineIcon />}
+              sx={{
+                backgroundColor: "#2563eb",
+                color: "#fff",
+                textTransform: "none",
+                mt: 1,
+                mb: 1,
+              }}
+            >
+              New User
+            </Button>
+          </NavLink>
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -420,11 +373,6 @@ function Components() {
       variant: "outlined",
     },
     enablePagination: true,
-    initialState: {
-      pagination: {
-        pageSize: 5,
-      },
-    },
 
     muiTableHeadCellProps: {
       sx: {
@@ -444,11 +392,9 @@ function Components() {
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full  p-4 bg-gray-50">
-        <h2 className="text-lg font-semibold mb-6 text-start">
-          ALL COMPONENTS
-        </h2>
+        <h2 className="text-lg font-semibold mb-6 text-start">ALL USERS</h2>
         <MaterialReactTable table={table} />
-        {openModal && (
+        {/* {openModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
               <h2 className="text-xl font-bold text-gray-800 mb-6">
@@ -492,7 +438,6 @@ function Components() {
             </div>
           </div>
         )}
-
         {openAddModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
@@ -538,7 +483,7 @@ function Components() {
             </div>
               
           </div>
-        )}
+        )} */}
         {deleteConfirmationModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-8">
@@ -572,6 +517,6 @@ function Components() {
       </div>
     </>
   );
-}
+};
 
-export default Components;
+export default Users;

@@ -2,14 +2,11 @@ import mongoose  from "mongoose";
 
 const authSchema = mongoose.Schema(
     {
-        businessUnit : String,
         employeeName : String,
         employeeCode : String,
-        grade : String,
         emailAddress : String,
         mobileNumber : Number,
         designation : String,
-        costCentre : String,
         location : String,
         subLocation : String,
         department : String,
@@ -17,9 +14,54 @@ const authSchema = mongoose.Schema(
         reportingManager: String,
         departmentHead : String,
         businessHead : String,
-        vipUser : String,
         password : String,
-        confirmPassword : String
+        confirmPassword : String,
+        users: {
+            isView: { type: Boolean, default: false },
+            isEdit: { type: Boolean, default: false },
+            isDelete: { type: Boolean, default: false },
+        },
+        components: {
+            isView: { type: Boolean, default: false },
+            isEdit: { type: Boolean, default: false },
+            isDelete: { type: Boolean, default: false },
+        },
+        departments: {
+            isView: { type: Boolean, default: false },
+            isEdit: { type: Boolean, default: false },
+            isDelete: { type: Boolean, default: false },
+        },
+        subDepartments: {
+            isView: { type: Boolean, default: false },
+            isEdit: { type: Boolean, default: false },
+            isDelete: { type: Boolean, default: false },
+        },
+        locations: {
+            isView: { type: Boolean, default: false },
+            isEdit: { type: Boolean, default: false },
+            isDelete: { type: Boolean, default: false },
+        },
+        subLocations: {
+            isView: { type: Boolean, default: false },
+            isEdit: { type: Boolean, default: false },
+            isDelete: { type: Boolean, default: false },
+        },
+        assets: {
+            isView: { type: Boolean, default: false },
+        },
+        tickets: {
+            isView: { type: Boolean, default: false },
+        },
+        showUsers: {
+            isView: { type: Boolean, default: false },
+        },
+        summary: {
+            isView: { type: Boolean, default: false },
+        },
+        importAsset:{
+            isView: { type: Boolean, default: false },
+        }, 
+        isActive: {type: Boolean, default: true}
     },
     { timestamps: true}
 )

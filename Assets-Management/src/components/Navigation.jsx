@@ -93,7 +93,8 @@ const Navigation = ({ nav, setNav }) => {
             {expandedSubMenus.global && (
               <ul className='flex flex-col gap-2 list-disc pl-5 '>
                 <li className='text-[11px] hover:underline'>vip users</li>
-                <li className='text-[11px] hover:underline'>users</li>
+                {/* <li className='text-[11px] hover:underline'>users</li> */}
+                <li className='text-[11px] hover:underline'><NavLink to="/main/configuration/Users" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Users</NavLink></li>
                 <li className='text-[11px] hover:underline'>technicians</li> 
                 <li className='text-[11px] hover:underline'><NavLink to="/main/configuration/components" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>components</NavLink></li>
                 <li className='text-[11px] hover:underline'>business units</li>
@@ -168,7 +169,7 @@ const Navigation = ({ nav, setNav }) => {
 
   return (
     <div className='flex h-full'>
-      <div className='w-fit h-[94vh] p-5 flex flex-col gap-8 text-2xl bg-gray-800 text-white'>
+      <div className='w-fit h-[calc(100vh-3.5rem)] p-5 flex flex-col gap-8 text-2xl bg-gray-800 text-white'>
         <RxDashboard className={`${activeMenu == 'dashboard'? "text-blue-400" :"" } cursor-pointer`} onClick={() => {setActiveMenu('dashboard'); setNav(true)}} />
         <LiaToolsSolid className={`${activeMenu == 'servicedesk'? "text-blue-400" :"" } cursor-pointer`} onClick={() => {setActiveMenu('servicedesk'); setNav(true)}} />
         <GrCubes className={`${activeMenu == 'assets'? "text-blue-400" :"" } cursor-pointer`}  onClick={() => {setActiveMenu('assets'); setNav(true)}} />
@@ -176,7 +177,7 @@ const Navigation = ({ nav, setNav }) => {
         <MdOutlineAdminPanelSettings className={`${activeMenu == 'configuration'? "text-blue-400" :"" } cursor-pointer`}  onClick={() => {setActiveMenu('configuration'); setNav(true)}} />
       </div>
 
-      <div className={`w-40 h-[94vh] p-7 text-xs flex flex-col gap-3 bg-gray-900 text-white uppercase overflow-y-auto ${nav ? "" : "hidden"} `}>
+      <div className={`w-40 h-[calc(100vh-3.5rem)] p-7 text-xs flex flex-col gap-3 bg-gray-900 text-white uppercase overflow-y-auto ${nav ? "" : "hidden"} `}>
         {renderSubMenu()}
       </div>
     </div>

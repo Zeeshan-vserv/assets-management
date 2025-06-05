@@ -9,6 +9,9 @@ import { useNavigate } from 'react-router-dom'
 const Header = ({toggleNav}) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const user = useSelector((state) => state.authReducer.authData);
+
+  // console.log(user.user.isActive);
+  
   const dispatch = useDispatch()
   const navigate = useNavigate();
 
@@ -38,7 +41,7 @@ const Header = ({toggleNav}) => {
               <h3 className='text-xs'>VservInfosystems</h3>
             </div>
             {dropdownVisible && (
-              <div className="absolute z-50 right-0 mt-12 w-42 bg-white border rounded shadow-lg">
+              <div className="absolute z-50 right-0 mt-20 w-42 bg-white border rounded shadow-lg">
                 <button
                   className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
                   onClick={handleLogout}

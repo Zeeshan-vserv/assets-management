@@ -5,6 +5,7 @@ import { MdOutlineAdminPanelSettings } from 'react-icons/md'
 import { RxDashboard } from 'react-icons/rx'
 import { TbReportSearch } from 'react-icons/tb'
 import { IoMdArrowDropdown, IoMdArrowDropright } from "react-icons/io";
+import { NavLink } from 'react-router-dom'
 
 const Navigation = ({ nav, setNav }) => {
   const [activeMenu, setActiveMenu] = useState('dashboard');
@@ -92,9 +93,10 @@ const Navigation = ({ nav, setNav }) => {
             {expandedSubMenus.global && (
               <ul className='flex flex-col gap-2 list-disc pl-5 '>
                 <li className='text-[11px] hover:underline'>vip users</li>
-                <li className='text-[11px] hover:underline'>users</li>
-                <li className='text-[11px] hover:underline'>technicians</li>
-                <li className='text-[11px] hover:underline'>components</li>
+                {/* <li className='text-[11px] hover:underline'>users</li> */}
+                <li className='text-[11px] hover:underline'><NavLink to="/main/configuration/Users" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Users</NavLink></li>
+                <li className='text-[11px] hover:underline'>technicians</li> 
+                <li className='text-[11px] hover:underline'><NavLink to="/main/configuration/components" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>components</NavLink></li>
                 <li className='text-[11px] hover:underline'>business units</li>
                 <li className='text-[11px] hover:underline'>department</li>
                 <li className='text-[11px] hover:underline'>sub department</li>

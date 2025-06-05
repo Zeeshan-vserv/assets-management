@@ -55,7 +55,7 @@ const authSchema = mongoose.Schema(
         showUsers: {
             isView: { type: Boolean, default: false },
         },
-        summry: {
+        summary: {
             isView: { type: Boolean, default: false },
         },
         importAsset:{

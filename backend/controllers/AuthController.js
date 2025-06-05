@@ -57,10 +57,14 @@ export const login = async (req, res) => {
             emailAddress: user.emailAddress,
             id: user._id,
         }, process.env.JWT_KEY, { expiresIn: '2h' });
-        res.status(200).json({ user, token });
+
+        // Remove sensitive fields
+        const { password: pwd, confirmPassword, ...safeUser } = user._doc;
+
+        res.status(200).json({ user: safeUser, token });
     } catch (error) {
         console.log("User not Authenticated", error);
-        res.status(500).json({ success: false, message: 'Login Failed' + error.message });
+        res.status(500).json({ success: false, message: 'Login Failed: ' + error.message });
     }
 };
 

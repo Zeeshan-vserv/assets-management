@@ -13,6 +13,8 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
+import { getAllUsers } from "../../../api/AuthRequest";
+import { NavLink } from "react-router-dom";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -34,14 +36,12 @@ const Users = () => {
   const fetchUser = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(
-        "https://jsonplaceholder.typicode.com/users"
-      );
-      const users = response.data.map((user) => ({
-        id: user.id,
-        name: user.name,
-      }));
-      setData(users);
+      const response = await getAllUsers();
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setData(response?.data || []);
+      // setData(response);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -53,15 +53,40 @@ const Users = () => {
     fetchUser();
   }, []);
 
+  console.log(data);
+
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
-        header: "Components Id",
+        accessorKey: "employeeName",
+        header: "Employee Name",
       },
       {
-        accessorKey: "name",
-        header: "Components Name",
+        accessorKey: "employeeCode",
+        header: "Employee Code",
+      },
+      {
+        accessorKey: "emailAddress",
+        header: "Email",
+      },
+      {
+        accessorKey: "designation",
+        header: "Designation",
+      },
+      {
+        accessorKey: "isActive",
+        header: "Status",
+        Cell: ({ row }) => {
+          const status = row.original.isActive;
+          let bgColor = "";
+          if (status === false) bgColor = "bg-red-400";
+          else if (status === true) bgColor = "bg-green-400";
+          return (
+            <span className={`${bgColor} px-4 py-2 rounded`}>
+              {status ? "Active" : "Unactive"}
+            </span>
+          );
+        },
       },
       {
         id: "edit",
@@ -70,11 +95,13 @@ const Users = () => {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleEditComponents(row.original.id)}
+            // onClick={() => handleEditComponents(row.original.id)}
             color="primary"
             aria-label="edit"
           >
+            <NavLink to={`/main/configuration/${row.original._id}`}>
             <MdModeEdit />
+            </NavLink>
           </IconButton>
         ),
       },
@@ -97,46 +124,40 @@ const Users = () => {
     [isLoading]
   );
 
-  const handleEditComponents = (id) => {
-    const newComponents = data.find((val) => String(val?.id) === String(id));
-    setEditComponents(newComponents);
-    setOpenModal(true);
-  };
+  // const componentsInputChangeHandler = (e) => {
+  //   const { name, value } = e.target;
+  //   setEditComponents((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+  // };
 
-  const componentsInputChangeHandler = (e) => {
-    const { name, value } = e.target;
-    setEditComponents((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const updateComponentsHandler = (e) => {
-    e.preventDefault();
-    const updatedComponentsData = data.map((user) =>
-      user.id === editComponents?.id ? editComponents : user
-    );
-    setData(updatedComponentsData);
-    //call api
-    setOpenModal(false);
-  };
+  // const updateComponentsHandler = (e) => {
+  //   e.preventDefault();
+  //   const updatedComponentsData = data.map((user) =>
+  //     user.id === editComponents?.id ? editComponents : user
+  //   );
+  //   setData(updatedComponentsData);
+  //   //call api
+  //   setOpenModal(false);
+  // };
 
   //Add New components
-  const newComponentChangeHandler = (e) => {
-    const { name, value } = e.target;
-    setNewComponent((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  // const newComponentChangeHandler = (e) => {
+  //   const { name, value } = e.target;
+  //   setNewComponent((prev) => ({
+  //     ...prev,
+  //     [name]: value,
+  //   }));
+  // };
 
-  const addNewComponentHandler = (e) => {
-    e.preventDefault();
-    console.log("add new components");
-    //call api
-    setNewComponent({ name: "" });
-    setOpenAddModal(false);
-  };
+  // const addNewComponentHandler = (e) => {
+  //   e.preventDefault();
+  //   console.log("add new components");
+  //   //call api
+  //   setNewComponent({ name: "" });
+  //   setOpenAddModal(false);
+  // };
 
   const handleExportRows = (rows) => {
     const visibleColumns = table
@@ -261,21 +282,23 @@ const Users = () => {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          <Button
-            onClick={() => setOpenAddModal(true)}
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlineIcon />}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "#fff",
-              textTransform: "none",
-              mt: 1,
-              mb: 1,
-            }}
-          >
-            New
-          </Button>
+          <NavLink to="/main/configuration/AddUser">
+            <Button
+              // onClick={() => setOpenAddModal(true)}
+              variant="contained"
+              size="small"
+              startIcon={<AddCircleOutlineIcon />}
+              sx={{
+                backgroundColor: "#2563eb",
+                color: "#fff",
+                textTransform: "none",
+                mt: 1,
+                mb: 1,
+              }}
+            >
+              New User
+            </Button>
+          </NavLink>
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -369,11 +392,9 @@ const Users = () => {
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full  p-4 bg-gray-50">
-        <h2 className="text-lg font-semibold mb-6 text-start">
-          ALL USERS
-        </h2>
+        <h2 className="text-lg font-semibold mb-6 text-start">ALL USERS</h2>
         <MaterialReactTable table={table} />
-        {openModal && (
+        {/* {openModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
               <h2 className="text-xl font-bold text-gray-800 mb-6">
@@ -462,7 +483,7 @@ const Users = () => {
             </div>
               
           </div>
-        )}
+        )} */}
         {deleteConfirmationModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-8">

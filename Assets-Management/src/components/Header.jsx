@@ -10,7 +10,7 @@ const Header = ({toggleNav}) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const user = useSelector((state) => state.authReducer.authData);
 
-  console.log(user.user.isActive);
+  // console.log(user.user.isActive);
   
   const dispatch = useDispatch()
   const navigate = useNavigate();

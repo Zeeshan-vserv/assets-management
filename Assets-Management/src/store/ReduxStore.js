@@ -1,40 +1,49 @@
 import {
-    legacy_createStore as createSrore,
-    applyMiddleware, compose,
-    createStore
+    legacy_createStore as createStore,
+    applyMiddleware, compose
 } from 'redux'
-import { thunk} from 'redux-thunk'
+import { thunk } from 'redux-thunk'
 import { reducers } from '../reducers'
 
-function saveToLocalStorage(store){
-    try{
-        const serializedStore = JSON.stringify(store)
-        window.localStorage.setItem("store", serializedStore)
-    }
-    catch(err){
-        console.error("Error saving to local storage", err)
-    }
-}
-
-function loadFromLocalStorage(){
-    try{
-        const serializedStore = window.localStorage.getItem("store")
-        if(serializedStore === null) return undefined
-        return JSON.parse(serializedStore)
-    }
-    catch(err){
-        console.error("Error loading from local storage", err)
-        return undefined
+// Only store/retrieve the JWT token
+function saveTokenToLocalStorage(token) {
+    try {
+        window.localStorage.setItem("token", token)
+    } catch (err) {
+        console.error("Error saving token to local storage", err)
     }
 }
 
-const composeEnhancers = window._REDUX_DEVTOOLS_EXTENSIONS_COMPOSE__ || compose
-const persistedState = loadFromLocalStorage()
+function loadTokenFromLocalStorage() {
+    try {
+        return window.localStorage.getItem("token")
+    } catch (err) {
+        console.error("Error loading token from local storage", err)
+        return null
+    }
+}
+
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+
+// Optionally, you can initialize authData from token if needed
+const token = loadTokenFromLocalStorage()
+const persistedState = token
+    ? { authReducer: { authData: { token }, loading: false, error: false, updateLoading: false } }
+    : undefined
 
 const store = createStore(
     reducers, persistedState, composeEnhancers(applyMiddleware(thunk))
 )
 
-store.subscribe(() => saveToLocalStorage(store.getState()))
+// Subscribe to store changes and save only the token
+store.subscribe(() => {
+    const state = store.getState()
+    const token = state.authReducer?.authData?.token
+    if (token) {
+        saveTokenToLocalStorage(token)
+    } else {
+        window.localStorage.removeItem("token")
+    }
+})
 
 export default store;

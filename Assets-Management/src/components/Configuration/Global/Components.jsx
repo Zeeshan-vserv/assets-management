@@ -10,9 +10,13 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { AiOutlineFileExcel } from "react-icons/ai";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
-import axios from "axios";
+// import axios from "axios";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
+import {
+  getAllComponent,
+  deleteComponent,
+} from "../../../api/ComponentsRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -30,20 +34,16 @@ function Components() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteComponentsId, setDeleteComponentsId] = useState(null);
   const [newComponent, setNewComponent] = useState({ name: "" });
-  const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-  const [deleteComponentsId, setDeleteComponentsId] = useState(null);
 
   const fetchUser = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get(
-        "https://jsonplaceholder.typicode.com/users"
-      );
-      const users = response.data.map((user) => ({
-        id: user.id,
-        name: user.name,
+      const response = await getAllComponent();
+      const component = response?.data?.data?.map((value) => ({
+        id: value.componentId,
+        name: value.componentName,
       }));
-      setData(users);
+      setData(component);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -104,12 +104,6 @@ function Components() {
     setEditComponents(newComponents);
     setOpenModal(true);
   };
-
-  // const handleDeleteComponents = (id) => {
-  //   const filterData = data.filter((val) => val.id !== id);
-  //   setData(filterData);
-  //   //call api
-  // };
 
   const componentsInputChangeHandler = (e) => {
     const { name, value } = e.target;
@@ -252,10 +246,27 @@ function Components() {
     setDeleteConfirmationModal(true);
   };
 
-  const deleteComponentConfirmationHandler = () => {
-    const filterData = data.filter((val) => val.id !== deleteComponentsId);
-    setData(filterData);
-    setDeleteConfirmationModal(false);
+  // const deleteComponentConfirmationHandler = async () => {
+  //   const filterData = data.filter((val) => val.id !== deleteComponentsId);
+  //   //call api
+  //   const deletedComponents = await deleteComponent(filterData);
+  //   setData(deletedComponents);
+  //   setDeleteConfirmationModal(false);
+  // };
+
+  const deleteComponentConfirmationHandler = async () => {
+    try {
+      setIsLoading(true);
+      await deleteComponent(deleteComponentsId);
+      setData((prevData) =>
+        prevData.filter((val) => val.id !== deleteComponentsId)
+      );
+      setDeleteConfirmationModal(false);
+    } catch (error) {
+      console.error("Error deleting component:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const table = useMaterialReactTable({
@@ -267,68 +278,6 @@ function Components() {
       density: "compact",
     },
     renderTopToolbarCustomActions: ({ table }) => {
-      // const handleExportRows = (rows) => {
-      //   const excludedColumns = ["mrt-row-select", "edit", "delete"];
-      //   const visibleCols = table
-      //     .getVisibleLeafColumns()
-      //     .filter((col) => !excludedColumns.includes(col.id));
-
-      //   const rowData = rows.map((row) => {
-      //     const exportRow = {};
-      //     visibleCols.forEach((col) => {
-      //       const header = col.columnDef.header || col.id;
-      //       exportRow[header] = row.original[col.id];
-      //     });
-      //     return exportRow;
-      //   });
-      //   const csv = generateCsv(csvConfig)(rowData);
-      //   download(csvConfig)(csv);
-      // };
-
-      // const handleExportData = () => {
-      //   const excludedColumns = ["mrt-row-select", "edit", "delete"];
-      //   const visibleCols = table
-      //     .getVisibleLeafColumns()
-      //     .filter((col) => !excludedColumns.includes(col.id));
-
-      //   const exportData = data.map((item) => {
-      //     const exportRow = {};
-      //     visibleCols.forEach((col) => {
-      //       const header = col.columnDef.header || col.id;
-      //       exportRow[header] = item[col.id];
-      //     });
-      //     return exportRow;
-      //   });
-
-      //   const csv = generateCsv(csvConfig)(exportData);
-      //   download(csvConfig)(csv);
-      // };
-
-      // const handleExportPDF = () => {
-      //   const excludedColumns = ["mrt-row-select", "edit", "delete"];
-      //   const visibleColumns = table
-      //     .getAllLeafColumns()
-      //     .filter(
-      //       (col) => col.getIsVisible() && !excludedColumns.includes(col.id)
-      //     );
-
-      //   const headers = visibleColumns.map(
-      //     (col) => col.columnDef.header || col.id
-      //   );
-      //   const exportData = data.map((item) => [item.id, item.name]);
-
-      //   const doc = new jsPDF({ orientation: "landscape", format: "a3" });
-      //   autoTable(doc, {
-      //     head: [headers],
-      //     body: exportData,
-      //     styles: { fontSize: 12 },
-      //     headStyles: { fillColor: [66, 139, 202] },
-      //     margin: { top: 20 },
-      //   });
-
-      //   doc.save("exported_data.pdf");
-      // };
-
       return (
         <Box>
           <Button

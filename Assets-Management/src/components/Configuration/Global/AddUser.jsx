@@ -72,70 +72,72 @@ const AddUser = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     // console.log("Form Data:", formData);
-    
+
     await signup(formData);
-    setFormData({ employeeName: "",
-    employeeCode: "",
-    emailAddress: "",
-    mobileNumber: "",
-    designation: "",
-    location: "",
-    subLocation: "",
-    department: "",
-    subDepartment: "",
-    reportingManager: "",
-    departmentHead: "",
-    businessHead: "",
-    password: "",
-    confirmPassword: "",
-    users: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
-    },
-    components: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
-    },
-    departments: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
-    },
-    subDepartments: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
-    },
-    locations: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
-    },
-    subLocations: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
-    },
-    assets: {
-      isView: "",
-    },
-    tickets: {
-      isView: "",
-    },
-    showUsers: {
-      isView: "",
-    },
-    summary: {
-      isView: "",
-    },
-    importAsset: {
-      isView: "",
-    },})
+    setFormData({
+      employeeName: "",
+      employeeCode: "",
+      emailAddress: "",
+      mobileNumber: "",
+      designation: "",
+      location: "",
+      subLocation: "",
+      department: "",
+      subDepartment: "",
+      reportingManager: "",
+      departmentHead: "",
+      businessHead: "",
+      password: "",
+      confirmPassword: "",
+      users: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      components: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      departments: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      subDepartments: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      locations: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      subLocations: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      assets: {
+        isView: "",
+      },
+      tickets: {
+        isView: "",
+      },
+      showUsers: {
+        isView: "",
+      },
+      summary: {
+        isView: "",
+      },
+      importAsset: {
+        isView: "",
+      },
+    });
   };
   return (
-    <div className="w-[100%] p-6 flex flex-col gap-5 bg-slate-200">
+    <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
       <form action="" onSubmit={handleSubmit} className="flex flex-col gap-5">
         <h2 className="text-slate-700 font-semibold">ADD USER</h2>
         <div className="w-full p-8 bg-white rounded-md shadow-md">
@@ -458,14 +460,14 @@ const AddUser = () => {
         </div>
 
         <h2 className="text-slate-700 font-semibold">USER ROLE PERMISSIONS</h2>
-        <div className="w-full flex gap-5">
-          <div className="w-1/2 p-4 bg-white rounded-md shadow-md">
+        <div className="w-full flex gap-5 max-lg:flex-col">
+          <div className="w-1/2 p-4 bg-white rounded-md shadow-md max-lg:w-full">
             <table>
               <h2 className="text-slate-700 font-semibold mb-3">
                 Page View Permissions
               </h2>
               <tr>
-                <th>Page Name</th>
+                <th className="w-[85%]">Page Name</th>
                 <th>View</th>
               </tr>
               <tr>
@@ -575,13 +577,13 @@ const AddUser = () => {
               </tr>
             </table>
           </div>
-          <div className="w-1/2 p-4 bg-white rounded-md shadow-md">
+          <div className="w-1/2 p-4 bg-white rounded-md shadow-md max-lg:w-full">
             <table>
               <h2 className="text-slate-700 font-semibold mb-3">
                 Data Permissions
               </h2>
               <tr>
-                <th>Data Name</th>
+                <th className="w-[70%]">Data Name</th>
                 <th>View</th>
                 <th>Edit</th>
                 <th>Delete</th>

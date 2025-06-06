@@ -53,8 +53,6 @@ const Users = () => {
     fetchUser();
   }, []);
 
-  console.log(data);
-
   const columns = useMemo(
     () => [
       {

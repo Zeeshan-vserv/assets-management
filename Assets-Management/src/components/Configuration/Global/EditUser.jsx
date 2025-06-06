@@ -66,8 +66,6 @@ const EditUser = () => {
     },
   });
 
-//   console.log(id);
-
   const fetchUser = async () => {
     try {
       setIsLoading(true);
@@ -98,66 +96,7 @@ const EditUser = () => {
 
     await updateUser(id, formData);
     console.log(id, formData);
-    
-    setFormData({
-      employeeName: "",
-      employeeCode: "",
-      emailAddress: "",
-      mobileNumber: "",
-      designation: "",
-      location: "",
-      subLocation: "",
-      department: "",
-      subDepartment: "",
-      reportingManager: "",
-      departmentHead: "",
-      businessHead: "",
-      users: {
-        isView: false,
-        isEdit: false,
-        isDelete: false,
-      },
-      components: {
-        isView: false,
-        isEdit: false,
-        isDelete: false,
-      },
-      departments: {
-        isView: false,
-        isEdit: false,
-        isDelete: false,
-      },
-      subDepartments: {
-        isView: false,
-        isEdit: false,
-        isDelete: false,
-      },
-      locations: {
-        isView: false,
-        isEdit: false,
-        isDelete: false,
-      },
-      subLocations: {
-        isView: false,
-        isEdit: false,
-        isDelete: false,
-      },
-      assets: {
-        isView: false,
-      },
-      tickets: {
-        isView: false,
-      },
-      showUsers: {
-        isView: false,
-      },
-      summary: {
-        isView: false,
-      },
-      importAsset: {
-        isView: false,
-      },
-    });
+
   };
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">

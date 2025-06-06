@@ -3,139 +3,139 @@ import { NavLink } from "react-router-dom";
 import "../../Table.css";
 import { signup } from "../../../api/AuthRequest";
 const EditUser = () => {
-      const [formData, setFormData] = useState({
-        employeeName: "",
-        employeeCode: "",
-        emailAddress: "",
-        mobileNumber: "",
-        designation: "",
-        location: "",
-        subLocation: "",
-        department: "",
-        subDepartment: "",
-        reportingManager: "",
-        departmentHead: "",
-        businessHead: "",
-        password: "",
-        confirmPassword: "",
-        users: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        components: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        departments: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        subDepartments: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        locations: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        subLocations: {
-          isView: "",
-          isEdit: "",
-          isDelete: "",
-        },
-        assets: {
-          isView: "",
-        },
-        tickets: {
-          isView: "",
-        },
-        showUsers: {
-          isView: "",
-        },
-        summary: {
-          isView: "",
-        },
-        importAsset: {
-          isView: "",
-        },
-      });
-    
-      const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-      };
-    
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-        // console.log("Form Data:", formData);
-    
-        await signup(formData);
-        setFormData({
-          employeeName: "",
-          employeeCode: "",
-          emailAddress: "",
-          mobileNumber: "",
-          designation: "",
-          location: "",
-          subLocation: "",
-          department: "",
-          subDepartment: "",
-          reportingManager: "",
-          departmentHead: "",
-          businessHead: "",
-          password: "",
-          confirmPassword: "",
-          users: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          components: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          departments: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          subDepartments: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          locations: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          subLocations: {
-            isView: "",
-            isEdit: "",
-            isDelete: "",
-          },
-          assets: {
-            isView: "",
-          },
-          tickets: {
-            isView: "",
-          },
-          showUsers: {
-            isView: "",
-          },
-          summary: {
-            isView: "",
-          },
-          importAsset: {
-            isView: "",
-          },
-        });
-      };
+  const [formData, setFormData] = useState({
+    employeeName: "",
+    employeeCode: "",
+    emailAddress: "",
+    mobileNumber: "",
+    designation: "",
+    location: "",
+    subLocation: "",
+    department: "",
+    subDepartment: "",
+    reportingManager: "",
+    departmentHead: "",
+    businessHead: "",
+    password: "",
+    confirmPassword: "",
+    users: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    components: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    departments: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    subDepartments: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    locations: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    subLocations: {
+      isView: "",
+      isEdit: "",
+      isDelete: "",
+    },
+    assets: {
+      isView: "",
+    },
+    tickets: {
+      isView: "",
+    },
+    showUsers: {
+      isView: "",
+    },
+    summary: {
+      isView: "",
+    },
+    importAsset: {
+      isView: "",
+    },
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // console.log("Form Data:", formData);
+
+    await signup(formData);
+    setFormData({
+      employeeName: "",
+      employeeCode: "",
+      emailAddress: "",
+      mobileNumber: "",
+      designation: "",
+      location: "",
+      subLocation: "",
+      department: "",
+      subDepartment: "",
+      reportingManager: "",
+      departmentHead: "",
+      businessHead: "",
+      password: "",
+      confirmPassword: "",
+      users: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      components: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      departments: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      subDepartments: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      locations: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      subLocations: {
+        isView: "",
+        isEdit: "",
+        isDelete: "",
+      },
+      assets: {
+        isView: "",
+      },
+      tickets: {
+        isView: "",
+      },
+      showUsers: {
+        isView: "",
+      },
+      summary: {
+        isView: "",
+      },
+      importAsset: {
+        isView: "",
+      },
+    });
+  };
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
       <form action="" onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -936,7 +936,8 @@ const EditUser = () => {
           </NavLink>
         </div>
       </form>
-    </div>  )
-}
+    </div>
+  );
+};
 
-export default EditUser
+export default EditUser;

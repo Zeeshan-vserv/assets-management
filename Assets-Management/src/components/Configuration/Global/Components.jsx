@@ -10,13 +10,16 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { AiOutlineFileExcel } from "react-icons/ai";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
-// import axios from "axios";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import {
+  createComponent,
   getAllComponent,
+  updateComponent,
   deleteComponent,
 } from "../../../api/ComponentsRequest";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -26,6 +29,8 @@ const csvConfig = mkConfig({
 });
 
 function Components() {
+  const user = useSelector((state) => state.authReducer.authData);
+  // console.log("uu", user);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
@@ -33,7 +38,7 @@ function Components() {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteComponentsId, setDeleteComponentsId] = useState(null);
-  const [newComponent, setNewComponent] = useState({ name: "" });
+  const [newComponent, setNewComponent] = useState({ componentName: "" });
 
   const fetchUser = async () => {
     try {
@@ -42,6 +47,7 @@ function Components() {
       const component = response?.data?.data?.map((value) => ({
         id: value.componentId,
         name: value.componentName,
+        _id: value._id,
       }));
       setData(component);
     } catch (error) {
@@ -100,9 +106,15 @@ function Components() {
   );
 
   const handleEditComponents = (id) => {
-    const newComponents = data.find((val) => String(val?.id) === String(id));
-    setEditComponents(newComponents);
-    setOpenModal(true);
+    const componentToEdit = data?.find((component) => component?.id === id);
+    if (componentToEdit) {
+      setEditComponents({
+        _id: componentToEdit._id,
+        id: componentToEdit._id,
+        name: componentToEdit.name,
+      });
+      setOpenModal(true);
+    }
   };
 
   const componentsInputChangeHandler = (e) => {
@@ -113,14 +125,27 @@ function Components() {
     }));
   };
 
-  const updateComponentsHandler = (e) => {
+  const updateComponentsHandler = async (e) => {
     e.preventDefault();
-    const updatedComponentsData = data.map((user) =>
-      user.id === editComponents?.id ? editComponents : user
-    );
-    setData(updatedComponentsData);
-    //call api
-    setOpenModal(false);
+    try {
+      const formData = {
+        componentName: editComponents.name,
+      };
+      const response = await updateComponent(editComponents._id, formData);
+      if (response?.data?.success) {
+        toast.success("Component updated successfully");
+        setData((prevData) =>
+          prevData.map((item) =>
+            item._id === editComponents._id
+              ? { ...item, name: editComponents.name }
+              : item
+          )
+        );
+        setOpenModal(false);
+      }
+    } catch (error) {
+      console.error("Error updating component:", error);
+    }
   };
 
   //Add New components
@@ -132,12 +157,19 @@ function Components() {
     }));
   };
 
-  const addNewComponentHandler = (e) => {
+  const addNewComponentHandler = async (e) => {
     e.preventDefault();
-    console.log("add new components");
-    //call api
-    setNewComponent({ name: "" });
-    setOpenAddModal(false);
+    const formData = {
+      userId: user?.id,
+      componentName: newComponent.componentName,
+    };
+    const response = await createComponent(formData);
+    console.log("res add", response);
+    if (response?.data?.success) {
+      fetchUser();
+      setNewComponent({ componentName: "" });
+      setOpenAddModal(false);
+    }
   };
 
   const handleExportRows = (rows) => {
@@ -242,30 +274,29 @@ function Components() {
   };
 
   const handleDeleteComponents = (id) => {
-    setDeleteComponentsId(id);
-    setDeleteConfirmationModal(true);
+    const componentToDelete = data?.find((component) => component?.id === id);
+    if (componentToDelete) {
+      setDeleteComponentsId(componentToDelete?._id);
+      setDeleteConfirmationModal(true);
+    }
   };
 
-  // const deleteComponentConfirmationHandler = async () => {
-  //   const filterData = data.filter((val) => val.id !== deleteComponentsId);
-  //   //call api
-  //   const deletedComponents = await deleteComponent(filterData);
-  //   setData(deletedComponents);
-  //   setDeleteConfirmationModal(false);
-  // };
-
-  const deleteComponentConfirmationHandler = async () => {
+  const deleteComponentConfirmationHandler = async (e) => {
+    e.preventDefault();
     try {
-      setIsLoading(true);
-      await deleteComponent(deleteComponentsId);
-      setData((prevData) =>
-        prevData.filter((val) => val.id !== deleteComponentsId)
-      );
-      setDeleteConfirmationModal(false);
+      const response = await deleteComponent(deleteComponentsId);
+      if (response?.data?.success) {
+        toast.success("Component deleted successfully");
+        setData((prevData) =>
+          prevData.filter((component) => component._id !== deleteComponentsId)
+        );
+        setDeleteConfirmationModal(false);
+      }
     } catch (error) {
-      console.error("Error deleting component:", error);
-    } finally {
-      setIsLoading(false);
+      console.error(
+        "Error deleting component:",
+        error.response?.data?.message || error.message
+      );
     }
   };
 
@@ -451,16 +482,16 @@ function Components() {
               <form onSubmit={addNewComponentHandler} className="space-y-4">
                 <div className="flex flex-col">
                   <label
-                    htmlFor="name"
+                    htmlFor="componentName"
                     className="text-sm font-medium text-gray-600 mb-1"
                   >
                     Component Name <span className="text-red-500">*</span>
                   </label>
                   <input
-                    id="name"
+                    id="componentName"
                     type="text"
-                    name="name"
-                    value={newComponent?.name || ""}
+                    name="componentName"
+                    value={newComponent?.componentName || ""}
                     onChange={newComponentChangeHandler}
                     required
                     placeholder="Enter component name"

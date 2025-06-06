@@ -71,8 +71,8 @@ export const deleteComponent = async(req, res) => {
         if(!deleteComponent){
             return res.status(404).json({success:false, message:'Component not found'})
         }
-        res.status(200).json({success:true, data: component, message:'Component deleted successfully'})
+        res.status(200).json({success:true, data: deleteComponent, message:"Component deleted successfully"})
     } catch (error) {
-        
+        res.status(500).json({ message: 'An error occurred while deleting component' });
     }
 }

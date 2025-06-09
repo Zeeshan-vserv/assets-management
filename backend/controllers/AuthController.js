@@ -23,7 +23,7 @@ export const signup = async (req, res) => {
             const token = jwt.sign({
                 emailAddress: user.emailAddress,
                 id: user._id,
-            }, process.env.JWT_KEY, { expiresIn: '2m' });
+            }, process.env.JWT_KEY, { expiresIn: '2h' });
 
             res.status(201).json({
                 user,
@@ -56,7 +56,7 @@ export const login = async (req, res) => {
         const token = jwt.sign({
             emailAddress: user.emailAddress,
             id: user._id,
-        }, process.env.JWT_KEY, { expiresIn: '2m' });
+        }, process.env.JWT_KEY, { expiresIn: '2h' });
 
         // Remove sensitive fields
         const { password: pwd, confirmPassword, ...safeUser } = user._doc;
@@ -114,21 +114,21 @@ export const updateUser = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ success: false, message: "Error updating PO: " + error.message });
+      .json({ success: false, message: "Error updating user: " + error.message });
   }
 };
 
 export const deleteUser = async (req, res) => {
-    const id = req.params.id;
-    const { currentUserId, currentAdminStatus } = req.body;
-    if (id === currentUserId || currentAdminStatus) {
-        try {
-            await AuthModel.findByIdAndDelete(id);
-            res.status(200).json('User Deleted');
-        } catch (error) {
-            res.status(500).json({ message: error.message });
+    try {
+        const { id } = req.params;
+
+        const deletedUser = await AuthModel.findByIdAndDelete(id);
+        if (!deletedUser) {
+            return res.status(404).json({ success: false, message: 'User not found' });
         }
-    } else {
-        res.status(403).json({ message: 'Unauthorized' });
+
+        res.status(200).json({ success: true, message: 'User deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to delete user", error: error.message });
     }
 };

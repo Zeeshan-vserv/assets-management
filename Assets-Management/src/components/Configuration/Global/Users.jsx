@@ -13,8 +13,9 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { getAllUsers } from "../../../api/AuthRequest";
+import { deleteUser, getAllUsers } from "../../../api/AuthRequest";
 import { NavLink } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -53,8 +54,6 @@ const Users = () => {
     fetchUser();
   }, []);
 
-  console.log(data);
-
   const columns = useMemo(
     () => [
       {
@@ -79,10 +78,11 @@ const Users = () => {
         Cell: ({ row }) => {
           const status = row.original.isActive;
           let bgColor = "";
-          if (status === false) bgColor = "bg-red-400";
-          else if (status === true) bgColor = "bg-green-400";
+          let borderColor = "";
+          if (status === false) (bgColor = "bg-red-400", borderColor = "border-red-500");
+          else if (status === true) (bgColor = "bg-green-400", borderColor = "border-green-500");
           return (
-            <span className={`${bgColor} px-4 py-2 rounded`}>
+            <span className={`${bgColor} border-2 ${borderColor} selection: px-4 py-2 rounded `}>
               {status ? "Active" : "Unactive"}
             </span>
           );
@@ -261,14 +261,30 @@ const Users = () => {
   };
 
   const handleDeleteComponents = (id) => {
-    setDeleteComponentsId(id);
-    setDeleteConfirmationModal(true);
+        const componentToDelete = data?.find((component) => component?.id === id);
+    if (componentToDelete) {
+      setDeleteComponentsId(componentToDelete?._id);
+      setDeleteConfirmationModal(true);
+    }
   };
 
-  const deleteComponentConfirmationHandler = () => {
-    const filterData = data.filter((val) => val.id !== deleteComponentsId);
-    setData(filterData);
-    setDeleteConfirmationModal(false);
+  const deleteUserConfirmationHandler =  async (e) => {
+       e.preventDefault();
+       try {
+         const response = await deleteUser(deleteComponentsId);
+         if (response?.data?.success) {
+           toast.success("User deleted successfully");
+           setData((prevData) =>
+             prevData.filter((component) => component._id !== deleteComponentsId)
+           );
+           setDeleteConfirmationModal(false);
+         }
+       } catch (error) {
+         console.error(
+           "Error deleting component:",
+           error.response?.data?.message || error.message
+         );
+       }
   };
 
   const table = useMaterialReactTable({
@@ -494,7 +510,7 @@ const Users = () => {
                 This action will permanently delete the component.
               </p>
               <form
-                onSubmit={deleteComponentConfirmationHandler}
+                onSubmit={deleteUserConfirmationHandler}
                 className="flex justify-end gap-3"
               >
                 <button

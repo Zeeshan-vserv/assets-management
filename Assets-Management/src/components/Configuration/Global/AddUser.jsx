@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import "../../Table.css";
 import { signup } from "../../../api/AuthRequest";
+import { toast } from "react-toastify";
+
 const AddUser = () => {
   const [formData, setFormData] = useState({
     employeeName: "",
@@ -19,49 +21,49 @@ const AddUser = () => {
     password: "",
     confirmPassword: "",
     users: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
+      isView: false,
+      isEdit: false,
+      isDelete: false,
     },
     components: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
+      isView: false,
+      isEdit: false,
+      isDelete: false,
     },
     departments: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
+      isView: false,
+      isEdit: false,
+      isDelete: false,
     },
     subDepartments: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
+      isView: false,
+      isEdit: false,
+      isDelete: false,
     },
     locations: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
+      isView: false,
+      isEdit: false,
+      isDelete: false,
     },
     subLocations: {
-      isView: "",
-      isEdit: "",
-      isDelete: "",
+      isView: false,
+      isEdit: false,
+      isDelete: false,
     },
     assets: {
-      isView: "",
+      isView: false,
     },
     tickets: {
-      isView: "",
+      isView: false,
     },
     showUsers: {
-      isView: "",
+      isView: false,
     },
     summary: {
-      isView: "",
+      isView: false,
     },
     importAsset: {
-      isView: "",
+      isView: false,
     },
   });
 
@@ -69,11 +71,12 @@ const AddUser = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // console.log("Form Data:", formData);
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
+  try {
     await signup(formData);
+    toast.success("User created successfully");
     setFormData({
       employeeName: "",
       employeeCode: "",
@@ -89,84 +92,34 @@ const AddUser = () => {
       businessHead: "",
       password: "",
       confirmPassword: "",
-      users: {
-        isView: "",
-        isEdit: "",
-        isDelete: "",
-      },
-      components: {
-        isView: "",
-        isEdit: "",
-        isDelete: "",
-      },
-      departments: {
-        isView: "",
-        isEdit: "",
-        isDelete: "",
-      },
-      subDepartments: {
-        isView: "",
-        isEdit: "",
-        isDelete: "",
-      },
-      locations: {
-        isView: "",
-        isEdit: "",
-        isDelete: "",
-      },
-      subLocations: {
-        isView: "",
-        isEdit: "",
-        isDelete: "",
-      },
-      assets: {
-        isView: "",
-      },
-      tickets: {
-        isView: "",
-      },
-      showUsers: {
-        isView: "",
-      },
-      summary: {
-        isView: "",
-      },
-      importAsset: {
-        isView: "",
-      },
+      users: { isView: false, isEdit: false, isDelete: false },
+      components: { isView: false, isEdit: false, isDelete: false },
+      departments: { isView: false, isEdit: false, isDelete: false },
+      subDepartments: { isView: false, isEdit: false, isDelete: false },
+      locations: { isView: false, isEdit: false, isDelete: false },
+      subLocations: { isView: false, isEdit: false, isDelete: false },
+      assets: { isView: false },
+      tickets: { isView: false },
+      showUsers: { isView: false },
+      summary: { isView: false },
+      importAsset: { isView: false },
     });
-  };
+  } catch (error) {
+    toast.error("Failed to create user");
+  }
+};
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
       <form action="" onSubmit={handleSubmit} className="flex flex-col gap-5">
         <h2 className="text-slate-700 font-semibold">ADD USER</h2>
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex flex-wrap gap-6 justify-between mt-3">
-            {/* <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="businessUnit"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Business Unit{" "}
-              </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="businessUnit"
-                id="businessUnit"
-                value={formData.businessUnit}
-                onChange={handleChange}
-              >
-                <option value="">Select</option>
-                <option value="1">Business Unit 1</option>
-                <option value="2">Business Unit 2</option>
-              </select>
-            </div> */}
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="employeeName"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Employee Name
+                Employee Name <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -175,6 +128,7 @@ const AddUser = () => {
                 name="employeeName"
                 value={formData.employeeName}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -182,7 +136,7 @@ const AddUser = () => {
                 htmlFor="employeeCode"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Employee Code
+                Employee Code <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -191,41 +145,15 @@ const AddUser = () => {
                 name="employeeCode"
                 value={formData.employeeCode}
                 onChange={handleChange}
+                required
               />
             </div>
-            {/* <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="grade"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Grade
-              </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="grade"
-                id="grade"
-                value={formData.grade}
-                onChange={handleChange}
-              >
-                <option value="">Select</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-              </select>
-            </div> */}
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="emailAddress"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Email Address
+                Email Address <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -234,6 +162,7 @@ const AddUser = () => {
                 name="emailAddress"
                 value={formData.emailAddress}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -241,7 +170,7 @@ const AddUser = () => {
                 htmlFor="mobileNumber"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Mobile Number
+                Mobile Number <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -250,6 +179,7 @@ const AddUser = () => {
                 name="mobileNumber"
                 value={formData.mobileNumber}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -257,7 +187,7 @@ const AddUser = () => {
                 htmlFor="designation"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Designation
+                Designation <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -266,6 +196,7 @@ const AddUser = () => {
                 name="designation"
                 value={formData.designation}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -273,7 +204,7 @@ const AddUser = () => {
                 htmlFor="location"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Location
+                Location <span className="text-red-500 text-base">*</span>
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -281,6 +212,7 @@ const AddUser = () => {
                 id="location"
                 value={formData.location}
                 onChange={handleChange}
+                required
               >
                 <option value="">Select Location</option>
                 <option value="agra">AGRA</option>
@@ -349,7 +281,7 @@ const AddUser = () => {
                 htmlFor="department"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Department
+                Department <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -358,6 +290,7 @@ const AddUser = () => {
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -381,7 +314,7 @@ const AddUser = () => {
                 htmlFor="reportingManager"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Reporting Manager
+                Reporting Manager <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -390,6 +323,7 @@ const AddUser = () => {
                 name="reportingManager"
                 value={formData.reportingManager}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -406,6 +340,7 @@ const AddUser = () => {
                 name="departmentHead"
                 value={formData.departmentHead}
                 onChange={handleChange}
+
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -429,7 +364,7 @@ const AddUser = () => {
                 htmlFor="password"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Password
+                Password <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -438,6 +373,7 @@ const AddUser = () => {
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -445,7 +381,7 @@ const AddUser = () => {
                 htmlFor="confirmPassword"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Confirm Password
+                Confirm Password <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -454,6 +390,7 @@ const AddUser = () => {
                 name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
+                required
               />
             </div>
           </div>

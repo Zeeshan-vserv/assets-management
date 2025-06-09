@@ -29,7 +29,7 @@ function loadAuthFromLocalStorage() {
     }
 }
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+const composeEnhancers = window._REDUX_DEVTOOLS_EXTENSION_COMPOSE_ || compose
 
 const auth = loadAuthFromLocalStorage()
 const persistedState = auth

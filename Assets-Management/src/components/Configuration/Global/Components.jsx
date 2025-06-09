@@ -30,7 +30,6 @@ const csvConfig = mkConfig({
 
 function Components() {
   const user = useSelector((state) => state.authReducer.authData);
-  // console.log("uu", user);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
@@ -141,6 +140,7 @@ function Components() {
               : item
           )
         );
+        await fetchUser();
         setOpenModal(false);
       }
     } catch (error) {
@@ -160,12 +160,12 @@ function Components() {
   const addNewComponentHandler = async (e) => {
     e.preventDefault();
     const formData = {
-      userId: user?.id,
+      userId: user?.userId,
       componentName: newComponent.componentName,
     };
     const response = await createComponent(formData);
-    console.log("res add", response);
     if (response?.data?.success) {
+      toast.success("Component Added successfully");
       fetchUser();
       setNewComponent({ componentName: "" });
       setOpenAddModal(false);
@@ -180,7 +180,7 @@ function Components() {
           col.getIsVisible() &&
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
-          col.id !== "delete" 
+          col.id !== "delete"
       );
 
     const rowData = rows.map((row) => {
@@ -204,7 +204,7 @@ function Components() {
           col.getIsVisible() &&
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
-          col.id !== "delete" 
+          col.id !== "delete"
       );
 
     const exportData = data.map((item) => {
@@ -468,7 +468,6 @@ function Components() {
             </div>
           </div>
         )}
-
         {openAddModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">

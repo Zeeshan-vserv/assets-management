@@ -160,7 +160,7 @@ function Components() {
   const addNewComponentHandler = async (e) => {
     e.preventDefault();
     const formData = {
-      userId: user?.id,
+      userId: user?.userId,
       componentName: newComponent.componentName,
     };
     const response = await createComponent(formData);
@@ -180,7 +180,7 @@ function Components() {
           col.getIsVisible() &&
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
-          col.id !== "delete" 
+          col.id !== "delete"
       );
 
     const rowData = rows.map((row) => {
@@ -204,7 +204,7 @@ function Components() {
           col.getIsVisible() &&
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
-          col.id !== "delete" 
+          col.id !== "delete"
       );
 
     const exportData = data.map((item) => {

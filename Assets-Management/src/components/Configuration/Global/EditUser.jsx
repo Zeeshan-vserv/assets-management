@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import "../../Table.css";
 import { getUser, signup, updateUser } from "../../../api/AuthRequest";
+import { toast } from "react-toastify";
 const EditUser = () => {
   const { id } = useParams(); // Get vendor ID from the URL parameter
 
@@ -92,11 +93,14 @@ const EditUser = () => {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    // console.log("Form Data:", formData);
-
-    await updateUser(id, formData);
-    console.log(id, formData);
+    try {
+      await updateUser(id, formData);
+      toast.success("User Updated successfully");
+    } catch (error) {
+      toast.error("Failed to Update user");
+    }
   };
+  
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
       <form action="" onSubmit={handleUpdate} className="flex flex-col gap-5">

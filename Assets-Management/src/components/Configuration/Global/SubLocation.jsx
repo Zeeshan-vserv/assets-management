@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton, Select } from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -12,14 +12,8 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import {
-  createComponent,
-  getAllComponent,
-  updateComponent,
-  deleteComponent,
-} from "../../../api/ComponentsRequest";
-import { useSelector } from "react-redux";
-import { toast } from "react-toastify";
+import axios from "axios";
+import { Autocomplete, TextField } from "@mui/material";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -28,28 +22,28 @@ const csvConfig = mkConfig({
   filename: "Assets-Management-Components",
 });
 
-function Components() {
-  const user = useSelector((state) => state.authReducer.authData);
-  // console.log("uu", user);
+function SubLocation() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [openModal, setOpenModal] = useState(false);
-  const [editComponents, setEditComponents] = useState(null);
-  const [openAddModal, setOpenAddModal] = useState(false);
+  const [openAddSubLocationModal, setOpenAddSubLocationModal] = useState(false);
+  const [addNewSubLocation, setAddNewSubLocation] = useState({
+    subLocationName: "",
+  });
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-  const [deleteComponentsId, setDeleteComponentsId] = useState(null);
-  const [newComponent, setNewComponent] = useState({ componentName: "" });
+  const [deleteSubLocationId, setDeleteSubLocationId] = useState(null);
+  const [updateSubLocationModal, setUpdateSubLocationModal] = useState(false);
+  const [editSubLocations, setEditSubLocations] = useState(null);
 
-  const fetchUser = async () => {
+  const fetchLocation = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllComponent();
-      const component = response?.data?.data?.map((value) => ({
-        id: value.componentId,
-        name: value.componentName,
-        _id: value._id,
+      const response = await axios.get("https://dummyjson.com/products");
+      const subLocationData = response?.data?.products?.map((value) => ({
+        id: value.id,
+        location: value.title,
+        subLocationName: value.title,
       }));
-      setData(component);
+      setData(subLocationData);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -58,18 +52,21 @@ function Components() {
   };
 
   useEffect(() => {
-    fetchUser();
+    fetchLocation();
   }, []);
-
   const columns = useMemo(
     () => [
       {
         accessorKey: "id",
-        header: "Components Id",
+        header: "Sub Location Id",
       },
       {
-        accessorKey: "name",
-        header: "Components Name",
+        accessorKey: "location",
+        header: "Location",
+      },
+      {
+        accessorKey: "subLocationName",
+        header: "Sub-Location Name",
       },
       {
         id: "edit",
@@ -78,7 +75,7 @@ function Components() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleEditComponents(row.original.id)}
+            onClick={() => handleUpdateSubLocation(row.original.id)}
             color="primary"
             aria-label="edit"
           >
@@ -93,7 +90,7 @@ function Components() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleDeleteComponents(row.original.id)}
+            onClick={() => handleDeleteSubLocation(row.original.id)}
             color="error"
             aria-label="delete"
           >
@@ -105,74 +102,60 @@ function Components() {
     [isLoading]
   );
 
-  const handleEditComponents = (id) => {
-    const componentToEdit = data?.find((component) => component?.id === id);
-    if (componentToEdit) {
-      setEditComponents({
-        _id: componentToEdit._id,
-        id: componentToEdit._id,
-        name: componentToEdit.name,
-      });
-      setOpenModal(true);
-    }
-  };
-
-  const componentsInputChangeHandler = (e) => {
+  //add
+  const addNewSubLocationChangeHandler = (e) => {
     const { name, value } = e.target;
-    setEditComponents((prev) => ({
+    setAddNewSubLocation((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const updateComponentsHandler = async (e) => {
+  const addNewSubLocationHandler = (e) => {
     e.preventDefault();
-    try {
-      const formData = {
-        componentName: editComponents.name,
-      };
-      const response = await updateComponent(editComponents._id, formData);
-      if (response?.data?.success) {
-        toast.success("Component updated successfully");
-        setData((prevData) =>
-          prevData.map((item) =>
-            item._id === editComponents._id
-              ? { ...item, name: editComponents.name }
-              : item
-          )
-        );
-        await fetchUser();
-        setOpenModal(false);
-      }
-    } catch (error) {
-      console.error("Error updating component:", error);
-    }
+    console.log("added");
+    //call api
+    // console.log(addNewSubLocation);
+    setAddNewSubLocation({ location: "" });
+    setOpenAddSubLocationModal(false);
   };
 
-  //Add New components
-  const newComponentChangeHandler = (e) => {
+  //update
+  const handleUpdateSubLocation = (id) => {
+    setEditSubLocations();
+    setUpdateSubLocationModal(true);
+  };
+
+  const subLocationInputChangeHandler = (e) => {
     const { name, value } = e.target;
-    setNewComponent((prev) => ({
+    setEditSubLocations((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const addNewComponentHandler = async (e) => {
+  const updateSubLocationHandler = (e) => {
     e.preventDefault();
-    const formData = {
-      userId: user?.id,
-      componentName: newComponent.componentName,
-    };
-    const response = await createComponent(formData);
-    console.log("res add", response);
-    if (response?.data?.success) {
-      fetchUser();
-      setNewComponent({ componentName: "" });
-      setOpenAddModal(false);
-    }
+    // editSubLocations
+    //call api
+    setUpdateSubLocationModal(false);
   };
 
+  //delete
+  const handleDeleteSubLocation = (id) => {
+    setDeleteSubLocationId(id);
+    setDeleteConfirmationModal(true);
+  };
+
+  const deleteSubLocationConfirmationHandler = (e) => {
+    e.preventDefault();
+    console.log("deleted");
+    // deleteSubLocationId
+    //call api
+    setDeleteConfirmationModal(false);
+  };
+
+  //Exports
   const handleExportRows = (rows) => {
     const visibleColumns = table
       .getAllLeafColumns()
@@ -266,35 +249,7 @@ function Components() {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-
     doc.save("Assets-Management-Components.pdf");
-  };
-
-  const handleDeleteComponents = (id) => {
-    const componentToDelete = data?.find((component) => component?.id === id);
-    if (componentToDelete) {
-      setDeleteComponentsId(componentToDelete?._id);
-      setDeleteConfirmationModal(true);
-    }
-  };
-
-  const deleteComponentConfirmationHandler = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await deleteComponent(deleteComponentsId);
-      if (response?.data?.success) {
-        toast.success("Component deleted successfully");
-        setData((prevData) =>
-          prevData.filter((component) => component._id !== deleteComponentsId)
-        );
-        setDeleteConfirmationModal(false);
-      }
-    } catch (error) {
-      console.error(
-        "Error deleting component:",
-        error.response?.data?.message || error.message
-      );
-    }
   };
 
   const table = useMaterialReactTable({
@@ -309,7 +264,7 @@ function Components() {
       return (
         <Box>
           <Button
-            onClick={() => setOpenAddModal(true)}
+            onClick={() => setOpenAddSubLocationModal(true)}
             variant="contained"
             size="small"
             startIcon={<AddCircleOutlineIcon />}
@@ -378,7 +333,6 @@ function Components() {
         </Box>
       );
     },
-
     muiTableProps: {
       sx: {
         border: "1px solid rgba(81, 81, 81, .5)",
@@ -405,7 +359,6 @@ function Components() {
 
     muiTableHeadCellProps: {
       sx: {
-        // border: "1px solid #dddddd",
         backgroundColor: "#f1f5fa",
         color: "#303E67",
         fontSize: "14px",
@@ -420,105 +373,14 @@ function Components() {
   });
   return (
     <>
-      <div className="flex flex-col w-[100%] min-h-full  p-4 bg-gray-50">
-        <h2 className="text-lg font-semibold mb-6 text-start">
-          ALL COMPONENTS
-        </h2>
+      <div className="flex flex-col w-[100%] min-h-full p-4 bg-gray-50">
+        <h2 className="text-lg font-semibold mb-6 text-start">SUB LOCATION</h2>
         <MaterialReactTable table={table} />
-        {openModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
-                Edit Component
-              </h2>
-              <form onSubmit={updateComponentsHandler} className="space-y-4">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="name"
-                    className="text-sm font-medium text-gray-600 mb-1"
-                  >
-                    Component Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    value={editComponents?.name || ""}
-                    onChange={componentsInputChangeHandler}
-                    placeholder="Enter component name"
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setOpenModal(false)}
-                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-                  >
-                    Update
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {openAddModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
-                Add Component
-              </h2>
-              <form onSubmit={addNewComponentHandler} className="space-y-4">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="componentName"
-                    className="text-sm font-medium text-gray-600 mb-1"
-                  >
-                    Component Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="componentName"
-                    type="text"
-                    name="componentName"
-                    value={newComponent?.componentName || ""}
-                    onChange={newComponentChangeHandler}
-                    required
-                    placeholder="Enter component name"
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setOpenAddModal(false)}
-                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-                  >
-                    Add
-                  </button>
-                </div>
-              </form>
-            </div>
-              
-          </div>
-        )}
-        {deleteConfirmationModal && (
+      </div>
+      {deleteConfirmationModal && (
+        <>
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-8">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
               <h2 className="text-xl font-semibold text-red-600 mb-3">
                 Are you sure?
               </h2>
@@ -526,7 +388,7 @@ function Components() {
                 This action will permanently delete the component.
               </p>
               <form
-                onSubmit={deleteComponentConfirmationHandler}
+                onSubmit={deleteSubLocationConfirmationHandler}
                 className="flex justify-end gap-3"
               >
                 <button
@@ -545,10 +407,96 @@ function Components() {
               </form>
             </div>
           </div>
-        )}
-      </div>
+        </>
+      )}
+      {updateSubLocationModal && (
+        <>
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-6">
+                Edit Sub Location
+              </h2>
+              <form onSubmit={updateSubLocationHandler}>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Sub Location*
+                  </label>
+                  <TextField
+                    name="subLocationName"
+                    required
+                    fullWidth
+                    value={editSubLocations?.subLocationName || ""}
+                    onChange={subLocationInputChangeHandler}
+                    placeholder="Enter Department Name"
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setUpdateSubLocationModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </>
+      )}
+      {openAddSubLocationModal && (
+        <>
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-6">
+                Add Sub Location
+              </h2>
+              <form onSubmit={addNewSubLocationHandler}>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Sub Location*
+                  </label>
+                  <TextField
+                    name="subLocationName"
+                    required
+                    fullWidth
+                    value={addNewSubLocation?.subLocationName || ""}
+                    onChange={addNewSubLocationChangeHandler}
+                    placeholder="Enter Department Name"
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setOpenAddSubLocationModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
 
-export default Components;
+export default SubLocation;

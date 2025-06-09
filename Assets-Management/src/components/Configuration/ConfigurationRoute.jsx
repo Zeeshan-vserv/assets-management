@@ -6,6 +6,8 @@ import AddUser from "./Global/AddUser.jsx";
 import EditUser from "./Global/EditUser.jsx";
 import Department from "./Global/Department.jsx";
 import SubDepartment from "./Global/SubDepartment.jsx";
+import Location from "./Global/Location.jsx";
+import SubLocation from "./Global/SubLocation.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -16,6 +18,8 @@ function ConfigurationRoute() {
         <Route path=":id" element={<EditUser />} />
         <Route path="department" element={<Department />} />
         <Route path="sub-department" element={<SubDepartment />} />
+        <Route path="location" element={<Location />} />
+        <Route path="sub-location" element={<SubLocation />} />
       </Routes>
     </>
   );

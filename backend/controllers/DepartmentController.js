@@ -2,7 +2,7 @@ import DepartmentModel from "../models/departmentModel.js";
 
 export const createDepartment = async (req, res) => {
     try {
-        const { userId, departmentName, subdepartments = [] } = req.body;
+        const { userId, departmentName, departmentHead,  subdepartments = [] } = req.body;
 
         if (!userId) {
             return res.status(400).json({ message: 'User Id not found' });
@@ -25,6 +25,7 @@ export const createDepartment = async (req, res) => {
             userId,
             departmentId: nextDepartmentId,
             departmentName,
+            departmentHead,
             subdepartments: subdepartmentsWithIds
         });
 

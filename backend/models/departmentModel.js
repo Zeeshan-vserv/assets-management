@@ -8,6 +8,7 @@ const subDepartmentSchema = mongoose.Schema({
 const departmentSchema = mongoose.Schema({
     departmentId: Number,
     departmentName: String,
+    departmentHead: String,
     subdepartments: [subDepartmentSchema], 
 }, {timestamps: true})
 

@@ -5,33 +5,33 @@ import {
 import { thunk } from 'redux-thunk'
 import { reducers } from '../reducers'
 
-// Save token and userId to SessionStorage
-function saveAuthToSessionStorage(token, userId) {
+// Save token and userId to localStorage
+function saveAuthToLocalStorage(token, userId) {
     try {
-        window.sessionStorage.setItem("token", token)
-        window.sessionStorage.setItem("userId", userId)
+        window.localStorage.setItem("token", token)
+        window.localStorage.setItem("userId", userId)
     } catch (err) {
-        console.error("Error saving auth to session storage", err)
+        console.error("Error saving auth to local storage", err)
     }
 }
 
-function loadAuthFromSessionStorage() {
+function loadAuthFromLocalStorage() {
     try {
-        const token = window.sessionStorage.getItem("token")
-        const userId = window.sessionStorage.getItem("userId")
+        const token = window.localStorage.getItem("token")
+        const userId = window.localStorage.getItem("userId")
         if (token && userId) {
             return { token, userId }
         }
         return null
     } catch (err) {
-        console.error("Error loading auth from session storage", err)
+        console.error("Error loading auth from local storage", err)
         return null
     }
 }
 
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
 
-const auth = loadAuthFromSessionStorage()
+const auth = loadAuthFromLocalStorage()
 const persistedState = auth
     ? { authReducer: { authData: { token: auth.token, userId: auth.userId }, loading: false, error: false, updateLoading: false } }
     : undefined
@@ -46,10 +46,10 @@ store.subscribe(() => {
     const token = state.authReducer?.authData?.token
     const userId = state.authReducer?.authData?.userId
     if (token && userId) {
-        saveAuthToSessionStorage(token, userId)
+        saveAuthToLocalStorage(token, userId)
     } else {
-        window.sessionStorage.removeItem("token")
-        window.sessionStorage.removeItem("userId")
+        window.localStorage.removeItem("token")
+        window.localStorage.removeItem("userId")
     }
 })
 

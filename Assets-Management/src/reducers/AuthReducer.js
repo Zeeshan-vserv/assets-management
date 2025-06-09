@@ -3,8 +3,8 @@ const authReducer = (state = { authData: null, loading: false, error: false, upd
         case 'AUTH_START':
             return { ...state, loading: true, error: false };
         case 'AUTH_SUCCESS':
-            sessionStorage.setItem('token', action.data.token)
-            sessionStorage.setItem('userId', action.data.user._id)
+            localStorage.setItem('token', action.data.token)
+            localStorage.setItem('userId', action.data.user._id)
             return {
                 ...state,
                 authData: {

@@ -4,16 +4,12 @@ const authReducer = (state = {authData: null, loading: false, error: false, upda
             return {...state, loading: true, error: false};
         case 'AUTH_SUCCESS':
     localStorage.setItem('token', action.data.token)
+    localStorage.setItem('userId', action.data.user._id) 
     return {
         ...state,
         authData: {
             token: action.data.token,
-            user: {
-                employeeName: action.data.user.employeeName,
-                emailAddress: action.data.user.emailAddress,
-                employeeCode: action.data.user.emailCode,
-                
-            }
+            userId: action.data.user._id
         },
         loading: false,
         error: false

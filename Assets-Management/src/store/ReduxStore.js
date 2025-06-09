@@ -5,7 +5,7 @@ import {
 import { thunk } from 'redux-thunk'
 import { reducers } from '../reducers'
 
-// Save token and userId to localStorage
+// Save token and userId to SessionStorage
 function saveAuthToSessionStorage(token, userId) {
     try {
         window.sessionStorage.setItem("token", token)

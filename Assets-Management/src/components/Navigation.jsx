@@ -98,8 +98,8 @@ const Navigation = ({ nav, setNav }) => {
                 <li className='text-[11px] hover:underline'>technicians</li> 
                 <li className='text-[11px] hover:underline'><NavLink to="/main/configuration/components" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>components</NavLink></li>
                 <li className='text-[11px] hover:underline'>business units</li>
-                <li className='text-[11px] hover:underline'>department</li>
-                <li className='text-[11px] hover:underline'>sub department</li>
+                <li className='text-[11px] hover:underline'><NavLink to="/main/configuration/department" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>department</NavLink></li>
+                <li className='text-[11px] hover:underline'><NavLink to="/main/configuration/sub-department" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>sub department</NavLink></li>
                 <li className='text-[11px] hover:underline'>location</li>
                 <li className='text-[11px] hover:underline'>sub location</li>
                 <li className='text-[11px] hover:underline'>floor</li>

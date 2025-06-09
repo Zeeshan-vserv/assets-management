@@ -180,9 +180,8 @@ function Components() {
           col.getIsVisible() &&
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
-          col.id !== "delete" &&
-          col.id !== "file"
-      ); // Exclude edit/delete if needed
+          col.id !== "delete" 
+      );
 
     const rowData = rows.map((row) => {
       const result = {};
@@ -205,8 +204,7 @@ function Components() {
           col.getIsVisible() &&
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
-          col.id !== "delete" &&
-          col.id !== "file"
+          col.id !== "delete" 
       );
 
     const exportData = data.map((item) => {
@@ -223,9 +221,7 @@ function Components() {
   };
 
   const handlePdfData = () => {
-    // Check column IDs for debugging
-
-    const excludedColumns = ["mrt-row-select", "edit", "delete", "file"];
+    const excludedColumns = ["mrt-row-select", "edit", "delete"];
 
     const visibleColumns = table
       .getAllLeafColumns()
@@ -241,17 +237,17 @@ function Components() {
         let value = item[key];
 
         // Format date fields
-        if (
-          [
-            "entryDate",
-            "bgIssueDate",
-            "expireDate",
-            "amendDate",
-            "claimDate",
-          ].includes(key)
-        ) {
-          value = value ? new Date(value).toLocaleDateString() : "";
-        }
+        // if (
+        //   [
+        //     "entryDate",
+        //     "bgIssueDate",
+        //     "expireDate",
+        //     "amendDate",
+        //     "claimDate",
+        //   ].includes(key)
+        // ) {
+        //   value = value ? new Date(value).toLocaleDateString() : "";
+        // }
 
         return value ?? "";
       })

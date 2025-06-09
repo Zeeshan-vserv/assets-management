@@ -93,32 +93,14 @@ const Navigation = ({ nav, setNav }) => {
             </h3>
             {expandedSubMenus.global && (
               <ul className='flex flex-col gap-2 list-disc pl-5 '>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >vip users</li>
-                {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >users</li> */}
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}}  ><NavLink to="/main/configuration/Users" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Users</NavLink></li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >technicians</li> 
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/components" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>components</NavLink></li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >business units</li>
-                      <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/department" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Department</NavLink></li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >department</li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/department" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Department</NavLink></li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub department</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >location</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub location</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >floor</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >status</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >support department</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >support group</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >active directory</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >rbac</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >smtp</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >organisation info</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >roles</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >import user</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >cost center</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >page permissions</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >knowledge category</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >knowledge sub category</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >knowledge sub category</li>
               </ul>
             )}
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => toggleSubMenu('incidents')}>
@@ -160,8 +142,8 @@ const Navigation = ({ nav, setNav }) => {
                 </ul>
             )}
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >gate pass</h3>
-            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >vendor</h3>
-            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >license</h3>
+            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >vendor</h3> */}
+            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >license</h3> */}
           </>
         );
       default:

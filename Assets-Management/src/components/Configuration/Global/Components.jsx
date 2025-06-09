@@ -30,7 +30,6 @@ const csvConfig = mkConfig({
 
 function Components() {
   const user = useSelector((state) => state.authReducer.authData);
-  // console.log("uu", user);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openModal, setOpenModal] = useState(false);
@@ -141,6 +140,7 @@ function Components() {
               : item
           )
         );
+        await fetchUser();
         setOpenModal(false);
       }
     } catch (error) {

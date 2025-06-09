@@ -26,7 +26,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Components",
+  filename: "Assets-Management-Department.csv",
 });
 
 function Department() {

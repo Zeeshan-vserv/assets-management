@@ -96,7 +96,7 @@ const Navigation = ({ nav, setNav }) => {
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}}  ><NavLink to="/main/configuration/Users" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Users</NavLink></li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/components" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>components</NavLink></li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/department" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Department</NavLink></li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub department</li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/sub-department" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Sub Department</NavLink></li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >location</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub location</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >organisation info</li>

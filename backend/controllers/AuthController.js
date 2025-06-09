@@ -135,14 +135,21 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   const id = req.params.id;
   const { currentUserId, currentAdminStatus } = req.body;
-  if (id === currentUserId || currentAdminStatus) {
-    try {
-      await AuthModel.findByIdAndDelete(id);
-      res.status(200).json("User Deleted");
-    } catch (error) {
-      res.status(500).json({ message: error.message });
-    }
-  } else {
-    res.status(403).json({ message: "Unauthorized" });
-  }
+
+  console.log("Delete User Request:", {
+    id,
+    currentUserId,
+    currentAdminStatus,
+  });
+  
+  // if (id === currentUserId || currentAdminStatus) {
+  //   try {
+  //     await AuthModel.findByIdAndDelete(id);
+  //     res.status(200).json("User Deleted");
+  //   } catch (error) {
+  //     res.status(500).json({ message: error.message });
+  //   }
+  // } else {
+  //   res.status(403).json({ message: "Unauthorized" });
+  // }
 };

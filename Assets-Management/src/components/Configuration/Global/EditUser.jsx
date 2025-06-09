@@ -96,7 +96,6 @@ const EditUser = () => {
 
     await updateUser(id, formData);
     console.log(id, formData);
-
   };
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">

@@ -164,8 +164,8 @@ function Components() {
       componentName: newComponent.componentName,
     };
     const response = await createComponent(formData);
-    console.log("res add", response);
     if (response?.data?.success) {
+      toast.success("Component Added successfully");
       fetchUser();
       setNewComponent({ componentName: "" });
       setOpenAddModal(false);
@@ -468,7 +468,6 @@ function Components() {
             </div>
           </div>
         )}
-
         {openAddModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">

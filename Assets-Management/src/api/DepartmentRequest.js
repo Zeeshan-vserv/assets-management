@@ -28,9 +28,9 @@ API.interceptors.response.use(
 
 export const createDepartment = (formData) => API.post('/dept/', formData);
 export const getAllDepartment = () => API.get('/dept/department');
-export const getAllSubDepartment = () => API.get('/dept/department/subdepartments');
+export const getAllSubDepartment = () => API.get('/dept/subdepartment');
 export const getDepartmentById = (id) => API.get(`/dept/department/${id}`);
-export const getSubDepartmentById = (id) => API.get(`/dept/department/subdepartment/${id}`);
+export const getSubDepartmentById = (id) => API.get(`/dept/subdepartment/${id}`);
 export const updateDepartment = (id, formData) => API.put(`/dept/department/${id}`, formData);
 export const deleteDepartment = (id) => API.delete(`/dept/department/${id}`);
 export const updateSubDepartment = (id, subId, formData) => API.put(`/dept/department/${id}/subdepartment/${subId}`, formData);

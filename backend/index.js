@@ -11,6 +11,7 @@ import authRoute from './routes/authRoute.js'
 import assetRoute from './routes/assetRoute.js'
 import componentRoute from './routes/componentRoute.js'
 import departmentRoute from './routes/departmentRoute.js'
+import locationRoute from './routes/locationRoute.js'
 
 const app = express()
 
@@ -30,4 +31,5 @@ mongoose.connect(process.env.MONGODB, {useNewUrlParser: true, useUnifiedTopology
 app.use('/auth', authRoute)
 app.use('/asset', assetRoute)
 app.use('/component', componentRoute)
-app.use('/dept', departmentRoute)
+app.use('/department', departmentRoute)
+app.use('/location', locationRoute)

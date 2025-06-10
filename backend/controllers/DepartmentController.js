@@ -87,6 +87,29 @@ export const getSubDepartmentById = async (req, res) => {
     }
 }
 
+// export const getSubDepartmentById = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         const departments = await DepartmentModel.find();
+//         for (const dep of departments) {
+//             const sub = dep.subdepartments.id(id);
+//             if (sub) {
+//                 return res.status(200).json({
+//                     success: true,
+//                     data: {
+//                         departmentId: dep.departmentId,
+//                         departmentName: dep.departmentName,
+//                         subdepartment: sub
+//                     }
+//                 });
+//             }
+//         }
+//         res.status(404).json({ success: false, message: 'SubDepartment id not found' });
+//     } catch (error) {
+//         res.status(500).json({ message: 'An error occurred while fetching SubDepartment' });
+//     }
+// }
+
 export const updateDepartment = async (req, res) => {
     try {
         const { id } = req.params

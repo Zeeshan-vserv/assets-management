@@ -580,6 +580,7 @@ import {
   createDepartment,
   getAllDepartment,
   deleteSubDepartment,
+  getAllSubDepartment,
 } from "../../../api/DepartmentRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
@@ -604,11 +605,16 @@ function SubDepartment() {
   });
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteSubDepartmentId, setDeleteSubDepartmentId] = useState(null);
+  const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [editDepartment, setEditDepartment] = useState(null);
 
   const fetchDepartmentAndSubDepartemntData = async () => {
     try {
       setIsLoading(true);
       const response = await getAllDepartment();
+      const response2 = await getAllSubDepartment();
+
+      // console.log(response2?.data?.data);
       setDepartments(response?.data?.data);
       const allSubDepartments = response?.data?.data?.reduce(
         (acc, department) => {
@@ -663,7 +669,7 @@ function SubDepartment() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleUpdateDepartment(row.original.department_id)}
+            onClick={() => handleUpdateDepartment(row.original)}
             color="primary"
             aria-label="edit"
           >
@@ -678,7 +684,7 @@ function SubDepartment() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleDeleteSubDepartment(row.original, row.original.department_id)}
+            onClick={() => handleDeleteSubDepartment(row.original)}
             color="error"
             aria-label="delete"
           >
@@ -705,16 +711,19 @@ function SubDepartment() {
       (dept) => dept.departmentName === addNewSubDepartment.departmentName
     );
     const formData = {
-      userId: user?.userId,
-      departmentId: selectedDepartment.departmentId,
-      departmentName: addNewSubDepartment.departmentName,
-      subdepartments: [
-        {
+      // userId: user?.userId,
+      // departmentId: selectedDepartment.departmentId,
+      // departmentName: addNewSubDepartment.departmentName,
+      // subdepartments: [
+      //   {
           subdepartmentName: addNewSubDepartment.subdepartmentName,
-        },
-      ],
+      //   },
+      // ],
     };
-    const response = await createDepartment(formData);
+
+    console.log(selectedDepartment._id,formData);
+    
+    // const response = await createDepartment(formData);
     if (response?.data?.success) {
       toast.success("Sub Department Added successfully");
       await fetchDepartmentAndSubDepartemntData();
@@ -727,12 +736,13 @@ function SubDepartment() {
   };
 
   //delete
-  const handleDeleteSubDepartment = (subDepartment, id) => {
-    console.log(subDepartment, id);
-    // setDeleteSubDepartmentId({
-    //   departmentId: subDepartment.departmentId,
-    //   subdepartmentId: subDepartment._id,
-    // });
+  const handleDeleteSubDepartment = async (subDepartment, id) => {
+    console.log(subDepartment);
+
+    setDeleteSubDepartmentId({
+      departmentId: subDepartment.department_id,
+      subdepartmentId: subDepartment._id,
+    });
     setDeleteConfirmationModal(true);
   };
 
@@ -761,6 +771,60 @@ function SubDepartment() {
       );
     } finally {
       setDeleteConfirmationModal(false);
+    }
+  };
+
+  //Update
+
+const UpdateSubDepartmentChangeHandler = (e) => {
+  const { name, value } = e.target;
+  setEditDepartment((prev) => ({
+    ...prev,
+    [name]: value,
+  }));
+};
+
+  const handleUpdateDepartment = (subDepartment) => {
+    setEditDepartment({
+      _id: subDepartment._id,
+      departmentName: subDepartment.departmentName,
+      subdepartmentName: subDepartment.subdepartmentName,
+      departmentId: subDepartment.department_id,
+    });
+    setOpenUpdateModal(true);
+  };
+
+  const updateNewDepartmentHandler = async (e) => {
+    e.preventDefault();
+    if (!editDepartment?._id) return;
+    try {
+      const formData = {
+        departmentId: editDepartment.departmentId,
+        subdepartments: [
+          {
+            _id: editDepartment._id,
+            subdepartmentName: editDepartment.subdepartmentName,
+          },
+        ],
+      };
+      const response = await createDepartment(formData);
+      if (response?.data?.success) {
+        toast.success("Sub Department Updated successfully");
+        await fetchDepartmentAndSubDepartemntData();
+        setOpenUpdateModal(false);
+        setEditDepartment(null);
+      } else {
+        throw new Error(
+          response?.data?.message || "Failed to update sub department"
+        );
+      }
+    } catch (error) {
+      console.error("Error updating sub department:", error);
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to update sub department"
+      );
     }
   };
 
@@ -1056,6 +1120,64 @@ function SubDepartment() {
                 >
                   Delete
                 </button>
+              </form>
+            </div>
+          </div>
+        )}
+        {openUpdateModal && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <form onSubmit={updateNewDepartmentHandler} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Department Name
+                  </label>
+                  <span className="w-60 text-lg border-b border-gray-400 text-black">
+                    {editDepartment?.departmentName || "N/A"}
+                  </span>
+                  {/* <TextField
+                    name="departmentName"
+                    required
+                    fullWidth
+                    value={editDepartment?.departmentName || ""}
+                    onChange={addNewSubDepartmentChangeHandler}
+                    placeholder="Enter Department Name"
+                    variant="standard"
+                    sx={{ width: 250 }}
+                    readOnly
+                  /> */}
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Department Name
+                  </label>
+                  <TextField
+                    name="subdepartmentName"
+                    required
+                    fullWidth
+                    value={editDepartment?.subdepartmentName || ""}
+                    onChange={UpdateSubDepartmentChangeHandler}
+                    placeholder="Enter Sub Department Name"
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setOpenUpdateModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                </div>
               </form>
             </div>
           </div>

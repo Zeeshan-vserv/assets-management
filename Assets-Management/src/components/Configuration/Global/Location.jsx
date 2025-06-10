@@ -12,8 +12,15 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import axios from "axios";
 import { TextField } from "@mui/material";
+import {
+  createLocation,
+  deleteLocation,
+  getAllLocation,
+  updateLocation,
+} from "../../../api/LocationRequest";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -23,6 +30,7 @@ const csvConfig = mkConfig({
 });
 
 function Location() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openAddLocationModal, setOpenAddLocationModal] = useState(false);
@@ -35,13 +43,8 @@ function Location() {
   const fetchLocation = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("https://dummyjson.com/products");
-      const locationData = response?.data?.products?.map((value) => ({
-        id: value.id,
-        locationName: value.title,
-        default: value.title,
-      }));
-      setData(locationData);
+      const response = await getAllLocation();
+      setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -55,16 +58,12 @@ function Location() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
+        accessorKey: "locationId",
         header: "Location Id",
       },
       {
         accessorKey: "locationName",
         header: "Location Name",
-      },
-      {
-        accessorKey: "default",
-        header: "Default",
       },
       {
         id: "edit",
@@ -73,7 +72,7 @@ function Location() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleUpdateLocation(row.original.id)}
+            onClick={() => handleUpdateLocation(row.original._id)}
             color="primary"
             aria-label="edit"
           >
@@ -88,7 +87,7 @@ function Location() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleDeleteLocation(row.original.id)}
+            onClick={() => handleDeleteLocation(row.original._id)}
             color="error"
             aria-label="delete"
           >
@@ -108,18 +107,30 @@ function Location() {
     }));
   };
 
-  const addNewLocationHandler = (e) => {
+  const addNewLocationHandler = async (e) => {
     e.preventDefault();
-    console.log("added");
-    //call api
-    console.log(addNewLocation);
-    setAddNewLocation({ locationName: "" });
-    setOpenAddLocationModal(false);
+    const formData = {
+      userId: user?.userId,
+      locationName: addNewLocation?.locationName,
+    };
+    const response = await createLocation(formData);
+    if (response?.data?.success) {
+      toast.success("Location created successfully");
+      await fetchLocation();
+      setAddNewLocation({ locationName: "" });
+      setOpenAddLocationModal(false);
+    }
   };
 
   //update
   const handleUpdateLocation = (id) => {
-    setEditLocations();
+    const locationToEdit = data?.find((d) => d._id === id);
+    if (locationToEdit) {
+      setEditLocations({
+        _id: locationToEdit._id,
+        locationName: locationToEdit?.locationName,
+      });
+    }
     setUpdateLocationModal(true);
   };
 
@@ -131,11 +142,20 @@ function Location() {
     }));
   };
 
-  const updateLocationHandler = (e) => {
+  const updateLocationHandler = async (e) => {
     e.preventDefault();
-    // editLocations
-    //call api
-    setUpdateLocationModal(false);
+    try {
+      const updateData = {
+        locationName: editLocations?.locationName,
+      };
+      await updateLocation(editLocations?._id, updateData);
+      toast.success("Location updated successfully");
+      await fetchLocation();
+      setEditLocations(null);
+      setUpdateLocationModal(false);
+    } catch (error) {
+      console.error("Error updating locaction:", error);
+    }
   };
 
   //delete
@@ -144,12 +164,17 @@ function Location() {
     setDeleteConfirmationModal(true);
   };
 
-  const deleteLocationConfirmationHandler = (e) => {
+  const deleteLocationConfirmationHandler = async (e) => {
     e.preventDefault();
-    console.log("deleted");
-    // deleteLocationId
-    //call api
+    try {
+      await deleteLocation(deleteLocationId);
+      toast.success("Location deleted successfully");
+      await fetchLocation();
+    } catch (error) {
+      console.error("Error deleting location:", error);
+    }
     setDeleteConfirmationModal(false);
+    setDeleteLocationId(null);
   };
 
   //Exports
@@ -252,7 +277,7 @@ function Location() {
   const table = useMaterialReactTable({
     data,
     columns,
-    getRowId: (row) => row?.id?.toString(),
+    getRowId: (row) => row?.locationId?.toString(),
     enableRowSelection: true,
     initialState: {
       density: "compact",
@@ -417,7 +442,7 @@ function Location() {
                     Location*
                   </label>
                   <TextField
-                    name="departmentName"
+                    name="locationName"
                     required
                     fullWidth
                     value={editLocations?.locationName || ""}

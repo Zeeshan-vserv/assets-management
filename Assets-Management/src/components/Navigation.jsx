@@ -99,7 +99,7 @@ const Navigation = ({ nav, setNav }) => {
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/sub-department" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>sub department</NavLink></li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >location</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub location</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >organisation info</li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/organization" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>organization info</NavLink></li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/import-user" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>import user</NavLink></li>
               </ul>
             )}

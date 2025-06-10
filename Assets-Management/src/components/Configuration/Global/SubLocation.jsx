@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton, Select } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -12,56 +12,98 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import axios from "axios";
-import { Autocomplete, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
+import {
+  getAllLocation,
+  getAllSubLocation,
+  addSubLOcation,
+  updateSubLocation,
+  deleteSubLocation,
+} from "../../../api/LocationRequest";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Components",
+  filename: "Assets-Management-SubLocation",
 });
 
 function SubLocation() {
   const [data, setData] = useState([]);
+  const [rawSubLocations, setRawSubLocations] = useState([]); // for mapping
   const [isLoading, setIsLoading] = useState(true);
   const [openAddSubLocationModal, setOpenAddSubLocationModal] = useState(false);
   const [addNewSubLocation, setAddNewSubLocation] = useState({
     subLocationName: "",
+    locationId: "",
   });
+  const [locations, setLocations] = useState([]);
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-  const [deleteSubLocationId, setDeleteSubLocationId] = useState(null);
+  const [deleteSubLocationInfo, setDeleteSubLocationInfo] = useState(null);
   const [updateSubLocationModal, setUpdateSubLocationModal] = useState(false);
-  const [editSubLocations, setEditSubLocations] = useState(null);
+  const [editSubLocation, setEditSubLocation] = useState(null);
 
-  const fetchLocation = async () => {
+  // Fetch all locations for dropdown
+  const fetchLocations = async () => {
+    try {
+      const response = await getAllLocation();
+      setLocations(response?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    }
+  };
+
+  // Fetch all sub-locations (raw, without mapping)
+  const fetchSubLocations = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("https://dummyjson.com/products");
-      const subLocationData = response?.data?.products?.map((value) => ({
-        id: value.id,
-        location: value.title,
-        subLocationName: value.title,
-      }));
-      setData(subLocationData);
+      const response = await getAllSubLocation();
+      setRawSubLocations(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching sub-locations:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Fetch locations first, then sub-locations
   useEffect(() => {
-    fetchLocation();
+    fetchLocations();
   }, []);
+
+  useEffect(() => {
+    if (locations.length > 0) {
+      fetchSubLocations();
+    }
+    // eslint-disable-next-line
+  }, [locations]);
+
+  // Map locationId to locationName after both are loaded
+  useEffect(() => {
+    if (locations.length && rawSubLocations.length) {
+      const locationMap = {};
+      locations.forEach(loc => {
+        locationMap[loc._id] = loc.locationName;
+      });
+      const mapped = rawSubLocations.map(subLoc => ({
+        ...subLoc,
+        locationName: locationMap[subLoc.locationId] || "",
+      }));
+      setData(mapped);
+    } else if (!rawSubLocations.length) {
+      setData([]);
+    }
+  }, [locations, rawSubLocations]);
+
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
+        accessorKey: "subLocationId",
         header: "Sub Location Id",
       },
       {
-        accessorKey: "location",
+        accessorKey: "locationName",
         header: "Location",
       },
       {
@@ -75,7 +117,7 @@ function SubLocation() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleUpdateSubLocation(row.original.id)}
+            onClick={() => handleUpdateSubLocation(row.original)}
             color="primary"
             aria-label="edit"
           >
@@ -90,7 +132,7 @@ function SubLocation() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleDeleteSubLocation(row.original.id)}
+            onClick={() => handleDeleteSubLocation(row.original)}
             color="error"
             aria-label="delete"
           >
@@ -102,7 +144,7 @@ function SubLocation() {
     [isLoading]
   );
 
-  //add
+  // Add
   const addNewSubLocationChangeHandler = (e) => {
     const { name, value } = e.target;
     setAddNewSubLocation((prev) => ({
@@ -111,154 +153,96 @@ function SubLocation() {
     }));
   };
 
-  const addNewSubLocationHandler = (e) => {
+  const addNewSubLocationHandler = async (e) => {
     e.preventDefault();
-    console.log("added");
-    //call api
-    // console.log(addNewSubLocation);
-    setAddNewSubLocation({ location: "" });
-    setOpenAddSubLocationModal(false);
+    if (!addNewSubLocation.locationId || !addNewSubLocation.subLocationName) {
+      toast.error("Please select location and enter sub-location name");
+      return;
+    }
+    try {
+      await addSubLOcation(addNewSubLocation.locationId, {
+        subLocationName: addNewSubLocation.subLocationName,
+      });
+      toast.success("Sub Location Added successfully");
+      setAddNewSubLocation({ subLocationName: "", locationId: "" });
+      setOpenAddSubLocationModal(false);
+      fetchSubLocations();
+    } catch (error) {
+      toast.error("Failed to add sub location");
+    }
   };
 
-  //update
-  const handleUpdateSubLocation = (id) => {
-    setEditSubLocations();
+  // Update
+  const handleUpdateSubLocation = (row) => {
+    setEditSubLocation({
+      ...row,
+    });
     setUpdateSubLocationModal(true);
   };
 
   const subLocationInputChangeHandler = (e) => {
     const { name, value } = e.target;
-    setEditSubLocations((prev) => ({
+    setEditSubLocation((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const updateSubLocationHandler = (e) => {
+  const updateSubLocationHandler = async (e) => {
     e.preventDefault();
-    // editSubLocations
-    //call api
-    setUpdateSubLocationModal(false);
+    if (!editSubLocation?.locationId || !editSubLocation?.subLocationName) {
+      toast.error("Please select location and enter sub-location name");
+      return;
+    }
+    try {
+      await updateSubLocation(editSubLocation._id, {
+        subLocationName: editSubLocation.subLocationName,
+        locationId: editSubLocation.locationId,
+      });
+      toast.success("Sub Location Updated successfully");
+      setUpdateSubLocationModal(false);
+      setEditSubLocation(null);
+      fetchSubLocations();
+    } catch (error) {
+      toast.error("Failed to update sub location");
+    }
   };
 
-  //delete
-  const handleDeleteSubLocation = (id) => {
-    setDeleteSubLocationId(id);
+  // Delete
+  const handleDeleteSubLocation = (row) => {
+    setDeleteSubLocationInfo(row);
     setDeleteConfirmationModal(true);
   };
 
-  const deleteSubLocationConfirmationHandler = (e) => {
+  const deleteSubLocationConfirmationHandler = async (e) => {
     e.preventDefault();
-    console.log("deleted");
-    // deleteSubLocationId
-    //call api
-    setDeleteConfirmationModal(false);
-  };
-
-  //Exports
-  const handleExportRows = (rows) => {
-    const visibleColumns = table
-      .getAllLeafColumns()
-      .filter(
-        (col) =>
-          col.getIsVisible() &&
-          col.id !== "mrt-row-select" &&
-          col.id !== "edit" &&
-          col.id !== "delete"
+    if (!deleteSubLocationInfo?.locationId || !deleteSubLocationInfo?._id) {
+      toast.error("Invalid sub location info");
+      return;
+    }
+    try {
+      await deleteSubLocation(
+        deleteSubLocationInfo.locationId,
+        deleteSubLocationInfo._id
       );
-
-    const rowData = rows.map((row) => {
-      const result = {};
-      visibleColumns.forEach((col) => {
-        const key = col.id || col.accessorKey;
-        result[key] = row.original[key];
-      });
-      return result;
-    });
-
-    const csv = generateCsv(csvConfig)(rowData);
-    download(csvConfig)(csv);
+      toast.success("Sub Location Deleted successfully");
+      setDeleteConfirmationModal(false);
+      setDeleteSubLocationInfo(null);
+      fetchSubLocations();
+    } catch (error) {
+      toast.error("Failed to delete sub location");
+    }
   };
 
-  const handleExportData = () => {
-    const visibleColumns = table
-      .getAllLeafColumns()
-      .filter(
-        (col) =>
-          col.getIsVisible() &&
-          col.id !== "mrt-row-select" &&
-          col.id !== "edit" &&
-          col.id !== "delete"
-      );
-
-    const exportData = data.map((item) => {
-      const result = {};
-      visibleColumns.forEach((col) => {
-        const key = col.id || col.accessorKey;
-        result[key] = item[key];
-      });
-      return result;
-    });
-
-    const csv = generateCsv(csvConfig)(exportData);
-    download(csvConfig)(csv);
-  };
-
-  const handlePdfData = () => {
-    const excludedColumns = ["mrt-row-select", "edit", "delete"];
-
-    const visibleColumns = table
-      .getAllLeafColumns()
-      .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
-
-    // Prepare headers for PDF
-    const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
-
-    // Prepare data rows for PDF
-    const exportData = data.map((item) =>
-      visibleColumns.map((col) => {
-        const key = col.id || col.accessorKey;
-        let value = item[key];
-
-        // Format date fields
-        // if (
-        //   [
-        //     "entryDate",
-        //     "bgIssueDate",
-        //     "expireDate",
-        //     "amendDate",
-        //     "claimDate",
-        //   ].includes(key)
-        // ) {
-        //   value = value ? new Date(value).toLocaleDateString() : "";
-        // }
-
-        return value ?? "";
-      })
-    );
-
-    const doc = new jsPDF({
-      // format: "a3",
-      // orientation: "landscape",
-    });
-
-    autoTable(doc, {
-      head: [headers],
-      body: exportData,
-      styles: { fontSize: 8 },
-      headStyles: { fillColor: [66, 139, 202] },
-      margin: { top: 20 },
-    });
-    doc.save("Assets-Management-Components.pdf");
-  };
-
+  // Exports
   const table = useMaterialReactTable({
     data,
     columns,
-    getRowId: (row) => row?.id?.toString(),
+    getRowId: (row) => row?._id?.toString() || row?.subLocationId?.toString(),
     enableRowSelection: true,
     initialState: {
       density: "compact",
+      pagination: { pageSize: 5 },
     },
     renderTopToolbarCustomActions: ({ table }) => {
       return (
@@ -341,7 +325,6 @@ function SubLocation() {
         },
       },
     },
-
     paginationDisplayMode: "pages",
     positionToolbarAlertBanner: "bottom",
     muiPaginationProps: {
@@ -351,12 +334,6 @@ function SubLocation() {
       variant: "outlined",
     },
     enablePagination: true,
-    initialState: {
-      pagination: {
-        pageSize: 5,
-      },
-    },
-
     muiTableHeadCellProps: {
       sx: {
         backgroundColor: "#f1f5fa",
@@ -371,6 +348,86 @@ function SubLocation() {
       },
     }),
   });
+
+  // Export handlers
+  const handleExportRows = (rows) => {
+    const visibleColumns = table
+      .getAllLeafColumns()
+      .filter(
+        (col) =>
+          col.getIsVisible() &&
+          col.id !== "mrt-row-select" &&
+          col.id !== "edit" &&
+          col.id !== "delete"
+      );
+
+    const rowData = rows.map((row) => {
+      const result = {};
+      visibleColumns.forEach((col) => {
+        const key = col.id || col.accessorKey;
+        result[key] = row.original[key];
+      });
+      return result;
+    });
+
+    const csv = generateCsv(csvConfig)(rowData);
+    download(csvConfig)(csv);
+  };
+
+  const handleExportData = () => {
+    const visibleColumns = table
+      .getAllLeafColumns()
+      .filter(
+        (col) =>
+          col.getIsVisible() &&
+          col.id !== "mrt-row-select" &&
+          col.id !== "edit" &&
+          col.id !== "delete"
+      );
+
+    const exportData = data.map((item) => {
+      const result = {};
+      visibleColumns.forEach((col) => {
+        const key = col.id || col.accessorKey;
+        result[key] = item[key];
+      });
+      return result;
+    });
+
+    const csv = generateCsv(csvConfig)(exportData);
+    download(csvConfig)(csv);
+  };
+
+  const handlePdfData = () => {
+    const excludedColumns = ["mrt-row-select", "edit", "delete"];
+
+    const visibleColumns = table
+      .getAllLeafColumns()
+      .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
+
+    // Prepare headers for PDF
+    const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
+
+    // Prepare data rows for PDF
+    const exportData = data.map((item) =>
+      visibleColumns.map((col) => {
+        const key = col.id || col.accessorKey;
+        let value = item[key];
+        return value ?? "";
+      })
+    );
+
+    const doc = new jsPDF({});
+    autoTable(doc, {
+      head: [headers],
+      body: exportData,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [66, 139, 202] },
+      margin: { top: 20 },
+    });
+    doc.save("Assets-Management-SubLocation.pdf");
+  };
+
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-gray-50">
@@ -378,122 +435,154 @@ function SubLocation() {
         <MaterialReactTable table={table} />
       </div>
       {deleteConfirmationModal && (
-        <>
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
-              <h2 className="text-xl font-semibold text-red-600 mb-3">
-                Are you sure?
-              </h2>
-              <p className="text-gray-700 mb-6">
-                This action will permanently delete the component.
-              </p>
-              <form
-                onSubmit={deleteSubLocationConfirmationHandler}
-                className="flex justify-end gap-3"
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
+            <h2 className="text-xl font-semibold text-red-600 mb-3">
+              Are you sure?
+            </h2>
+            <p className="text-gray-700 mb-6">
+              This action will permanently delete the sub location.
+            </p>
+            <form
+              onSubmit={deleteSubLocationConfirmationHandler}
+              className="flex justify-end gap-3"
+            >
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmationModal(false)}
+                className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:border-gray-500 hover:bg-gray-100 transition"
               >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+              >
+                Delete
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+      {updateSubLocationModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">
+              Edit Sub Location
+            </h2>
+            <form onSubmit={updateSubLocationHandler}>
+              <div className="flex items-center gap-2 mb-4">
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Location*
+                </label>
+                <select
+                  name="locationId"
+                  required
+                  value={editSubLocation?.locationId || ""}
+                  onChange={subLocationInputChangeHandler}
+                  className="w-[250px] border-b-2 border-gray-300 p-2 outline-none"
+                >
+                  <option value="">Select Location</option>
+                  {locations.map((loc) => (
+                    <option key={loc._id} value={loc._id}>
+                      {loc.locationName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Sub Location*
+                </label>
+                <TextField
+                  name="subLocationName"
+                  required
+                  fullWidth
+                  value={editSubLocation?.subLocationName || ""}
+                  onChange={subLocationInputChangeHandler}
+                  placeholder="Enter Sub Location Name"
+                  variant="standard"
+                  sx={{ width: 250 }}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="button"
-                  onClick={() => setDeleteConfirmationModal(false)}
-                  className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:border-gray-500 hover:bg-gray-100 transition"
+                  onClick={() => setUpdateSubLocationModal(false)}
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
-                  Delete
+                  Update
                 </button>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
-        </>
-      )}
-      {updateSubLocationModal && (
-        <>
-          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
-                Edit Sub Location
-              </h2>
-              <form onSubmit={updateSubLocationHandler}>
-                <div className="flex items-center gap-2">
-                  <label className="w-40 text-sm font-medium text-gray-500">
-                    Sub Location*
-                  </label>
-                  <TextField
-                    name="subLocationName"
-                    required
-                    fullWidth
-                    value={editSubLocations?.subLocationName || ""}
-                    onChange={subLocationInputChangeHandler}
-                    placeholder="Enter Sub Location Name"
-                    variant="standard"
-                    sx={{ width: 250 }}
-                  />
-                </div>
-                <div className="flex justify-end gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setUpdateSubLocationModal(false)}
-                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </>
+        </div>
       )}
       {openAddSubLocationModal && (
-        <>
-          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
-                Add Sub Location
-              </h2>
-              <form onSubmit={addNewSubLocationHandler}>
-                <div className="flex items-center gap-2">
-                  <label className="w-40 text-sm font-medium text-gray-500">
-                    Sub Location*
-                  </label>
-                  <TextField
-                    name="subLocationName"
-                    required
-                    fullWidth
-                    value={addNewSubLocation?.subLocationName || ""}
-                    onChange={addNewSubLocationChangeHandler}
-                    placeholder="Enter Sub Location Name"
-                    variant="standard"
-                    sx={{ width: 250 }}
-                  />
-                </div>
-                <div className="flex justify-end gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setOpenAddSubLocationModal(false)}
-                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
-                  </button>
-                </div>
-              </form>
-            </div>
+        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">
+              Add Sub Location
+            </h2>
+            <form onSubmit={addNewSubLocationHandler}>
+              <div className="flex items-center gap-2 mb-4">
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Location*
+                </label>
+                <select
+                  name="locationId"
+                  required
+                  value={addNewSubLocation.locationId}
+                  onChange={addNewSubLocationChangeHandler}
+                  className="w-[250px] border-b-2 border-gray-300 p-2 outline-none"
+                >
+                  <option value="">Select Location</option>
+                  {locations.map((loc) => (
+                    <option key={loc._id} value={loc._id}>
+                      {loc.locationName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Sub Location*
+                </label>
+                <TextField
+                  name="subLocationName"
+                  required
+                  fullWidth
+                  value={addNewSubLocation.subLocationName}
+                  onChange={addNewSubLocationChangeHandler}
+                  placeholder="Enter Sub Location Name"
+                  variant="standard"
+                  sx={{ width: 250 }}
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setOpenAddSubLocationModal(false)}
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Add
+                </button>
+              </div>
+            </form>
           </div>
-        </>
+        </div>
       )}
     </>
   );

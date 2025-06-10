@@ -28,7 +28,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Department.csv",
+  filename: "Assets-Management-SubDepartment.csv",
 });
 
 function SubDepartment() {
@@ -51,9 +51,6 @@ function SubDepartment() {
     try {
       setIsLoading(true);
       const response = await getAllDepartment();
-      const response2 = await getAllSubDepartment();
-
-      // console.log(response2?.data?.data);
       setDepartments(response?.data?.data);
       const allSubDepartments = response?.data?.data?.reduce(
         (acc, department) => {

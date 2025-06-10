@@ -28,7 +28,7 @@ function ImportUser() {
           >
             <div className="w-full md:w-1/2">
               <label className="block mb-2 text-sm font-medium text-gray-700">
-                Import File
+                Import User File
               </label>
               <input
                 type="file"

@@ -1,25 +1,21 @@
-const authReducer = (state = {authData: null, loading: false, error: false, updateLoading: false}, action) => {
+const authReducer = (state = { authData: null, loading: false, error: false, updateLoading: false }, action) => {
     switch (action.type) {
         case 'AUTH_START':
-            return {...state, loading: true, error: false};
+            return { ...state, loading: true, error: false };
         case 'AUTH_SUCCESS':
-    localStorage.setItem('token', action.data.token)
-    return {
-        ...state,
-        authData: {
-            token: action.data.token,
-            user: {
-                employeeName: action.data.user.employeeName,
-                emailAddress: action.data.user.emailAddress,
-                employeeCode: action.data.user.emailCode,
-                
-            }
-        },
-        loading: false,
-        error: false
-    };
+            localStorage.setItem('token', action.data.token)
+            localStorage.setItem('userId', action.data.user._id)
+            return {
+                ...state,
+                authData: {
+                    token: action.data.token,
+                    userId: action.data.user._id
+                },
+                loading: false,
+                error: false
+            };
         case 'AUTH_FAIL':
-            return {...state, loading: false, error: true};
+            return { ...state, loading: false, error: true };
         case "UPDATING_START":
             return { ...state, updateLoading: true, error: false }
         case "UPDATING_SUCCESS":
@@ -29,7 +25,7 @@ const authReducer = (state = {authData: null, loading: false, error: false, upda
             return { ...state, updateLoading: false, error: true };
         case "LOG_OUT":
             localStorage.clear();
-            return {...state,  authData: null, loading: false, error: false, updateLoading: false }
+            return { ...state, authData: null, loading: false, error: false, updateLoading: false }
         default:
             return state;
     }

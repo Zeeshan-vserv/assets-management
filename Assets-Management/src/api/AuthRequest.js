@@ -26,6 +26,7 @@ API.interceptors.response.use(
 )
 
 export const signup = (formData) => API.post('auth/signup', formData)
+
 export const login = (formData) => API.post('auth/login', formData)
 
 export const getUser = (id) => API.get(`auth/${id}`)

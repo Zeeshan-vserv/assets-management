@@ -3,7 +3,7 @@ import React from "react";
 function SubDepartment() {
   return (
     <>
-      <div>SubDepartment</div>
+      <div></div>
     </>
   );
 }

@@ -5,44 +5,51 @@ import {
 import { thunk } from 'redux-thunk'
 import { reducers } from '../reducers'
 
-// Only store/retrieve the JWT token
-function saveTokenToLocalStorage(token) {
+// Save token and userId to localStorage
+function saveAuthToLocalStorage(token, userId) {
     try {
         window.localStorage.setItem("token", token)
+        window.localStorage.setItem("userId", userId)
     } catch (err) {
-        console.error("Error saving token to local storage", err)
+        console.error("Error saving auth to local storage", err)
     }
 }
 
-function loadTokenFromLocalStorage() {
+function loadAuthFromLocalStorage() {
     try {
-        return window.localStorage.getItem("token")
+        const token = window.localStorage.getItem("token")
+        const userId = window.localStorage.getItem("userId")
+        if (token && userId) {
+            return { token, userId }
+        }
+        return null
     } catch (err) {
-        console.error("Error loading token from local storage", err)
+        console.error("Error loading auth from local storage", err)
         return null
     }
 }
 
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+const composeEnhancers = window._REDUX_DEVTOOLS_EXTENSION_COMPOSE_ || compose
 
-// Optionally, you can initialize authData from token if needed
-const token = loadTokenFromLocalStorage()
-const persistedState = token
-    ? { authReducer: { authData: { token }, loading: false, error: false, updateLoading: false } }
+const auth = loadAuthFromLocalStorage()
+const persistedState = auth
+    ? { authReducer: { authData: { token: auth.token, userId: auth.userId }, loading: false, error: false, updateLoading: false } }
     : undefined
 
 const store = createStore(
     reducers, persistedState, composeEnhancers(applyMiddleware(thunk))
 )
 
-// Subscribe to store changes and save only the token
+// Subscribe to store changes and save only the token and userId
 store.subscribe(() => {
     const state = store.getState()
     const token = state.authReducer?.authData?.token
-    if (token) {
-        saveTokenToLocalStorage(token)
+    const userId = state.authReducer?.authData?.userId
+    if (token && userId) {
+        saveAuthToLocalStorage(token, userId)
     } else {
         window.localStorage.removeItem("token")
+        window.localStorage.removeItem("userId")
     }
 })
 

@@ -9,9 +9,9 @@ router.get('/', getAllLocation)
 router.get('/sublocation', getAllSubLocation)
 router.get('/:id', getLocationById)
 router.get('/sublocation/:id', getSubLocationById)
-router.put('/', updateLocation)
+router.put('/:id', updateLocation)
 router.put('/sublocation/:id', updateSubLocation)
 router.delete('/:id', deleteLocation)
-router.delete('/:locationId/sublocation/:id', deleteSubLocation)
+router.delete('/:locationId/sublocation/:subLocationId', deleteSubLocation)
 
 export default router

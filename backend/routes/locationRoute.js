@@ -1,10 +1,11 @@
 import express from 'express'
 import authMiddleware from '../middleware/AuthMiddleware.js'
-import { createLocation, deleteLocation, deleteSubLocation, getAllLocation, getAllSubLocation, getLocationById, getSubLocationById, updateLocation, updateSubLocation } from '../controllers/LocationController.js'
+import { addSubLOcation, createLocation, deleteLocation, deleteSubLocation, getAllLocation, getAllSubLocation, getLocationById, getSubLocationById, updateLocation, updateSubLocation } from '../controllers/LocationController.js'
 
 const router = express.Router()
 
 router.post('/', authMiddleware, createLocation)
+router.post('/:locationId/sublocation', addSubLOcation)
 router.get('/', getAllLocation)
 router.get('/sublocation', getAllSubLocation)
 router.get('/:id', getLocationById)

@@ -142,6 +142,44 @@ export const updateSubDepartment = async (req, res) => {
     }
 }
 
+export const addSubDepartment = async (req, res) => {
+    try {
+        const { departmentId } = req.params;
+        const { subdepartmentName } = req.body;
+
+        if (!subdepartmentName) {
+            return res.status(400).json({ success: false, message: 'SubDepartment name is required' });
+        }
+
+        const department = await DepartmentModel.findById(departmentId);
+        if (!department) {
+            return res.status(404).json({ success: false, message: 'Department not found' });
+        }
+
+        // Find the next serial subdepartmentId
+        const lastSub = department.subdepartments.length > 0
+            ? Math.max(...department.subdepartments.map(sub => sub.subdepartmentId))
+            : 0;
+        const nextSubId = lastSub + 1;
+
+        // Add the new subdepartment
+        department.subdepartments.push({
+            subdepartmentId: nextSubId,
+            subdepartmentName
+        });
+
+        await department.save();
+
+        res.status(201).json({
+            success: true,
+            data: department,
+            message: 'SubDepartment added successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred while adding subdepartment', error: error.message });
+    }
+};
+
 export const deleteDepartment = async (req, res) => {
     try {
         const { id } = req.params

@@ -1,10 +1,11 @@
 import express from 'express'
-import { createDepartment, deleteDepartment, deleteSubDepartment, getAllDepartment, getAllSubDepartment, getDepartmentById, getSubDepartmentById, updateDepartment, updateSubDepartment } from '../controllers/DepartmentController.js'
+import { addSubDepartment, createDepartment, deleteDepartment, deleteSubDepartment, getAllDepartment, getAllSubDepartment, getDepartmentById, getSubDepartmentById, updateDepartment, updateSubDepartment } from '../controllers/DepartmentController.js'
 import authMiddleware from '../middleware/AuthMiddleware.js'
 
 const router = express.Router()
 
 router.post('/', authMiddleware, createDepartment)
+router.post('/:departmentId/subdepartment', addSubDepartment)
 router.get('/', getAllDepartment)
 router.get('/subdepartment', getAllSubDepartment)
 router.get('/:id', getDepartmentById)

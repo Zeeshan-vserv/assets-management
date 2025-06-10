@@ -36,6 +36,44 @@ export const createLocation = async (req, res) => {
     }
 }
 
+export const addSubLOcation = async (req, res) => {
+    try {
+        const { locationId } = req.params;
+        const { subLocationName } = req.body;
+
+        if (!subLocationName) {
+            return res.status(400).json({ success: false, message: 'SubLocation name is required' });
+        }
+
+        const location = await LocationModel.findById(locationId);
+        if (!location) {
+            return res.status(404).json({ success: false, message: 'Location not found' });
+        }
+
+        // Find the next serial sublocationId
+        const lastSub = location.subLocations.length > 0
+            ? Math.max(...location.subLocations.map(sub => sub.subLocationId))
+            : 0;
+        const nextSubId = lastSub + 1;
+
+        // Add the new subdepartment
+        location.subLocations.push({
+            subLocationId: nextSubId,
+            subLocationName
+        });
+
+        await location.save();
+
+        res.status(201).json({
+            success: true,
+            data: location,
+            message: 'Sublocation added successfully'
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred while adding sublocation', error: error.message });
+    }
+};
+
 export const getAllLocation = async ( req, res) => {
     try {
         const location = await LocationModel.find()

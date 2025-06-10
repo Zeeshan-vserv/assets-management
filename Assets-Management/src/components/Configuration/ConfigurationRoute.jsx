@@ -8,6 +8,8 @@ import Department from "./Global/Department.jsx";
 import SubDepartment from "./Global/SubDepartment.jsx";
 import Location from "./Global/Location.jsx";
 import SubLocation from "./Global/SubLocation.jsx";
+import ImportUser from "./Global/ImportUser.jsx";
+import Organization from "./Global/Organization.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -20,6 +22,8 @@ function ConfigurationRoute() {
         <Route path="sub-department" element={<SubDepartment />} />
         <Route path="location" element={<Location />} />
         <Route path="sub-location" element={<SubLocation />} />
+        <Route path="import-user" element={<ImportUser />} />
+        <Route path="organization" element={<Organization />} />
       </Routes>
     </>
   );

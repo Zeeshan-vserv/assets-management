@@ -2,6 +2,8 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import AuthModel from "../models/authModel.js";
 import dotenv from "dotenv";
+import xlsx from 'xlsx';
+import fs from 'fs';
 
 dotenv.config();
 
@@ -138,3 +140,41 @@ export const deleteUser = async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to delete user", error: error.message });
     }
 };
+
+export const uploadUsersFromExcel = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' })
+        }
+
+        // Read the uploaded Excel file
+        const workbook = xlsx.readFile(req.file.path)
+        const sheetName = workbook.SheetNames[0]
+        const sheet = workbook.Sheets[sheetName]
+        const users = xlsx.utils.sheet_to_json(sheet)
+
+        // Prepare users for insertion
+        const usersToInsert = await Promise.all(users.map(async (user) => {
+            // Hash password if present
+            let hashedPassword = user.password
+            if (user.password) {
+                const salt = await bcrypt.genSalt(10)
+                hashedPassword = await bcrypt.hash(user.password, salt)
+            }
+            return {
+                ...user,
+                password: hashedPassword
+            }
+        }))
+
+        // Insert users into DB
+        await AuthModel.insertMany(usersToInsert)
+
+        // Remove the uploaded file
+        fs.unlinkSync(req.file.path)
+
+        res.status(201).json({ success: true, message: 'Users uploaded successfully' })
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Failed to upload users', error: error.message })
+    }
+}

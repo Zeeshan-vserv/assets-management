@@ -1,29 +1,33 @@
 import AssetModel from "../models/assetModel.js";
 
 export const createAsset = async (req, res) => {
-    try{
+    try {
         const { userId, ...assetData } = req.body;
 
-        if(!userId) {
-            return res.status(400).json({message:'User ID not found'})
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID not found' });
         }
 
         const lastAsset = await AssetModel.findOne().sort({ assetId: -1 });
         const nextAssetId = lastAsset ? lastAsset.assetId + 1 : 1;
 
+        
+        if (req.file) {
+            if (!assetData.assetInformation) assetData.assetInformation = {};
+            assetData.assetInformation.assetImage = req.file.path;
+        }
+
         const newAsset = new AssetModel({
             userId,
             ...assetData,
-        assetId: nextAssetId,
-    })
+            assetId: nextAssetId,
+        });
 
-       const asset = await newAsset.save()
-       res.status(201).json({asset, message: "Asset Created"}) 
+        const asset = await newAsset.save();
+        res.status(201).json({ asset, message: "Asset Created" });
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
-    catch(err){
-        res.status(400).json({message: err.message})
-    }
-    
 }
 
 export const getAllAssets = async (req, res) => {

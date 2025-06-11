@@ -3,6 +3,14 @@ import { NavLink, useParams } from "react-router-dom";
 import "../../Table.css";
 import { getUser, signup, updateUser } from "../../../api/AuthRequest";
 import { toast } from "react-toastify";
+import {
+  getAllLocation,
+  getAllSubLocation,
+} from "../../../api/LocationRequest";
+import {
+  getAllDepartment,
+  getAllSubDepartment,
+} from "../../../api/DepartmentRequest";
 const EditUser = () => {
   const { id } = useParams(); // Get vendor ID from the URL parameter
 
@@ -66,6 +74,10 @@ const EditUser = () => {
       isView: false,
     },
   });
+  const [locationData, setLocationData] = useState([]);
+  const [subLocationData, setSubLocationData] = useState([]);
+  const [departmentData, setDepartmentData] = useState([]);
+  const [subDepartmentData, setSubDepartmentData] = useState([]);
 
   const fetchUser = async () => {
     try {
@@ -87,6 +99,30 @@ const EditUser = () => {
     fetchUser();
   }, []);
 
+  const fetchDetails = async () => {
+    try {
+      setIsLoading(true);
+      const responseLocation = await getAllLocation();
+      setLocationData(responseLocation?.data?.data || []);
+
+      const responseSubLocation = await getAllSubLocation();
+      setSubLocationData(responseSubLocation?.data?.data || []);
+
+      const responseDepartment = await getAllDepartment();
+      setDepartmentData(responseDepartment?.data?.data || []);
+
+      const responseSubDepartment = await getAllSubDepartment();
+      setSubDepartmentData(responseSubDepartment?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchDetails();
+  }, []);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -100,7 +136,7 @@ const EditUser = () => {
       toast.error("Failed to Update user");
     }
   };
-  
+
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
       <form action="" onSubmit={handleUpdate} className="flex flex-col gap-5">
@@ -202,7 +238,15 @@ const EditUser = () => {
                 onChange={handleChange}
               >
                 <option value="">Select Location</option>
-                <option value="agra">AGRA</option>
+                {locationData?.map((locationValue) => (
+                  <option
+                    key={locationValue?._id}
+                    value={locationValue?.locationName}
+                  >
+                    {locationValue?.locationName?.toUpperCase()}
+                  </option>
+                ))}
+                {/* <option value="agra">AGRA</option>
                 <option value="ahmedabad">AHMEDABAD</option>
                 <option value="banglore">BANGLORE</option>
                 <option value="bokaro">BOKARO</option>
@@ -244,7 +288,7 @@ const EditUser = () => {
                 <option value="siliguri">SILIGURI</option>
                 <option value="srinagar">SRINAGAR</option>
                 <option value="trichy">TRICHY</option>
-                <option value="vizag">VIZAG</option>
+                <option value="vizag">VIZAG</option> */}
               </select>
             </div>
             <div className="flex items-center w-[46%]">
@@ -254,14 +298,31 @@ const EditUser = () => {
               >
                 Sub Location
               </label>
-              <input
+              <select
+                name="subLocation"
+                id="subLocation"
+                value={formData.subLocation}
+                onChange={handleChange}
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+              >
+                <option value="">Select Sub Location</option>
+                {subLocationData?.map((subLocationValue) => (
+                  <option
+                    key={subLocationValue?._id}
+                    value={subLocationValue?.subLocationName}
+                  >
+                    {subLocationValue?.subLocationName?.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="subLocation"
                 name="subLocation"
                 value={formData.subLocation}
                 onChange={handleChange}
-              />
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -270,14 +331,31 @@ const EditUser = () => {
               >
                 Department
               </label>
-              <input
+              <select
+                name="department"
+                id="department"
+                value={formData.department}
+                onChange={handleChange}
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+              >
+                <option value="">Select Department</option>
+                {departmentData?.map((departmentValue) => (
+                  <option
+                    key={departmentValue?._id}
+                    value={departmentValue?.departmentName}
+                  >
+                    {departmentValue?.departmentName?.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="department"
                 name="department"
                 value={formData.department}
                 onChange={handleChange}
-              />
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -286,14 +364,31 @@ const EditUser = () => {
               >
                 Sub Department
               </label>
-              <input
+              <select
+                name="subDepartment"
+                id="subDepartment"
+                value={formData.subDepartment}
+                onChange={handleChange}
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+              >
+                <option value="">Select Sub Department</option>
+                {subDepartmentData?.map((subDepartmentValue) => (
+                  <option
+                    key={subDepartmentValue?._id}
+                    value={subDepartmentValue?.subdepartmentName}
+                  >
+                    {subDepartmentValue?.subdepartmentName?.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="subDepartment"
                 name="subDepartment"
                 value={formData.subDepartment}
                 onChange={handleChange}
-              />
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label

@@ -14,9 +14,6 @@ function ImportUser() {
     console.log(fileData);
   };
 
-  const downloadTemplateHandler = () => {
-    //logic
-  };
   return (
     <>
       <div className="flex flex-col gap-8 w-[100%] min-h-full p-4 bg-slate-200">
@@ -51,13 +48,21 @@ function ImportUser() {
               >
                 Import
               </button>
-              <button
+              {/* <button
                 type="button"
-                onClick={downloadTemplateHandler}
                 className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition outline-none"
               >
                 Download Template
-              </button>
+              </button> */}
+              <a
+                href="/"
+                download
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition outline-none"
+              >
+                Download Template
+              </a>
             </div>
           </form>
         </div>

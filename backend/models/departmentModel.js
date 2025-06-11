@@ -6,6 +6,7 @@ const subDepartmentSchema = mongoose.Schema({
 })
 
 const departmentSchema = mongoose.Schema({
+    userId:String,
     departmentId: Number,
     departmentName: String,
     departmentHead: String,

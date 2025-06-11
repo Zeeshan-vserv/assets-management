@@ -1,11 +1,21 @@
 import AssetModel from "../models/assetModel.js";
 
 export const createAsset = async (req, res) => {
-
-    const { ...assetData } = req.body
-
     try{
-        const newAsset = new AssetModel({...assetData})
+        const { userId, ...assetData } = req.body;
+
+        if(!userId) {
+            return res.status(400).json({message:'User ID not found'})
+        }
+
+        const lastAsset = await AssetModel.findOne().sort({ assetId: -1 });
+        const nextAssetId = lastAsset ? lastAsset.assetId + 1 : 1;
+
+        const newAsset = new AssetModel({
+            userId,
+            ...assetData,
+        assetId: nextAssetId,
+    })
 
        const asset = await newAsset.save()
        res.status(201).json({asset, message: "Asset Created"}) 

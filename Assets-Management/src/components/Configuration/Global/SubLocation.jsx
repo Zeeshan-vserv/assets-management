@@ -44,57 +44,40 @@ function SubLocation() {
   const [updateSubLocationModal, setUpdateSubLocationModal] = useState(false);
   const [editSubLocation, setEditSubLocation] = useState(null);
 
-  // Fetch all locations for dropdown
-  const fetchLocations = async () => {
-    try {
-      const response = await getAllLocation();
-      setLocations(response?.data?.data || []);
-    } catch (error) {
-      console.error("Error fetching locations:", error);
-    }
-  };
-
-  // Fetch all sub-locations (raw, without mapping)
   const fetchSubLocations = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllSubLocation();
-      setRawSubLocations(response?.data?.data || []);
+      const response = await getAllLocation();
+      setLocations(response?.data?.data || []);
+      const allSubLocations = response?.data?.data?.reduce(
+        (acc, location) => {
+          if (location.subLocations && location.subLocations.length > 0) {
+            return [
+              ...acc,
+              ...location.subLocations.map((sub) => ({
+                ...sub,
+                locationName: location.locationName,
+                locationId: location._id,
+              })),
+            ];
+          }
+          console.log(acc);
+          return acc;
+        },
+
+        []
+      );
+      setData(allSubLocations || []);
     } catch (error) {
-      console.error("Error fetching sub-locations:", error);
+      console.error("Error fetching locations:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fetch locations first, then sub-locations
   useEffect(() => {
-    fetchLocations();
+    fetchSubLocations();
   }, []);
-
-  useEffect(() => {
-    if (locations.length > 0) {
-      fetchSubLocations();
-    }
-    // eslint-disable-next-line
-  }, [locations]);
-
-  // Map locationId to locationName after both are loaded
-  useEffect(() => {
-    if (locations.length && rawSubLocations.length) {
-      const locationMap = {};
-      locations.forEach(loc => {
-        locationMap[loc._id] = loc.locationName;
-      });
-      const mapped = rawSubLocations.map(subLoc => ({
-        ...subLoc,
-        locationName: locationMap[subLoc.locationId] || "",
-      }));
-      setData(mapped);
-    } else if (!rawSubLocations.length) {
-      setData([]);
-    }
-  }, [locations, rawSubLocations]);
 
   const columns = useMemo(
     () => [
@@ -470,12 +453,16 @@ function SubLocation() {
             <h2 className="text-xl font-bold text-gray-800 mb-6">
               Edit Sub Location
             </h2>
+            {console.log(editSubLocation)}
             <form onSubmit={updateSubLocationHandler}>
               <div className="flex items-center gap-2 mb-4">
                 <label className="w-40 text-sm font-medium text-gray-500">
                   Location*
                 </label>
-                <select
+                <span className="w-60 text-lg border-b border-gray-400 text-black">
+                  {editSubLocation?.locationName || "N/A"}
+                </span>
+                {/* <select
                   name="locationId"
                   required
                   value={editSubLocation?.locationId || ""}
@@ -488,7 +475,7 @@ function SubLocation() {
                       {loc.locationName}
                     </option>
                   ))}
-                </select>
+                </select> */}
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">

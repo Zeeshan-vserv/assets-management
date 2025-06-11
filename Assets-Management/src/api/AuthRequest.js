@@ -36,3 +36,5 @@ export const updateUser = (id, formData) => API.put(`auth/${id}`, formData)
 export const deleteUser = (id) => API.delete(`auth/${id}`)
 
 export const getAllUsers = () => API.get('auth/')
+
+export const uploadUsersFromExcel = (formData)=>API.post('/auth/upload-excel',formData)

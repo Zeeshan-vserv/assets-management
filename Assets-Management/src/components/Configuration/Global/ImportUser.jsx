@@ -1,4 +1,8 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import { uploadUsersFromExcel } from "../../../api/AuthRequest.js";
+import { toast } from "react-toastify";
+import { IoCloudUploadOutline } from "react-icons/io5";
+import { IoMdDownload } from "react-icons/io";
 
 function ImportUser() {
   const [fileData, setFileData] = useState(null);
@@ -8,10 +12,24 @@ function ImportUser() {
     setFileData(file);
   };
 
-  const importUserHandler = (e) => {
+  const importUserHandler = async (e) => {
     e.preventDefault();
-    //api
-    console.log(fileData);
+    if (!fileData) {
+      toast.warning("Please select a file before uploading.");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", fileData);
+    try {
+      const response = await uploadUsersFromExcel(formData);
+      if (response?.data?.success) {
+        toast.success("Users uploaded successfully");
+        setFileData(null);
+      }
+    } catch (error) {
+      console.log(error);
+      console.error("Upload Failed:", error);
+    }
   };
 
   return (
@@ -41,28 +59,29 @@ function ImportUser() {
               />
             </div>
             <div className="flex justify-end gap-4">
-              <button
-                type="submit"
-                onClick={importUserHandler}
-                className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition outline-none"
-              >
-                Import
-              </button>
-              {/* <button
-                type="button"
-                className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition outline-none"
-              >
-                Download Template
-              </button> */}
-              <a
-                href="/"
-                download
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition outline-none"
-              >
-                Download Template
-              </a>
+              <div className="flex justify-center items-center gap-1 border-2 border-green-500 rounded-md p-1">
+                <span className="text-green-500">Upload</span>
+                <button
+                  type="submit"
+                  onClick={importUserHandler}
+                  className="flex items-center justify-center text-green-500 rounded-sm hover:bg-green-600 transition outline-none"
+                >
+                  <IoCloudUploadOutline size={22} />
+                </button>
+              </div>
+
+              <div className="flex justify-center items-center gap-1 border-2 border-blue-600 rounded-md p-1">
+                <span className="text-blue-500">Download Template</span>
+                <a
+                  href="/User_Format.xlsx"
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center text-blue-600 rounded-sm hover:bg-blue-700 transition outline-none"
+                >
+                  <IoMdDownload size={22} />
+                </a>
+              </div>
             </div>
           </form>
         </div>

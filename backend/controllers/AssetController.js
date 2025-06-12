@@ -71,17 +71,17 @@ export const updateAsset = async (req, res) => {
     }
 }
 
-export const deleteAsset = async (req, res)=>{
-    try{
+export const deleteAsset = async (req, res) => {
+    try {
         const { id } = req.params
         const deleteAsset = await AssetModel.findByIdAndDelete(id)
+
         if(!deleteAsset){
-            return res.status(404).json({success:false, message: 'Asset not found'})
+            return res.status(404).json({success:false, message:'Asset Id not found'})
         }
-        res.status(200).json({success: true, data: asset, message: 'Asset deleted successfully'})
-    }
-    catch(err){
-        res.status(500).json({success: false, message: 'Failed to delete Asset'})
+        res.status(200).json({ success:true, data: deleteAsset, message:"Asset deleted successfully"})
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred while deleting Asset' });
     }
 }
 

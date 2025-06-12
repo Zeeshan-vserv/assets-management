@@ -248,7 +248,36 @@ const AddUser = () => {
               >
                 Location <span className="text-red-500 text-base">*</span>
               </label>
-              <select
+              <Autocomplete
+                className="w-[65%]"
+                options={locationData}
+                getOptionLabel={(option) => option.locationName}
+                value={
+                  locationData.find(
+                    (loc) => loc.locationName === formData.location
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    location: newValue ? newValue.locationName : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+
+              {/* <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="location"
                 id="location"
@@ -264,8 +293,9 @@ const AddUser = () => {
                   >
                     {locationValue?.locationName?.toUpperCase()}
                   </option>
-                ))}
-                {/* <option value="agra">AGRA</option>
+                ))} 
+
+               <option value="agra">AGRA</option>
                 <option value="ahmedabad">AHMEDABAD</option>
                 <option value="banglore">BANGLORE</option>
                 <option value="bokaro">BOKARO</option>
@@ -307,8 +337,8 @@ const AddUser = () => {
                 <option value="siliguri">SILIGURI</option>
                 <option value="srinagar">SRINAGAR</option>
                 <option value="trichy">TRICHY</option>
-                <option value="vizag">VIZAG</option> */}
-              </select>
+                <option value="vizag">VIZAG</option> 
+              </select>  */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -317,7 +347,35 @@ const AddUser = () => {
               >
                 Sub Location
               </label>
-              <select
+              <Autocomplete
+                className="w-[65%]"
+                options={subLocationData}
+                getOptionLabel={(option) => option.subLocationName}
+                value={
+                  subLocationData.find(
+                    (subLoc) => subLoc.subLocationName === formData.subLocation
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    subLocation: newValue ? newValue.subLocationName : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Sub Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <select
                 name="subLocation"
                 id="subLocation"
                 value={formData.subLocation}
@@ -333,7 +391,7 @@ const AddUser = () => {
                     {subLocationValue?.subLocationName?.toUpperCase()}
                   </option>
                 ))}
-              </select>
+              </select> */}
               {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
@@ -350,7 +408,35 @@ const AddUser = () => {
               >
                 Department <span className="text-red-500 text-base">*</span>
               </label>
-              <select
+              <Autocomplete
+                className="w-[65%]"
+                options={departmentData}
+                getOptionLabel={(option) => option.departmentName}
+                value={
+                  departmentData.find(
+                    (subLoc) => subLoc.departmentName === formData.department
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    department: newValue ? newValue.departmentName : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Department"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <select
                 name="department"
                 id="department"
                 value={formData.department}
@@ -366,7 +452,7 @@ const AddUser = () => {
                     {departmentValue?.departmentName?.toUpperCase()}
                   </option>
                 ))}
-              </select>
+              </select> */}
               {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
@@ -384,7 +470,36 @@ const AddUser = () => {
               >
                 Sub Department
               </label>
-              <select
+              <Autocomplete
+                className="w-[65%]"
+                options={subDepartmentData}
+                getOptionLabel={(option) => option.subdepartmentName}
+                value={
+                  subDepartmentData.find(
+                    (subLoc) =>
+                      subLoc.subdepartmentName === formData.subDepartment
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    subDepartment: newValue ? newValue.subdepartmentName : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Sub Department"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <select
                 name="subDepartment"
                 id="subDepartment"
                 value={formData.subDepartment}
@@ -400,7 +515,7 @@ const AddUser = () => {
                     {subDepartmentValue?.subdepartmentName?.toUpperCase()}
                   </option>
                 ))}
-              </select>
+              </select> */}
               {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"

@@ -1,10 +1,9 @@
-import React, { useRef, useState } from "react";
-import { uploadUsersFromExcel } from "../../../api/AuthRequest.js";
+import { useState } from "react";
 import { toast } from "react-toastify";
 import { IoCloudUploadOutline } from "react-icons/io5";
 import { IoMdDownload } from "react-icons/io";
 
-function ImportUser() {
+function AssetImport() {
   const [fileData, setFileData] = useState(null);
 
   const uploadFileChangeHandler = (e) => {
@@ -12,7 +11,7 @@ function ImportUser() {
     setFileData(file);
   };
 
-  const importUserHandler = async (e) => {
+  const assetImportHandler = (e) => {
     e.preventDefault();
     if (!fileData) {
       toast.warning("Please select a file before uploading.");
@@ -20,30 +19,21 @@ function ImportUser() {
     }
     const formData = new FormData();
     formData.append("file", fileData);
-    try {
-      const response = await uploadUsersFromExcel(formData);
-      if (response?.data?.success) {
-        toast.success("Users uploaded successfully");
-        setFileData(null);
-      }
-    } catch (error) {
-      console.log(error);
-      console.error("Upload Failed:", error);
-    }
+    //call api
   };
 
   return (
     <>
       <div className="flex flex-col gap-8 w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-md font-semibold mb-6 text-start">IMPORT USER</h2>
+        <h2 className="text-md font-semibold mb-6 text-start">ASSET IMPORT</h2>
         <div>
           <form
-            onSubmit={importUserHandler}
+            onSubmit={assetImportHandler}
             className="flex flex-col md:flex-row justify-between max-w-3xl space-y-6 p-10 rounded-md shadow-lg mx-auto bg-white"
           >
             <div className="w-full md:w-1/2">
               <label className="block mb-2 text-sm font-medium text-gray-700">
-                Import User File
+                Import Asset File
               </label>
               <input
                 type="file"
@@ -93,4 +83,4 @@ function ImportUser() {
   );
 }
 
-export default ImportUser;
+export default AssetImport;

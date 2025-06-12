@@ -27,12 +27,8 @@ const csvConfig = mkConfig({
 const Users = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const [openModal, setOpenModal] = useState(false);
-  // const [editComponents, setEditComponents] = useState(null);
-  // const [openAddModal, setOpenAddModal] = useState(false);
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteComponentsId, setDeleteComponentsId] = useState(null);
-  // const [newComponent, setNewComponent] = useState({ name: "" });
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState("true");
 
@@ -425,7 +421,7 @@ const Users = () => {
                 This action will permanently delete the component.
               </p>
               <form
-                onSubmit={deleteUserConfirmationHandler}
+                onSubmit={deleteUserConfirmationHandler} 
                 className="flex justify-end gap-3"
               >
                 <button

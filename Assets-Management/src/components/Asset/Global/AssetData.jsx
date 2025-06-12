@@ -403,6 +403,37 @@ const AssetData = () => {
           </div>
           <MaterialReactTable table={table} />
         </div>
+
+        {deleteConfirmationModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
+              <h2 className="text-xl font-semibold text-red-600 mb-3">
+                Are you sure?
+              </h2>
+              <p className="text-gray-700 mb-6">
+                This action will permanently delete the component.
+              </p>
+              <form
+                onSubmit={deleteAssetConfirmationHandler}
+                className="flex justify-end gap-3"
+              >
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmationModal(false)}
+                  className="shadow-md px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:border-gray-500 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

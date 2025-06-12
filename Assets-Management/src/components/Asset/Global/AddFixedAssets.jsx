@@ -1,10 +1,131 @@
-import React from "react";
+import React, { useState } from "react";
+import { createAsset } from "../../../api/AssetsRequest";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const AddFixedAssets = () => {
+  const user = useSelector((state) => state.authReducer.authData);
+  const [formData, setFormData] = useState({
+    assetInformation: {
+      category: "",
+      assetTag: "",
+      criticality: "",
+      make: "",
+      model: "",
+      serialNumber: "",
+      expressServiceCode: "",
+      ipAddress: "",
+      operatingSystem: "",
+      cpu: "",
+      hardDisk: "",
+      ram: "",
+      assetImage: "",
+    },
+    locationInformation: {
+      location: "",
+      subLocation: "",
+      storeLocation: "",
+    },
+    warrantyInformation: {
+      vendor: "",
+      assetType: "",
+      supportType: "",
+    },
+    financeInformation: {
+      poNo: "",
+      poDate: "",
+      invoiceNo: "",
+      invoiceDate: "",
+      assetCost: "",
+      residualCost: "",
+      assetLife: "",
+      depreciation: "",
+      hsnCode: "",
+      costCenter: "",
+    },
+    preventiveMaintenance: {
+      pmCycle: "",
+      schedule: "",
+      istPmDate: "",
+    },
+  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const dataToSend = new FormData();
+
+    // Append all fields except the image
+    Object.entries(formData).forEach(([sectionKey, sectionValue]) => {
+      if (typeof sectionValue === "object" && sectionValue !== null) {
+        Object.entries(sectionValue).forEach(([key, value]) => {
+          // For assetImage, append as file
+          if (
+            sectionKey === "assetInformation" &&
+            key === "assetImage" &&
+            value
+          ) {
+            dataToSend.append("assetImage", value);
+          } else {
+            dataToSend.append(`${sectionKey}[${key}]`, value);
+          }
+        });
+      }
+    });
+
+    // Append userId if needed
+    dataToSend.append("userId", user._id);
+
+    await createAsset(dataToSend);
+    toast.success("Asset created Sucessfully")
+          setFormData({
+        assetInformation: {
+          category: "",
+          assetTag: "",
+          criticality: "",
+          make: "",
+          model: "",
+          serialNumber: "",
+          expressServiceCode: "",
+          ipAddress: "",
+          operatingSystem: "",
+          cpu: "",
+          hardDisk: "",
+          ram: "",
+          assetImage: "",
+        },
+        locationInformation: {
+          location: "",
+          subLocation: "",
+          storeLocation: "",
+        },
+        warrantyInformation: {
+          vendor: "",
+          assetType: "",
+          supportType: "",
+        },
+        financeInformation: {
+          poNo: "",
+          poDate: "",
+          invoiceNo: "",
+          invoiceDate: "",
+          assetCost: "",
+          residualCost: "",
+          assetLife: "",
+          depreciation: "",
+          hsnCode: "",
+          costCenter: "",
+        },
+        preventiveMaintenance: {
+          pmCycle: "",
+          schedule: "",
+          istPmDate: "",
+        },
+      });
+  };
+
   return (
     <div className="w-[100%] h-[94vh] overflow-auto p-6 flex flex-col gap-5 bg-slate-200">
       <h2 className="text-slate-700 font-semibold">NEW ASSET</h2>
-      <form action="" className="flex flex-col gap-10">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-10">
         {/* Asset Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex gap-1 justify-end">
@@ -19,23 +140,6 @@ const AddFixedAssets = () => {
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="businessUnit"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Business Unit
-              </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="businessUnit"
-                id="businessUnit"
-              >
-                <option value="">Select</option>
-                <option value="1">Business Unit 1</option>
-                <option value="2">Business Unit 2</option>
-              </select>
-            </div>
-            <div className="flex items-center w-[46%]">
-              <label
                 htmlFor="category"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
@@ -45,6 +149,17 @@ const AddFixedAssets = () => {
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="category"
                 id="category"
+                value={formData.assetInformation.category}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      category: e.target.value,
+                    },
+                  })
+                }
+                // required
               >
                 <option value="">Select</option>
                 <option value="IT Assets">IT Assets</option>
@@ -103,6 +218,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="assetTag"
                 name="assetTag"
+                value={formData.assetInformation.assetTag}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      assetTag: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -116,6 +241,16 @@ const AddFixedAssets = () => {
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="criticality"
                 id="criticality"
+                value={formData.assetInformation.criticality}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      criticality: e.target.value,
+                    },
+                  })
+                }
               >
                 <option value="">Select</option>
                 <option value="Critical">Critical</option>
@@ -134,6 +269,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="make"
                 name="make"
+                value={formData.assetInformation.make}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      make: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -148,6 +293,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="model"
                 name="model"
+                value={formData.assetInformation.model}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      model: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -162,6 +317,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="serialNumber"
                 name="serialNumber"
+                value={formData.assetInformation.serialNumber}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      serialNumber: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -176,6 +341,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="expressServiceCode"
                 name="expressServiceCode"
+                value={formData.assetInformation.expressServiceCode}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      expressServiceCode: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -190,6 +365,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="ipAddress"
                 name="ipAddress"
+                value={formData.assetInformation.ipAddress}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      ipAddress: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -204,6 +389,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="operatingSystem"
                 name="operatingSystem"
+                value={formData.assetInformation.operatingSystem}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      operatingSystem: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -218,6 +413,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="cpu"
                 name="cpu"
+                value={formData.assetInformation.cpu}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      cpu: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -232,6 +437,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="hardDisk"
                 name="hardDisk"
+                value={formData.assetInformation.hardDisk}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      hardDisk: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -246,6 +461,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="ram"
                 name="ram"
+                value={formData.assetInformation.ram}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      ram: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -258,8 +483,18 @@ const AddFixedAssets = () => {
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="file"
-                id="ram"
-                name="ram"
+                id="assetImage"
+                name="assetImage"
+                // value={formData.assetInformation.assetImage}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetInformation: {
+                      ...formData.assetInformation,
+                      assetImage: e.target.files[0],
+                    },
+                  })
+                }
               />
             </div>
           </div>
@@ -280,6 +515,16 @@ const AddFixedAssets = () => {
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="location"
                 id="location"
+                value={formData.locationInformation.location}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      location: e.target.value,
+                    },
+                  })
+                }
               >
                 <option value="">Select Location</option>
                 <option value="agra">AGRA</option>
@@ -339,6 +584,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="subLocation"
                 name="subLocation"
+                value={formData.locationInformation.subLocation}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      subLocation: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -353,6 +608,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="storeLocation"
                 name="storeLocation"
+                value={formData.locationInformation.storeLocation}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      storeLocation: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
           </div>
@@ -371,8 +636,18 @@ const AddFixedAssets = () => {
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="businessUnit"
-                id="businessUnit"
+                name="vendor"
+                id="vendor"
+                value={formData.warrantyInformation.vendor}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    warrantyInformation: {
+                      ...formData.warrantyInformation,
+                      vendor: e.target.value,
+                    },
+                  })
+                }
               >
                 <option value="">Select</option>
                 <option value="N/A">N/A</option>
@@ -389,6 +664,16 @@ const AddFixedAssets = () => {
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="assetType"
                 id="assetType"
+                value={formData.warrantyInformation.assetType}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    warrantyInformation: {
+                      ...formData.warrantyInformation,
+                      assetType: e.target.value,
+                    },
+                  })
+                }
               >
                 <option value="">Select</option>
                 <option value="New">New</option>
@@ -404,15 +689,25 @@ const AddFixedAssets = () => {
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="assetType"
+                htmlFor="supportType"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Asset Type
+                Support Type
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="supportType"
                 id="supportType"
+                value={formData.warrantyInformation.supportType}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    warrantyInformation: {
+                      ...formData.warrantyInformation,
+                      supportType: e.target.value,
+                    },
+                  })
+                }
               >
                 Support Type
                 <option value="">Select</option>
@@ -440,6 +735,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="poNo"
                 name="poNo"
+                value={formData.financeInformation.poNo}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      poNo: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -454,6 +759,16 @@ const AddFixedAssets = () => {
                 type="date"
                 id="poDate"
                 name="poDate"
+                value={formData.financeInformation.poDate}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      poDate: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -468,6 +783,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="invoiceNo"
                 name="invoiceNo"
+                value={formData.financeInformation.invoiceNo}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      invoiceNo: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -482,6 +807,16 @@ const AddFixedAssets = () => {
                 type="date"
                 id="invoiceDate"
                 name="invoiceDate"
+                value={formData.financeInformation.invoiceDate}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      invoiceDate: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -497,6 +832,16 @@ const AddFixedAssets = () => {
                 placeholder="(INR)"
                 id="assetCost"
                 name="assetCost"
+                value={formData.financeInformation.assetCost}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      assetCost: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -512,6 +857,16 @@ const AddFixedAssets = () => {
                 placeholder="(INR)"
                 id="residualCost"
                 name="residualCost"
+                value={formData.financeInformation.residualCost}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      residualCost: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -527,11 +882,21 @@ const AddFixedAssets = () => {
                 placeholder="(YEARS)"
                 id="assetLife"
                 name="assetLife"
+                value={formData.financeInformation.assetLife}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      assetLife: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="assetLife"
+                htmlFor="depreciation"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
                 Depreciation(%)
@@ -540,8 +905,18 @@ const AddFixedAssets = () => {
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="number"
                 placeholder="(0.0)"
-                id="assetLife"
-                name="assetLife"
+                id="depreciation"
+                name="depreciation"
+                value={formData.financeInformation.depreciation}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      depreciation: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -556,6 +931,16 @@ const AddFixedAssets = () => {
                 type="text"
                 id="hsnCode"
                 name="hsnCode"
+                value={formData.financeInformation.hsnCode}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      hsnCode: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -569,6 +954,16 @@ const AddFixedAssets = () => {
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="costCenter"
                 id="costCenter"
+                value={formData.financeInformation.costCenter}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      costCenter: e.target.value,
+                    },
+                  })
+                }
               >
                 <option value="">Select</option>
                 <option value="N/A">N/A</option>
@@ -594,50 +989,99 @@ const AddFixedAssets = () => {
                 placeholder="Np. of Days"
                 id="pmCycle"
                 name="pmCycle"
+                value={formData.preventiveMaintenance.pmCycle}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    preventiveMaintenance: {
+                      ...formData.preventiveMaintenance,
+                      pmCycle: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="pmCycle"
+                htmlFor="schedule"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                PM Cycle
+                Schedule
               </label>
               <div className="w-[65%] flex flex-col gap-2 text-sm">
                 <div className="flex items-center gap-2">
                   <input
                     type="radio"
+                    id="schedule-actual"
+                    name="schedule"
                     value="From Actual PM Date"
-                    id="pmCycle"
-                    name="pmCycle"
+                    checked={
+                      formData.preventiveMaintenance.schedule ===
+                      "From Actual PM Date"
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        preventiveMaintenance: {
+                          ...formData.preventiveMaintenance,
+                          schedule: e.target.value,
+                        },
+                      })
+                    }
                   />
                   From Actual PM Date
                 </div>
                 <div className="flex items-center gap-2">
                   <input
                     type="radio"
+                    id="schedule-fixed"
+                    name="schedule"
                     value="Fixed Schedule"
-                    id="pmCycle"
-                    name="pmCycle"
+                    checked={
+                      formData.preventiveMaintenance.schedule ===
+                      "Fixed Schedule"
+                    }
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        preventiveMaintenance: {
+                          ...formData.preventiveMaintenance,
+                          schedule: e.target.value,
+                        },
+                      })
+                    }
                   />
                   Fixed Schedule
                 </div>
               </div>
             </div>
-            <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="istPmDate"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                1st PM Date
-              </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="date"
-                id="istPmDate"
-                name="istPmDate"
-              />
-            </div>
+
+            {formData.preventiveMaintenance.schedule === "Fixed Schedule" && (
+              <div className="flex items-center w-[46%]">
+                <label
+                  htmlFor="istPmDate"
+                  className="w-[25%] text-xs font-semibold text-slate-600"
+                >
+                  1st PM Date
+                </label>
+                <input
+                  className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                  type="date"
+                  id="istPmDate"
+                  name="istPmDate"
+                  value={formData.preventiveMaintenance.istPmDate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      preventiveMaintenance: {
+                        ...formData.preventiveMaintenance,
+                        istPmDate: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
+            )}
           </div>
         </div>
       </form>

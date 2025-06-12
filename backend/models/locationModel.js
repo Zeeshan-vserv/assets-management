@@ -6,6 +6,7 @@ const subLocationSchema = mongoose.Schema({
 })
 
 const locationSchema = mongoose.Schema({
+    userId:String,
     locationId: Number,
     locationName: String,
     subLocations:[subLocationSchema]

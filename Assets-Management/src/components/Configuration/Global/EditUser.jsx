@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import "../../Table.css";
-import { getUser, signup, updateUser } from "../../../api/AuthRequest";
+import {
+  getAllUsers,
+  getUser,
+  signup,
+  updateUser,
+} from "../../../api/AuthRequest";
 import { toast } from "react-toastify";
 import {
   getAllLocation,
@@ -11,6 +16,7 @@ import {
   getAllDepartment,
   getAllSubDepartment,
 } from "../../../api/DepartmentRequest";
+import { Autocomplete, TextField } from "@mui/material";
 const EditUser = () => {
   const { id } = useParams(); // Get vendor ID from the URL parameter
 
@@ -78,6 +84,7 @@ const EditUser = () => {
   const [subLocationData, setSubLocationData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
   const [subDepartmentData, setSubDepartmentData] = useState([]);
+  const [reportingManagerData, setReportingManagerData] = useState([]);
 
   const fetchUser = async () => {
     try {
@@ -113,6 +120,9 @@ const EditUser = () => {
 
       const responseSubDepartment = await getAllSubDepartment();
       setSubDepartmentData(responseSubDepartment?.data?.data || []);
+
+      const responseReportingManager = await getAllUsers();
+      setReportingManagerData(responseReportingManager?.data || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
@@ -397,13 +407,41 @@ const EditUser = () => {
               >
                 Reporting Manager
               </label>
-              <input
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="reportingManager"
                 name="reportingManager"
                 value={formData.reportingManager}
                 onChange={handleChange}
+              /> */}
+              <Autocomplete
+                className="w-[65%]"
+                options={reportingManagerData}
+                getOptionLabel={(option) => option.emailAddress}
+                value={
+                  reportingManagerData.find(
+                    (user) => user.emailAddress === formData.reportingManager
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    reportingManager: newValue ? newValue.emailAddress : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Reporting Manager"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="flex items-center w-[46%]">

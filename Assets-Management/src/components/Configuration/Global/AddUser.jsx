@@ -1,8 +1,17 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import "../../Table.css";
-import { signup } from "../../../api/AuthRequest";
+import { getAllUsers, signup } from "../../../api/AuthRequest";
 import { toast } from "react-toastify";
+import {
+  getAllLocation,
+  getAllSubLocation,
+} from "../../../api/LocationRequest";
+import {
+  getAllDepartment,
+  getAllSubDepartment,
+} from "../../../api/DepartmentRequest";
+import { Autocomplete, TextField } from "@mui/material";
 
 const AddUser = () => {
   const [formData, setFormData] = useState({
@@ -66,48 +75,81 @@ const AddUser = () => {
       isView: false,
     },
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [locationData, setLocationData] = useState([]);
+  const [subLocationData, setSubLocationData] = useState([]);
+  const [departmentData, setDepartmentData] = useState([]);
+  const [subDepartmentData, setSubDepartmentData] = useState([]);
+  const [reportingManagerData, setReportingManagerData] = useState([]);
+
+  const fetchDetails = async () => {
+    try {
+      setIsLoading(true);
+      const responseLocation = await getAllLocation();
+      setLocationData(responseLocation?.data?.data || []);
+
+      const responseSubLocation = await getAllSubLocation();
+      setSubLocationData(responseSubLocation?.data?.data || []);
+
+      const responseDepartment = await getAllDepartment();
+      setDepartmentData(responseDepartment?.data?.data || []);
+
+      const responseSubDepartment = await getAllSubDepartment();
+      setSubDepartmentData(responseSubDepartment?.data?.data || []);
+
+      const responseReportingManager = await getAllUsers();
+      setReportingManagerData(responseReportingManager?.data || []);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchDetails();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    await signup(formData);
-    toast.success("User created successfully");
-    setFormData({
-      employeeName: "",
-      employeeCode: "",
-      emailAddress: "",
-      mobileNumber: "",
-      designation: "",
-      location: "",
-      subLocation: "",
-      department: "",
-      subDepartment: "",
-      reportingManager: "",
-      departmentHead: "",
-      businessHead: "",
-      password: "",
-      confirmPassword: "",
-      users: { isView: false, isEdit: false, isDelete: false },
-      components: { isView: false, isEdit: false, isDelete: false },
-      departments: { isView: false, isEdit: false, isDelete: false },
-      subDepartments: { isView: false, isEdit: false, isDelete: false },
-      locations: { isView: false, isEdit: false, isDelete: false },
-      subLocations: { isView: false, isEdit: false, isDelete: false },
-      assets: { isView: false },
-      tickets: { isView: false },
-      showUsers: { isView: false },
-      summary: { isView: false },
-      importAsset: { isView: false },
-    });
-  } catch (error) {
-    toast.error("Failed to create user");
-  }
-};
+    try {
+      await signup(formData);
+      toast.success("User created successfully");
+      setFormData({
+        employeeName: "",
+        employeeCode: "",
+        emailAddress: "",
+        mobileNumber: "",
+        designation: "",
+        location: "",
+        subLocation: "",
+        department: "",
+        subDepartment: "",
+        reportingManager: "",
+        departmentHead: "",
+        businessHead: "",
+        password: "",
+        confirmPassword: "",
+        users: { isView: false, isEdit: false, isDelete: false },
+        components: { isView: false, isEdit: false, isDelete: false },
+        departments: { isView: false, isEdit: false, isDelete: false },
+        subDepartments: { isView: false, isEdit: false, isDelete: false },
+        locations: { isView: false, isEdit: false, isDelete: false },
+        subLocations: { isView: false, isEdit: false, isDelete: false },
+        assets: { isView: false },
+        tickets: { isView: false },
+        showUsers: { isView: false },
+        summary: { isView: false },
+        importAsset: { isView: false },
+      });
+    } catch (error) {
+      toast.error("Failed to create user");
+    }
+  };
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
       <form action="" onSubmit={handleSubmit} className="flex flex-col gap-5">
@@ -215,7 +257,15 @@ const handleSubmit = async (e) => {
                 required
               >
                 <option value="">Select Location</option>
-                <option value="agra">AGRA</option>
+                {locationData?.map((locationValue) => (
+                  <option
+                    key={locationValue?._id}
+                    value={locationValue?.locationName}
+                  >
+                    {locationValue?.locationName?.toUpperCase()}
+                  </option>
+                ))}
+                {/* <option value="agra">AGRA</option>
                 <option value="ahmedabad">AHMEDABAD</option>
                 <option value="banglore">BANGLORE</option>
                 <option value="bokaro">BOKARO</option>
@@ -257,7 +307,7 @@ const handleSubmit = async (e) => {
                 <option value="siliguri">SILIGURI</option>
                 <option value="srinagar">SRINAGAR</option>
                 <option value="trichy">TRICHY</option>
-                <option value="vizag">VIZAG</option>
+                <option value="vizag">VIZAG</option> */}
               </select>
             </div>
             <div className="flex items-center w-[46%]">
@@ -267,14 +317,31 @@ const handleSubmit = async (e) => {
               >
                 Sub Location
               </label>
-              <input
+              <select
+                name="subLocation"
+                id="subLocation"
+                value={formData.subLocation}
+                onChange={handleChange}
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+              >
+                <option value="">Select Sub Location</option>
+                {subLocationData?.map((subLocationValue) => (
+                  <option
+                    key={subLocationValue?._id}
+                    value={subLocationValue?.subLocationName}
+                  >
+                    {subLocationValue?.subLocationName?.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="subLocation"
                 name="subLocation"
                 value={formData.subLocation}
                 onChange={handleChange}
-              />
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -283,7 +350,24 @@ const handleSubmit = async (e) => {
               >
                 Department <span className="text-red-500 text-base">*</span>
               </label>
-              <input
+              <select
+                name="department"
+                id="department"
+                value={formData.department}
+                onChange={handleChange}
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+              >
+                <option value="">Select Department</option>
+                {departmentData?.map((departmentValue) => (
+                  <option
+                    key={departmentValue?._id}
+                    value={departmentValue?.departmentName}
+                  >
+                    {departmentValue?.departmentName?.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="department"
@@ -291,7 +375,7 @@ const handleSubmit = async (e) => {
                 value={formData.department}
                 onChange={handleChange}
                 required
-              />
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -300,23 +384,69 @@ const handleSubmit = async (e) => {
               >
                 Sub Department
               </label>
-              <input
+              <select
+                name="subDepartment"
+                id="subDepartment"
+                value={formData.subDepartment}
+                onChange={handleChange}
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+              >
+                <option value="">Select Sub Department</option>
+                {subDepartmentData?.map((subDepartmentValue) => (
+                  <option
+                    key={subDepartmentValue?._id}
+                    value={subDepartmentValue?.subdepartmentName}
+                  >
+                    {subDepartmentValue?.subdepartmentName?.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="subDepartment"
                 name="subDepartment"
                 value={formData.subDepartment}
                 onChange={handleChange}
-              />
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="reportingManager"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Reporting Manager <span className="text-red-500 text-base">*</span>
+                Reporting Manager{" "}
+                <span className="text-red-500 text-base">*</span>
               </label>
-              <input
+              <Autocomplete
+                className="w-[65%]"
+                options={reportingManagerData}
+                getOptionLabel={(option) => option.emailAddress}
+                value={
+                  reportingManagerData.find(
+                    (user) => user.emailAddress === formData.reportingManager
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    reportingManager: newValue ? newValue.emailAddress : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Reporting Manager"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="reportingManager"
@@ -324,7 +454,7 @@ const handleSubmit = async (e) => {
                 value={formData.reportingManager}
                 onChange={handleChange}
                 required
-              />
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -340,7 +470,6 @@ const handleSubmit = async (e) => {
                 name="departmentHead"
                 value={formData.departmentHead}
                 onChange={handleChange}
-
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -381,7 +510,8 @@ const handleSubmit = async (e) => {
                 htmlFor="confirmPassword"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Confirm Password <span className="text-red-500 text-base">*</span>
+                Confirm Password{" "}
+                <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"

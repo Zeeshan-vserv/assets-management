@@ -59,7 +59,7 @@ function ImportUser() {
               />
             </div>
             <div className="flex justify-end gap-4">
-              <div className="flex justify-center items-center gap-1 border-2 border-green-500 rounded-md p-1">
+              <div className="flex justify-center items-center gap-1 border-[0.1rem] border-green-500 rounded-md p-1">
                 <span className="text-green-500">Upload</span>
                 <button
                   type="submit"
@@ -70,7 +70,7 @@ function ImportUser() {
                 </button>
               </div>
 
-              <div className="flex justify-center items-center gap-1 border-2 border-blue-600 rounded-md p-1">
+              <div className="flex justify-center items-center gap-1 border-[0.1rem] border-blue-600 rounded-md p-1">
                 <span className="text-blue-500">Download Template</span>
                 <a
                   href="/User_Format.xlsx"

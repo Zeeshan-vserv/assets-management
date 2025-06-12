@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton, Select } from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -12,14 +12,15 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
+import { TextField } from "@mui/material";
 import {
-  createComponent,
-  getAllComponent,
-  updateComponent,
-  deleteComponent,
-} from "../../../api/ComponentsRequest";
-import { useSelector } from "react-redux";
+  createLocation,
+  deleteLocation,
+  getAllLocation,
+  updateLocation,
+} from "../../../api/LocationRequest";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -28,27 +29,22 @@ const csvConfig = mkConfig({
   filename: "Assets-Management-Components",
 });
 
-function Components() {
+function Location() {
   const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [openModal, setOpenModal] = useState(false);
-  const [editComponents, setEditComponents] = useState(null);
-  const [openAddModal, setOpenAddModal] = useState(false);
+  const [openAddLocationModal, setOpenAddLocationModal] = useState(false);
+  const [addNewLocation, setAddNewLocation] = useState({ locationName: "" });
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-  const [deleteComponentsId, setDeleteComponentsId] = useState(null);
-  const [newComponent, setNewComponent] = useState({ componentName: "" });
+  const [deleteLocationId, setDeleteLocationId] = useState(null);
+  const [updateLocationModal, setUpdateLocationModal] = useState(false);
+  const [editLocations, setEditLocations] = useState(null);
 
-  const fetchUser = async () => {
+  const fetchLocation = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllComponent();
-      const component = response?.data?.data?.map((value) => ({
-        id: value.componentId,
-        name: value.componentName,
-        _id: value._id,
-      }));
-      setData(component);
+      const response = await getAllLocation();
+      setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -57,18 +53,17 @@ function Components() {
   };
 
   useEffect(() => {
-    fetchUser();
+    fetchLocation();
   }, []);
-
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
-        header: "Components Id",
+        accessorKey: "locationId",
+        header: "Location Id",
       },
       {
-        accessorKey: "name",
-        header: "Components Name",
+        accessorKey: "locationName",
+        header: "Location Name",
       },
       {
         id: "edit",
@@ -77,7 +72,7 @@ function Components() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleEditComponents(row.original.id)}
+            onClick={() => handleUpdateLocation(row.original._id)}
             color="primary"
             aria-label="edit"
           >
@@ -92,7 +87,7 @@ function Components() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleDeleteComponents(row.original.id)}
+            onClick={() => handleDeleteLocation(row.original._id)}
             color="error"
             aria-label="delete"
           >
@@ -103,75 +98,86 @@ function Components() {
     ],
     [isLoading]
   );
-
-  const handleEditComponents = (id) => {
-    const componentToEdit = data?.find((component) => component?.id === id);
-    if (componentToEdit) {
-      setEditComponents({
-        _id: componentToEdit._id,
-        id: componentToEdit._id,
-        name: componentToEdit.name,
-      });
-      setOpenModal(true);
-    }
-  };
-
-  const componentsInputChangeHandler = (e) => {
+  //add
+  const addNewLocationChangeHandler = (e) => {
     const { name, value } = e.target;
-    setEditComponents((prev) => ({
+    setAddNewLocation((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const updateComponentsHandler = async (e) => {
-    e.preventDefault();
-    try {
-      const formData = {
-        componentName: editComponents.name,
-      };
-      const response = await updateComponent(editComponents._id, formData);
-      if (response?.data?.success) {
-        toast.success("Component updated successfully");
-        setData((prevData) =>
-          prevData.map((item) =>
-            item._id === editComponents._id
-              ? { ...item, name: editComponents.name }
-              : item
-          )
-        );
-        await fetchUser();
-        setOpenModal(false);
-      }
-    } catch (error) {
-      console.error("Error updating component:", error);
-    }
-  };
-
-  //Add New components
-  const newComponentChangeHandler = (e) => {
-    const { name, value } = e.target;
-    setNewComponent((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const addNewComponentHandler = async (e) => {
+  const addNewLocationHandler = async (e) => {
     e.preventDefault();
     const formData = {
       userId: user?.userId,
-      componentName: newComponent.componentName,
+      locationName: addNewLocation?.locationName,
     };
-    const response = await createComponent(formData);
+    const response = await createLocation(formData);
     if (response?.data?.success) {
-      toast.success("Component Added successfully");
-      fetchUser();
-      setNewComponent({ componentName: "" });
-      setOpenAddModal(false);
+      toast.success("Location created successfully");
+      await fetchLocation();
+      setAddNewLocation({ locationName: "" });
+      setOpenAddLocationModal(false);
     }
   };
 
+  //update
+  const handleUpdateLocation = (id) => {
+    const locationToEdit = data?.find((d) => d._id === id);
+    if (locationToEdit) {
+      setEditLocations({
+        _id: locationToEdit._id,
+        locationName: locationToEdit?.locationName,
+      });
+    }
+    setUpdateLocationModal(true);
+  };
+
+  const locationInputChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setEditLocations((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const updateLocationHandler = async (e) => {
+    e.preventDefault();
+    try {
+      const updateData = {
+        locationName: editLocations?.locationName,
+      };
+      await updateLocation(editLocations?._id, updateData);
+      toast.success("Location updated successfully");
+      await fetchLocation();
+      setEditLocations(null);
+      setUpdateLocationModal(false);
+    } catch (error) {
+      console.error("Error updating locaction:", error);
+    }
+  };
+
+  //delete
+  const handleDeleteLocation = (id) => {
+    setDeleteLocationId(id);
+    setDeleteConfirmationModal(true);
+  };
+
+  const deleteLocationConfirmationHandler = async (e) => {
+    e.preventDefault();
+    try {
+      await deleteLocation(deleteLocationId);
+      toast.success("Location deleted successfully");
+      await fetchLocation();
+    } catch (error) {
+      console.error("Error deleting location:", error);
+    }
+    setDeleteConfirmationModal(false);
+    setDeleteLocationId(null);
+  };
+
+  //Exports
   const handleExportRows = (rows) => {
     const visibleColumns = table
       .getAllLeafColumns()
@@ -265,41 +271,13 @@ function Components() {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-
     doc.save("Assets-Management-Components.pdf");
-  };
-
-  const handleDeleteComponents = (id) => {
-    const componentToDelete = data?.find((component) => component?.id === id);
-    if (componentToDelete) {
-      setDeleteComponentsId(componentToDelete?._id);
-      setDeleteConfirmationModal(true);
-    }
-  };
-
-  const deleteComponentConfirmationHandler = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await deleteComponent(deleteComponentsId);
-      if (response?.data?.success) {
-        toast.success("Component deleted successfully");
-        setData((prevData) =>
-          prevData.filter((component) => component._id !== deleteComponentsId)
-        );
-        setDeleteConfirmationModal(false);
-      }
-    } catch (error) {
-      console.error(
-        "Error deleting component:",
-        error.response?.data?.message || error.message
-      );
-    }
   };
 
   const table = useMaterialReactTable({
     data,
     columns,
-    getRowId: (row) => row?.id?.toString(),
+    getRowId: (row) => row?.locationId?.toString(),
     enableRowSelection: true,
     initialState: {
       density: "compact",
@@ -308,7 +286,7 @@ function Components() {
       return (
         <Box>
           <Button
-            onClick={() => setOpenAddModal(true)}
+            onClick={() => setOpenAddLocationModal(true)}
             variant="contained"
             size="small"
             startIcon={<AddCircleOutlineIcon />}
@@ -377,7 +355,6 @@ function Components() {
         </Box>
       );
     },
-
     muiTableProps: {
       sx: {
         border: "1px solid rgba(81, 81, 81, .5)",
@@ -404,7 +381,6 @@ function Components() {
 
     muiTableHeadCellProps: {
       sx: {
-        // border: "1px solid #dddddd",
         backgroundColor: "#f1f5fa",
         color: "#303E67",
         fontSize: "14px",
@@ -419,102 +395,12 @@ function Components() {
   });
   return (
     <>
-      <div className="flex flex-col w-[100%] min-h-full  p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">
-          ALL COMPONENTS
-        </h2>
+      <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
+        <h2 className="text-lg font-semibold mb-6 text-start">LOCATION</h2>
         <MaterialReactTable table={table} />
-        {openModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
-                Edit Component
-              </h2>
-              <form onSubmit={updateComponentsHandler} className="space-y-4">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="name"
-                    className="text-sm font-medium text-gray-600 mb-1"
-                  >
-                    Component Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    value={editComponents?.name || ""}
-                    onChange={componentsInputChangeHandler}
-                    placeholder="Enter component name"
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setOpenModal(false)}
-                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-        {openAddModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
-                Add Component
-              </h2>
-              <form onSubmit={addNewComponentHandler} className="space-y-4">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="componentName"
-                    className="text-sm font-medium text-gray-600 mb-1"
-                  >
-                    Component Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="componentName"
-                    type="text"
-                    name="componentName"
-                    value={newComponent?.componentName || ""}
-                    onChange={newComponentChangeHandler}
-                    required
-                    placeholder="Enter component name"
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setOpenAddModal(false)}
-                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
-                  </button>
-                </div>
-              </form>
-            </div>
-              
-          </div>
-        )}
-        {deleteConfirmationModal && (
+      </div>
+      {deleteConfirmationModal && (
+        <>
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
               <h2 className="text-xl font-semibold text-red-600 mb-3">
@@ -524,7 +410,7 @@ function Components() {
                 This action will permanently delete the component.
               </p>
               <form
-                onSubmit={deleteComponentConfirmationHandler}
+                onSubmit={deleteLocationConfirmationHandler}
                 className="flex justify-end gap-3"
               >
                 <button
@@ -543,10 +429,95 @@ function Components() {
               </form>
             </div>
           </div>
-        )}
-      </div>
+        </>
+      )}
+      {updateLocationModal && (
+        <>
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <h1>Edit Location</h1>
+              <form onSubmit={updateLocationHandler} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Location*
+                  </label>
+                  <TextField
+                    name="locationName"
+                    required
+                    fullWidth
+                    value={editLocations?.locationName || ""}
+                    onChange={locationInputChangeHandler}
+                    placeholder="Enter Loaction Name"
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setUpdateLocationModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </>
+      )}
+
+      {openAddLocationModal && (
+        <>
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-6">
+                Add Location
+              </h2>
+              <form onSubmit={addNewLocationHandler} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Location*
+                  </label>
+                  <TextField
+                    name="locationName"
+                    required
+                    fullWidth
+                    value={addNewLocation?.locationName || ""}
+                    onChange={addNewLocationChangeHandler}
+                    placeholder="Enter Location Name"
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setOpenAddLocationModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }
 
-export default Components;
+export default Location;

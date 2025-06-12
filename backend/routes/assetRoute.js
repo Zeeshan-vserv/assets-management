@@ -16,7 +16,7 @@ const upload = multer({ storage: storage });
 
 const router = express.Router()
 
-router.post('/', authMiddleware, upload.single('assetImage'), createAsset);
+router.post('/', authMiddleware, upload.single('assetImage'), createAsset)
 router.get('/', authMiddleware, getAllAssets)
 router.get('/:id', authMiddleware, getAssetById)
 router.put('/:id', authMiddleware, updateAsset)

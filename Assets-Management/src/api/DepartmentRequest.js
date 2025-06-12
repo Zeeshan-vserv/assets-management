@@ -27,12 +27,13 @@ API.interceptors.response.use(
 
 
 export const createDepartment = (formData) => API.post('/department', formData);
+export const addSubDepartment = (id, formData) => API.post(`/department/${id}/subdepartment`, formData);
 export const getAllDepartment = () => API.get('/department');
-export const getAllSubDepartment = () => API.get('/department/subdepartments');
+export const getAllSubDepartment = () => API.get('/department/subdepartment');
 export const getDepartmentById = (id) => API.get(`/department/${id}`);
 export const getSubDepartmentById = (id) => API.get(`/department/subdepartment/${id}`);
 export const updateDepartment = (id, formData) => API.put(`/department/${id}`, formData);
 export const deleteDepartment = (id) => API.delete(`/department/${id}`);
-export const updateSubDepartment = (id, subId, formData) => API.put(`/department/${id}/subdepartment/${subId}`, formData);
+export const updateSubDepartment = (subId, formData) => API.put(`/department/subdepartment/${subId}`, formData);
 export const deleteSubDepartment = (id, subId) => API.delete(`/department/${id}/subdepartment/${subId}`);
  

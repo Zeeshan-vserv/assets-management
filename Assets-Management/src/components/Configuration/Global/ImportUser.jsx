@@ -59,27 +59,31 @@ function ImportUser() {
               />
             </div>
             <div className="flex justify-end gap-4">
-              <div className="flex justify-center items-center gap-1 border-[0.1rem] border-green-500 rounded-md p-1">
-                <span className="text-green-500">Upload</span>
+              <div className="flex justify-center items-center border-[0.1rem] border-green-500 rounded-md p-1 cursor-pointer">
                 <button
                   type="submit"
                   onClick={importUserHandler}
-                  className="flex items-center justify-center text-green-500 rounded-sm hover:bg-green-600 transition outline-none"
+                  className="text-green-500 rounded-sm transition outline-none"
                 >
-                  <IoCloudUploadOutline size={22} />
+                  <div className="flex justify-center items-center gap-1">
+                    <span className="text-green-500">Upload</span>
+                    <IoCloudUploadOutline size={22} />
+                  </div>
                 </button>
               </div>
 
-              <div className="flex justify-center items-center gap-1 border-[0.1rem] border-blue-600 rounded-md p-1">
-                <span className="text-blue-500">Download Template</span>
+              <div className="flex justify-center items-center gap-1 border-[0.1rem] border-blue-600 rounded-md p-1 cursor-pointer">
                 <a
                   href="/User_Format.xlsx"
                   download
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center text-blue-600 rounded-sm hover:bg-blue-700 transition outline-none"
+                  className="text-blue-600 rounded-sm transition outline-none"
                 >
-                  <IoMdDownload size={22} />
+                  <div className="flex items-center justify-center">
+                    <span className="text-blue-500">Download Template</span>
+                    <IoMdDownload size={22} />
+                  </div>
                 </a>
               </div>
             </div>

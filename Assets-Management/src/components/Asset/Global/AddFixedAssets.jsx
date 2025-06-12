@@ -131,10 +131,10 @@ const AddFixedAssets = () => {
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex gap-1 justify-end">
             <button className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
-              submit
+              Submit
             </button>
             <button className="bg-[#F26E75] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
-              cancel
+              Cancel
             </button>
           </div>
           <h3 className="text-slate-700">Asset Information</h3>

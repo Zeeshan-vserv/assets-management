@@ -3,6 +3,7 @@ import Navigation from './Navigation'
 import ConfigurationRoute from './Configuration/ConfigurationRoute'
 import {Routes,Route} from "react-router-dom"
 import AssetRoute from './Asset/AssetRoute'
+import Test from '../pages/Test'
 const Body = ({nav,setNav}) => {
   return (
     <div className='flex mt-14'>
@@ -13,6 +14,7 @@ const Body = ({nav,setNav}) => {
         <Routes>
           <Route path="/Configuration/*"element={<ConfigurationRoute/>} />
           <Route path="/Asset/*"element={<AssetRoute/>} />
+          <Route path="/test"element={<Test/>} /> 
         </Routes>
         </div>
     </div>

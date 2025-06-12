@@ -515,7 +515,7 @@ const Users = () => {
                 This action will permanently delete the component.
               </p>
               <form
-                onSubmit={deleteUserConfirmationHandler}
+                onSubmit={deleteUserConfirmationHandler} 
                 className="flex justify-end gap-3"
               >
                 <button

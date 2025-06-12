@@ -18,9 +18,9 @@ import {
 } from "../../../api/DepartmentRequest";
 import { Autocomplete, TextField } from "@mui/material";
 const EditUser = () => {
-  const { id } = useParams(); // Get vendor ID from the URL parameter
-
+  const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
+
   const [formData, setFormData] = useState({
     employeeName: "",
     employeeCode: "",
@@ -129,6 +129,7 @@ const EditUser = () => {
       setIsLoading(false);
     }
   };
+  
   useEffect(() => {
     fetchDetails();
   }, []);
@@ -158,7 +159,7 @@ const EditUser = () => {
                 htmlFor="employeeName"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Employee Name
+                Employee Name <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -167,6 +168,7 @@ const EditUser = () => {
                 name="employeeName"
                 value={formData.employeeName}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -174,7 +176,7 @@ const EditUser = () => {
                 htmlFor="employeeCode"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Employee Code
+                Employee Code <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -183,6 +185,7 @@ const EditUser = () => {
                 name="employeeCode"
                 value={formData.employeeCode}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -190,7 +193,7 @@ const EditUser = () => {
                 htmlFor="emailAddress"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Email Address
+                Email Address <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -199,6 +202,7 @@ const EditUser = () => {
                 name="emailAddress"
                 value={formData.emailAddress}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -206,7 +210,7 @@ const EditUser = () => {
                 htmlFor="mobileNumber"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Mobile Number
+                Mobile Number <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -215,6 +219,7 @@ const EditUser = () => {
                 name="mobileNumber"
                 value={formData.mobileNumber}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -222,7 +227,7 @@ const EditUser = () => {
                 htmlFor="designation"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Designation
+                Designation <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -231,6 +236,7 @@ const EditUser = () => {
                 name="designation"
                 value={formData.designation}
                 onChange={handleChange}
+                required
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -238,7 +244,7 @@ const EditUser = () => {
                 htmlFor="location"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Location
+                Location <span className="text-red-500 text-base">*</span>
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -246,6 +252,7 @@ const EditUser = () => {
                 id="location"
                 value={formData.location}
                 onChange={handleChange}
+                required
               >
                 <option value="">Select Location</option>
                 {locationData?.map((locationValue) => (
@@ -256,49 +263,6 @@ const EditUser = () => {
                     {locationValue?.locationName?.toUpperCase()}
                   </option>
                 ))}
-                {/* <option value="agra">AGRA</option>
-                <option value="ahmedabad">AHMEDABAD</option>
-                <option value="banglore">BANGLORE</option>
-                <option value="bokaro">BOKARO</option>
-                <option value="bokaburnpurro">BURNPUR</option>
-                <option value="chandigarh">CHANDIGARH</option>
-                <option value="chattisgarh">CHATTISGARH</option>
-                <option value="chennai">CHENNAI</option>
-                <option value="coimbatore">COIMBATORE</option>
-                <option value="dankuni">DANKUNI</option>
-                <option value="delhi">DELHI</option>
-                <option value="durgapur">DURGAPUR</option>
-                <option value="faridabad">FARIDABAD</option>
-                <option value="ghaziabad">GHAZIABAD</option>
-                <option value="gujarat">GUJARAT</option>
-                <option value="guwahati">GUWAHATI</option>
-                <option value="haldia">HALDIA</option>
-                <option value="hyderabad">HYDERABAD</option>
-                <option value="jagdishpur">JAGDISHPUR</option>
-                <option value="jalandhar">JALANDHAR</option>
-                <option value="jammu">JAMMU</option>
-                <option value="kandrori">KANDRORI</option>
-                <option value="kanpur">KANPUR</option>
-                <option value="kochi">KOCHI</option>
-                <option value="kolkata">KOLKATA</option>
-                <option value="lucknow">LUCKNOW</option>
-                <option value="ludhiana">LUDHIANA</option>
-                <option value="madhya pradesh">MADHYA PRADESH</option>
-                <option value="maharashtra">MAHARASHTRA</option>
-                <option value="manali">MANALI</option>
-                <option value="mandigobindgarh">MANDIGOBINDGARH</option>
-                <option value="N/A">N/A</option>
-                <option value="paradeep">PARADEEP</option>
-                <option value="patna">PATNA</option>
-                <option value="prayagraj">PRAYAGRAJ</option>
-                <option value="rajasthan">RAJASTHAN</option>
-                <option value="rishikesh">RISHIKESH</option>
-                <option value="roorkela">ROORKELA</option>
-                <option value="salem">SALEM</option>
-                <option value="siliguri">SILIGURI</option>
-                <option value="srinagar">SRINAGAR</option>
-                <option value="trichy">TRICHY</option>
-                <option value="vizag">VIZAG</option> */}
               </select>
             </div>
             <div className="flex items-center w-[46%]">
@@ -325,29 +289,22 @@ const EditUser = () => {
                   </option>
                 ))}
               </select>
-              {/* <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="subLocation"
-                name="subLocation"
-                value={formData.subLocation}
-                onChange={handleChange}
-              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="department"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Department
+                Department <span className="text-red-500 text-base">*</span>
               </label>
               <select
                 name="department"
                 id="department"
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 value={formData.department}
                 onChange={handleChange}
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-              >
+                required
+                >
                 <option value="">Select Department</option>
                 {departmentData?.map((departmentValue) => (
                   <option
@@ -358,14 +315,6 @@ const EditUser = () => {
                   </option>
                 ))}
               </select>
-              {/* <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="department"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -391,34 +340,19 @@ const EditUser = () => {
                   </option>
                 ))}
               </select>
-              {/* <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="subDepartment"
-                name="subDepartment"
-                value={formData.subDepartment}
-                onChange={handleChange}
-              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="reportingManager"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Reporting Manager
+                Reporting Manager <span className="text-red-500 text-base">*</span>
               </label>
-              {/* <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="reportingManager"
-                name="reportingManager"
-                value={formData.reportingManager}
-                onChange={handleChange}
-              /> */}
               <Autocomplete
                 className="w-[65%]"
                 options={reportingManagerData}
                 getOptionLabel={(option) => option.emailAddress}
+                required
                 value={
                   reportingManagerData.find(
                     (user) => user.emailAddress === formData.reportingManager

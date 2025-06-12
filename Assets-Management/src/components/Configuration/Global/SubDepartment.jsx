@@ -542,13 +542,13 @@ const UpdateSubDepartmentChangeHandler = (e) => {
                 <button
                   type="button"
                   onClick={() => setDeleteConfirmationModal(false)}
-                  className="px-4 py-2 rounded-md border border-gray-300 bg-white text-gray-700 hover:border-gray-500 hover:bg-gray-100 transition"
+                  className="shadow-md px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:border-gray-500 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Delete
                 </button>

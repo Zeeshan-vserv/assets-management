@@ -49,6 +49,7 @@ const AddFixedAssets = () => {
       istPmDate: "",
     },
   });
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     const dataToSend = new FormData();
@@ -75,51 +76,51 @@ const AddFixedAssets = () => {
     dataToSend.append("userId", user._id);
 
     await createAsset(dataToSend);
-    toast.success("Asset created Sucessfully")
-          setFormData({
-        assetInformation: {
-          category: "",
-          assetTag: "",
-          criticality: "",
-          make: "",
-          model: "",
-          serialNumber: "",
-          expressServiceCode: "",
-          ipAddress: "",
-          operatingSystem: "",
-          cpu: "",
-          hardDisk: "",
-          ram: "",
-          assetImage: "",
-        },
-        locationInformation: {
-          location: "",
-          subLocation: "",
-          storeLocation: "",
-        },
-        warrantyInformation: {
-          vendor: "",
-          assetType: "",
-          supportType: "",
-        },
-        financeInformation: {
-          poNo: "",
-          poDate: "",
-          invoiceNo: "",
-          invoiceDate: "",
-          assetCost: "",
-          residualCost: "",
-          assetLife: "",
-          depreciation: "",
-          hsnCode: "",
-          costCenter: "",
-        },
-        preventiveMaintenance: {
-          pmCycle: "",
-          schedule: "",
-          istPmDate: "",
-        },
-      });
+    toast.success("Asset created Sucessfully");
+    setFormData({
+      assetInformation: {
+        category: "",
+        assetTag: "",
+        criticality: "",
+        make: "",
+        model: "",
+        serialNumber: "",
+        expressServiceCode: "",
+        ipAddress: "",
+        operatingSystem: "",
+        cpu: "",
+        hardDisk: "",
+        ram: "",
+        assetImage: "",
+      },
+      locationInformation: {
+        location: "",
+        subLocation: "",
+        storeLocation: "",
+      },
+      warrantyInformation: {
+        vendor: "",
+        assetType: "",
+        supportType: "",
+      },
+      financeInformation: {
+        poNo: "",
+        poDate: "",
+        invoiceNo: "",
+        invoiceDate: "",
+        assetCost: "",
+        residualCost: "",
+        assetLife: "",
+        depreciation: "",
+        hsnCode: "",
+        costCenter: "",
+      },
+      preventiveMaintenance: {
+        pmCycle: "",
+        schedule: "",
+        istPmDate: "",
+      },
+    });
   };
 
   return (

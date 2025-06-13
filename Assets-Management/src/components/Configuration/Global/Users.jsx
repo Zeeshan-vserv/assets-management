@@ -118,7 +118,7 @@ const Users = () => {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleDeleteComponents(row.original.id)}
+            onClick={() => handleDeleteComponents(row.original._id)}
             color="error"
             aria-label="delete"
           >
@@ -257,9 +257,9 @@ const Users = () => {
   };
 
   const handleDeleteComponents = (id) => {
-    const componentToDelete = data?.find((component) => component?.id === id);
+    // const componentToDelete = data?.find((component) => component?.id === id);
     if (componentToDelete) {
-      setDeleteComponentsId(componentToDelete?._id);
+      setDeleteComponentsId(id);
       setDeleteConfirmationModal(true);
     }
   };

@@ -16,6 +16,10 @@ import { NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllAssets, deleteAsset } from "../../../api/AssetsRequest";
 
+import QrCodeIcon from "@mui/icons-material/QrCode";
+import { QRCodeSVG as QRCode } from "qrcode.react";
+import { RxCross2 } from "react-icons/rx";
+
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
@@ -30,6 +34,9 @@ const AssetData = () => {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteComponentsId, setDeleteComponentsId] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  const [qrCodesModalOpen, setQrCodesModalOpen] = useState(false);
+  const [selectedRowsForQrCodes, setSelectedRowsForQrCodes] = useState([]);
 
   const fetchAsset = async () => {
     try {
@@ -83,6 +90,7 @@ const AssetData = () => {
   }, [data]);
 
   // console.log(data);
+  console.log(selectedRowsForQrCodes);
 
   const columns = useMemo(
     () => [
@@ -238,6 +246,14 @@ const AssetData = () => {
     doc.save("Assets-Management-Assets.pdf");
   };
 
+  //Generate qrCodes function
+  const handleGenerateQrCodes = () => {
+    const selectedRows = table.getSelectedRowModel().rows;
+    if (selectedRows.length === 0) return;
+    setSelectedRowsForQrCodes(selectedRows.map((row) => row.original));
+    setQrCodesModalOpen(true);
+  };
+
   const handleDeleteComponents = (id) => {
     if (id) {
       setDeleteComponentsId(id);
@@ -343,6 +359,18 @@ const AssetData = () => {
         >
           Export Selected Rows
         </Button>
+        <Button
+          disabled={
+            !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
+          }
+          onClick={handleGenerateQrCodes}
+          startIcon={<QrCodeIcon />}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+        >
+          Generate QR Codes
+        </Button>
       </Box>
     ),
     muiTableProps: {
@@ -433,6 +461,50 @@ const AssetData = () => {
               </form>
             </div>
           </div>
+        )}
+        {qrCodesModalOpen && (
+          <>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+              <div className="bg-white w-[90%] max-w-[800px] max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-2xl relative">
+                <button
+                  onClick={() => setQrCodesModalOpen(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-red-600 transition"
+                >
+                  <RxCross2 size={24} />
+                </button>
+                <h2 className="text-xl font-bold mb-6 text-center text-gray-800">
+                  Generated QR Codes
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
+                  {selectedRowsForQrCodes.map((row) => (
+                    <div
+                      key={row?._id}
+                      className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow"
+                    >
+                      <QRCode
+                        size={128}
+                        value={`
+                        Asset ID: ${row?.assetId}
+                        Asset Tag: ${row?.assetInformation?.assetTag}
+                        Model: ${row?.assetInformation?.model}
+                        Serial Number: ${row?.assetInformation?.serialNumber}
+                        Operating System: ${row?.assetInformation?.operatingSystem}
+                        CPU: ${row?.assetInformation?.cpu}
+                        RAM: ${row?.assetInformation?.ram}
+                        Hard Disk: ${row?.assetInformation?.hardDisk}
+                        Location: ${row?.locationInformation?.location}`}
+                        level="H"
+                        includeMargin={true}
+                      />
+                      <span className="mt-2 text-xs text-gray-600 font-medium">
+                        Asset ID: {row?.assetId}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </>

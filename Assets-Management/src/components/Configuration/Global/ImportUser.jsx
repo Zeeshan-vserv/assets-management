@@ -15,7 +15,7 @@ function ImportUser() {
   const importUserHandler = async (e) => {
     e.preventDefault();
     if (!fileData) {
-      toast.warning("Please select a file before uploading.");
+      toast.warning("Please select a user file before uploading.");
       return;
     }
     const formData = new FormData();
@@ -28,7 +28,7 @@ function ImportUser() {
       }
     } catch (error) {
       console.log(error);
-      console.error("Upload Failed:", error);
+      console.error("User Upload Failed:", error);
     }
   };
 

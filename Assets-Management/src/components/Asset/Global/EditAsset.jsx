@@ -108,7 +108,7 @@ const EditAsset = () => {
     // console.log(id,formData, dataToSend);
 
     updateAsset(id, dataToSend);
-    toast.success("Asset created Sucessfully");
+    toast.success("Asset updated Sucessfully");
     //   assetInformation: {
     //     category: "",
     //     assetTag: "",
@@ -156,7 +156,7 @@ const EditAsset = () => {
 
   return (
     <div className="w-[100%] h-[94vh] overflow-auto p-6 flex flex-col gap-5 bg-slate-200">
-      <h2 className="text-slate-700 font-semibold">NEW ASSET</h2>
+      <h2 className="text-slate-700 font-semibold">Edit ASSET</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-10">
         {/* Asset Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">

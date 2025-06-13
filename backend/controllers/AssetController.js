@@ -57,41 +57,41 @@ export const getAssetById = async (req, res) => {
     }
 }
 
-// export const updateAsset = async (req, res) => {
-//     try {
-//         const { id } = req.params
-//         const updateAsset = await AssetModel.findByIdAndUpdate(id, req.body, {new:true})
-
-//         if(!updateAsset){
-//             return res.status(404).json({success:false, message:"Asset not found"})
-//         }
-//         res.status(200).json({success:true, data: updateAsset, message:'Asset updated successfully'})
-//     } catch (error) {
-//         res.status(500).json({message: "An error occurred while updating asset"})
-//     }
-// }
-
 export const updateAsset = async (req, res) => {
     try {
-        const { id } = req.params;
-        let updateData = req.body;
+        const { id } = req.params
+        const updateAsset = await AssetModel.findByIdAndUpdate(id, req.body, {new:true})
 
-        // If assetImage is uploaded, add its path
-        if (req.file) {
-            if (!updateData.assetInformation) updateData.assetInformation = {};
-            updateData.assetInformation.assetImage = req.file.path;
+        if(!updateAsset){
+            return res.status(404).json({success:false, message:"Asset not found"})
         }
-
-        const updatedAsset = await AssetModel.findByIdAndUpdate(id, updateData, { new: true });
-
-        if (!updatedAsset) {
-            return res.status(404).json({ success: false, message: "Asset not found" });
-        }
-        res.status(200).json({ success: true, data: updatedAsset, message: 'Asset updated successfully' });
+        res.status(200).json({success:true, data: updateAsset, message:'Asset updated successfully'})
     } catch (error) {
-        res.status(500).json({ message: "An error occurred while updating asset" });
+        res.status(500).json({message: "An error occurred while updating asset"})
     }
-};
+}
+
+// export const updateAsset = async (req, res) => {
+//     try {
+//         const { id } = req.params;
+//         let updateData = req.body;
+
+//         // If assetImage is uploaded, add its path
+//         if (req.file) {
+//             if (!updateData.assetInformation) updateData.assetInformation = {};
+//             updateData.assetInformation.assetImage = req.file.path;
+//         }
+
+//         const updatedAsset = await AssetModel.findByIdAndUpdate(id, updateData, { new: true });
+
+//         if (!updatedAsset) {
+//             return res.status(404).json({ success: false, message: "Asset not found" });
+//         }
+//         res.status(200).json({ success: true, data: updatedAsset, message: 'Asset updated successfully' });
+//     } catch (error) {
+//         res.status(500).json({ message: "An error occurred while updating asset" });
+//     }
+// };
 
 export const deleteAsset = async (req, res) => {
     try {

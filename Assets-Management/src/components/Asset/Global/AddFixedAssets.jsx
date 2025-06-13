@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { createAsset } from "../../../api/AssetsRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { NavLink } from "react-router-dom";
 
 const AddFixedAssets = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -49,7 +50,7 @@ const AddFixedAssets = () => {
       istPmDate: "",
     },
   });
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const dataToSend = new FormData();
@@ -134,9 +135,18 @@ const AddFixedAssets = () => {
             <button className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
               Submit
             </button>
-            <button className="bg-[#F26E75] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
-              Cancel
-            </button>
+            <NavLink
+              to="/main/asset/AssetData"
+              className={({ isActive }) =>
+                `hover:underline cursor-pointer ${
+                  isActive ? "text-blue-400" : ""
+                }`
+              }
+            >
+              <button className="bg-[#F26E75] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
+                Cancel
+              </button>
+            </NavLink>
           </div>
           <h3 className="text-slate-700">Asset Information</h3>
           <div className="flex flex-wrap gap-6 justify-between mt-3">

@@ -1,8 +1,12 @@
 import React, { useState } from "react";
-import { createAsset, getAssetById, updateAsset } from "../../../api/AssetsRequest";
+import {
+  createAsset,
+  getAssetById,
+  updateAsset,
+} from "../../../api/AssetsRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import { useEffect } from "react";
 const EditAsset = () => {
   const { id } = useParams();
@@ -70,7 +74,6 @@ const EditAsset = () => {
   };
 
   // console.log(formData);
-  
 
   useEffect(() => {
     fetchAsset();
@@ -83,7 +86,7 @@ const EditAsset = () => {
     const dataToSend = new FormData();
 
     // Append all fields except the image
-    Object.entries(formData).forEach(([sectionKey, sectionValue]) => {      
+    Object.entries(formData).forEach(([sectionKey, sectionValue]) => {
       if (typeof sectionValue === "object" && sectionValue !== null) {
         Object.entries(sectionValue).forEach(([key, value]) => {
           // For assetImage, append as file
@@ -103,8 +106,8 @@ const EditAsset = () => {
     // Append userId if needed
     dataToSend.append("userId", user._id);
     // console.log(id,formData, dataToSend);
-    
-     updateAsset(id ,dataToSend);
+
+    updateAsset(id, dataToSend);
     toast.success("Asset created Sucessfully");
     //   assetInformation: {
     //     category: "",
@@ -158,12 +161,24 @@ const EditAsset = () => {
         {/* Asset Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex gap-1 justify-end">
-            <button className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
+            <button
+              type="submit"
+              className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
+            >
               Submit
             </button>
-            <button className="bg-[#F26E75] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
-              Cancel
-            </button>
+            <NavLink
+              to="/main/asset/AssetData"
+              className={({ isActive }) =>
+                `hover:underline cursor-pointer ${
+                  isActive ? "text-blue-400" : ""
+                }`
+              }
+            >
+              <button className="bg-[#F26E75] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
+                Cancel
+              </button>
+            </NavLink>
           </div>
           <h3 className="text-slate-700">Asset Information</h3>
           <div className="flex flex-wrap gap-6 justify-between mt-3">

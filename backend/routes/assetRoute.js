@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAsset, deleteAsset, getAllAssets, getAssetById, updateAsset } from '../controllers/AssetController.js';
+import { createAsset, deleteAsset, getAllAssets, getAssetById, updateAsset, uploadAssetFromExcel } from '../controllers/AssetController.js';
 import authMiddleware from '../middleware/AuthMiddleware.js';
 import multer from 'multer';
 
@@ -21,5 +21,6 @@ router.get('/', authMiddleware, getAllAssets)
 router.get('/:id', authMiddleware, getAssetById)
 router.put('/:id', authMiddleware, updateAsset)
 router.delete('/:id', authMiddleware, deleteAsset)
+router.post('/upload-excel', authMiddleware, upload.single('file'), uploadAssetFromExcel)
 
 export default router

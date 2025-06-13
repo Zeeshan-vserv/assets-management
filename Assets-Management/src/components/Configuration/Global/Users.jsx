@@ -258,7 +258,7 @@ const Users = () => {
 
   const handleDeleteComponents = (id) => {
     // const componentToDelete = data?.find((component) => component?.id === id);
-    if (componentToDelete) {
+    if (id) {
       setDeleteComponentsId(id);
       setDeleteConfirmationModal(true);
     }

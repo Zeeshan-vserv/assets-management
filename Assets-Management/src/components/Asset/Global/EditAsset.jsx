@@ -6,7 +6,7 @@ import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 const EditAsset = () => {
   const { id } = useParams();
-  // const user = useSelector((state) => state.authReducer.authData);
+  const user = useSelector((state) => state.authReducer.authData);
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     assetInformation: {
@@ -101,12 +101,11 @@ const EditAsset = () => {
     });
 
     // Append userId if needed
-    // dataToSend.append("userId", user._id);
+    dataToSend.append("userId", user._id);
     // console.log(id,formData, dataToSend);
     
      updateAsset(id ,dataToSend);
     toast.success("Asset created Sucessfully");
-    // setFormData({
     //   assetInformation: {
     //     category: "",
     //     assetTag: "",

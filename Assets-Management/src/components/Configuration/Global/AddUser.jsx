@@ -14,7 +14,6 @@ import {
 import { Autocomplete, TextField } from "@mui/material";
 
 const AddUser = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     employeeName: "",
     employeeCode: "",

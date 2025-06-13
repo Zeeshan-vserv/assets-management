@@ -58,16 +58,16 @@ export const getAssetById = async (req, res) => {
 }
 
 export const updateAsset = async (req, res) => {
-    try{
+    try {
         const { id } = req.params
-        const updateAsset = await AssetModel.findByIdAndUpdate(id, req.body, {new: true})
+        const updateAsset = await AssetModel.findByIdAndUpdate(id, req.body, {new:true})
+
         if(!updateAsset){
-            return res.status(404).json({success:false, message: 'Asset not found'})
+            return res.status(404).json({success:false, message:"Asset not found"})
         }
-        res.status(200).json({success: true, data: updateAsset, message:'Asset updated successfully'})
-    }
-    catch(err){
-        res.status(400).json({success: false, message: "Failed to update Asset"})
+        res.status(200).json({success:true, data: updateAsset, message:'Asset updated successfully'})
+    } catch (error) {
+        res.status(500).json({message: "An error occurred while updating asset"})
     }
 }
 

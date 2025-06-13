@@ -1,10 +1,13 @@
 import React, { useState } from "react";
-import { createAsset } from "../../../api/AssetsRequest";
+import { createAsset, getAssetById, updateAsset } from "../../../api/AssetsRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-
-const AddFixedAssets = () => {
+import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+const EditAsset = () => {
+  const { id } = useParams();
   const user = useSelector((state) => state.authReducer.authData);
+  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     assetInformation: {
       category: "",
@@ -49,13 +52,38 @@ const AddFixedAssets = () => {
       istPmDate: "",
     },
   });
+
+  const fetchAsset = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAssetById(id);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setFormData(response?.data.data || []);
+      // setData(response);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // console.log(formData);
   
+
+  useEffect(() => {
+    fetchAsset();
+  }, [id]);
+
+  // console.log(id);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const dataToSend = new FormData();
 
     // Append all fields except the image
-    Object.entries(formData).forEach(([sectionKey, sectionValue]) => {
+    Object.entries(formData).forEach(([sectionKey, sectionValue]) => {      
       if (typeof sectionValue === "object" && sectionValue !== null) {
         Object.entries(sectionValue).forEach(([key, value]) => {
           // For assetImage, append as file
@@ -74,54 +102,53 @@ const AddFixedAssets = () => {
 
     // Append userId if needed
     dataToSend.append("userId", user._id);
-
-    // console.log(dataToSend);
-    await createAsset(dataToSend);
+    // console.log(id,formData, dataToSend);
+    
+     updateAsset(id ,dataToSend);
     toast.success("Asset created Sucessfully");
-    setFormData({
-      assetInformation: {
-        category: "",
-        assetTag: "",
-        criticality: "",
-        make: "",
-        model: "",
-        serialNumber: "",
-        expressServiceCode: "",
-        ipAddress: "",
-        operatingSystem: "",
-        cpu: "",
-        hardDisk: "",
-        ram: "",
-        assetImage: "",
-      },
-      locationInformation: {
-        location: "",
-        subLocation: "",
-        storeLocation: "",
-      },
-      warrantyInformation: {
-        vendor: "",
-        assetType: "",
-        supportType: "",
-      },
-      financeInformation: {
-        poNo: "",
-        poDate: "",
-        invoiceNo: "",
-        invoiceDate: "",
-        assetCost: "",
-        residualCost: "",
-        assetLife: "",
-        depreciation: "",
-        hsnCode: "",
-        costCenter: "",
-      },
-      preventiveMaintenance: {
-        pmCycle: "",
-        schedule: "",
-        istPmDate: "",
-      },
-    });
+    //   assetInformation: {
+    //     category: "",
+    //     assetTag: "",
+    //     criticality: "",
+    //     make: "",
+    //     model: "",
+    //     serialNumber: "",
+    //     expressServiceCode: "",
+    //     ipAddress: "",
+    //     operatingSystem: "",
+    //     cpu: "",
+    //     hardDisk: "",
+    //     ram: "",
+    //     assetImage: "",
+    //   },
+    //   locationInformation: {
+    //     location: "",
+    //     subLocation: "",
+    //     storeLocation: "",
+    //   },
+    //   warrantyInformation: {
+    //     vendor: "",
+    //     assetType: "",
+    //     supportType: "",
+    //   },
+    //   financeInformation: {
+    //     poNo: "",
+    //     poDate: "",
+    //     invoiceNo: "",
+    //     invoiceDate: "",
+    //     assetCost: "",
+    //     residualCost: "",
+    //     assetLife: "",
+    //     depreciation: "",
+    //     hsnCode: "",
+    //     costCenter: "",
+    //   },
+    //   preventiveMaintenance: {
+    //     pmCycle: "",
+    //     schedule: "",
+    //     istPmDate: "",
+    //   },
+    // });
   };
 
   return (
@@ -1091,4 +1118,4 @@ const AddFixedAssets = () => {
   );
 };
 
-export default AddFixedAssets;
+export default EditAsset;

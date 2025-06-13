@@ -11,9 +11,9 @@ import {
   getAllDepartment,
   getAllSubDepartment,
 } from "../../../api/DepartmentRequest";
+import { Autocomplete, TextField } from "@mui/material";
 
 const AddUser = () => {
-  const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     employeeName: "",
     employeeCode: "",
@@ -75,15 +75,12 @@ const AddUser = () => {
       isView: false,
     },
   });
+  // const [isLoading, setIsLoading] = useState(true);
   const [locationData, setLocationData] = useState([]);
   const [subLocationData, setSubLocationData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
   const [subDepartmentData, setSubDepartmentData] = useState([]);
   const [reportingManagerData, setReportingManagerData] = useState([]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
 
   const fetchDetails = async () => {
     try {
@@ -108,10 +105,13 @@ const AddUser = () => {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     fetchDetails();
   }, []);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -293,8 +293,52 @@ const AddUser = () => {
                   >
                     {locationValue?.locationName?.toUpperCase()}
                   </option>
-                ))}
-              </select>
+                ))} 
+
+               <option value="agra">AGRA</option>
+                <option value="ahmedabad">AHMEDABAD</option>
+                <option value="banglore">BANGLORE</option>
+                <option value="bokaro">BOKARO</option>
+                <option value="bokaburnpurro">BURNPUR</option>
+                <option value="chandigarh">CHANDIGARH</option>
+                <option value="chattisgarh">CHATTISGARH</option>
+                <option value="chennai">CHENNAI</option>
+                <option value="coimbatore">COIMBATORE</option>
+                <option value="dankuni">DANKUNI</option>
+                <option value="delhi">DELHI</option>
+                <option value="durgapur">DURGAPUR</option>
+                <option value="faridabad">FARIDABAD</option>
+                <option value="ghaziabad">GHAZIABAD</option>
+                <option value="gujarat">GUJARAT</option>
+                <option value="guwahati">GUWAHATI</option>
+                <option value="haldia">HALDIA</option>
+                <option value="hyderabad">HYDERABAD</option>
+                <option value="jagdishpur">JAGDISHPUR</option>
+                <option value="jalandhar">JALANDHAR</option>
+                <option value="jammu">JAMMU</option>
+                <option value="kandrori">KANDRORI</option>
+                <option value="kanpur">KANPUR</option>
+                <option value="kochi">KOCHI</option>
+                <option value="kolkata">KOLKATA</option>
+                <option value="lucknow">LUCKNOW</option>
+                <option value="ludhiana">LUDHIANA</option>
+                <option value="madhya pradesh">MADHYA PRADESH</option>
+                <option value="maharashtra">MAHARASHTRA</option>
+                <option value="manali">MANALI</option>
+                <option value="mandigobindgarh">MANDIGOBINDGARH</option>
+                <option value="N/A">N/A</option>
+                <option value="paradeep">PARADEEP</option>
+                <option value="patna">PATNA</option>
+                <option value="prayagraj">PRAYAGRAJ</option>
+                <option value="rajasthan">RAJASTHAN</option>
+                <option value="rishikesh">RISHIKESH</option>
+                <option value="roorkela">ROORKELA</option>
+                <option value="salem">SALEM</option>
+                <option value="siliguri">SILIGURI</option>
+                <option value="srinagar">SRINAGAR</option>
+                <option value="trichy">TRICHY</option>
+                <option value="vizag">VIZAG</option> 
+              </select>  */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -303,13 +347,40 @@ const AddUser = () => {
               >
                 Sub Location
               </label>
-              <select
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="subLocation"
+              <Autocomplete
+                className="w-[65%]"
+                options={subLocationData}
+                getOptionLabel={(option) => option.subLocationName}
+                value={
+                  subLocationData.find(
+                    (subLoc) => subLoc.subLocationName === formData.subLocation
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    subLocation: newValue ? newValue.subLocationName : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Sub Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <select
                 name="subLocation"
+                id="subLocation"
                 value={formData.subLocation}
                 onChange={handleChange}
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
               >
                 <option value="">Select Sub Location</option>
                 {subLocationData?.map((subLocationValue) => (
@@ -320,7 +391,15 @@ const AddUser = () => {
                     {subLocationValue?.subLocationName?.toUpperCase()}
                   </option>
                 ))}
-              </select>
+              </select> */}
+              {/* <input
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="subLocation"
+                name="subLocation"
+                value={formData.subLocation}
+                onChange={handleChange}
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -329,14 +408,40 @@ const AddUser = () => {
               >
                 Department <span className="text-red-500 text-base">*</span>
               </label>
-              <select
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="department"
+              <Autocomplete
+                className="w-[65%]"
+                options={departmentData}
+                getOptionLabel={(option) => option.departmentName}
+                value={
+                  departmentData.find(
+                    (subLoc) => subLoc.departmentName === formData.department
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    department: newValue ? newValue.departmentName : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Department"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <select
                 name="department"
+                id="department"
                 value={formData.department}
                 onChange={handleChange}
-                required
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
               >
                 <option value="">Select Department</option>
                 {departmentData?.map((departmentValue) => (
@@ -347,7 +452,16 @@ const AddUser = () => {
                     {departmentValue?.departmentName?.toUpperCase()}
                   </option>
                 ))}
-              </select>
+              </select> */}
+              {/* <input
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="department"
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                required
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label

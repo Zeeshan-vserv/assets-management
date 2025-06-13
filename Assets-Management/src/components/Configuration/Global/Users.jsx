@@ -27,12 +27,8 @@ const csvConfig = mkConfig({
 const Users = () => {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [openModal, setOpenModal] = useState(false);
-  const [editComponents, setEditComponents] = useState(null);
-  const [openAddModal, setOpenAddModal] = useState(false);
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteComponentsId, setDeleteComponentsId] = useState(null);
-  const [newComponent, setNewComponent] = useState({ name: "" });
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState("true");
 
@@ -257,7 +253,6 @@ const Users = () => {
   };
 
   const handleDeleteComponents = (id) => {
-    // const componentToDelete = data?.find((component) => component?.id === id);
     if (id) {
       setDeleteComponentsId(id);
       setDeleteConfirmationModal(true);
@@ -410,101 +405,12 @@ const Users = () => {
       },
     }),
   });
+  
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full  p-4 bg-slate-100">
         <h2 className="text-lg font-semibold mb-6 text-start">ALL USERS</h2>
         <MaterialReactTable table={table} />
-        {/* {openModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
-                Edit Component
-              </h2>
-              <form onSubmit={updateComponentsHandler} className="space-y-4">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="name"
-                    className="text-sm font-medium text-gray-600 mb-1"
-                  >
-                    Component Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    value={editComponents?.name || ""}
-                    onChange={componentsInputChangeHandler}
-                    placeholder="Enter component name"
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setOpenModal(false)}
-                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-                  >
-                    Update
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-        {openAddModal && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
-                Add Component
-              </h2>
-              <form onSubmit={addNewComponentHandler} className="space-y-4">
-                <div className="flex flex-col">
-                  <label
-                    htmlFor="name"
-                    className="text-sm font-medium text-gray-600 mb-1"
-                  >
-                    Component Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    name="name"
-                    value={newComponent?.name || ""}
-                    onChange={newComponentChangeHandler}
-                    required
-                    placeholder="Enter component name"
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-3 pt-4 border-t mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setOpenAddModal(false)}
-                    className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
-                  >
-                    Add
-                  </button>
-                </div>
-              </form>
-            </div>
-              
-          </div>
-        )} */}
         {deleteConfirmationModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">

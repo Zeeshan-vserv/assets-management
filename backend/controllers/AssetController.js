@@ -72,6 +72,7 @@ export const updateAsset = async (req, res) => {
         // Convert fields like "assetInformation[category]": "Laptop" to nested objects
         const nestedFields = [
             "assetInformation",
+            "assetState",
             "locationInformation",
             "warrantyInformation",
             "financeInformation",

@@ -15,9 +15,11 @@ import { autoTable } from "jspdf-autotable";
 import { NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllAssets, deleteAsset } from "../../../api/AssetsRequest";
+import { MdDownload } from "react-icons/md";
 
+import QRCode from 'qrcode';
 import QrCodeIcon from "@mui/icons-material/QrCode";
-import { QRCodeSVG as QRCode } from "qrcode.react";
+// import { QRCodeSVG as QRCode } from "qrcode.react";cls
 import { RxCross2 } from "react-icons/rx";
 
 const csvConfig = mkConfig({
@@ -254,6 +256,40 @@ const AssetData = () => {
     setQrCodesModalOpen(true);
   };
 
+  // const qrCodesDownloadHandler = () => {
+  //   //logic
+  //   const doc = new jsPDF();
+  //   console.log("doc", doc);
+  // };
+
+const qrCodesDownloadHandler = async () => {
+  if (selectedRowsForQrCodes.length === 0) return;
+
+  const doc = new jsPDF();
+  let yPosition = 20;
+
+  for (const row of selectedRowsForQrCodes) {
+    // Generate QR code as data URL
+    const qrCodeDataUrl = await QRCode.toDataURL(`Asset ID: ${row?.assetId || ''}`, {
+      width: 100,
+      margin: 1
+    });
+
+    // Add to PDF
+    doc.addImage(qrCodeDataUrl, 'PNG', 50, yPosition, 100, 100);
+    doc.text(`Asset ID: ${row?.assetId || ''}`, 105, yPosition + 110, { align: 'center' });
+    
+    yPosition += 130;
+    if (yPosition > 250) {
+      doc.addPage();
+      yPosition = 20;
+    }
+  }
+
+  doc.save('asset_qr_codes.pdf');
+};
+  
+
   const handleDeleteComponents = (id) => {
     if (id) {
       setDeleteComponentsId(id);
@@ -465,7 +501,16 @@ const AssetData = () => {
         {qrCodesModalOpen && (
           <>
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-              <div className="bg-white w-[90%] max-w-[800px] max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-2xl relative">
+              <div className="bg-white w-[90%] max-w-[650px] max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-2xl relative">
+                <button
+                  onClick={qrCodesDownloadHandler}
+                  className="p-1 text-blue-800"
+                >
+                  <div className="flex flex-row items-center border border-gray-400 rounded-md p-1 text-sm hover:transition-all">
+                    <span>Download</span>
+                    <MdDownload size={18} />
+                  </div>
+                </button>
                 <button
                   onClick={() => setQrCodesModalOpen(false)}
                   className="absolute top-4 right-4 text-gray-500 hover:text-red-600 transition"
@@ -475,7 +520,13 @@ const AssetData = () => {
                 <h2 className="text-xl font-bold mb-6 text-center text-gray-800">
                   Generated QR Codes
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
+                <div
+                  className={`${
+                    selectedRowsForQrCodes.length === 1
+                      ? "flex justify-center"
+                      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center"
+                  }`}
+                >
                   {selectedRowsForQrCodes.map((row) => (
                     <div
                       key={row?._id}
@@ -483,16 +534,15 @@ const AssetData = () => {
                     >
                       <QRCode
                         size={128}
-                        value={`
-                        Asset ID: ${row?.assetId}
-                        Asset Tag: ${row?.assetInformation?.assetTag}
-                        Model: ${row?.assetInformation?.model}
-                        Serial Number: ${row?.assetInformation?.serialNumber}
-                        Operating System: ${row?.assetInformation?.operatingSystem}
-                        CPU: ${row?.assetInformation?.cpu}
-                        RAM: ${row?.assetInformation?.ram}
-                        Hard Disk: ${row?.assetInformation?.hardDisk}
-                        Location: ${row?.locationInformation?.location}`}
+                        value={`Asset ID :         ${row?.assetId ?? ""}
+Asset Tag :        ${row?.assetInformation?.assetTag ?? ""}
+Model :            ${row?.assetInformation?.model ?? ""}
+Serial Number :    ${row?.assetInformation?.serialNumber ?? ""}
+Operating System : ${row?.assetInformation?.operatingSystem ?? ""}
+CPU :              ${row?.assetInformation?.cpu ?? ""}
+RAM :              ${row?.assetInformation?.ram ?? ""}
+Hard Disk :        ${row?.assetInformation?.hardDisk ?? ""}
+Location :         ${row?.locationInformation?.location ?? ""}`}
                         level="H"
                         includeMargin={true}
                       />

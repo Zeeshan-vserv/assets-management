@@ -23,7 +23,7 @@ const Login = () => {
         navigate('/dashboardAsset')
       }
       else{
-        console.log(response.message)
+        // console.log(response.message)
       }
     }
     catch(err){

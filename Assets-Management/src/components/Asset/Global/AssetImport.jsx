@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { IoCloudUploadOutline } from "react-icons/io5";
 import { IoMdDownload } from "react-icons/io";
-
+import { uploadAssetFromExcel } from "../../../api/AssetsRequest";
 function AssetImport() {
   const [fileData, setFileData] = useState(null);
 
@@ -11,15 +11,24 @@ function AssetImport() {
     setFileData(file);
   };
 
-  const assetImportHandler = (e) => {
+  const assetImportHandler = async (e) => {
     e.preventDefault();
     if (!fileData) {
-      toast.warning("Please select a file before uploading.");
+      toast.warning("Please select a asset file before uploading.");
       return;
     }
     const formData = new FormData();
     formData.append("file", fileData);
-    //call api
+    try {
+      const response = await uploadAssetFromExcel(formData);
+      if (response?.data?.success) {
+        toast.success("Assets uploaded successfully");
+        setFileData(null);
+      }
+    } catch (error) {
+      console.log(error);
+      console.error("Asset Upload Failed:", error);
+    }
   };
 
   return (
@@ -63,7 +72,7 @@ function AssetImport() {
 
               <div className="flex justify-center items-center gap-1 border-[0.1rem] border-blue-600 rounded-md p-1 cursor-pointer">
                 <a
-                  href="/User_Format.xlsx"
+                  href="/AssetTemplate1.xlsx"
                   download
                   target="_blank"
                   rel="noopener noreferrer"

@@ -74,9 +74,9 @@ const AddFixedAssets = () => {
     });
 
     // Append userId if needed
-    dataToSend.append("userId", user._id);
+    dataToSend.append("userId", user.userId);
 
-    // console.log(dataToSend);
+    console.log(dataToSend);
     await createAsset(dataToSend);
     toast.success("Asset created Sucessfully");
     setFormData({
@@ -504,6 +504,115 @@ const AddFixedAssets = () => {
                     assetInformation: {
                       ...formData.assetInformation,
                       assetImage: e.target.files[0],
+                    },
+                  })
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Asset State fields */}
+        <div className="w-full p-8 bg-white rounded-md shadow-md">
+          <h3 className="text-slate-700">Asset State</h3>
+          <div className="flex flex-wrap gap-6 justify-between mt-3">
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="location"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                Asset is Currently
+              </label>
+              <select
+                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                name="location"
+                id="location"
+                value={formData.locationInformation.location}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      location: e.target.value,
+                    },
+                  })
+                }
+              >
+                <option value="">Select</option>
+                <option value="In Store">In Store</option>
+                <option value="In Use">In Use</option>
+                <option value="In Repair">In Repair</option>
+                <option value="Expired">Expired</option>
+                <option value="Disposed">Disposed</option>
+              </select>
+            </div>
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="subLocation"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                User
+              </label>
+              <input
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="subLocation"
+                name="subLocation"
+                value={formData.locationInformation.subLocation}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      subLocation: e.target.value,
+                    },
+                  })
+                }
+              />
+            </div>
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="storeLocation"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                Department
+              </label>
+              <input
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="storeLocation"
+                name="storeLocation"
+                value={formData.locationInformation.storeLocation}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      storeLocation: e.target.value,
+                    },
+                  })
+                }
+              />
+            </div>
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="storeLocation"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                Comment
+              </label>
+              <input
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="storeLocation"
+                name="storeLocation"
+                value={formData.locationInformation.storeLocation}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      storeLocation: e.target.value,
                     },
                   })
                 }

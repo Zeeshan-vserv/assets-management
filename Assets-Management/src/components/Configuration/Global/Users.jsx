@@ -421,7 +421,7 @@ const Users = () => {
                 This action will permanently delete the component.
               </p>
               <form
-                onSubmit={deleteUserConfirmationHandler} 
+                onSubmit={deleteUserConfirmationHandler}
                 className="flex justify-end gap-3"
               >
                 <button
@@ -442,19 +442,19 @@ const Users = () => {
           </div>
         )}
         {statusModalOpen && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center transition-opacity">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-8">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800 text-center">
+          <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center transition-opacity">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
+              <h2 className="text-xl font-bold mb-8 text-gray-800 text-center">
                 Update Status
               </h2>
               <form onSubmit={handleBulkStatusUpdate}>
-                <label className="block mb-3 text-gray-600 font-medium">
+                <label className="block mb-2 text-gray-600 font-medium">
                   Select Status
                 </label>
                 <select
                   value={statusToUpdate}
                   onChange={(e) => setStatusToUpdate(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-8 focus:ring-2 focus:ring-blue-400 transition"
+                  className="w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 px-2 py-3 mb-6 outline-none transition cursor-pointer"
                 >
                   <option value="true">Active</option>
                   <option value="false">Unactive</option>
@@ -463,13 +463,13 @@ const Users = () => {
                   <button
                     type="button"
                     onClick={() => setStatusModalOpen(false)}
-                    className="px-6 py-3 rounded-lg border border-gray-300 bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 hover:from-gray-200 hover:to-gray-300 transition shadow-md"
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-6 py-3 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold hover:from-blue-600 hover:to-blue-800 transition shadow-md"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
                     Update
                   </button>

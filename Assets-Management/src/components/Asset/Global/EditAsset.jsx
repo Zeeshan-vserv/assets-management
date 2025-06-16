@@ -28,6 +28,12 @@ const EditAsset = () => {
       ram: "",
       assetImage: "",
     },
+    assetState: {
+      assetIsCurrently: "",
+      user: "",
+      department: "",
+      comment: "",
+    },
     locationInformation: {
       location: "",
       subLocation: "",
@@ -104,54 +110,11 @@ const EditAsset = () => {
     });
 
     // Append userId if needed
-    dataToSend.append("userId", user._id);
+    dataToSend.append("userId", user.userId);
     // console.log(id,formData, dataToSend);
 
     updateAsset(id, dataToSend);
     toast.success("Asset updated Sucessfully");
-    //   assetInformation: {
-    //     category: "",
-    //     assetTag: "",
-    //     criticality: "",
-    //     make: "",
-    //     model: "",
-    //     serialNumber: "",
-    //     expressServiceCode: "",
-    //     ipAddress: "",
-    //     operatingSystem: "",
-    //     cpu: "",
-    //     hardDisk: "",
-    //     ram: "",
-    //     assetImage: "",
-    //   },
-    //   locationInformation: {
-    //     location: "",
-    //     subLocation: "",
-    //     storeLocation: "",
-    //   },
-    //   warrantyInformation: {
-    //     vendor: "",
-    //     assetType: "",
-    //     supportType: "",
-    //   },
-    //   financeInformation: {
-    //     poNo: "",
-    //     poDate: "",
-    //     invoiceNo: "",
-    //     invoiceDate: "",
-    //     assetCost: "",
-    //     residualCost: "",
-    //     assetLife: "",
-    //     depreciation: "",
-    //     hsnCode: "",
-    //     costCenter: "",
-    //   },
-    //   preventiveMaintenance: {
-    //     pmCycle: "",
-    //     schedule: "",
-    //     istPmDate: "",
-    //   },
-    // });
   };
 
   return (
@@ -536,6 +499,115 @@ const EditAsset = () => {
                     assetInformation: {
                       ...formData.assetInformation,
                       assetImage: e.target.files[0],
+                    },
+                  })
+                }
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Asset State fields */}
+        <div className="w-full p-8 bg-white rounded-md shadow-md">
+          <h3 className="text-slate-700">Asset State</h3>
+          <div className="flex flex-wrap gap-6 justify-between mt-3">
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="assetIsCurrently"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                Asset is Currently
+              </label>
+              <select
+                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                name="assetIsCurrently"
+                id="assetIsCurrently"
+                value={formData.assetState.assetIsCurrently}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetState: {
+                      ...formData.assetState,
+                      assetIsCurrently: e.target.value,
+                    },
+                  })
+                }
+              >
+                <option value="">Select</option>
+                <option value="In Store">In Store</option>
+                <option value="In Use">In Use</option>
+                <option value="In Repair">In Repair</option>
+                <option value="Expired">Expired</option>
+                <option value="Disposed">Disposed</option>
+              </select>
+            </div>
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="user"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                User
+              </label>
+              <input
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="user"
+                name="user"
+                value={formData.assetState.user}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetState: {
+                      ...formData.assetState,
+                      user: e.target.value,
+                    },
+                  })
+                }
+              />
+            </div>
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="department"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                Department
+              </label>
+              <input
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="department"
+                name="department"
+                value={formData.assetState.department}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetState: {
+                      ...formData.assetState,
+                      department: e.target.value,
+                    },
+                  })
+                }
+              />
+            </div>
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="comment"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                Comment
+              </label>
+              <input
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="comment"
+                name="comment"
+                value={formData.assetState.comment}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetState: {
+                      ...formData.assetState,
+                      comment: e.target.value,
                     },
                   })
                 }

@@ -17,9 +17,8 @@ import { toast } from "react-toastify";
 import { getAllAssets, deleteAsset } from "../../../api/AssetsRequest";
 import { MdDownload } from "react-icons/md";
 
-import QRCode from 'qrcode';
 import QrCodeIcon from "@mui/icons-material/QrCode";
-// import { QRCodeSVG as QRCode } from "qrcode.react";cls
+import { QRCodeSVG as QRCode } from "qrcode.react";
 import { RxCross2 } from "react-icons/rx";
 
 const csvConfig = mkConfig({
@@ -256,39 +255,11 @@ const AssetData = () => {
     setQrCodesModalOpen(true);
   };
 
-  // const qrCodesDownloadHandler = () => {
-  //   //logic
-  //   const doc = new jsPDF();
-  //   console.log("doc", doc);
-  // };
-
-const qrCodesDownloadHandler = async () => {
-  if (selectedRowsForQrCodes.length === 0) return;
-
-  const doc = new jsPDF();
-  let yPosition = 20;
-
-  for (const row of selectedRowsForQrCodes) {
-    // Generate QR code as data URL
-    const qrCodeDataUrl = await QRCode.toDataURL(`Asset ID: ${row?.assetId || ''}`, {
-      width: 100,
-      margin: 1
-    });
-
-    // Add to PDF
-    doc.addImage(qrCodeDataUrl, 'PNG', 50, yPosition, 100, 100);
-    doc.text(`Asset ID: ${row?.assetId || ''}`, 105, yPosition + 110, { align: 'center' });
-    
-    yPosition += 130;
-    if (yPosition > 250) {
-      doc.addPage();
-      yPosition = 20;
-    }
-  }
-
-  doc.save('asset_qr_codes.pdf');
-};
-  
+  const qrCodesDownloadHandler = () => {
+    //logic
+    const doc = new jsPDF();
+    console.log("doc", doc);
+  };
 
   const handleDeleteComponents = (id) => {
     if (id) {

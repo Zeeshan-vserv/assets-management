@@ -18,8 +18,9 @@ import { getAllAssets, deleteAsset } from "../../../api/AssetsRequest";
 import { MdDownload } from "react-icons/md";
 
 import QrCodeIcon from "@mui/icons-material/QrCode";
-import { QRCodeSVG as QRCode } from "qrcode.react";
 import { RxCross2 } from "react-icons/rx";
+import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
+import QRCodeGenerator from "qrcode";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -91,7 +92,7 @@ const AssetData = () => {
   }, [data]);
 
   // console.log(data);
-  console.log(selectedRowsForQrCodes);
+  // console.log(selectedRowsForQrCodes);
 
   const columns = useMemo(
     () => [
@@ -255,10 +256,68 @@ const AssetData = () => {
     setQrCodesModalOpen(true);
   };
 
-  const qrCodesDownloadHandler = () => {
-    //logic
+  //Download qrCodes in pdf
+  const qrCodesDownloadHandler = async () => {
+    if (selectedRowsForQrCodes.length === 0) return;
+
     const doc = new jsPDF();
-    console.log("doc", doc);
+    doc.setFontSize(16);
+    doc.text("Asset QR Codes", 105, 15, { align: "center" });
+
+    const qrSize = 60;
+    const margin = 15;
+    const startX = 15;
+    let xPosition = startX;
+    let yPosition = 30; 
+    const maxPerRow = 3; 
+    let currentRowCount = 0;
+
+    for (const row of selectedRowsForQrCodes) {
+      const qrData = `Asset ID: ${row?.assetId ?? ""}
+Asset Tag: ${row?.assetInformation?.assetTag ?? ""}
+Model: ${row?.assetInformation?.model ?? ""}
+Serial Number: ${row?.assetInformation?.serialNumber ?? ""}
+Operating System: ${row?.assetInformation?.operatingSystem ?? ""}
+CPU: ${row?.assetInformation?.cpu ?? ""}
+RAM: ${row?.assetInformation?.ram ?? ""}
+Hard Disk: ${row?.assetInformation?.hardDisk ?? ""}
+Location: ${row?.locationInformation?.location ?? ""}`;
+
+      try {
+        const qrImageData = await QRCodeGenerator.toDataURL(qrData, {
+          width: qrSize * 4,
+          margin: 1,
+          color: {
+            dark: "#000000",
+            light: "#ffffff",
+          },
+        });
+
+        doc.addImage(qrImageData, "PNG", xPosition, yPosition, qrSize, qrSize);
+        doc.setFontSize(8);
+        doc.text(
+          `Asset ID: ${row?.assetId ?? ""}`,
+          xPosition,
+          yPosition + qrSize + 5
+        );
+
+        xPosition += qrSize + margin;
+        currentRowCount++;
+        if (currentRowCount >= maxPerRow) {
+          xPosition = startX;
+          yPosition += qrSize + margin + 15;
+          currentRowCount = 0;
+
+          if (yPosition > doc.internal.pageSize.height - 30) {
+            doc.addPage();
+            yPosition = 30;
+          }
+        }
+      } catch (error) {
+        console.error("Error generating QR code:", error);
+      }
+    }
+    doc.save("Asset_QR_Codes.pdf");
   };
 
   const handleDeleteComponents = (id) => {
@@ -503,7 +562,7 @@ const AssetData = () => {
                       key={row?._id}
                       className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow"
                     >
-                      <QRCode
+                      <QRCodeComponent
                         size={128}
                         value={`Asset ID :         ${row?.assetId ?? ""}
 Asset Tag :        ${row?.assetInformation?.assetTag ?? ""}

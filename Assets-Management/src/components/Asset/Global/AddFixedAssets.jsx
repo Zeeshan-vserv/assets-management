@@ -1,11 +1,28 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createAsset } from "../../../api/AssetsRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { NavLink } from "react-router-dom";
+import {
+  getAllLocation,
+  getAllSubLocation,
+} from "../../../api/LocationRequest";
+import {
+  getAllDepartment,
+  getAllSubDepartment,
+} from "../../../api/DepartmentRequest";
+import { getAllUsers } from "../../../api/AuthRequest";
+import { Autocomplete, TextField } from "@mui/material";
 
 const AddFixedAssets = () => {
   const user = useSelector((state) => state.authReducer.authData);
+  const [isLoading, setIsLoading] = useState(true);
+  const [locationData, setLocationData] = useState([]);
+  const [subLocationData, setSubLocationData] = useState([]);
+  const [departmentData, setDepartmentData] = useState([]);
+  const [subDepartmentData, setSubDepartmentData] = useState([]);
+  const [users, setUsers] = useState([]);
+
   const [formData, setFormData] = useState({
     assetInformation: {
       category: "",
@@ -56,6 +73,34 @@ const AddFixedAssets = () => {
       istPmDate: "",
     },
   });
+
+  const fetchDetails = async () => {
+    try {
+      setIsLoading(true);
+      const responseLocation = await getAllLocation();
+      setLocationData(responseLocation?.data?.data || []);
+
+      const responseSubLocation = await getAllSubLocation();
+      setSubLocationData(responseSubLocation?.data?.data || []);
+
+      const responseDepartment = await getAllDepartment();
+      setDepartmentData(responseDepartment?.data?.data || []);
+
+      const responseSubDepartment = await getAllSubDepartment();
+      setSubDepartmentData(responseSubDepartment?.data?.data || []);
+
+      const responseReportingManager = await getAllUsers();
+      setUsers(responseReportingManager?.data || []);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDetails();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -565,7 +610,35 @@ const AddFixedAssets = () => {
               >
                 User
               </label>
-              <input
+              <Autocomplete
+                className="w-[65%]"
+                options={users}
+                getOptionLabel={(option) => option.emailAddress}
+                value={
+                  users.find(
+                    (user) => user.emailAddress === formData.users
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    users: newValue ? newValue.emailAddress : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Reporting Manager"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="user"
@@ -580,7 +653,7 @@ const AddFixedAssets = () => {
                     },
                   })
                 }
-              />
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label

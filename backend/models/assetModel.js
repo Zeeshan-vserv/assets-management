@@ -19,6 +19,12 @@ const assetSchema = mongoose.Schema(
             ram: String,
             assetImage: String,
         },
+        assetState:{
+            assetIsCurrently: String,
+            user: String,
+            department: String,
+            comment: String
+        },
         locationInformation: {
             location: String,
             subLocation: String,

@@ -22,6 +22,12 @@ const AddFixedAssets = () => {
       ram: "",
       assetImage: "",
     },
+    assetState: {
+      assetIsCurrently: "",
+      user: "",
+      department: "",
+      comment: "",
+    },
     locationInformation: {
       location: "",
       subLocation: "",
@@ -94,6 +100,12 @@ const AddFixedAssets = () => {
         hardDisk: "",
         ram: "",
         assetImage: "",
+      },
+      assetState: {
+        assetIsCurrently: "",
+        user: "",
+        department: "",
+        comment: "",
       },
       locationInformation: {
         location: "",
@@ -518,22 +530,22 @@ const AddFixedAssets = () => {
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="location"
+                htmlFor="assetIsCurrently"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
                 Asset is Currently
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="location"
-                id="location"
-                value={formData.locationInformation.location}
+                name="assetIsCurrently"
+                id="assetIsCurrently"
+                value={formData.assetState.assetIsCurrently}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    locationInformation: {
-                      ...formData.locationInformation,
-                      location: e.target.value,
+                    assetState: {
+                      ...formData.assetState,
+                      assetIsCurrently: e.target.value,
                     },
                   })
                 }
@@ -548,7 +560,7 @@ const AddFixedAssets = () => {
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="subLocation"
+                htmlFor="user"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
                 User
@@ -556,15 +568,15 @@ const AddFixedAssets = () => {
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="subLocation"
-                name="subLocation"
-                value={formData.locationInformation.subLocation}
+                id="user"
+                name="user"
+                value={formData.assetState.user}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    locationInformation: {
-                      ...formData.locationInformation,
-                      subLocation: e.target.value,
+                    assetState: {
+                      ...formData.assetState,
+                      user: e.target.value,
                     },
                   })
                 }
@@ -572,7 +584,7 @@ const AddFixedAssets = () => {
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="storeLocation"
+                htmlFor="department"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
                 Department
@@ -580,15 +592,15 @@ const AddFixedAssets = () => {
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="storeLocation"
-                name="storeLocation"
-                value={formData.locationInformation.storeLocation}
+                id="department"
+                name="department"
+                value={formData.assetState.department}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    locationInformation: {
-                      ...formData.locationInformation,
-                      storeLocation: e.target.value,
+                    assetState: {
+                      ...formData.assetState,
+                      department: e.target.value,
                     },
                   })
                 }
@@ -596,7 +608,7 @@ const AddFixedAssets = () => {
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="storeLocation"
+                htmlFor="comment"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
                 Comment
@@ -604,15 +616,15 @@ const AddFixedAssets = () => {
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="storeLocation"
-                name="storeLocation"
-                value={formData.locationInformation.storeLocation}
+                id="comment"
+                name="comment"
+                value={formData.assetState.comment}
                 onChange={(e) =>
                   setFormData({
                     ...formData,
-                    locationInformation: {
-                      ...formData.locationInformation,
-                      storeLocation: e.target.value,
+                    assetState: {
+                      ...formData.assetState,
+                      comment: e.target.value,
                     },
                   })
                 }

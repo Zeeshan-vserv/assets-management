@@ -3,8 +3,11 @@ import { toast } from "react-toastify";
 import { IoCloudUploadOutline } from "react-icons/io5";
 import { IoMdDownload } from "react-icons/io";
 import { uploadAssetFromExcel } from "../../../api/AssetsRequest";
+import { useSelector } from "react-redux";
 function AssetImport() {
   const [fileData, setFileData] = useState(null);
+
+  const user = useSelector((state) => state.authReducer.authData);
 
   const uploadFileChangeHandler = (e) => {
     const file = e.target.files[0];
@@ -12,24 +15,27 @@ function AssetImport() {
   };
 
   const assetImportHandler = async (e) => {
-    e.preventDefault();
-    if (!fileData) {
-      toast.warning("Please select a asset file before uploading.");
-      return;
+  e.preventDefault();
+  if (!fileData) {
+    toast.warning("Please select a asset file before uploading.");
+    return;
+  }
+  const formData = new FormData();
+  formData.append("file", fileData);
+  if (user && user.userId) {
+    formData.append("userId", user.userId);
+  }
+  try {
+    const response = await uploadAssetFromExcel(formData);
+    if (response?.data?.success) {
+      toast.success("Assets uploaded successfully");
+      setFileData(null);
     }
-    const formData = new FormData();
-    formData.append("file", fileData);
-    try {
-      const response = await uploadAssetFromExcel(formData);
-      if (response?.data?.success) {
-        toast.success("Assets uploaded successfully");
-        setFileData(null);
-      }
-    } catch (error) {
-      console.log(error);
-      console.error("Asset Upload Failed:", error);
-    }
-  };
+  } catch (error) {
+    console.log(error);
+    console.error("Asset Upload Failed:", error);
+  }
+};
 
   return (
     <>

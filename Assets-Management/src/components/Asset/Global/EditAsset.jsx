@@ -11,6 +11,7 @@ import { useEffect } from "react";
 const EditAsset = () => {
   const { id } = useParams();
   const user = useSelector((state) => state.authReducer.authData);
+  console.log("user",user)
   const [isLoading, setIsLoading] = useState(true);
   const [formData, setFormData] = useState({
     assetInformation: {

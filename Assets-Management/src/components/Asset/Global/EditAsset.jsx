@@ -97,7 +97,7 @@ const EditAsset = () => {
           ) {
             dataToSend.append("assetImage", value);
           } else {
-            dataToSend.append(`${sectionKey}[${key}] `, value);
+            dataToSend.append(`${sectionKey}[${key}]`, value);
           }
         });
       }
@@ -109,49 +109,6 @@ const EditAsset = () => {
 
     updateAsset(id, dataToSend);
     toast.success("Asset updated Sucessfully");
-    //   assetInformation: {
-    //     category: "",
-    //     assetTag: "",
-    //     criticality: "",
-    //     make: "",
-    //     model: "",
-    //     serialNumber: "",
-    //     expressServiceCode: "",
-    //     ipAddress: "",
-    //     operatingSystem: "",
-    //     cpu: "",
-    //     hardDisk: "",
-    //     ram: "",
-    //     assetImage: "",
-    //   },
-    //   locationInformation: {
-    //     location: "",
-    //     subLocation: "",
-    //     storeLocation: "",
-    //   },
-    //   warrantyInformation: {
-    //     vendor: "",
-    //     assetType: "",
-    //     supportType: "",
-    //   },
-    //   financeInformation: {
-    //     poNo: "",
-    //     poDate: "",
-    //     invoiceNo: "",
-    //     invoiceDate: "",
-    //     assetCost: "",
-    //     residualCost: "",
-    //     assetLife: "",
-    //     depreciation: "",
-    //     hsnCode: "",
-    //     costCenter: "",
-    //   },
-    //   preventiveMaintenance: {
-    //     pmCycle: "",
-    //     schedule: "",
-    //     istPmDate: "",
-    //   },
-    // });
   };
 
   return (
@@ -203,6 +160,7 @@ const EditAsset = () => {
                     },
                   })
                 }
+                // required
               >
                 <option value="">Select</option>
                 <option value="IT Assets">IT Assets</option>

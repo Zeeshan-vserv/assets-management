@@ -37,3 +37,5 @@ export const getAssetById = (id) => API.get(`asset/${id}`);
 export const updateAsset = (id, formData) => API.put(`asset/${id}`, formData);
 
 export const deleteAsset = (id) => API.delete(`asset/${id}`)
+
+export const uploadAssetFromExcel = (formData)=>API.post('asset/upload-excel',formData)

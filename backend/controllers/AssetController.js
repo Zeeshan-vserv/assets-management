@@ -60,18 +60,18 @@ export const getAssetById = async (req, res) => {
 export const updateAsset = async (req, res) => {
     try {
         const { id } = req.params;
-        let updateData = req.body;
+        let updateData = { ...req.body };
 
-        // If assetImage is uploaded, add its path
+        // Handle file upload for assetImage
         if (req.file) {
             if (!updateData.assetInformation) updateData.assetInformation = {};
             updateData.assetInformation.assetImage = req.file.path;
         }
 
-        // If using FormData, nested fields come as strings, so parse them
-        // Convert fields like "assetInformation[category]": "Laptop" to nested objects
+        // Reconstruct nested fields from FormData (e.g., assetInformation[category])
         const nestedFields = [
             "assetInformation",
+            "assetState",
             "locationInformation",
             "warrantyInformation",
             "financeInformation",
@@ -87,9 +87,32 @@ export const updateAsset = async (req, res) => {
                 }
             });
             if (Object.keys(sectionObj).length > 0) {
-                updateData[section] = sectionObj;
+                updateData[section] = { ...updateData[section], ...sectionObj };
             }
         });
+
+        // Sanitize date fields: convert "null" or "" to null
+        if (
+            updateData.preventiveMaintenance &&
+            (updateData.preventiveMaintenance.istPmDate === "null" ||
+             updateData.preventiveMaintenance.istPmDate === "")
+        ) {
+            updateData.preventiveMaintenance.istPmDate = null;
+        }
+        if (
+            updateData.financeInformation &&
+            (updateData.financeInformation.poDate === "null" ||
+             updateData.financeInformation.poDate === "")
+        ) {
+            updateData.financeInformation.poDate = null;
+        }
+        if (
+            updateData.financeInformation &&
+            (updateData.financeInformation.invoiceDate === "null" ||
+             updateData.financeInformation.invoiceDate === "")
+        ) {
+            updateData.financeInformation.invoiceDate = null;
+        }
 
         const updatedAsset = await AssetModel.findByIdAndUpdate(id, updateData, { new: true });
 
@@ -98,31 +121,10 @@ export const updateAsset = async (req, res) => {
         }
         res.status(200).json({ success: true, data: updatedAsset, message: 'Asset updated successfully' });
     } catch (error) {
-        res.status(500).json({ message: "An error occurred while updating asset" });
+        console.error(error);
+        res.status(500).json({ message: "An error occurred while updating asset", error: error.message });
     }
 }
-
-// export const updateAsset = async (req, res) => {
-//     try {
-//         const { id } = req.params;
-//         let updateData = req.body;
-
-//         // If assetImage is uploaded, add its path
-//         if (req.file) {
-//             if (!updateData.assetInformation) updateData.assetInformation = {};
-//             updateData.assetInformation.assetImage = req.file.path;
-//         }
-
-//         const updatedAsset = await AssetModel.findByIdAndUpdate(id, updateData, { new: true });
-
-//         if (!updatedAsset) {
-//             return res.status(404).json({ success: false, message: "Asset not found" });
-//         }
-//         res.status(200).json({ success: true, data: updatedAsset, message: 'Asset updated successfully' });
-//     } catch (error) {
-//         res.status(500).json({ message: "An error occurred while updating asset" });
-//     }
-// };
 
 export const deleteAsset = async (req, res) => {
     try {

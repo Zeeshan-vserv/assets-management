@@ -78,7 +78,7 @@ function AssetImport() {
 
               <div className="flex justify-center items-center gap-1 border-[0.1rem] border-blue-600 rounded-md p-1 cursor-pointer">
                 <a
-                  href="/AssetTemplate1.xlsx"
+                  href="/AssetTemplate.xlsx"
                   download
                   target="_blank"
                   rel="noopener noreferrer"

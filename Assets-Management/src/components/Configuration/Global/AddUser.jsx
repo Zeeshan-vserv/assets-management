@@ -75,7 +75,7 @@ const AddUser = () => {
       isView: false,
     },
   });
-  // const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [locationData, setLocationData] = useState([]);
   const [subLocationData, setSubLocationData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);

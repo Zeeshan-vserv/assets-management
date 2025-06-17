@@ -49,8 +49,8 @@ const Navigation = ({ nav, setNav }) => {
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {toggleSubMenu('assets')}} >assets  {expandedSubMenus.assets ?<IoMdArrowDropdown />: <IoMdArrowDropright />}</h3>
             {expandedSubMenus.assets && (
               <ul className='flex flex-col gap-2 list-disc pl-5 '>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}}  ><NavLink to="/main/asset/AssetData" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Users</NavLink></li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >summary</li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}}  ><NavLink to="/main/asset/AssetData" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Assets</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/asset/assets-summary" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>summary</NavLink></li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/Asset/asset-import" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>assets import</NavLink></li>
                 </ul>
             )}

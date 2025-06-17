@@ -9,7 +9,7 @@ const Test = () => {
       <div style={{ background: "white", padding: "16px" }}>
         <QRCode
           value={
-            "Ankit Bhai k Raaz : jaane k liye bane rahe humare sath\nheyyy"
+            "hello"
           }
         />
       </div>

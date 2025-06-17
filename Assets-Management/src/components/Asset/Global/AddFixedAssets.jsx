@@ -1,11 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { createAsset } from "../../../api/AssetsRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { NavLink } from "react-router-dom";
+import {
+  getAllLocation,
+  getAllSubLocation,
+} from "../../../api/LocationRequest";
+import {
+  getAllDepartment,
+  getAllSubDepartment,
+} from "../../../api/DepartmentRequest";
+import { getAllUsers } from "../../../api/AuthRequest";
+import { Autocomplete, TextField } from "@mui/material";
 
 const AddFixedAssets = () => {
   const user = useSelector((state) => state.authReducer.authData);
+  const [isLoading, setIsLoading] = useState(true);
+  const [locationData, setLocationData] = useState([]);
+  const [subLocationData, setSubLocationData] = useState([]);
+  const [departmentData, setDepartmentData] = useState([]);
+  const [subDepartmentData, setSubDepartmentData] = useState([]);
+  const [filteredSubLocations, setFilteredSubLocations] = useState([]);
+  const [filteredSubDepartments, setFilteredSubDepartments] = useState([]);
+  const [users, setUsers] = useState([]);
+
   const [formData, setFormData] = useState({
     assetInformation: {
       category: "",
@@ -57,6 +76,57 @@ const AddFixedAssets = () => {
     },
   });
 
+  useEffect(() => {
+    const selectedLocation = locationData.find(
+      (loc) => loc.locationName === formData.locationInformation.location
+    );
+    setFilteredSubLocations(selectedLocation?.subLocations || []);
+  }, [formData.locationInformation.location, locationData]);
+
+  useEffect(() => {
+    const selectedDepartment = departmentData.find(
+      (dept) => dept.departmentName === formData.assetState.department
+    );
+    setFilteredSubDepartments(selectedDepartment?.subdepartments || []);
+  }, [formData.assetState.department, departmentData]);
+
+  const fetchDetails = async () => {
+    try {
+      setIsLoading(true);
+      const responseLocation = await getAllLocation();
+      // console.log(responseLocation?.data?.data);
+
+      setLocationData(responseLocation?.data?.data || []);
+
+      const responseSubLocation = await getAllSubLocation();
+      setSubLocationData(responseSubLocation?.data?.data || []);
+
+      const responseDepartment = await getAllDepartment();
+      // console.log(responseDepartment?.data?.data);
+      setDepartmentData(responseDepartment?.data?.data || []);
+
+      const responseSubDepartment = await getAllSubDepartment();
+      // console.log(responseSubDepartment?.data?.data);
+
+      setSubDepartmentData(responseSubDepartment?.data?.data || []);
+
+      const responseReportingManager = await getAllUsers();
+      setUsers(responseReportingManager?.data || []);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // console.log("departmentData", departmentData);
+  // console.log("Selected department", formData.assetState.department);
+  // console.log("filteredSubDepartments", filteredSubDepartments);
+
+  useEffect(() => {
+    fetchDetails();
+  }, []);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const dataToSend = new FormData();
@@ -105,6 +175,7 @@ const AddFixedAssets = () => {
         assetIsCurrently: "",
         user: "",
         department: "",
+        subDepartment: "",
         comment: "",
       },
       locationInformation: {
@@ -552,10 +623,12 @@ const AddFixedAssets = () => {
               >
                 <option value="">Select</option>
                 <option value="In Store">In Store</option>
-                <option value="In Use">In Use</option>
+                <option value="Allocated">Allocated</option>
                 <option value="In Repair">In Repair</option>
-                <option value="Expired">Expired</option>
-                <option value="Disposed">Disposed</option>
+                <option value="Lost">Theft/Lost</option>
+                <option value="Discard">Discard/Replaced</option>
+                <option value="Disposed">Disposed / Scrapped</option>
+                <option value="Sold">Sold</option>
               </select>
             </div>
             <div className="flex items-center w-[46%]">
@@ -565,21 +638,36 @@ const AddFixedAssets = () => {
               >
                 User
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="user"
-                name="user"
-                value={formData.assetState.user}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={users}
+                getOptionLabel={(option) => option.emailAddress}
+                value={
+                  users.find(
+                    (user) => user.emailAddress === formData.assetState.user
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     assetState: {
                       ...formData.assetState,
-                      user: e.target.value,
+                      user: newValue ? newValue.emailAddress : "",
                     },
-                  })
-                }
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Users"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -589,22 +677,146 @@ const AddFixedAssets = () => {
               >
                 Department
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="department"
-                name="department"
-                value={formData.assetState.department}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={departmentData}
+                getOptionLabel={(option) => option.departmentName}
+                value={
+                  departmentData.find(
+                    (dept) =>
+                      dept.departmentName === formData.assetState.department
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     assetState: {
                       ...formData.assetState,
-                      department: e.target.value,
+                      department: newValue ? newValue.departmentName : "",
+                      subDepartment: "", // Reset subDepartment when department changes
                     },
-                  })
-                }
+                  });
+                  setFilteredSubDepartments(newValue?.subdepartments || []);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Department"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
+              {/* <Autocomplete
+                className="w-[65%]"
+                options={departmentData}
+                getOptionLabel={(option) => option.departmentName}
+                value={
+                  departmentData.find(
+                    (dept) =>
+                      dept.departmentName === formData.assetState.department
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    assetState: {
+                      ...formData.assetState,
+                      department: newValue ? newValue.departmentName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Department"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              /> */}
+            </div>
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="subDepartment"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                Sub Department
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                options={filteredSubDepartments}
+                getOptionLabel={(option) => option?.subdepartmentName || ""}
+                value={
+                  filteredSubDepartments.find(
+                    (subDept) =>
+                      subDept.subdepartmentName ===
+                      formData.assetState.subDepartment
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    assetState: {
+                      ...formData.assetState,
+                      subDepartment: newValue ? newValue.subdepartmentName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select SubDepartment"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <Autocomplete
+                className="w-[65%]"
+                options={subDepartmentData}
+                getOptionLabel={(option) => option.subDepartmentName}
+                value={
+                  subDepartmentData.find(
+                    (subDept) =>
+                      subDept.subDepartmentName ===
+                      formData.assetState.subDepartment
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    assetState: {
+                      ...formData.assetState,
+                      subDepartment: newValue ? newValue.subDepartmentName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Sub Department"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -644,66 +856,72 @@ const AddFixedAssets = () => {
               >
                 Location
               </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="location"
-                id="location"
-                value={formData.locationInformation.location}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={locationData}
+                getOptionLabel={(option) => option.locationName}
+                value={
+                  locationData.find(
+                    (loc) =>
+                      loc.locationName === formData.locationInformation.location
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     locationInformation: {
                       ...formData.locationInformation,
-                      location: e.target.value,
+                      location: newValue ? newValue.locationName : "",
+                      subLocation: "", // Reset subLocation when location changes
                     },
-                  })
+                  });
+                  setFilteredSubLocations(newValue?.subLocations || []);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <Autocomplete
+                className="w-[65%]"
+                options={locationData}
+                getOptionLabel={(option) => option.locationName}
+                value={
+                  locationData.find(
+                    (loc) =>
+                      loc.locationName === formData.locationInformation.location
+                  ) || null
                 }
-              >
-                <option value="">Select Location</option>
-                <option value="agra">AGRA</option>
-                <option value="ahmedabad">AHMEDABAD</option>
-                <option value="banglore">BANGLORE</option>
-                <option value="bokaro">BOKARO</option>
-                <option value="bokaburnpurro">BURNPUR</option>
-                <option value="chandigarh">CHANDIGARH</option>
-                <option value="chattisgarh">CHATTISGARH</option>
-                <option value="chennai">CHENNAI</option>
-                <option value="coimbatore">COIMBATORE</option>
-                <option value="dankuni">DANKUNI</option>
-                <option value="delhi">DELHI</option>
-                <option value="durgapur">DURGAPUR</option>
-                <option value="faridabad">FARIDABAD</option>
-                <option value="ghaziabad">GHAZIABAD</option>
-                <option value="gujarat">GUJARAT</option>
-                <option value="guwahati">GUWAHATI</option>
-                <option value="haldia">HALDIA</option>
-                <option value="hyderabad">HYDERABAD</option>
-                <option value="jagdishpur">JAGDISHPUR</option>
-                <option value="jalandhar">JALANDHAR</option>
-                <option value="jammu">JAMMU</option>
-                <option value="kandrori">KANDRORI</option>
-                <option value="kanpur">KANPUR</option>
-                <option value="kochi">KOCHI</option>
-                <option value="kolkata">KOLKATA</option>
-                <option value="lucknow">LUCKNOW</option>
-                <option value="ludhiana">LUDHIANA</option>
-                <option value="madhya pradesh">MADHYA PRADESH</option>
-                <option value="maharashtra">MAHARASHTRA</option>
-                <option value="manali">MANALI</option>
-                <option value="mandigobindgarh">MANDIGOBINDGARH</option>
-                <option value="N/A">N/A</option>
-                <option value="paradeep">PARADEEP</option>
-                <option value="patna">PATNA</option>
-                <option value="prayagraj">PRAYAGRAJ</option>
-                <option value="rajasthan">RAJASTHAN</option>
-                <option value="rishikesh">RISHIKESH</option>
-                <option value="roorkela">ROORKELA</option>
-                <option value="salem">SALEM</option>
-                <option value="siliguri">SILIGURI</option>
-                <option value="srinagar">SRINAGAR</option>
-                <option value="trichy">TRICHY</option>
-                <option value="vizag">VIZAG</option>
-              </select>
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      location: newValue ? newValue.locationName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -712,22 +930,72 @@ const AddFixedAssets = () => {
               >
                 Sub Location
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="subLocation"
-                name="subLocation"
-                value={formData.locationInformation.subLocation}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={filteredSubLocations}
+                getOptionLabel={(option) => option?.subLocationName || ""}
+                value={
+                  filteredSubLocations.find(
+                    (subLoc) =>
+                      subLoc.subLocationName ===
+                      formData.locationInformation.subLocation
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     locationInformation: {
                       ...formData.locationInformation,
-                      subLocation: e.target.value,
+                      subLocation: newValue ? newValue.subLocationName : "",
                     },
-                  })
-                }
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Sub Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
+              {/* <Autocomplete
+                className="w-[65%]"
+                options={subLocationData}
+                getOptionLabel={(option) => option.subLocationName}
+                value={
+                  subLocationData.find(
+                    (subLoc) =>
+                      subLoc.subLocationName ===
+                      formData.locationInformation.subLocation
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      subLocation: newValue ? newValue.subLocationName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Sub Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -1119,7 +1387,7 @@ const AddFixedAssets = () => {
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="number"
-                placeholder="Np. of Days"
+                placeholder="No. of Days"
                 id="pmCycle"
                 name="pmCycle"
                 value={formData.preventiveMaintenance.pmCycle}

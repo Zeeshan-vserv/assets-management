@@ -40,6 +40,8 @@ const AssetData = () => {
   const [qrCodesModalOpen, setQrCodesModalOpen] = useState(false);
   const [selectedRowsForQrCodes, setSelectedRowsForQrCodes] = useState([]);
 
+  // console.log(filteredData);
+
   const fetchAsset = async () => {
     try {
       setIsLoading(true);
@@ -105,8 +107,8 @@ const AssetData = () => {
         header: "Asset Tag",
       },
       {
-        accessorKey: "N/A",
-        header: "User Info",
+        accessorKey: "assetState.user",
+        header: "Assigned To",
       },
       {
         accessorKey: "assetInformation.model",
@@ -125,7 +127,7 @@ const AssetData = () => {
         header: "Sub Location",
       },
       {
-        accessorKey: "status",
+        accessorKey: "assetState.assetIsCurrently",
         header: "Status",
       },
       {
@@ -268,8 +270,8 @@ const AssetData = () => {
     const margin = 15;
     const startX = 15;
     let xPosition = startX;
-    let yPosition = 30; 
-    const maxPerRow = 3; 
+    let yPosition = 30;
+    const maxPerRow = 3;
     let currentRowCount = 0;
 
     for (const row of selectedRowsForQrCodes) {
@@ -563,17 +565,40 @@ Location: ${row?.locationInformation?.location ?? ""}`;
                       className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow"
                     >
                       <QRCodeComponent
-                        size={128}
-                        value={`Asset ID :         ${row?.assetId ?? ""}
-Asset Tag :        ${row?.assetInformation?.assetTag ?? ""}
-Model :            ${row?.assetInformation?.model ?? ""}
-Serial Number :    ${row?.assetInformation?.serialNumber ?? ""}
-Operating System : ${row?.assetInformation?.operatingSystem ?? ""}
-CPU :              ${row?.assetInformation?.cpu ?? ""}
-RAM :              ${row?.assetInformation?.ram ?? ""}
-Hard Disk :        ${row?.assetInformation?.hardDisk ?? ""}
-Location :         ${row?.locationInformation?.location ?? ""}`}
-                        level="H"
+                        size={200}
+                        value={[
+                          ` Asset ID:        ${row?.assetId ?? ""}`,
+                          ` RAM:             ${
+                            row?.assetInformation?.ram ?? ""
+                          }`,
+                          ` CPU:             ${
+                            row?.assetInformation?.cpu ?? ""
+                          }`,
+                          ` Hard Disk:       ${
+                            row?.assetInformation?.hardDisk ?? ""
+                          }`,
+                          ` Location:        ${
+                            row?.locationInformation?.location ?? ""
+                          }`,
+                          ` Asset Tag:       ${
+                            row?.assetInformation?.assetTag ?? ""
+                          }`,
+                          ` Model:           ${
+                            row?.assetInformation?.model ?? ""
+                          }`,
+                          ` Assigned To:     ${row?.assetState?.user ?? ""}`,
+                          ` Operating System:${
+                            row?.assetInformation?.operatingSystem ?? ""
+                          }`,
+                          ` Serial Number:   ${
+                            row?.assetInformation?.serialNumber ?? ""
+                          }`,
+                          ` Sub Location:    ${
+                            row?.locationInformation?.subLocation ?? ""
+                          }`,
+                          // ` Status:          ${row?.status ?? ""}`,
+                        ].join("\n")}
+                        level="M"
                         includeMargin={true}
                       />
                       <span className="mt-2 text-xs text-gray-600 font-medium">
@@ -586,6 +611,87 @@ Location :         ${row?.locationInformation?.location ?? ""}`}
             </div>
           </>
         )}
+        {/* {qrCodesModalOpen && (
+          <>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+              <div className="bg-white w-[90%] max-w-[650px] max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-2xl relative">
+                <button
+                  onClick={qrCodesDownloadHandler}
+                  className="p-1 text-blue-800"
+                >
+                  <div className="flex flex-row items-center border border-gray-400 rounded-md p-1 text-sm hover:transition-all">
+                    <span>Download</span>
+                    <MdDownload size={18} />
+                  </div>
+                </button>
+                <button
+                  onClick={() => setQrCodesModalOpen(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-red-600 transition"
+                >
+                  <RxCross2 size={24} />
+                </button>
+                <h2 className="text-xl font-bold mb-6 text-center text-gray-800">
+                  Generated QR Codes
+                </h2>
+                <div
+                  className={`${
+                    selectedRowsForQrCodes.length === 1
+                      ? "flex justify-center"
+                      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center"
+                  }`}
+                >
+                  {selectedRowsForQrCodes.map((row) => (
+                    <div
+                      key={row?._id}
+                      className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow"
+                    >
+                      <QRCode
+                        size={200}
+                        value={[
+                          ` Asset ID:        ${row?.assetId ?? ""}`,
+                          ` RAM:             ${
+                            row?.assetInformation?.ram ?? ""
+                          }`,
+                          ` CPU:             ${
+                            row?.assetInformation?.cpu ?? ""
+                          }`,
+                          ` Hard Disk:       ${
+                            row?.assetInformation?.hardDisk ?? ""
+                          }`,
+                          ` Location:        ${
+                            row?.locationInformation?.location ?? ""
+                          }`,
+                          ` Asset Tag:       ${
+                            row?.assetInformation?.assetTag ?? ""
+                          }`,
+                          ` Model:           ${
+                            row?.assetInformation?.model ?? ""
+                          }`,
+                          ` Assigned To:     ${row?.assetState?.user ?? ""}`,
+                          ` Operating System:${
+                            row?.assetInformation?.operatingSystem ?? ""
+                          }`,
+                          ` Serial Number:   ${
+                            row?.assetInformation?.serialNumber ?? ""
+                          }`,
+                          ` Sub Location:    ${
+                            row?.locationInformation?.subLocation ?? ""
+                          }`,
+                          // ` Status:          ${row?.status ?? ""}`,
+                        ].join("\n")}
+                        level="M"
+                        includeMargin={true}
+                      />
+                      <span className="mt-2 text-xs text-gray-600 font-medium">
+                        Asset ID: {row?.assetId}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        )} */}
       </div>
     </>
   );

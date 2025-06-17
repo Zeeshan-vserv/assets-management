@@ -8,10 +8,27 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { NavLink, useParams } from "react-router-dom";
 import { useEffect } from "react";
+import { Autocomplete, TextField } from "@mui/material";
+import {
+  getAllLocation,
+  getAllSubLocation,
+} from "../../../api/LocationRequest";
+import {
+  getAllDepartment,
+  getAllSubDepartment,
+} from "../../../api/DepartmentRequest";
+import { getAllUsers } from "../../../api/AuthRequest";
 const EditAsset = () => {
   const { id } = useParams();
   const user = useSelector((state) => state.authReducer.authData);
   const [isLoading, setIsLoading] = useState(true);
+  const [locationData, setLocationData] = useState([]);
+  const [subLocationData, setSubLocationData] = useState([]);
+  const [departmentData, setDepartmentData] = useState([]);
+  const [subDepartmentData, setSubDepartmentData] = useState([]);
+  const [filteredSubLocations, setFilteredSubLocations] = useState([]);
+  const [filteredSubDepartments, setFilteredSubDepartments] = useState([]);
+  const [users, setUsers] = useState([]);
   const [formData, setFormData] = useState({
     assetInformation: {
       category: "",
@@ -32,6 +49,7 @@ const EditAsset = () => {
       assetIsCurrently: "",
       user: "",
       department: "",
+      subDepartment: "",
       comment: "",
     },
     locationInformation: {
@@ -79,13 +97,51 @@ const EditAsset = () => {
     }
   };
 
-  // console.log(formData);
+  useEffect(() => {
+    const selectedLocation = locationData.find(
+      (loc) => loc.locationName === formData.locationInformation.location
+    );
+    setFilteredSubLocations(selectedLocation?.subLocations || []);
+  }, [formData.locationInformation.location, locationData]);
+
+  useEffect(() => {
+    const selectedDepartment = departmentData.find(
+      (dept) => dept.departmentName === formData.assetState.department
+    );
+    setFilteredSubDepartments(selectedDepartment?.subdepartments || []);
+  }, [formData.assetState.department, departmentData]);
 
   useEffect(() => {
     fetchAsset();
   }, [id]);
 
-  // console.log(id);
+  const fetchDetails = async () => {
+    try {
+      setIsLoading(true);
+      const responseLocation = await getAllLocation();
+      setLocationData(responseLocation?.data?.data || []);
+
+      const responseSubLocation = await getAllSubLocation();
+      setSubLocationData(responseSubLocation?.data?.data || []);
+
+      const responseDepartment = await getAllDepartment();
+      setDepartmentData(responseDepartment?.data?.data || []);
+
+      const responseSubDepartment = await getAllSubDepartment();
+      setSubDepartmentData(responseSubDepartment?.data?.data || []);
+
+      const responseReportingManager = await getAllUsers();
+      setUsers(responseReportingManager?.data || []);
+    } catch (error) {
+      console.error("Error fetching locations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDetails();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -110,7 +166,7 @@ const EditAsset = () => {
     });
 
     // Append userId if needed
-    dataToSend.append("userId", user._id);
+    dataToSend.append("userId", user.userId);
     // console.log(id,formData, dataToSend);
 
     updateAsset(id, dataToSend);
@@ -548,21 +604,36 @@ const EditAsset = () => {
               >
                 User
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="user"
-                name="user"
-                value={formData.assetState.user}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={users}
+                getOptionLabel={(option) => option.emailAddress}
+                value={
+                  users.find(
+                    (user) => user.emailAddress === formData.assetState.user
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     assetState: {
                       ...formData.assetState,
-                      user: e.target.value,
+                      user: newValue ? newValue.emailAddress : "",
                     },
-                  })
-                }
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Users"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -572,21 +643,80 @@ const EditAsset = () => {
               >
                 Department
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="department"
-                name="department"
-                value={formData.assetState.department}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={departmentData}
+                getOptionLabel={(option) => option.departmentName}
+                value={
+                  departmentData.find(
+                    (dept) =>
+                      dept.departmentName === formData.assetState.department
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     assetState: {
                       ...formData.assetState,
-                      department: e.target.value,
+                      department: newValue ? newValue.departmentName : "",
+                      subDepartment: "", // Reset subDepartment when department changes
                     },
-                  })
+                  });
+                  setFilteredSubDepartments(newValue?.subdepartments || []);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Department"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+            </div>
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="subDepartment"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                Sub Department
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                options={filteredSubDepartments}
+                getOptionLabel={(option) => option?.subdepartmentName || ""}
+                value={
+                  filteredSubDepartments.find(
+                    (subDept) =>
+                      subDept.subdepartmentName ===
+                      formData.assetState.subDepartment
+                  ) || null
                 }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    assetState: {
+                      ...formData.assetState,
+                      subDepartment: newValue ? newValue.subdepartmentName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select SubDepartment"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -627,66 +757,40 @@ const EditAsset = () => {
               >
                 Location
               </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="location"
-                id="location"
-                value={formData.locationInformation.location}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={locationData}
+                getOptionLabel={(option) => option.locationName}
+                value={
+                  locationData.find(
+                    (loc) =>
+                      loc.locationName === formData.locationInformation.location
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     locationInformation: {
                       ...formData.locationInformation,
-                      location: e.target.value,
+                      location: newValue ? newValue.locationName : "",
+                      subLocation: "", // Reset subLocation when location changes
                     },
-                  })
-                }
-              >
-                <option value="">Select Location</option>
-                <option value="agra">AGRA</option>
-                <option value="ahmedabad">AHMEDABAD</option>
-                <option value="banglore">BANGLORE</option>
-                <option value="bokaro">BOKARO</option>
-                <option value="bokaburnpurro">BURNPUR</option>
-                <option value="chandigarh">CHANDIGARH</option>
-                <option value="chattisgarh">CHATTISGARH</option>
-                <option value="chennai">CHENNAI</option>
-                <option value="coimbatore">COIMBATORE</option>
-                <option value="dankuni">DANKUNI</option>
-                <option value="delhi">DELHI</option>
-                <option value="durgapur">DURGAPUR</option>
-                <option value="faridabad">FARIDABAD</option>
-                <option value="ghaziabad">GHAZIABAD</option>
-                <option value="gujarat">GUJARAT</option>
-                <option value="guwahati">GUWAHATI</option>
-                <option value="haldia">HALDIA</option>
-                <option value="hyderabad">HYDERABAD</option>
-                <option value="jagdishpur">JAGDISHPUR</option>
-                <option value="jalandhar">JALANDHAR</option>
-                <option value="jammu">JAMMU</option>
-                <option value="kandrori">KANDRORI</option>
-                <option value="kanpur">KANPUR</option>
-                <option value="kochi">KOCHI</option>
-                <option value="kolkata">KOLKATA</option>
-                <option value="lucknow">LUCKNOW</option>
-                <option value="ludhiana">LUDHIANA</option>
-                <option value="madhya pradesh">MADHYA PRADESH</option>
-                <option value="maharashtra">MAHARASHTRA</option>
-                <option value="manali">MANALI</option>
-                <option value="mandigobindgarh">MANDIGOBINDGARH</option>
-                <option value="N/A">N/A</option>
-                <option value="paradeep">PARADEEP</option>
-                <option value="patna">PATNA</option>
-                <option value="prayagraj">PRAYAGRAJ</option>
-                <option value="rajasthan">RAJASTHAN</option>
-                <option value="rishikesh">RISHIKESH</option>
-                <option value="roorkela">ROORKELA</option>
-                <option value="salem">SALEM</option>
-                <option value="siliguri">SILIGURI</option>
-                <option value="srinagar">SRINAGAR</option>
-                <option value="trichy">TRICHY</option>
-                <option value="vizag">VIZAG</option>
-              </select>
+                  });
+                  setFilteredSubLocations(newValue?.subLocations || []);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -695,21 +799,38 @@ const EditAsset = () => {
               >
                 Sub Location
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="subLocation"
-                name="subLocation"
-                value={formData.locationInformation.subLocation}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={filteredSubLocations}
+                getOptionLabel={(option) => option?.subLocationName || ""}
+                value={
+                  filteredSubLocations.find(
+                    (subLoc) =>
+                      subLoc.subLocationName ===
+                      formData.locationInformation.subLocation
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     locationInformation: {
                       ...formData.locationInformation,
-                      subLocation: e.target.value,
+                      subLocation: newValue ? newValue.subLocationName : "",
                     },
-                  })
-                }
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select SubLocation"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -875,7 +996,13 @@ const EditAsset = () => {
                 type="date"
                 id="poDate"
                 name="poDate"
-                value={formData.financeInformation.poDate}
+                value={
+                  formData.financeInformation.poDate
+                    ? new Date(formData.financeInformation.poDate)
+                        .toISOString()
+                        .slice(0, 10)
+                    : ""
+                }
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -886,6 +1013,23 @@ const EditAsset = () => {
                   })
                 }
               />
+
+              {/* <input
+                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="date"
+                id="poDate"
+                name="poDate"
+                value={formData.financeInformation.poDate}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      poDate: e.target.value,
+                    },
+                  })
+                }
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -923,7 +1067,13 @@ const EditAsset = () => {
                 type="date"
                 id="invoiceDate"
                 name="invoiceDate"
-                value={formData.financeInformation.invoiceDate}
+                value={
+                  formData.financeInformation.invoiceDate
+                    ? new Date(formData.financeInformation.invoiceDate)
+                        .toISOString()
+                        .slice(0, 10)
+                    : ""
+                }
                 onChange={(e) =>
                   setFormData({
                     ...formData,
@@ -934,6 +1084,21 @@ const EditAsset = () => {
                   })
                 }
               />
+              {/* <input
+                type="date"
+                id="invoiceDate"
+                name="invoiceDate"
+                value={formData.financeInformation.invoiceDate}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    financeInformation: {
+                      ...formData.financeInformation,
+                      invoiceDate: e.target.value,
+                    },
+                  })
+                }
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -1102,7 +1267,7 @@ const EditAsset = () => {
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="number"
-                placeholder="Np. of Days"
+                placeholder="No. of Days"
                 id="pmCycle"
                 name="pmCycle"
                 value={formData.preventiveMaintenance.pmCycle}
@@ -1185,7 +1350,13 @@ const EditAsset = () => {
                   type="date"
                   id="istPmDate"
                   name="istPmDate"
-                  value={formData.preventiveMaintenance.istPmDate}
+                  value={
+                    formData.preventiveMaintenance.istPmDate
+                      ? new Date(formData.preventiveMaintenance.istPmDate)
+                          .toISOString()
+                          .slice(0, 10)
+                      : ""
+                  }
                   onChange={(e) =>
                     setFormData({
                       ...formData,
@@ -1196,6 +1367,21 @@ const EditAsset = () => {
                     })
                   }
                 />
+                {/* <input
+                  type="date"
+                  id="istPmDate"
+                  name="istPmDate"
+                  value={formData.preventiveMaintenance.istPmDate}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      preventiveMaintenance: {
+                        ...formData.preventiveMaintenance,
+                        istPmDate: e.target.value,
+                      },
+                    })
+                  }
+                /> */}
               </div>
             )}
           </div>

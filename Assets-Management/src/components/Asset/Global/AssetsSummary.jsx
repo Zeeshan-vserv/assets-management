@@ -9,8 +9,6 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { Autocomplete, TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest";
 import { getAllAssets } from "../../../api/AssetsRequest";
 
 const csvConfig = mkConfig({
@@ -202,41 +200,6 @@ function AssetsSummary() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          <Autocomplete
-            className="w-[40%]"
-            sx={{
-              ml: 2,
-              mt: 1,
-              mb: 1,
-              "& .MuiInputBase-root": {
-                borderRadius: "0.35rem",
-                backgroundColor: "#f9fafb",
-                fontSize: "0.85rem",
-                border: "1px solid #e2e8f0",
-                transition: "all 0.3s ease",
-              },
-              "& .MuiInputBase-root:hover": {
-                borderColor: "#94a3b8",
-              },
-            }}
-            options={["Option 1", "Option 2", "Option 3"]}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="standard"
-                placeholder="Select"
-                InputProps={{
-                  ...params.InputProps,
-                  disableUnderline: true,
-                }}
-                inputProps={{
-                  ...params.inputProps,
-                  style: { fontSize: "0.85rem", padding: "8px" },
-                }}
-              />
-            )}
-          />
-
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}

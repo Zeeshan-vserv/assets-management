@@ -26,10 +26,10 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Components",
+  filename: "Assets-Management-Incident-Category",
 });
 
-function Location() {
+const Category = () =>  {
   const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -398,7 +398,7 @@ function Location() {
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">LOCATION</h2>
+        <h2 className="text-lg font-semibold mb-6 text-start">INCIDENT CATEGORY</h2>
         <MaterialReactTable table={table} />
       </div>
       {deleteConfirmationModal && (
@@ -522,4 +522,4 @@ function Location() {
   );
 }
 
-export default Location;
+export default Category

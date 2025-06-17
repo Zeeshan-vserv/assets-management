@@ -107,13 +107,15 @@ const Navigation = ({ nav, setNav }) => {
             </h3>
             {expandedSubMenus.incidents && (
               <ul className='flex flex-col gap-2 list-disc pl-5 '>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >add prefix</li>
+                {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >add prefix</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >auto closed time</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >closer code</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >predefined replies</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >pending reason</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >category</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub category</li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >pending reason</li> */}
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}}  ><NavLink to="/main/configuration/Category" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>category</NavLink></li>
+                {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >category</li> */}
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}}  ><NavLink to="/main/configuration/SubCategory" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>sub category</NavLink></li>
+                {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub category</li> */}
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >rules</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >escalatio level</li>
                 </ul>

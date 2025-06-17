@@ -10,7 +10,6 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { Autocomplete, TextField } from "@mui/material";
-import Stack from "@mui/material/Stack";
 import { getAllDepartment } from "../../../api/DepartmentRequest";
 
 const csvConfig = mkConfig({
@@ -188,46 +187,6 @@ function AssetsSummary() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          <Stack
-            direction="row"
-            spacing={2}
-            alignItems="center"
-            sx={{ mt: 1, mb: 1, ml: 2 }}
-          >
-            <p className="text-md text-start">Business Unit :</p>
-            <Autocomplete
-              className="w-[40%]"
-              sx={{
-                "& .MuiInputBase-root": {
-                  borderRadius: "0.35rem",
-                  backgroundColor: "#f9fafb",
-                  fontSize: "0.85rem",
-                  border: "1px solid #e2e8f0",
-                  transition: "all 0.3s ease",
-                },
-                "& .MuiInputBase-root:hover": {
-                  borderColor: "#94a3b8",
-                },
-              }}
-              options={["Option 1", "Option 2", "Option 3"]}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="standard"
-                  placeholder="Select"
-                  InputProps={{
-                    ...params.InputProps,
-                    disableUnderline: true,
-                  }}
-                  inputProps={{
-                    ...params.inputProps,
-                    style: { fontSize: "0.85rem", padding: "8px" },
-                  }}
-                />
-              )}
-            />
-          </Stack>
-
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}

@@ -94,7 +94,7 @@ const AddFixedAssets = () => {
     try {
       setIsLoading(true);
       const responseLocation = await getAllLocation();
-      console.log(responseLocation?.data?.data);
+      // console.log(responseLocation?.data?.data);
 
       setLocationData(responseLocation?.data?.data || []);
 
@@ -102,11 +102,11 @@ const AddFixedAssets = () => {
       setSubLocationData(responseSubLocation?.data?.data || []);
 
       const responseDepartment = await getAllDepartment();
-      console.log(responseDepartment?.data?.data);
+      // console.log(responseDepartment?.data?.data);
       setDepartmentData(responseDepartment?.data?.data || []);
 
       const responseSubDepartment = await getAllSubDepartment();
-      console.log(responseSubDepartment?.data?.data);
+      // console.log(responseSubDepartment?.data?.data);
 
       setSubDepartmentData(responseSubDepartment?.data?.data || []);
 
@@ -119,9 +119,9 @@ const AddFixedAssets = () => {
     }
   };
 
-  console.log("departmentData", departmentData);
-  console.log("Selected department", formData.assetState.department);
-  console.log("filteredSubDepartments", filteredSubDepartments);
+  // console.log("departmentData", departmentData);
+  // console.log("Selected department", formData.assetState.department);
+  // console.log("filteredSubDepartments", filteredSubDepartments);
 
   useEffect(() => {
     fetchDetails();
@@ -623,10 +623,12 @@ const AddFixedAssets = () => {
               >
                 <option value="">Select</option>
                 <option value="In Store">In Store</option>
-                <option value="In Use">In Use</option>
+                <option value="Allocated">Allocated</option>
                 <option value="In Repair">In Repair</option>
-                <option value="Expired">Expired</option>
-                <option value="Disposed">Disposed</option>
+                <option value="Lost">Theft/Lost</option>
+                <option value="Discard">Discard/Replaced</option>
+                <option value="Disposed">Disposed / Scrapped</option>
+                <option value="Sold">Sold</option>
               </select>
             </div>
             <div className="flex items-center w-[46%]">

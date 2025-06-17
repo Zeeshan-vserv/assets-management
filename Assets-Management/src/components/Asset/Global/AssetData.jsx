@@ -18,8 +18,9 @@ import { getAllAssets, deleteAsset } from "../../../api/AssetsRequest";
 import { MdDownload } from "react-icons/md";
 
 import QrCodeIcon from "@mui/icons-material/QrCode";
-import { QRCodeSVG as QRCode } from "qrcode.react";
 import { RxCross2 } from "react-icons/rx";
+import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
+import QRCodeGenerator from "qrcode";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -39,7 +40,7 @@ const AssetData = () => {
   const [qrCodesModalOpen, setQrCodesModalOpen] = useState(false);
   const [selectedRowsForQrCodes, setSelectedRowsForQrCodes] = useState([]);
 
-  console.log(filteredData);
+  // console.log(filteredData);
 
   const fetchAsset = async () => {
     try {
@@ -93,7 +94,7 @@ const AssetData = () => {
   }, [data]);
 
   // console.log(data);
-  console.log(selectedRowsForQrCodes);
+  // console.log(selectedRowsForQrCodes);
 
   const columns = useMemo(
     () => [
@@ -126,7 +127,7 @@ const AssetData = () => {
         header: "Sub Location",
       },
       {
-        accessorKey: "status",
+        accessorKey: "assetState.assetIsCurrently",
         header: "Status",
       },
       {
@@ -257,10 +258,68 @@ const AssetData = () => {
     setQrCodesModalOpen(true);
   };
 
-  const qrCodesDownloadHandler = () => {
-    //logic
+  //Download qrCodes in pdf
+  const qrCodesDownloadHandler = async () => {
+    if (selectedRowsForQrCodes.length === 0) return;
+
     const doc = new jsPDF();
-    console.log("doc", doc);
+    doc.setFontSize(16);
+    doc.text("Asset QR Codes", 105, 15, { align: "center" });
+
+    const qrSize = 60;
+    const margin = 15;
+    const startX = 15;
+    let xPosition = startX;
+    let yPosition = 30;
+    const maxPerRow = 3;
+    let currentRowCount = 0;
+
+    for (const row of selectedRowsForQrCodes) {
+      const qrData = `Asset ID: ${row?.assetId ?? ""}
+Asset Tag: ${row?.assetInformation?.assetTag ?? ""}
+Model: ${row?.assetInformation?.model ?? ""}
+Serial Number: ${row?.assetInformation?.serialNumber ?? ""}
+Operating System: ${row?.assetInformation?.operatingSystem ?? ""}
+CPU: ${row?.assetInformation?.cpu ?? ""}
+RAM: ${row?.assetInformation?.ram ?? ""}
+Hard Disk: ${row?.assetInformation?.hardDisk ?? ""}
+Location: ${row?.locationInformation?.location ?? ""}`;
+
+      try {
+        const qrImageData = await QRCodeGenerator.toDataURL(qrData, {
+          width: qrSize * 4,
+          margin: 1,
+          color: {
+            dark: "#000000",
+            light: "#ffffff",
+          },
+        });
+
+        doc.addImage(qrImageData, "PNG", xPosition, yPosition, qrSize, qrSize);
+        doc.setFontSize(8);
+        doc.text(
+          `Asset ID: ${row?.assetId ?? ""}`,
+          xPosition,
+          yPosition + qrSize + 5
+        );
+
+        xPosition += qrSize + margin;
+        currentRowCount++;
+        if (currentRowCount >= maxPerRow) {
+          xPosition = startX;
+          yPosition += qrSize + margin + 15;
+          currentRowCount = 0;
+
+          if (yPosition > doc.internal.pageSize.height - 30) {
+            doc.addPage();
+            yPosition = 30;
+          }
+        }
+      } catch (error) {
+        console.error("Error generating QR code:", error);
+      }
+    }
+    doc.save("Asset_QR_Codes.pdf");
   };
 
   const handleDeleteComponents = (id) => {
@@ -505,24 +564,40 @@ const AssetData = () => {
                       key={row?._id}
                       className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow"
                     >
-                      <QRCode
+                      <QRCodeComponent
                         size={200}
-                      value={
-                           [
-                             ` Asset ID:        ${row?.assetId ?? ""}`,
-                             ` RAM:             ${row?.assetInformation?.ram ?? ""}`,
-                             ` CPU:             ${row?.assetInformation?.cpu ?? ""}`,
-                             ` Hard Disk:       ${row?.assetInformation?.hardDisk ?? ""}`,
-                             ` Location:        ${row?.locationInformation?.location ?? ""}`,
-                             ` Asset Tag:       ${row?.assetInformation?.assetTag ?? ""}` ,
-                             ` Model:           ${row?.assetInformation?.model ?? ""}`,
-                             ` Assigned To:     ${row?.assetState?.user ?? ""}`,
-                             ` Operating System:${row?.assetInformation?.operatingSystem ?? ""}`,
-                             ` Serial Number:   ${row?.assetInformation?.serialNumber ?? ""}`,
-                             ` Sub Location:    ${row?.locationInformation?.subLocation ?? ""}`,
-                             // ` Status:          ${row?.status ?? ""}`,
-                           ].join('\n')
-                         }
+                        value={[
+                          ` Asset ID:        ${row?.assetId ?? ""}`,
+                          ` RAM:             ${
+                            row?.assetInformation?.ram ?? ""
+                          }`,
+                          ` CPU:             ${
+                            row?.assetInformation?.cpu ?? ""
+                          }`,
+                          ` Hard Disk:       ${
+                            row?.assetInformation?.hardDisk ?? ""
+                          }`,
+                          ` Location:        ${
+                            row?.locationInformation?.location ?? ""
+                          }`,
+                          ` Asset Tag:       ${
+                            row?.assetInformation?.assetTag ?? ""
+                          }`,
+                          ` Model:           ${
+                            row?.assetInformation?.model ?? ""
+                          }`,
+                          ` Assigned To:     ${row?.assetState?.user ?? ""}`,
+                          ` Operating System:${
+                            row?.assetInformation?.operatingSystem ?? ""
+                          }`,
+                          ` Serial Number:   ${
+                            row?.assetInformation?.serialNumber ?? ""
+                          }`,
+                          ` Sub Location:    ${
+                            row?.locationInformation?.subLocation ?? ""
+                          }`,
+                          // ` Status:          ${row?.status ?? ""}`,
+                        ].join("\n")}
                         level="M"
                         includeMargin={true}
                       />
@@ -536,6 +611,87 @@ const AssetData = () => {
             </div>
           </>
         )}
+        {/* {qrCodesModalOpen && (
+          <>
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+              <div className="bg-white w-[90%] max-w-[650px] max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-2xl relative">
+                <button
+                  onClick={qrCodesDownloadHandler}
+                  className="p-1 text-blue-800"
+                >
+                  <div className="flex flex-row items-center border border-gray-400 rounded-md p-1 text-sm hover:transition-all">
+                    <span>Download</span>
+                    <MdDownload size={18} />
+                  </div>
+                </button>
+                <button
+                  onClick={() => setQrCodesModalOpen(false)}
+                  className="absolute top-4 right-4 text-gray-500 hover:text-red-600 transition"
+                >
+                  <RxCross2 size={24} />
+                </button>
+                <h2 className="text-xl font-bold mb-6 text-center text-gray-800">
+                  Generated QR Codes
+                </h2>
+                <div
+                  className={`${
+                    selectedRowsForQrCodes.length === 1
+                      ? "flex justify-center"
+                      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center"
+                  }`}
+                >
+                  {selectedRowsForQrCodes.map((row) => (
+                    <div
+                      key={row?._id}
+                      className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow"
+                    >
+                      <QRCode
+                        size={200}
+                        value={[
+                          ` Asset ID:        ${row?.assetId ?? ""}`,
+                          ` RAM:             ${
+                            row?.assetInformation?.ram ?? ""
+                          }`,
+                          ` CPU:             ${
+                            row?.assetInformation?.cpu ?? ""
+                          }`,
+                          ` Hard Disk:       ${
+                            row?.assetInformation?.hardDisk ?? ""
+                          }`,
+                          ` Location:        ${
+                            row?.locationInformation?.location ?? ""
+                          }`,
+                          ` Asset Tag:       ${
+                            row?.assetInformation?.assetTag ?? ""
+                          }`,
+                          ` Model:           ${
+                            row?.assetInformation?.model ?? ""
+                          }`,
+                          ` Assigned To:     ${row?.assetState?.user ?? ""}`,
+                          ` Operating System:${
+                            row?.assetInformation?.operatingSystem ?? ""
+                          }`,
+                          ` Serial Number:   ${
+                            row?.assetInformation?.serialNumber ?? ""
+                          }`,
+                          ` Sub Location:    ${
+                            row?.locationInformation?.subLocation ?? ""
+                          }`,
+                          // ` Status:          ${row?.status ?? ""}`,
+                        ].join("\n")}
+                        level="M"
+                        includeMargin={true}
+                      />
+                      <span className="mt-2 text-xs text-gray-600 font-medium">
+                        Asset ID: {row?.assetId}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </>
+        )} */}
       </div>
     </>
   );

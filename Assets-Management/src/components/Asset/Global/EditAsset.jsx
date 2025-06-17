@@ -184,7 +184,7 @@ const EditAsset = () => {
               type="submit"
               className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
             >
-              Submit
+              Update
             </button>
             <NavLink
               to="/main/asset/AssetData"
@@ -591,10 +591,12 @@ const EditAsset = () => {
               >
                 <option value="">Select</option>
                 <option value="In Store">In Store</option>
-                <option value="In Use">In Use</option>
+                <option value="Allocated">Allocated</option>
                 <option value="In Repair">In Repair</option>
-                <option value="Expired">Expired</option>
-                <option value="Disposed">Disposed</option>
+                <option value="Lost">Theft/Lost</option>
+                <option value="Discard">Discard/Replaced</option>
+                <option value="Disposed">Disposed / Scrapped</option>
+                <option value="Sold">Sold</option>
               </select>
             </div>
             <div className="flex items-center w-[46%]">

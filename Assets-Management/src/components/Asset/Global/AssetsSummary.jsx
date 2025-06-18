@@ -11,6 +11,7 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { Autocomplete, TextField } from "@mui/material";
 import { getAllDepartment } from "../../../api/DepartmentRequest";
+import { getAllAssets } from "../../../api/AssetsRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -19,80 +20,94 @@ const csvConfig = mkConfig({
   filename: "Assets-Management-Department.csv",
 });
 
+const assetStates = [
+  "In Store",
+  "Allocated",
+  "In Repair",
+  "Lost",
+  "Discard",
+  "Disposed",
+  "Sold",
+];
+
 function AssetsSummary() {
   const [data, setData] = useState([]);
+  const [stateData, setStateData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchDepartment = async () => {
+  const fetchAssets = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment();
+      const response = await getAllAssets();
       setData(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching departments:", error);
+      console.error("Error fetching assets:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchDepartment();
+    fetchAssets();
   }, []);
+
+  const categorySummary = useMemo(() => {
+    // Get all unique categories
+    const allCategories = Array.from(
+      new Set(
+        data.map((item) => item.assetInformation?.category || "Uncategorized")
+      )
+    );
+
+    return allCategories.map((category, idx) => {
+      const assetsInCategory = data.filter(
+        (item) =>
+          (item.assetInformation?.category || "Uncategorized") === category
+      );
+      // Count for each state
+      const stateCounts = assetStates.reduce((acc, state) => {
+        acc[state] = assetsInCategory.filter(
+          (item) => item.assetState?.assetIsCurrently === state
+        ).length;
+        return acc;
+      }, {});
+      return {
+        id: idx + 1,
+        category,
+        total: assetsInCategory.length,
+        inStore: stateCounts["In Store"] || 0,
+        allocated: stateCounts["Allocated"] || 0,
+        inRepair: stateCounts["In Repair"] || 0,
+        lost: stateCounts["Lost"] || 0,
+        discard: stateCounts["Discard"] || 0,
+        disposed: stateCounts["Disposed"] || 0,
+        sold: stateCounts["Sold"] || 0,
+      };
+    });
+  }, [data]);
+
+  useEffect(() => {
+    const groupedData = assetStates.reduce((acc, state) => {
+      acc[state] = data.filter(
+        (item) => item.assetState?.assetIsCurrently === state
+      );
+      return acc;
+    }, {});
+    setStateData(groupedData);
+  }, [data]);
 
   const columns = useMemo(
     () => [
-      {
-        accessorKey: "departmentId",
-        header: "Id",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "Asset Category",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "Total",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "In-Store",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "Allocated",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "In-Repair",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "In-Transit",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "Handover",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "Under Recovery",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "Discard/Replaced",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "Theft/Lost",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "Scrapped (Ready To Dispose)",
-      },
-      {
-        accessorKey: "departmentName",
-        header: "Sold",
-      },
+      { accessorKey: "id", header: "Id" },
+      { accessorKey: "category", header: "Asset Category" },
+      { accessorKey: "total", header: "Total" },
+      { accessorKey: "inStore", header: "In-Store" },
+      { accessorKey: "allocated", header: "Allocated" },
+      { accessorKey: "inRepair", header: "In-Repair" },
+      { accessorKey: "lost", header: "Theft/Lost" },
+      { accessorKey: "discard", header: "Discard/Replaced" },
+      { accessorKey: "disposed", header: "Disposed/Scrapped" },
+      { accessorKey: "sold", header: "Sold" },
     ],
     [isLoading]
   );
@@ -176,7 +191,7 @@ function AssetsSummary() {
   };
 
   const table = useMaterialReactTable({
-    data,
+    data: categorySummary,
     columns,
     getRowId: (row) => row?._id?.toString(),
     enableRowSelection: true,
@@ -280,57 +295,42 @@ function AssetsSummary() {
   const cardData = [
     {
       id: "1",
-      totalCount: "100",
+      totalCount: data.length,
       description: "Total",
     },
     {
       id: "2",
-      storeCount: "70",
+      storeCount: stateData["In Store"]?.length || 0,
       description: "In-Store",
     },
     {
       id: "3",
-      allocatedCount: "40",
+      allocatedCount: stateData["Allocated"]?.length || 0,
       description: "Allocated",
     },
     {
       id: "4",
-      inRepairCount: "30",
+      inRepairCount: stateData["In Repair"]?.length || 0,
       description: "In-Repair",
     },
     {
       id: "5",
-      inTransitCount: "10",
-      description: "In-Transit",
-    },
-    {
-      id: "6",
-      handOverCount: "0",
-      description: "Handover",
-    },
-    {
-      id: "7",
-      underRecoveryCount: "0",
-      description: "Uder Recovery",
-    },
-    {
-      id: "8",
-      discardReplacedCount: "0",
-      description: "Discard/Replaced",
-    },
-    {
-      id: "9",
-      theftLostCount: "0",
+      inTransitCount: stateData["Lost"]?.length || 0,
       description: "Theft/Lost",
     },
     {
-      id: "10",
-      scrappedReadyToDisposeCount: "0",
-      description: "Scrapped (Ready To Dispose)",
+      id: "6",
+      handOverCount: stateData["Discard"]?.length || 0,
+      description: "Discard/Replaced",
     },
     {
-      id: "11",
-      soldCount: "0",
+      id: "7",
+      underRecoveryCount: stateData["Disposed"]?.length || 0,
+      description: "Disposed/Scrapped",
+    },
+    {
+      id: "8",
+      discardReplacedCount: stateData["Sold"]?.length || 0,
       description: "Sold",
     },
   ];

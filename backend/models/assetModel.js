@@ -23,6 +23,7 @@ const assetSchema = mongoose.Schema(
             assetIsCurrently: String,
             user: String,
             department: String,
+            subDepartment: String,
             comment: String
         },
         locationInformation: {

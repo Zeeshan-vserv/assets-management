@@ -231,7 +231,7 @@ const AddFixedAssets = () => {
               </button>
             </NavLink>
           </div>
-          <h3 className="text-slate-700">Asset Information</h3>
+          <h3 className="text-slate-700 font-semibold mb-6">Asset Information</h3>
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
@@ -597,7 +597,7 @@ const AddFixedAssets = () => {
 
         {/* Asset State fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Asset State</h3>
+          <h3 className="text-slate-700 font-semibold mb-6">Asset State</h3>
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
@@ -847,7 +847,7 @@ const AddFixedAssets = () => {
 
         {/* Location Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Location Information</h3>
+          <h3 className="text-slate-700 font-semibold mb-6">Location Information</h3>
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
@@ -1026,7 +1026,7 @@ const AddFixedAssets = () => {
 
         {/* Warranty Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Warranty Information</h3>
+          <h3 className="text-slate-700 font-semibold mb-6">Warranty Information</h3>
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
@@ -1122,7 +1122,7 @@ const AddFixedAssets = () => {
 
         {/* Finance Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Finance Information</h3>
+          <h3 className="text-slate-700 font-semibold mb-6">Finance Information</h3>
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
@@ -1375,7 +1375,7 @@ const AddFixedAssets = () => {
 
         {/* Preventive Maintenance fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Preventive Maintenance</h3>
+          <h3 className="text-slate-700 font-semibold mb-6">Preventive Maintenance</h3>
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label

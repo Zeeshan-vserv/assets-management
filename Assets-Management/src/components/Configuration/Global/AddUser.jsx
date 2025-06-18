@@ -155,8 +155,8 @@ const AddUser = () => {
       <form action="" onSubmit={handleSubmit} className="flex flex-col gap-5">
         <h2 className="text-slate-700 font-semibold">ADD USER</h2>
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <div className="flex flex-wrap gap-6 justify-between mt-3">
-            <div className="flex items-center w-[46%]">
+          <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="employeeName"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -173,7 +173,7 @@ const AddUser = () => {
                 required
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="employeeCode"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -190,7 +190,7 @@ const AddUser = () => {
                 required
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="emailAddress"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -207,7 +207,7 @@ const AddUser = () => {
                 required
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="mobileNumber"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -224,7 +224,7 @@ const AddUser = () => {
                 required
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="designation"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -241,7 +241,7 @@ const AddUser = () => {
                 required
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="location"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -277,70 +277,8 @@ const AddUser = () => {
                 )}
               />
 
-              {/* <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="location"
-                id="location"
-                value={formData.location}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Location</option>
-                {locationData?.map((locationValue) => (
-                  <option
-                    key={locationValue?._id}
-                    value={locationValue?.locationName}
-                  >
-                    {locationValue?.locationName?.toUpperCase()}
-                  </option>
-                ))} 
-
-               <option value="agra">AGRA</option>
-                <option value="ahmedabad">AHMEDABAD</option>
-                <option value="banglore">BANGLORE</option>
-                <option value="bokaro">BOKARO</option>
-                <option value="bokaburnpurro">BURNPUR</option>
-                <option value="chandigarh">CHANDIGARH</option>
-                <option value="chattisgarh">CHATTISGARH</option>
-                <option value="chennai">CHENNAI</option>
-                <option value="coimbatore">COIMBATORE</option>
-                <option value="dankuni">DANKUNI</option>
-                <option value="delhi">DELHI</option>
-                <option value="durgapur">DURGAPUR</option>
-                <option value="faridabad">FARIDABAD</option>
-                <option value="ghaziabad">GHAZIABAD</option>
-                <option value="gujarat">GUJARAT</option>
-                <option value="guwahati">GUWAHATI</option>
-                <option value="haldia">HALDIA</option>
-                <option value="hyderabad">HYDERABAD</option>
-                <option value="jagdishpur">JAGDISHPUR</option>
-                <option value="jalandhar">JALANDHAR</option>
-                <option value="jammu">JAMMU</option>
-                <option value="kandrori">KANDRORI</option>
-                <option value="kanpur">KANPUR</option>
-                <option value="kochi">KOCHI</option>
-                <option value="kolkata">KOLKATA</option>
-                <option value="lucknow">LUCKNOW</option>
-                <option value="ludhiana">LUDHIANA</option>
-                <option value="madhya pradesh">MADHYA PRADESH</option>
-                <option value="maharashtra">MAHARASHTRA</option>
-                <option value="manali">MANALI</option>
-                <option value="mandigobindgarh">MANDIGOBINDGARH</option>
-                <option value="N/A">N/A</option>
-                <option value="paradeep">PARADEEP</option>
-                <option value="patna">PATNA</option>
-                <option value="prayagraj">PRAYAGRAJ</option>
-                <option value="rajasthan">RAJASTHAN</option>
-                <option value="rishikesh">RISHIKESH</option>
-                <option value="roorkela">ROORKELA</option>
-                <option value="salem">SALEM</option>
-                <option value="siliguri">SILIGURI</option>
-                <option value="srinagar">SRINAGAR</option>
-                <option value="trichy">TRICHY</option>
-                <option value="vizag">VIZAG</option> 
-              </select>  */}
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="subLocation"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -375,33 +313,8 @@ const AddUser = () => {
                   />
                 )}
               />
-              {/* <select
-                name="subLocation"
-                id="subLocation"
-                value={formData.subLocation}
-                onChange={handleChange}
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-              >
-                <option value="">Select Sub Location</option>
-                {subLocationData?.map((subLocationValue) => (
-                  <option
-                    key={subLocationValue?._id}
-                    value={subLocationValue?.subLocationName}
-                  >
-                    {subLocationValue?.subLocationName?.toUpperCase()}
-                  </option>
-                ))}
-              </select> */}
-              {/* <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="subLocation"
-                name="subLocation"
-                value={formData.subLocation}
-                onChange={handleChange}
-              /> */}
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="department"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -436,34 +349,8 @@ const AddUser = () => {
                   />
                 )}
               />
-              {/* <select
-                name="department"
-                id="department"
-                value={formData.department}
-                onChange={handleChange}
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-              >
-                <option value="">Select Department</option>
-                {departmentData?.map((departmentValue) => (
-                  <option
-                    key={departmentValue?._id}
-                    value={departmentValue?.departmentName}
-                  >
-                    {departmentValue?.departmentName?.toUpperCase()}
-                  </option>
-                ))}
-              </select> */}
-              {/* <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="department"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                required
-              /> */}
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="subDepartment"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -499,33 +386,8 @@ const AddUser = () => {
                   />
                 )}
               />
-              {/* <select
-                name="subDepartment"
-                id="subDepartment"
-                value={formData.subDepartment}
-                onChange={handleChange}
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-              >
-                <option value="">Select Sub Department</option>
-                {subDepartmentData?.map((subDepartmentValue) => (
-                  <option
-                    key={subDepartmentValue?._id}
-                    value={subDepartmentValue?.subdepartmentName}
-                  >
-                    {subDepartmentValue?.subdepartmentName?.toUpperCase()}
-                  </option>
-                ))}
-              </select> */}
-              {/* <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="subDepartment"
-                name="subDepartment"
-                value={formData.subDepartment}
-                onChange={handleChange}
-              /> */}
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="reportingManager"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -561,17 +423,8 @@ const AddUser = () => {
                   />
                 )}
               />
-              {/* <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="reportingManager"
-                name="reportingManager"
-                value={formData.reportingManager}
-                onChange={handleChange}
-                required
-              /> */}
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="departmentHead"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -587,7 +440,7 @@ const AddUser = () => {
                 onChange={handleChange}
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="businessHead"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -603,7 +456,7 @@ const AddUser = () => {
                 onChange={handleChange}
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="password"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -620,7 +473,7 @@ const AddUser = () => {
                 required
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="confirmPassword"
                 className="w-[25%] text-xs font-semibold text-slate-600"

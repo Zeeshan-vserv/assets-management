@@ -949,8 +949,7 @@ const AddUser = () => {
               </tr>
             </table>
           </div>
-        </div>
-        <div className="my-2 flex gap-2 justify-end">
+        </div>      <div className="my-2 flex gap-2 justify-end">
           <button
             type="submit"
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
@@ -970,6 +969,7 @@ const AddUser = () => {
             </button>
           </NavLink>
         </div>
+  
       </form>
     </div>
   );

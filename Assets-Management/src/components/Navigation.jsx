@@ -56,7 +56,7 @@ const Navigation = ({ nav, setNav }) => {
                 </ul>
             )}
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >preventive</h3>
-            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >gate pass</h3>
+            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} ><NavLink to="/main/Asset/get-pass" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>gate pass</NavLink></h3>
           </>
         );
       case 'reports':

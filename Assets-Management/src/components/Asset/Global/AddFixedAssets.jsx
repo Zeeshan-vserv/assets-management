@@ -119,10 +119,6 @@ const AddFixedAssets = () => {
     }
   };
 
-  // console.log("departmentData", departmentData);
-  // console.log("Selected department", formData.assetState.department);
-  // console.log("filteredSubDepartments", filteredSubDepartments);
-
   useEffect(() => {
     fetchDetails();
   }, []);

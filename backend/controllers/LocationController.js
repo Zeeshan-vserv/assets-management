@@ -118,7 +118,7 @@ export const getSubLocationById = async (req, res) => {
                 return res.status(200).json({ success: true, data: sub });
             }
         }
-        res.status(404).json({ success: false, message: 'Subocation id not found' });
+        res.status(404).json({ success: false, message: 'Sublocation id not found' });
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while fetching SubLocation' });
     }

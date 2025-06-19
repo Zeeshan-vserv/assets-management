@@ -45,7 +45,7 @@ function NewVendor() {
               Submit
             </button>
             <NavLink
-              to="/main/configuration/all-vendors"
+              to="/main/service-desk/all-vendors"
               className={({ isActive }) =>
                 `hover:underline cursor-pointer ${
                   isActive ? "text-blue-400" : ""

@@ -38,7 +38,7 @@ const Navigation = ({ nav, setNav }) => {
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >incidents</h3>
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >service request</h3>
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >tasks</h3>
-            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/all-vendors" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>vendors</NavLink></h3>
+            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} ><NavLink to="/main/service-desk/all-vendors" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>vendors</NavLink></h3>
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >knowledge base</h3>
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >documents</h3>
           </>

@@ -142,6 +142,7 @@ export const deleteAsset = async (req, res) => {
 
 export const uploadAssetFromExcel = async (req, res) => {
     try {
+        const { userId } = req.body;
         if (!req.file) {
             return res.status(400).json({ success: false, message: 'No file uploaded' });
         }
@@ -204,7 +205,7 @@ export const uploadAssetFromExcel = async (req, res) => {
 
             // Assign assetId and increment for next
             const doc = {
-                userId: asset.userId,
+                userId: userId || asset.userId,
                 assetId: nextAssetId++,
                 assetInformation,
                 locationInformation,

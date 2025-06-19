@@ -12,6 +12,7 @@ import assetRoute from './routes/assetRoute.js'
 import componentRoute from './routes/componentRoute.js'
 import departmentRoute from './routes/departmentRoute.js'
 import locationRoute from './routes/locationRoute.js'
+import incidentCategoryRoute from './routes/incidentCategoryRoute.js'
 
 const app = express()
 
@@ -33,3 +34,4 @@ app.use('/asset', assetRoute)
 app.use('/component', componentRoute)
 app.use('/department', departmentRoute)
 app.use('/location', locationRoute)
+app.use('/category', incidentCategoryRoute)

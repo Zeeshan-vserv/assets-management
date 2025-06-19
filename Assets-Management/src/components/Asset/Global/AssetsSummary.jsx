@@ -9,8 +9,6 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { Autocomplete, TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest";
 import { getAllAssets } from "../../../api/AssetsRequest";
 
 const csvConfig = mkConfig({

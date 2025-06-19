@@ -55,6 +55,7 @@ function Location() {
   useEffect(() => {
     fetchLocation();
   }, []);
+
   const columns = useMemo(
     () => [
       {
@@ -393,6 +394,7 @@ function Location() {
       },
     }),
   });
+  
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">

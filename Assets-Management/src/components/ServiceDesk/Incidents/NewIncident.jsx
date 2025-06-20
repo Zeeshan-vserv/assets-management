@@ -9,13 +9,20 @@ import {
 } from "../../../api/DepartmentRequest";
 import { getAllUsers } from "../../../api/AuthRequest";
 import { Autocomplete, TextField } from "@mui/material";
+import { getAllAssets } from "../../../api/AssetsRequest";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { createIncident } from "../../../api/IncidentRequest";
 
 const NewIncident = () => {
+  const user = useSelector((state) => state.authReducer.authData);
   const [isLoading, setIsLoading] = useState(true);
+  const [filteredSubLocations, setFilteredSubLocations] = useState([]);
   const [locationData, setLocationData] = useState([]);
-  const [subLocationData, setSubLocationData] = useState([]);
+  // const [subDepartmentData, setSubDepartmentData] = useState([]);
+  // const [subLocationData, setSubLocationData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
-  const [subDepartmentData, setSubDepartmentData] = useState([]);
+  const [assetData, setAssetData] = useState([]);
   const [users, setUsers] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -28,6 +35,7 @@ const NewIncident = () => {
       user: "",
       userContactNumber: "",
       userEmail: "",
+      userDepartment: "",
       loggedBy: "",
     },
     assetDetails: {
@@ -43,7 +51,7 @@ const NewIncident = () => {
       roomNo: "",
     },
     classificaton: {
-      excludeSLA: "",
+      excludeSLA: false,
       severityLevel: "",
       supportDepartmentName: "",
       supportGroupName: "",
@@ -72,22 +80,23 @@ const NewIncident = () => {
     }
   };
 
-  console.log(formData);
-
   const fetchDetails = async () => {
     try {
       setIsLoading(true);
       const responseLocation = await getAllLocation();
       setLocationData(responseLocation?.data?.data || []);
 
-      const responseSubLocation = await getAllSubLocation();
-      setSubLocationData(responseSubLocation?.data?.data || []);
+      // const responseSubLocation = await getAllSubLocation();
+      // setSubLocationData(responseSubLocation?.data?.data || []);
 
       const responseDepartment = await getAllDepartment();
       setDepartmentData(responseDepartment?.data?.data || []);
 
-      const responseSubDepartment = await getAllSubDepartment();
-      setSubDepartmentData(responseSubDepartment?.data?.data || []);
+      // const responseSubDepartment = await getAllSubDepartment();
+      // setSubDepartmentData(responseSubDepartment?.data?.data || []);
+
+      const responseAsset = await getAllAssets();
+      setAssetData(responseAsset?.data?.data || []);
 
       const responseReportingManager = await getAllUsers();
       setUsers(responseReportingManager?.data || []);
@@ -102,10 +111,66 @@ const NewIncident = () => {
     fetchDetails();
   }, []);
 
+  useEffect(() => {
+    if (formData.locationDetails.location) {
+      const selectedLoc = locationData.find(
+        (loc) => loc.locationName === formData.locationDetails.location
+      );
+      setFilteredSubLocations(selectedLoc?.subLocations || []);
+    }
+  }, [locationData, formData.locationDetails.location]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      await createIncident({
+        ...formData,
+        userId: user?.userId,
+      });
+      toast.success("Incident Added Successfully");
+      setFormData({
+        subject: "",
+        category: "",
+        subCategory: "",
+        loggedVia: "",
+        description: "",
+        submitter: {
+          user: "",
+          userContactNumber: "",
+          userEmail: "",
+          userDepartment: "",
+          loggedBy: "",
+        },
+        assetDetails: {
+          asset: "",
+          make: "",
+          model: "",
+          serialNo: "",
+        },
+        locationDetails: {
+          location: "",
+          subLocation: "",
+          floor: "",
+          roomNo: "",
+        },
+        classificaton: {
+          excludeSLA: "",
+          severityLevel: "",
+          supportDepartmentName: "",
+          supportGroupName: "",
+          technician: "",
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to add Incident");
+    }
+  };
+
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
       <h2 className="text-slate-700 font-semibold">ADD INCIDENT</h2>
-      <form action="" className="flex flex-col gap-8">
+      <form action="" onSubmit={handleSubmit} className="flex flex-col gap-8">
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex gap-1 justify-end">
             <button
@@ -118,16 +183,17 @@ const NewIncident = () => {
               Cancel
             </button>
           </div>
+
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="subject"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Subject
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="subject"
                 name="subject"
@@ -138,12 +204,12 @@ const NewIncident = () => {
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="category"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Category
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="category"
                 name="category"
@@ -154,7 +220,7 @@ const NewIncident = () => {
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="subCategory"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Sub Category
               </label>
@@ -180,15 +246,15 @@ const NewIncident = () => {
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="businessUnit"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="loggedVia"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Logged Via
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="businessUnit"
-                id="businessUnit"
+                name="loggedVia"
+                id="loggedVia"
                 value={formData.loggedVia}
                 onChange={handleChange}
               >
@@ -201,7 +267,7 @@ const NewIncident = () => {
             <div className="flex flex-wrap gap-3 items-center w-[100%]">
               <label
                 htmlFor="description"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Description
               </label>
@@ -225,7 +291,7 @@ const NewIncident = () => {
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="user"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 User
               </label>
@@ -239,7 +305,7 @@ const NewIncident = () => {
                 }
                 value={
                   users.find(
-                    (user) => user.emailAddress === formData.submitter.user
+                    (user) => user.employeeName === formData.submitter.user
                   ) || null
                 }
                 onChange={(event, newValue) => {
@@ -248,6 +314,9 @@ const NewIncident = () => {
                     submitter: {
                       ...formData.submitter,
                       user: newValue ? newValue.employeeName : "",
+                      userContactNumber: newValue ? newValue.mobileNumber : "",
+                      userEmail: newValue ? newValue.emailAddress : "",
+                      userDepartment: newValue ? newValue.department : "",
                     },
                   });
                 }}
@@ -255,7 +324,7 @@ const NewIncident = () => {
                   <TextField
                     {...params}
                     variant="standard"
-                    className="text-xs text-slate-600"
+                    className="text-sm text-slate-800"
                     placeholder="Select Users"
                     inputProps={{
                       ...params.inputProps,
@@ -268,64 +337,121 @@ const NewIncident = () => {
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="userContactNumber"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 User Contact Number
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="userContactNumber"
                 name="userContactNumber"
+                value={formData.submitter.userContactNumber}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    submitter: {
+                      ...formData.submitter,
+                      userContactNumber: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="userEmail"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 User Email
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="email"
                 id="userEmail"
                 name="userEmail"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                value={formData.submitter.userEmail}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    submitter: {
+                      ...formData.submitter,
+                      userEmail: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="userDepartment"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 User Department
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+              <Autocomplete
+                className="w-[65%]"
+                options={departmentData}
+                getOptionLabel={(option) => option.departmentName}
+                value={
+                  departmentData.find(
+                    (dep) =>
+                      dep.departmentName === formData.submitter.userDepartment
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    submitter: {
+                      ...formData.submitter,
+                      userDepartment: newValue ? newValue.departmentName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Department"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
-            </div>
-            <div className="flex flex-wrap gap-3 items-center w-[100%]">
-              <label
-                htmlFor="employeeAddress"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Description
-              </label>
-              <textarea
-                className="w-[97%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+              {/* <input
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="employeeAddress"
-                name="employeeAddress"
-                rows="6"
-                //value={formData.emailAddress}
-                //onChange={handleChange}
+                id="userDepartment"
+                name="userDepartment"
+                value={formData.submitter.userDepartment}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    submitter: {
+                      ...formData.submitter,
+                      userDepartment: e.target.value,
+                    },
+                  })
+                }
+              /> */}
+            </div>
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="loggedBy"
+                className="w-[28%] text-xs font-semibold text-slate-600"
+              >
+                Logged By
+              </label>
+              <input
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="loggedBy"
+                name="submitter.loggedBy"
+                value={formData.submitter.loggedBy}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -337,66 +463,126 @@ const NewIncident = () => {
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="asset"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Asset
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+              <Autocomplete
+                className="w-[65%]"
+                options={assetData}
+                getOptionLabel={(asset) =>
+                  asset.assetInformation.assetTag &&
+                  asset.assetInformation.serialNumber
+                    ? `${asset.assetInformation.assetTag} - ${asset.assetInformation.serialNumber}`
+                    : asset.assetInformation.serialNumber || ""
+                }
+                value={
+                  assetData.find(
+                    (asset) =>
+                      asset.assetInformation.assetTag ===
+                      formData.assetDetails.asset
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  // console.log(newValue);
+                  setFormData({
+                    ...formData,
+                    assetDetails: {
+                      ...formData.assetDetails,
+                      asset: newValue ? newValue.assetInformation.assetTag : "",
+                      make: newValue ? newValue.assetInformation.make : "",
+                      model: newValue ? newValue.assetInformation.model : "",
+                      serialNo: newValue
+                        ? newValue.assetInformation.serialNumber
+                        : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-sm text-slate-800"
+                    placeholder="Select Assets"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="make"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Make
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                id="make"
+                name="assetDetails.make"
+                value={formData.assetDetails.make}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetDetails: {
+                      ...formData.assetDetails,
+                      make: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="model"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Model
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                id="model"
+                name="assetDetails.model"
+                value={formData.assetDetails.model}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetDetails: {
+                      ...formData.assetDetails,
+                      model: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="serialNo"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Serial No.
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                id="serialNo"
+                name="assetDetails.serialNo"
+                value={formData.assetDetails.serialNo}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    assetDetails: {
+                      ...formData.assetDetails,
+                      serialNo: e.target.value,
+                    },
+                  })
+                }
               />
             </div>
           </div>
@@ -408,66 +594,133 @@ const NewIncident = () => {
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="location"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Location
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+              <Autocomplete
+                className="w-[65%]"
+                options={locationData}
+                getOptionLabel={(option) => option.locationName}
+                value={
+                  locationData.find(
+                    (loc) =>
+                      loc.locationName === formData.locationDetails.location
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    locationDetails: {
+                      ...formData.locationDetails,
+                      location: newValue ? newValue.locationName : "",
+                      subLocation: "", // Reset subLocation when location changes
+                    },
+                  });
+                  setFilteredSubLocations(newValue?.subLocations || []);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
+              {/* <input
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="location"
+                name="locationDetails.location"
+                value={formData.locationDetails.location}
+                onChange={handleChange}
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="subLocation"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Sub Location
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+              <Autocomplete
+                className="w-[65%]"
+                options={filteredSubLocations}
+                getOptionLabel={(option) => option?.subLocationName || ""}
+                value={
+                  filteredSubLocations.find(
+                    (subLoc) =>
+                      subLoc.subLocationName ===
+                      formData.locationDetails.subLocation
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    locationDetails: {
+                      ...formData.locationDetails,
+                      subLocation: newValue ? newValue.subLocationName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Sub Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
+              {/* <input
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                type="text"
+                id="subLocation"
+                name="locationDetails.subLocation"
+                value={formData.locationDetails.subLocation}
+                onChange={handleChange}
+              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="floor"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Floor
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                id="floor"
+                name="locationDetails.floor"
+                value={formData.locationDetails.floor}
+                onChange={handleChange}
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="roomNo"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Room No
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                id="roomNo"
+                name="locationDetails.roomNo"
+                value={formData.locationDetails.roomNo}
+                onChange={handleChange}
               />
             </div>
           </div>
@@ -477,84 +730,99 @@ const NewIncident = () => {
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <h2 className="text-slate-700 font-semibold mb-10">Classification</h2>
           <div className="flex flex-wrap gap-6 justify-between mt-3">
-            <div className="flex items-center gap-10 w-[100%]">
+            <div className="flex justify-start items-center gap-10 w-[100%]">
               <label
-                htmlFor="employeeCode"
+                htmlFor="excludeSLA"
                 className="text-xs font-semibold text-slate-600"
               >
                 Exclude From SLA
               </label>
               <input
-                className="text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="checkbox"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                id="excludeSLA"
+                name="classificaton.excludeSLA"
+                checked={formData.classificaton.excludeSLA}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    classificaton: {
+                      ...prev.classificaton,
+                      excludeSLA: e.target.checked,
+                    },
+                  }))
+                }
               />
             </div>
+            {!formData.classificaton.excludeSLA && (
+              <div className="flex items-center w-[46%]">
+                <label
+                  htmlFor="severityLevel"
+                  className="w-[28%] text-xs font-semibold text-slate-600"
+                >
+                  Severity Level
+                </label>
+                <select
+                  className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                  name="classificaton.severityLevel"
+                  id="loggedVia"
+                  value={formData.classificaton.severityLevel}
+                  onChange={handleChange}
+                >
+                  <option value="">Select Priority</option>
+                  <option value="Severity-1">Severity-1</option>
+                  <option value="Severity-2">Severity-2</option>
+                  <option value="Severity-3">Severity-3</option>
+                  <option value="Severity-4">Severity-4</option>
+                </select>
+              </div>
+            )}
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
-              >
-                Severity Level
-              </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
-              />
-            </div>
-            <div className="flex items-center w-[46%]">
-              <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="supportDepartmentName"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Support Department Name
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                id="supportDepartmentName"
+                name="classificaton.supportDepartmentName"
+                value={formData.classificaton.supportDepartmentName}
+                onChange={handleChange}
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="supportGroupName"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Support Group Name
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                id="supportGroupName"
+                name="classificaton.supportGroupName"
+                value={formData.classificaton.supportGroupName}
+                onChange={handleChange}
               />
             </div>
             <div className="flex items-center w-[46%]">
               <label
-                htmlFor="employeeCode"
-                className="w-[25%] text-xs font-semibold text-slate-600"
+                htmlFor="technician"
+                className="w-[28%] text-xs font-semibold text-slate-600"
               >
                 Technician
               </label>
               <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
-                id="employeeCode"
-                name="employeeCode"
-                //value={formData.employeeCode}
-                //onChange={handleSubmit}
+                id="technician"
+                name="classificaton.technician"
+                value={formData.classificaton.technician}
+                onChange={handleChange}
               />
             </div>
           </div>

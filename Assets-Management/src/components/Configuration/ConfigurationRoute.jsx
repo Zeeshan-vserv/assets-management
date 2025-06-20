@@ -12,6 +12,8 @@ import ImportUser from "./Global/ImportUser.jsx";
 import Organization from "./Global/Organization.jsx";
 import Category from "./Incident/Category.jsx";
 import SubCategory from "./Incident/SubCategory.jsx";
+import AllVendors from "./Incident/AllVendors.jsx";
+import NewVendor from "./Incident/NewVendor.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -31,6 +33,8 @@ function ConfigurationRoute() {
         {/* Incident Routes */}
         <Route path="Category" element={<Category />} />
         <Route path="SubCategory" element={<SubCategory />} />
+        <Route path="all-vendors" element={<AllVendors />} />
+        <Route path="new-vendor" element={<NewVendor />} />
       </Routes>
     </>
   );

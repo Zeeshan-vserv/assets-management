@@ -12,6 +12,14 @@ import ImportUser from "./Global/ImportUser.jsx";
 import Organization from "./Global/Organization.jsx";
 import Category from "./Incident/Category.jsx";
 import SubCategory from "./Incident/SubCategory.jsx";
+import SoftwareCategory from "./Assets/SoftwareCategory.jsx";
+import SoftwareName from "./Assets/SoftwareName.jsx";
+import Publisher from "./Assets/Publisher.jsx";
+import StoreLocation from "./Assets/StoreLocation.jsx";
+import Condition from "./Assets/Condition.jsx";
+import ConsumableCategory from "./Assets/ConsumableCategory.jsx";
+import ConsumableSubCategory from "./Assets/ConsumableSubCategory.jsx";
+import AssetTag from "./Assets/AssetTag.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -27,9 +35,23 @@ function ConfigurationRoute() {
         <Route path="sub-location" element={<SubLocation />} />
         <Route path="import-user" element={<ImportUser />} />
         <Route path="organization" element={<Organization />} />
+        
         {/* Incident Routes */}
         <Route path="Category" element={<Category />} />
         <Route path="SubCategory" element={<SubCategory />} />
+
+        {/* Assets Routes */}
+        <Route path="software-category" element={<SoftwareCategory />} />
+        <Route path="software-name" element={<SoftwareName />} />
+        <Route path="publisher" element={<Publisher />} />
+        <Route path="store-location" element={<StoreLocation />} />
+        <Route path="condition" element={<Condition />} />
+        <Route path="consumable-category" element={<ConsumableCategory />} />
+        <Route
+          path="consumable-sub-category"
+          element={<ConsumableSubCategory />}
+        />
+        <Route path="asset-tag" element={<AssetTag />} />
       </Routes>
     </>
   );

@@ -120,6 +120,7 @@ const Navigation = ({ nav, setNav }) => {
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >escalatio level</li>
                 </ul>
             )}
+
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => toggleSubMenu('sla')}>sla {expandedSubMenus.sla ?<IoMdArrowDropdown />: <IoMdArrowDropright />}</h3>
             {expandedSubMenus.sla && (
               <ul className='flex flex-col gap-2 list-disc pl-5 '>
@@ -131,6 +132,7 @@ const Navigation = ({ nav, setNav }) => {
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >holiday list</li>
                 </ul>
             )}
+         
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => toggleSubMenu('request')}>request {expandedSubMenus.request ?<IoMdArrowDropdown />: <IoMdArrowDropright />}</h3>
             {expandedSubMenus.request && (
               <ul className='flex flex-col gap-2 list-disc pl-5 '>
@@ -140,6 +142,20 @@ const Navigation = ({ nav, setNav }) => {
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub category</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >templates</li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >rules</li>
+                </ul>
+            )}
+
+            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => toggleSubMenu('asset')}>asset {expandedSubMenus.asset ?<IoMdArrowDropdown />: <IoMdArrowDropright />}</h3>
+            {expandedSubMenus.asset && (
+              <ul className='flex flex-col gap-2 list-disc pl-5 '>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/software-category" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Software Category</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/software-name"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Software Name</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/publisher"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Publisher</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/store-location"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Store Location</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/condition"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Condition</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/consumable-category"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Consumable Category</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/consumable-sub-category"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Consumable SubCategory</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/asset-tag"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Asset Tag</NavLink></li>
                 </ul>
             )}
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >gate pass</h3>

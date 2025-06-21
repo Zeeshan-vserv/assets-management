@@ -25,21 +25,21 @@ API.interceptors.response.use(
     }
 );
 
-//Software Name (Create Software)
+//Software 
 export const createSoftware = (formData)=>API.post("/softwareName/")
 export const getAllSoftware = () => API.get('/software');
 export const getSoftwareById = (id) => API.get(`/software/${id}`);
 export const updateSoftware = (id, updatedData) => API.put(`/software/${id}`, updatedData);
 export const deleteSoftware = (id) => API.delete(`/software/${id}`);
 
-//Software Category
+//publisher
 export const createPublisher = (softwareId, formData) =>API.post(`/${softwareId}/publisher`, formData);
 export const getAllPublisher = () => API.get('/publishers');
 export const getPublisherById = (id) => API.get(`/publisher/${id}`);
 export const updatePublisher = (id, updatedData) => API.put(`/publisher/${id}`, updatedData);
 export const deletePublisher = (softwareId, publisherId) =>API.delete(`/${softwareId}/publisher/${publisherId}`);
 
-//publisher
+//Software Category
 export const createSoftwareCategory = (softwareId, formData) =>API.post(`/${softwareId}/softwareCategory`, formData);
 export const getAllSoftwareCategory = () => API.get('/softwareCategory');
 export const getSoftwareCategoryById = (id) => API.get(`/softwareCategory/${id}`);

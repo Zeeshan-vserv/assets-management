@@ -648,7 +648,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { createGatePass } from "../../../api/GatePassRequest";
 
-function GetPassImport() {
+function CreateGatePass() {
   const user = useSelector((state) => state.authReducer.authData);
 
   const [attachmentType, setAttachmentType] = useState("");
@@ -800,7 +800,7 @@ function GetPassImport() {
               Submit
             </button>
             <NavLink
-              to="/main/Asset/get-pass"
+              to="/main/Asset/GatePassData"
               className={({ isActive }) =>
                 `hover:underline cursor-pointer ${
                   isActive ? "text-blue-400" : ""
@@ -1341,4 +1341,4 @@ function GetPassImport() {
   );
 }
 
-export default GetPassImport;
+export default CreateGatePass;

@@ -237,6 +237,7 @@ export const updateSoftware = async (req, res) => {
 export const deletePublisher = async (req, res) => {
     try {
         const { softwareId, publisherId } = req.params
+
         const software = await SoftwareCategoryModel.findById(softwareId)
         if (!software) {
             return res.status(400).json({ success: false, message: 'Software Id not found' })

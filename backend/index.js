@@ -13,6 +13,9 @@ import componentRoute from './routes/componentRoute.js'
 import departmentRoute from './routes/departmentRoute.js'
 import locationRoute from './routes/locationRoute.js'
 import incidentCategoryRoute from './routes/incidentCategoryRoute.js'
+import incidentRoute from './routes/incidentRoute.js'
+import gatePass from './routes/gatePassRoute.js'
+import softwareCategory from './routes/softwareCategoryRoute.js'
 
 const app = express()
 
@@ -35,3 +38,6 @@ app.use('/component', componentRoute)
 app.use('/department', departmentRoute)
 app.use('/location', locationRoute)
 app.use('/category', incidentCategoryRoute)
+app.use('/incident', incidentRoute)
+app.use('/gatePass', gatePass)
+app.use('/softwareName', softwareCategory)

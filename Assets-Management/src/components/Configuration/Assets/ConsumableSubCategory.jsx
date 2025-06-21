@@ -133,7 +133,7 @@ function ConsumableSubCategory() {
       });
       setOpenUpdateModal(true);
     }
-  };
+  }; 
 
   const updateConsumableSubCategoryChangeHandler = (e) => {
     const { name, value } = e.target;

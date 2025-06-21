@@ -27,21 +27,21 @@ API.interceptors.response.use(
 
 //Software 
 export const createSoftware = (formData)=>API.post("/softwareName/")
-export const getAllSoftware = () => API.get('/software');
-export const getSoftwareById = (id) => API.get(`/software/${id}`);
+export const getAllSoftware = () => API.get('/softwareName/software');
+export const getSoftwareById = (id) => API.get(`/softwareName/software/${id}`);
 export const updateSoftware = (id, updatedData) => API.put(`/software/${id}`, updatedData);
 export const deleteSoftware = (id) => API.delete(`/software/${id}`);
 
 //publisher
-export const createPublisher = (softwareId, formData) =>API.post(`/${softwareId}/publisher`, formData);
-export const getAllPublisher = () => API.get('/publishers');
-export const getPublisherById = (id) => API.get(`/publisher/${id}`);
-export const updatePublisher = (id, updatedData) => API.put(`/publisher/${id}`, updatedData);
-export const deletePublisher = (softwareId, publisherId) =>API.delete(`/${softwareId}/publisher/${publisherId}`);
+export const createPublisher = (softwareId, formData) =>API.post(`/softwareName/${softwareId}/publisher`, formData);
+export const getAllPublisher = () => API.get('/softwareName/publishers');
+export const getPublisherById = (id) => API.get(`/softwareName/publisher/${id}`);
+export const updatePublisher = (id, updatedData) => API.put(`/softwareName/publisher/${id}`, updatedData);
+export const deletePublisher = (softwareId, publisherId) =>API.delete(`/softwareName/${softwareId}/publisher/${publisherId}`);
 
 //Software Category
-export const createSoftwareCategory = (softwareId, formData) =>API.post(`/${softwareId}/softwareCategory`, formData);
-export const getAllSoftwareCategory = () => API.get('/softwareCategory');
-export const getSoftwareCategoryById = (id) => API.get(`/softwareCategory/${id}`);
-export const updateSoftwareCategory = (id, updatedData) =>API.put(`/softwareCategory/${id}`, updatedData);
-export const deleteSoftwareCategory = (softwareId, softwareCategoryId) =>API.delete(`/${softwareId}/softwareCategory/${softwareCategoryId}`);
+export const createSoftwareCategory = (softwareId, formData) =>API.post(`/softwareName/${softwareId}/softwareCategory`, formData);
+export const getAllSoftwareCategory = () => API.get('/softwareName/softwareCategory');
+export const getSoftwareCategoryById = (id) => API.get(`/softwareName/softwareCategory/${id}`);
+export const updateSoftwareCategory = (id, updatedData) =>API.put(`/softwareName/softwareCategory/${id}`, updatedData);
+export const deleteSoftwareCategory = (softwareId, softwareCategoryId) =>API.delete(`/softwareName/${softwareId}/softwareCategory/${softwareCategoryId}`);

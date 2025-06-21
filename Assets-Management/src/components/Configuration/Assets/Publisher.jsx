@@ -13,7 +13,7 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import { getAllPublisher } from "../../../api/SoftwareCategoryRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -37,11 +37,12 @@ function Publisher() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deletePublisherId, setDeletePublisherId] = useState(null);
 
-  const fetchSoftwareName = async () => {
+  const fetchPublisher = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
-      setData(response?.data?.data || []);
+      const response = await getAllPublisher();
+      console.log("response",response?.data?.data)
+      // setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching software Name:", error);
     } finally {
@@ -50,7 +51,7 @@ function Publisher() {
   };
 
   useEffect(() => {
-    fetchSoftwareName();
+    fetchPublisher();
   }, []);
 
   // console.log("data", data);

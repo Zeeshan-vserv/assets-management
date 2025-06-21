@@ -1,11 +1,48 @@
 import GatePass from "../models/gatePassModel.js";
 
+// export const createGatePass = async (req, res) => {
+//     try {
+//         const { userId, ...gatePassData } = req.body
+        
+//         if(!userId){
+//             return res.status(404).json({message:'User not found'})
+//         }
+
+//         if (req.file) {
+//             gatePassData.attachment = req.file.path;
+//         }
+
+//         const newGatePass = new GatePass({
+//             userId,
+//             ...gatePassData
+//         })
+//         await newGatePass.save()
+
+//         res.status(201).json({success:true, data:newGatePass, message:'Gate Pass created successfully'})
+//     } catch (error) {
+//         res.status(500).json({message:'An error occurred while crearig gate pass'})
+//     }
+// }
+
 export const createGatePass = async (req, res) => {
     try {
         const { userId, ...gatePassData } = req.body
-        
+
         if(!userId){
             return res.status(404).json({message:'User not found'})
+        }
+
+        // Parse JSON fields if they exist
+        if (gatePassData.consumables && typeof gatePassData.consumables === "string") {
+            gatePassData.consumables = JSON.parse(gatePassData.consumables);
+        }
+        if (gatePassData.others && typeof gatePassData.others === "string") {
+            gatePassData.others = JSON.parse(gatePassData.others);
+        }
+
+        // Convert approvalRequired to Boolean
+        if (typeof gatePassData.approvalRequired === "string") {
+            gatePassData.approvalRequired = gatePassData.approvalRequired === "true";
         }
 
         if (req.file) {
@@ -20,7 +57,8 @@ export const createGatePass = async (req, res) => {
 
         res.status(201).json({success:true, data:newGatePass, message:'Gate Pass created successfully'})
     } catch (error) {
-        res.status(500).json({message:'An error occurred while crearig gate pass'})
+        console.error(error); // <--- Add this for debugging
+        res.status(500).json({message:'An error occurred while creating gate pass'})
     }
 }
 

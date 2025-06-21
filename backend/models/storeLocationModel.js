@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const storeLocationSchema = mongoose.Schema({
+    userId: String,
     storeLocationId: Number,
     locationName: String,
     storeLocationName: String,

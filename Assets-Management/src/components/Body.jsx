@@ -16,7 +16,7 @@ const Body = ({ nav, setNav }) => {
           <Route path="/Configuration/*" element={<ConfigurationRoute />} />
           <Route path="/Asset/*" element={<AssetRoute />} />
           <Route path="/test" element={<Test />} />
-          <Route path="/service-desk/*" element={<ServiceDeskRoute />} />
+          <Route path="/ServiceDesk/*" element={<ServiceDeskRoute />} />
         </Routes>
       </div>
     </div>

@@ -17,6 +17,7 @@ import incidentRoute from './routes/incidentRoute.js'
 import gatePass from './routes/gatePassRoute.js'
 import softwareCategory from './routes/softwareCategoryRoute.js'
 import storeLocation from './routes/storeLocationRoute.js'
+import consumable from './routes/consumableRoute.js'
 
 const app = express()
 
@@ -43,3 +44,4 @@ app.use('/incident', incidentRoute)
 app.use('/gatePass', gatePass)
 app.use('/softwareName', softwareCategory)
 app.use('/storeLocation', storeLocation)
+app.use('/consumable', consumable)

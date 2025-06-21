@@ -13,7 +13,14 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import {
+  createSoftwareCategory,
+  deleteSoftwareCategory,
+  getAllSoftware,
+  getAllSoftwareCategory,
+  updateSoftwareCategory,
+} from "../../../api/SoftwareCategoryRequest";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -24,12 +31,14 @@ const csvConfig = mkConfig({
 
 function SoftwareCategory() {
   const [data, setData] = useState([]);
+  const [softwareData, setSoftwareData] = useState([]);
+  const [SelectedSoftwareId, setSelectedSoftwareId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [addSoftwareCategoryModal, setAddSoftwareCategoryModal] =
     useState(false);
   const [addNewSoftwareCategory, setAddNewSoftwareCategory] = useState({
-    softwareCategory: "",
+    softwareCategoryName: "",
   });
 
   const [editSoftwareCategory, setEditSoftwareCategory] = useState(null);
@@ -38,11 +47,12 @@ function SoftwareCategory() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteSoftwareCategoryId, setDeleteSoftwareCategoryId] =
     useState(null);
+  const [deleteSoftwareId, setDeleteSoftwareId] = useState(null);
 
   const fetchSoftwareCategory = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
+      const response = await getAllSoftwareCategory();
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching software category:", error);
@@ -55,14 +65,29 @@ function SoftwareCategory() {
     fetchSoftwareCategory();
   }, []);
 
+  const fetchgetAllSoftware = async () => {
+    try {
+      setIsLoading(true);
+      const getAllSoftwareResponse = await getAllSoftware();
+      setSoftwareData(getAllSoftwareResponse?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching software Name:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchgetAllSoftware();
+  }, []);
+
   const columns = useMemo(
     () => [
       {
-        accessorKey: "departmentId",
+        accessorKey: "softwareCategoryId",
         header: "Software Category Id",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "softwareCategoryName",
         header: "Software Category Name",
       },
       {
@@ -87,7 +112,9 @@ function SoftwareCategory() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleDeleteSoftwareCategory(row.original._id)}
+            onClick={() =>
+              handleDeleteSoftwareCategory(row.original._id, softwareData)
+            }
             color="error"
             aria-label="delete"
           >
@@ -100,6 +127,11 @@ function SoftwareCategory() {
   );
 
   //Add
+  const openAddSoftwareCategoryModal = (softwareId) => {
+    setSelectedSoftwareId(softwareId);
+    setAddSoftwareCategoryModal(true);
+  };
+
   const addNewSoftwareCategoryChangeHandler = (e) => {
     const { name, value } = e.target;
     setAddNewSoftwareCategory((prev) => ({
@@ -110,8 +142,19 @@ function SoftwareCategory() {
 
   const addNewSoftwareCategoryHandler = async (e) => {
     e.preventDefault();
-    // console.log("addNewSoftwareCategory", addNewSoftwareCategory);
-    //call api
+    const formData = {
+      softwareCategoryName: addNewSoftwareCategory?.softwareCategoryName,
+    };
+    const createSoftwareCategoryResponse = await createSoftwareCategory(
+      SelectedSoftwareId,
+      formData
+    );
+    console.log();
+    if (createSoftwareCategoryResponse?.data.success) {
+      toast.success("Software Category created successfullly");
+      await fetchSoftwareCategory();
+      await fetchgetAllSoftware();
+    }
     setAddSoftwareCategoryModal(false);
   };
 
@@ -120,7 +163,8 @@ function SoftwareCategory() {
     const softwareCategoryToEdit = data?.find((d) => d._id === id);
     if (softwareCategoryToEdit) {
       setEditSoftwareCategory({
-        softwareCategory: softwareCategoryToEdit.softwareCategory,
+        _id: softwareCategoryToEdit?._id,
+        softwareCategoryName: softwareCategoryToEdit.softwareCategoryName,
       });
       setOpenUpdateModal(true);
     }
@@ -138,29 +182,55 @@ function SoftwareCategory() {
     e.preventDefault();
     if (!editSoftwareCategory?._id) return;
     try {
-      // console.log("editSoftwareCategory", editSoftwareCategory);
-      //call api
+      const updatedData = {
+        softwareCategoryName: editSoftwareCategory?.softwareCategoryName,
+      };
+      const updateSoftwareCategoryResponse = await updateSoftwareCategory(
+        editSoftwareCategory?._id,
+        updatedData
+      );
+      if (updateSoftwareCategoryResponse?.data.success) {
+        toast.success("Software category updated successfully");
+        await fetchSoftwareCategory();
+        await fetchgetAllSoftware();
+      }
       setEditSoftwareCategory(null);
     } catch (error) {
       console.error("Error updating software category:", error);
+    } finally {
+      setOpenUpdateModal(false);
     }
   };
 
   //Delete
-  const handleDeleteSoftwareCategory = (id) => {
-    setDeleteSoftwareCategoryId(id);
-    setDeleteConfirmationModal(true);
+  const handleDeleteSoftwareCategory = (softwareCategoryId, softwareDatas) => {
+    const softwareWithPublisher = softwareDatas.find((software) =>
+      software.softwareCategory.some((pub) => pub._id === softwareCategoryId)
+    );
+    if (softwareWithPublisher) {
+      setDeleteSoftwareId(softwareWithPublisher?._id);
+      setDeleteSoftwareCategoryId(softwareCategoryId);
+      setDeleteConfirmationModal(true);
+    }
   };
 
   const deleteSoftwareCategoryHandler = async (e) => {
     e.preventDefault();
     try {
-      // console.log("deleteSoftwareCategoryId", deleteSoftwareCategoryId);
-      //call api
+      const deleteSoftwareCategoryResponse = await deleteSoftwareCategory(
+        deleteSoftwareId,
+        deleteSoftwareCategoryId
+      );
+      if (deleteSoftwareCategoryResponse?.data.success) {
+        toast.success("Software category deleted successfully");
+        await fetchSoftwareCategory();
+        await fetchgetAllSoftware();
+      }
     } catch (error) {
       console.error("Error deleting software category:", error);
     }
     setDeleteConfirmationModal(false);
+    setDeleteSoftwareCategoryId(null);
     setDeleteSoftwareCategoryId(null);
   };
 
@@ -253,21 +323,24 @@ function SoftwareCategory() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          <Button
-            onClick={() => setAddSoftwareCategoryModal(true)}
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlineIcon />}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "#fff",
-              textTransform: "none",
-              mt: 1,
-              mb: 1,
-            }}
-          >
-            New
-          </Button>
+          {softwareData.map((software) => (
+            <Button
+              key={software?._id}
+              onClick={() => openAddSoftwareCategoryModal(software?._id)}
+              variant="contained"
+              size="small"
+              startIcon={<AddCircleOutlineIcon />}
+              sx={{
+                backgroundColor: "#2563eb",
+                color: "#fff",
+                textTransform: "none",
+                mt: 1,
+                mb: 1,
+              }}
+            >
+              New
+            </Button>
+          ))}
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -381,10 +454,10 @@ function SoftwareCategory() {
                       Software Category
                     </label>
                     <TextField
-                      name="softwareCategory"
+                      name="softwareCategoryName"
                       required
                       fullWidth
-                      value={addNewSoftwareCategory?.softwareCategory || ""}
+                      value={addNewSoftwareCategory?.softwareCategoryName || ""}
                       onChange={addNewSoftwareCategoryChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
@@ -426,10 +499,10 @@ function SoftwareCategory() {
                     Software Category
                   </label>
                   <TextField
-                    name="softwareCategory"
+                    name="softwareCategoryName"
                     required
                     fullWidth
-                    value={editSoftwareCategory?.softwareCategory || ""}
+                    value={editSoftwareCategory?.softwareCategoryName || ""}
                     onChange={updateSoftwareCategoryChangeHandler}
                     placeholder="Enter Software Category Name"
                     variant="standard"

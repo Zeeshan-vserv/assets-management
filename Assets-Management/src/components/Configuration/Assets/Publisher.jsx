@@ -13,7 +13,14 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import {
+  createPublisher,
+  deletePublisher,
+  getAllPublisher,
+  getAllSoftware,
+  updatePublisher,
+} from "../../../api/SoftwareCategoryRequest";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -24,11 +31,13 @@ const csvConfig = mkConfig({
 
 function Publisher() {
   const [data, setData] = useState([]);
+  const [softwareData, setSoftwareData] = useState([]);
+  const [SelectedSoftwareId, setSelectedSoftwareId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const [addPublisherModal, setAddPublisherModal] = useState(false);
   const [addNewPublisher, setAddNewPublisher] = useState({
-    publisher: "",
+    publisherName: "",
   });
 
   const [editPublisher, setEditPublisher] = useState(null);
@@ -36,12 +45,13 @@ function Publisher() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deletePublisherId, setDeletePublisherId] = useState(null);
+  const [deleteSoftwareId, setDeleteSoftwareId] = useState(null);
 
-  const fetchSoftwareName = async () => {
+  const fetchPublisher = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
-      setData(response?.data?.data || []);
+      const getAllPublisherResponse = await getAllPublisher();
+      setData(getAllPublisherResponse?.data?.data || []);
     } catch (error) {
       console.error("Error fetching software Name:", error);
     } finally {
@@ -50,29 +60,35 @@ function Publisher() {
   };
 
   useEffect(() => {
-    fetchSoftwareName();
+    fetchPublisher();
   }, []);
 
-  // console.log("data", data);
+  const fetchgetAllSoftware = async () => {
+    try {
+      setIsLoading(true);
+      const getAllSoftwareResponse = await getAllSoftware();
+      setSoftwareData(getAllSoftwareResponse?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching software Name:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchgetAllSoftware();
+  }, []);
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: "departmentId",
-        header: "Software Name Id",
+        accessorKey: "publisherId",
+        header: "Publisher Id",
       },
       {
-        accessorKey: "departmentName",
-        header: "Software Category",
+        accessorKey: "publisherName",
+        header: "Publisher Name",
       },
-      {
-        accessorKey: "departmentHead",
-        header: "Publisher",
-      },
-      {
-        accessorKey: "_id",
-        header: "Software Name",
-      },
+
       {
         id: "edit",
         header: "Edit",
@@ -95,7 +111,9 @@ function Publisher() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleDeletePublisher(row.original._id)}
+            onClick={() =>
+              handleDeletePublisher(row.original._id, softwareData)
+            }
             color="error"
             aria-label="delete"
           >
@@ -108,6 +126,11 @@ function Publisher() {
   );
 
   //Add
+  const openAddPublisherModal = (softwareId) => {
+    setSelectedSoftwareId(softwareId);
+    setAddPublisherModal(true);
+  };
+
   const addNewPublisherChangeHandler = (e) => {
     const { name, value } = e.target;
     setAddNewPublisher((prev) => ({
@@ -118,8 +141,19 @@ function Publisher() {
 
   const addNewPublisherHandler = async (e) => {
     e.preventDefault();
-    // console.log("addNewPublisher", addNewPublisher);
-    //call api
+    const formData = {
+      publisherName: addNewPublisher.publisherName,
+    };
+
+    const createPublisherResponse = await createPublisher(
+      SelectedSoftwareId,
+      formData
+    );
+    if (createPublisherResponse?.data?.success) {
+      toast.success("Publisher created successfullly");
+      await fetchPublisher();
+      await fetchgetAllSoftware();
+    }
     setAddPublisherModal(false);
   };
 
@@ -128,7 +162,8 @@ function Publisher() {
     const publisherToEdit = data?.find((d) => d._id === id);
     if (publisherToEdit) {
       setEditPublisher({
-        publisher: publisherToEdit.publisher,
+        _id: publisherToEdit._id,
+        publisherName: publisherToEdit.publisherName,
       });
       setOpenUpdateModal(true);
     }
@@ -136,30 +171,65 @@ function Publisher() {
 
   const updatePublisherChangeHandler = (e) => {
     const { name, value } = e.target;
-    setEditSoftwareName((prev) => ({
+    setEditPublisher((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
   const updatePublisherHandler = async (e) => {
     e.preventDefault();
+    try {
+      const updatedData = {
+        publisherName: editPublisher?.publisherName,
+      };
+      const updatePublisherResponse = await updatePublisher(
+        editPublisher._id,
+        updatedData
+      );
+      if (updatePublisherResponse?.data.success) {
+        toast.success("Publisher updated successfully");
+        await fetchPublisher();
+        await fetchgetAllSoftware();
+      }
+    } catch (error) {
+      console.error("Error updating publisher:", error);
+    } finally {
+      setOpenUpdateModal(false);
+    }
   };
 
   //delete
-  const handleDeletePublisher = (id) => {
-    setDeletePublisherId(id);
-    setDeleteConfirmationModal(true);
+  const handleDeletePublisher = (publisherId, softwareDatas) => {
+    const softwareWithPublisher = softwareDatas.find((software) =>
+      software.publishers.some((pub) => pub._id === publisherId)
+    );
+    if (softwareWithPublisher) {
+      setDeleteSoftwareId(softwareWithPublisher._id);
+      setDeletePublisherId(publisherId);
+      setDeleteConfirmationModal(true);
+    }
   };
+
   const deletePublisherHandler = async (e) => {
     e.preventDefault();
     try {
-      // console.log("deletePublisherId", deletePublisherId);
-      //call api
+      const deletePublisherResponse = await deletePublisher(
+        deleteSoftwareId,
+        deletePublisherId
+      );
+      console.log("deletePublisherResponse", deletePublisherResponse);
+      if (deletePublisherResponse?.data.success) {
+        toast.success("Publisher deleted successfully");
+        await fetchPublisher();
+        await fetchgetAllSoftware();
+      }
     } catch (error) {
       console.error("Error deleting publisher:", error);
+    } finally {
+      setDeleteConfirmationModal(false);
+      setDeletePublisherId(null);
+      setDeleteSoftwareId(null);
     }
-    setDeleteConfirmationModal(false);
-    setDeletePublisherId(null);
   };
 
   //Exports
@@ -251,21 +321,24 @@ function Publisher() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          <Button
-            onClick={() => setAddPublisherModal(true)}
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlineIcon />}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "#fff",
-              textTransform: "none",
-              mt: 1,
-              mb: 1,
-            }}
-          >
-            New
-          </Button>
+          {softwareData.map((software) => (
+            <Button
+              key={software?._id}
+              onClick={() => openAddPublisherModal(software?._id)}
+              variant="contained"
+              size="small"
+              startIcon={<AddCircleOutlineIcon />}
+              sx={{
+                backgroundColor: "#2563eb",
+                color: "#fff",
+                textTransform: "none",
+                mt: 1,
+                mb: 1,
+              }}
+            >
+              New
+            </Button>
+          ))}
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -374,10 +447,10 @@ function Publisher() {
                       Publisher *
                     </label>
                     <TextField
-                      name="publisher"
+                      name="publisherName"
                       required
                       fullWidth
-                      value={addNewPublisher?.publisher || ""}
+                      value={addNewPublisher?.publisherName || ""}
                       onChange={addNewPublisherChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
@@ -417,10 +490,10 @@ function Publisher() {
                         Publisher *
                       </label>
                       <TextField
-                        name="softwareName"
+                        name="publisherName"
                         required
                         fullWidth
-                        value={editPublisher?.publisher || ""}
+                        value={editPublisher?.publisherName || ""}
                         onChange={updatePublisherChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}

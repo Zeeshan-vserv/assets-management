@@ -13,7 +13,15 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import {
+  createSoftware,
+  deleteSoftware,
+  getAllPublisher,
+  getAllSoftware,
+  getAllSoftwareCategory,
+  updateSoftware,
+} from "../../../api/SoftwareCategoryRequest";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -29,9 +37,11 @@ function SoftwareName() {
   const [addSoftwareNameModal, setAddSoftwareNameModal] = useState(false);
   const [addNewSoftwareName, setAddNewSoftwareName] = useState({
     softwareName: "",
-    publisher: "",
+    publishers: "",
     softwareCategory: "",
   });
+  const [publishers, setPublishers] = useState([]);
+  const [softwareCategories, setSoftwareCategories] = useState([]);
 
   const [editSoftwareName, setEditSoftwareName] = useState(null);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
@@ -39,11 +49,29 @@ function SoftwareName() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteSoftwareNameId, setDeleteSoftwareNameId] = useState(null);
 
+  // Fetch and flatten software data so each row has a single publisher
   const fetchSoftwareName = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
-      setData(response?.data?.data || []);
+      const response = await getAllSoftware();
+      let rawData = response?.data?.data || [];
+      let flattened = [];
+      rawData.forEach((item) => {
+        if (Array.isArray(item.publishers) && item.publishers.length > 0) {
+          item.publishers.forEach((pub) => {
+            flattened.push({
+              ...item,
+              publishers: pub,
+            });
+          });
+        } else {
+          flattened.push({
+            ...item,
+            publishers: item.publishers || null,
+          });
+        }
+      });
+      setData(flattened);
     } catch (error) {
       console.error("Error fetching software Name:", error);
     } finally {
@@ -55,24 +83,84 @@ function SoftwareName() {
     fetchSoftwareName();
   }, []);
 
-  // console.log("data", data);
+  const fetchPublisherData = async () => {
+    try {
+      setIsLoading(true);
+      const getAllPublisherResponse = await getAllPublisher();
+      setPublishers(getAllPublisherResponse?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching publisher:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchPublisherData();
+  }, []);
+
+  const fetchSoftwareCategory = async () => {
+    try {
+      setIsLoading(true);
+      const getAllSoftwareCategoryResponse = await getAllSoftwareCategory();
+      setSoftwareCategories(getAllSoftwareCategoryResponse?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching software category:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchSoftwareCategory();
+  }, []);
+
+  const publisherMap = useMemo(() => {
+    const map = {};
+    publishers.forEach((pub) => {
+      map[pub.publisherId] = pub.publisherName;
+    });
+    return map;
+  }, [publishers]);
+
+  const categoryMap = useMemo(() => {
+    const map = {};
+    softwareCategories.forEach((cat) => {
+      map[cat.softwareCategoryId] = cat.softwareCategoryName;
+    });
+    return map;
+  }, [softwareCategories]);
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: "departmentId",
+        accessorKey: "softwareNameId",
         header: "Software Name Id",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "softwareCategory",
         header: "Software Category",
+        Cell: ({ row }) => {
+          const cat = Array.isArray(row.original.softwareCategory)
+            ? row.original.softwareCategory[0]
+            : row.original.softwareCategory;
+          return cat
+            ? cat.softwareCategoryName ||
+                categoryMap[cat.softwareCategoryId] ||
+                ""
+            : "";
+        },
       },
       {
-        accessorKey: "departmentHead",
+        accessorKey: "publishers",
         header: "Publisher",
+        Cell: ({ row }) => {
+          const pub = row.original.publishers;
+          return pub
+            ? pub.publisherName || publisherMap[pub.publisherId] || ""
+            : "";
+        },
       },
       {
-        accessorKey: "_id",
+        accessorKey: "softwareName",
         header: "Software Name",
       },
       {
@@ -106,7 +194,7 @@ function SoftwareName() {
         ),
       },
     ],
-    [isLoading]
+    [isLoading, categoryMap, publisherMap]
   );
 
   //Add
@@ -120,8 +208,49 @@ function SoftwareName() {
 
   const addNewSoftwareNameHandler = async (e) => {
     e.preventDefault();
-    // console.log("addNewSoftwareName", addNewSoftwareName);
-    //call api
+    const selectedPublisher = publishers.find(
+      (pub) => pub.publisherName === addNewSoftwareName.publishers
+    );
+    const formData = {
+      softwareName: addNewSoftwareName.softwareName,
+      publishers: selectedPublisher
+        ? [
+            {
+              publisherId: selectedPublisher.publisherId,
+              publisherName: selectedPublisher.publisherName,
+            },
+          ]
+        : [],
+      softwareCategory: softwareCategories.find(
+        (cat) =>
+          cat.softwareCategoryName === addNewSoftwareName.softwareCategory
+      )
+        ? [
+            {
+              softwareCategoryId: softwareCategories.find(
+                (cat) =>
+                  cat.softwareCategoryName ===
+                  addNewSoftwareName.softwareCategory
+              ).softwareCategoryId,
+              softwareCategoryName: addNewSoftwareName.softwareCategory,
+            },
+          ]
+        : [],
+    };
+    try {
+      const createSoftwareResponse = await createSoftware(formData);
+      if (createSoftwareResponse?.data?.success) {
+        toast.success("Software created successfully");
+        fetchSoftwareName();
+      }
+      setAddNewSoftwareName({
+        softwareName: "",
+        publishers: "",
+        softwareCategory: "",
+      });
+    } catch (error) {
+      console.error("Error adding new software name:", error);
+    }
     setAddSoftwareNameModal(false);
   };
 
@@ -130,9 +259,17 @@ function SoftwareName() {
     const softwareNameToEdit = data?.find((d) => d._id === id);
     if (softwareNameToEdit) {
       setEditSoftwareName({
+        _id: softwareNameToEdit._id,
         softwareName: softwareNameToEdit.softwareName,
-        publisher: softwareNameToEdit.publisher,
-        softwareCategory: softwareNameToEdit.softwareCategory,
+        publisher:
+          softwareNameToEdit.publishers?.publisherName ||
+          softwareNameToEdit.publishers ||
+          "",
+        softwareCategory:
+          Array.isArray(softwareNameToEdit.softwareCategory) &&
+          softwareNameToEdit.softwareCategory.length > 0
+            ? softwareNameToEdit.softwareCategory[0].softwareCategoryName
+            : softwareNameToEdit.softwareCategory?.softwareCategoryName || "",
       });
       setOpenUpdateModal(true);
     }
@@ -145,13 +282,47 @@ function SoftwareName() {
       [name]: value,
     }));
   };
+
   const updateSoftwareNameHandler = async (e) => {
     e.preventDefault();
     if (!editSoftwareName?._id) return;
     try {
-      console.log("editSoftwareName", editSoftwareName);
-      //call api
+      const updatedData = {
+        softwareName: editSoftwareName.softwareName,
+        publishers: [
+          {
+            publisherId: publishers.find(
+              (pub) => pub.publisherName === editSoftwareName.publisher
+            ).publisherId,
+            publisherName: editSoftwareName.publisher,
+          },
+        ],
+        softwareCategory: softwareCategories.find(
+          (cat) =>
+            cat.softwareCategoryName === editSoftwareName.softwareCategory
+        )
+          ? [
+              {
+                softwareCategoryId: softwareCategories.find(
+                  (cat) =>
+                    cat.softwareCategoryName ===
+                    editSoftwareName.softwareCategory
+                ).softwareCategoryId,
+                softwareCategoryName: editSoftwareName.softwareCategory,
+              },
+            ]
+          : [],
+      };
+      const updateSoftwareResponse = await updateSoftware(
+        editSoftwareName._id,
+        updatedData
+      );
+      if (updateSoftwareResponse?.data?.success) {
+        toast.success("Software updated successfully");
+      }
       setEditSoftwareName(null);
+      setOpenUpdateModal(false);
+      fetchSoftwareName();
     } catch (error) {
       console.error("Error updating software Name:", error);
     }
@@ -165,8 +336,11 @@ function SoftwareName() {
   const deleteSoftwareNameHandler = async (e) => {
     e.preventDefault();
     try {
-      // console.log("deleteSoftwareNameId", deleteSoftwareNameId);
-      //call api
+      const deleteSoftwareResponse = await deleteSoftware(deleteSoftwareNameId);
+      if (deleteSoftwareResponse?.data?.success) {
+        toast.success("Software deleted successfully");
+        fetchSoftwareName();
+      }
     } catch (error) {
       console.error("Error deleting software Name:", error);
     }
@@ -276,7 +450,7 @@ function SoftwareName() {
               mb: 1,
             }}
           >
-            New
+            {data.length === 0 ? "New" : "New"}
           </Button>
           <Button
             onClick={handlePdfData}
@@ -402,20 +576,22 @@ function SoftwareName() {
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
-                    options={["Adobe", "Google", "Microsoft"]}
+                    options={publishers.map(
+                      (publisher) => publisher.publisherName
+                    )}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label="Select"
                         variant="standard"
-                        required
+                        // required
                       />
                     )}
-                    value={addNewSoftwareName.publisher || null}
+                    value={addNewSoftwareName.publishers || null}
                     onChange={(event, value) =>
                       setAddNewSoftwareName((prev) => ({
                         ...prev,
-                        publisher: value,
+                        publishers: value,
                       }))
                     }
                   />
@@ -426,13 +602,15 @@ function SoftwareName() {
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
-                    options={["Cyber Security", "Business Email"]}
+                    options={softwareCategories.map(
+                      (category) => category.softwareCategoryName
+                    )}
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         label="Select"
                         variant="standard"
-                        required
+                        // required
                       />
                     )}
                     value={addNewSoftwareName.softwareCategory || null}
@@ -496,7 +674,9 @@ function SoftwareName() {
                     </label>
                     <Autocomplete
                       sx={{ width: 250 }}
-                      options={[]}
+                      options={publishers.map(
+                        (publisher) => publisher.publisherName
+                      )}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -505,7 +685,7 @@ function SoftwareName() {
                           required
                         />
                       )}
-                      value={editSoftwareName.publisher || null}
+                      value={editSoftwareName?.publisher || null}
                       onChange={(event, value) =>
                         setEditSoftwareName((prev) => ({
                           ...prev,
@@ -520,7 +700,9 @@ function SoftwareName() {
                     </label>
                     <Autocomplete
                       sx={{ width: 250 }}
-                      options={["Cyber Security", "Business Email"]}
+                      options={softwareCategories.map(
+                        (category) => category.softwareCategoryName
+                      )}
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -529,7 +711,7 @@ function SoftwareName() {
                           required
                         />
                       )}
-                      value={editSoftwareName.softwareCategory || null}
+                      value={editSoftwareName?.softwareCategory || null}
                       onChange={(event, value) =>
                         setEditSoftwareName((prev) => ({
                           ...prev,

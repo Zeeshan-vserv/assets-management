@@ -844,7 +844,7 @@ function CreateGatePass() {
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, movementType: value }))
                 }
-                options={[]}
+                options={["Floor Movement","Building Movement","Store Movement","To Repair","Office Movement"]}
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField
@@ -871,7 +871,7 @@ function CreateGatePass() {
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, gatePassType: value }))
                 }
-                options={[]}
+                options={["Returnable", "Non-Returnable"]}
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField

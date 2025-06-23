@@ -13,7 +13,14 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import {
+  createConsumable,
+  getAllConsumables,
+  updateConsumable,
+  deleteConsumable,
+} from "../../../api/ConsumableRequest";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -23,6 +30,7 @@ const csvConfig = mkConfig({
 });
 
 function ConsumableCategory() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -42,10 +50,10 @@ function ConsumableCategory() {
   const fetchConsumableCategory = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
+      const response = await getAllConsumables();
       setData(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching condition:", error);
+      console.error("Error fetching consumable categories:", error);
     } finally {
       setIsLoading(false);
     }
@@ -58,11 +66,11 @@ function ConsumableCategory() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "departmentId",
+        accessorKey: "consumableId",
         header: "Id",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "consumableName",
         header: "Category",
       },
       {
@@ -110,9 +118,23 @@ function ConsumableCategory() {
 
   const addNewConsumableCategoryHandler = async (e) => {
     e.preventDefault();
-    // console.log("addNewCosumableCategory", addNewCosumableCategory);
-    //call api
-    setAddConsumableCategoryModal(false);
+    try {
+      const payload = {
+        userId: user?.userId,
+        consumableName: addNewCosumableCategory.cosumableCategory,
+      };
+      const res = await createConsumable(payload);
+      if (res.data.success) {
+        toast.success("Consumable Category added!");
+        fetchConsumableCategory();
+        setAddConsumableCategoryModal(false);
+        setAddNewCosumableCategory({ cosumableCategory: "" });
+      } else {
+        toast.error(res.data.message || "Failed to add category");
+      }
+    } catch (error) {
+      toast.error("Error adding consumable category");
+    }
   };
 
   //update
@@ -120,7 +142,8 @@ function ConsumableCategory() {
     const consumableCategoryToEdit = data?.find((d) => d._id === id);
     if (consumableCategoryToEdit) {
       setEditConsumableCategory({
-        cosumableCategory: consumableCategoryToEdit.cosumableCategory,
+        _id: consumableCategoryToEdit._id,
+        cosumableCategory: consumableCategoryToEdit.consumableName,
       });
       setOpenUpdateModal(true);
     }
@@ -138,26 +161,40 @@ function ConsumableCategory() {
     e.preventDefault();
     if (!editConsumableCategory?._id) return;
     try {
-      // console.log("editConsumableCategory", editConsumableCategory);
-      //call api
-      setEditConsumableCategory(null);
+      const payload = {
+        consumableName: editConsumableCategory.cosumableCategory,
+      };
+      const res = await updateConsumable(editConsumableCategory._id, payload);
+      if (res.data.success) {
+        toast.success("Consumable Category updated!");
+        fetchConsumableCategory();
+        setOpenUpdateModal(false);
+        setEditConsumableCategory(null);
+      } else {
+        toast.error(res.data.message || "Failed to update category");
+      }
     } catch (error) {
-      console.error("Error updating consumable category:", error);
+      toast.error("Error updating consumable category");
     }
   };
 
-  //delete
   const handleDeleteConsumableCategory = (id) => {
     setDeleteConsumableCategoryId(id);
     setDeleteConfirmationModal(true);
   };
+
   const deleteConsumableCategoryHandler = async (e) => {
     e.preventDefault();
     try {
-      // console.log("deleteConsumableCategoryId", deleteConsumableCategoryId);
-      //call api
+      const res = await deleteConsumable(deleteConsumableCategoryId);
+      if (res.data.success) {
+        toast.success("Consumable Category deleted!");
+        fetchConsumableCategory();
+      } else {
+        toast.error(res.data.message || "Failed to delete category");
+      }
     } catch (error) {
-      console.error("Error deleting consumable category:", error);
+      toast.error("Error deleting consumable category");
     }
     setDeleteConfirmationModal(false);
     setDeleteConsumableCategoryId(null);

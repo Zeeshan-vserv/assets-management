@@ -18,6 +18,8 @@ import gatePass from './routes/gatePassRoute.js'
 import softwareCategory from './routes/softwareCategoryRoute.js'
 import storeLocation from './routes/storeLocationRoute.js'
 import consumable from './routes/consumableRoute.js'
+import condition from './routes/conditionRoute.js'
+import gatePassAddress from './routes/gatePassAddressRoute.js'
 
 const app = express()
 
@@ -45,3 +47,5 @@ app.use('/gatePass', gatePass)
 app.use('/softwareName', softwareCategory)
 app.use('/storeLocation', storeLocation)
 app.use('/consumable', consumable)
+app.use('/condition', condition)
+app.use('/gatePassAddress', gatePassAddress)

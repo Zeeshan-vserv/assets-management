@@ -6,8 +6,8 @@ import AssetData from "./Global/AssetData";
 import EditAsset from "./Global/EditAsset";
 import AssetsSummary from "./Global/AssetsSummary";
 // import GetPass from "./Global/GetPass";
-// import EditGetPass from "./Global/EditGetPass";
 // import GetPassImport from "./Global/GetPassImport";
+import EditGetPass from "./Global/EditGetPass";
 import GatePassData from "./Global/GatePassData";
 import CreateGatePass from "./Global/CreateGatePass";
 const AssetRoute = () => {
@@ -19,7 +19,7 @@ const AssetRoute = () => {
       <Route path=":id" element={<EditAsset />} />
       <Route path="assets-summary" element={<AssetsSummary />} />
       <Route path="GatePassData" element={<GatePassData />} />
-      {/* <Route path="edit-pass/:id" element={<EditGetPass />} /> */}
+      <Route path="EditGetPass/:id" element={<EditGetPass />} />
       <Route path="CreateGatePass" element={<CreateGatePass />} />
     </Routes>
   );

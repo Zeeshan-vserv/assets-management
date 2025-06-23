@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const gatePassSchema = mongoose.Schema({
     userId: String,
+    gatePassId: String,
     movementType: String,
     gatePassType: String,
     expectedReturnDate: Date,

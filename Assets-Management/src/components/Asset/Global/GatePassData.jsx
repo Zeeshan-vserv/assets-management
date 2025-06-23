@@ -50,19 +50,73 @@ function GatePassData() {
     fetchGetPass();
   }, []);
 
+  console.log(data);
+
   const columns = useMemo(
     () => [
-      { accessorKey: "_id", header: "ID" },
+      { accessorKey: "gatePassId", header: "ID" },
       { accessorKey: "movementType", header: "Movement Type" },
       { accessorKey: "gatePassType", header: "Gate Pass Type" },
-      { accessorKey: "expectedReturnDate", header: "Expected Date of Return" },
-      { accessorKey: "approvalRequired", header: "Approval Required" },
-      { accessorKey: "fromAddress", header: "From Address" },
+      // { accessorKey: "expectedReturnDate", header: "Expected Date of Return" },
+      {
+        accessorFn: (row) => new Date(row.expectedReturnDate),
+        id: "expectedReturnDate",
+        header: "Expected Date of Return",
+        filterVariant: "date",
+        filterFn: "lessThan",
+        sortingFn: "datetime",
+        // Cell: ({ cell }) => cell.getValue()?.toLocaleDateString(),
+        Cell: ({ cell }) => {
+          const date = cell.getValue();
+          // Check for epoch date (Jan 1, 1970)
+          if (
+            date instanceof Date &&
+            date.getTime() === new Date("1970-01-01T00:00:00.000Z").getTime()
+          ) {
+            return "Null"; // or return null;
+          }
+          return date?.toLocaleDateString();
+        },
+        Header: ({ column }) => <em>{column.columnDef.header}</em>,
+        muiFilterTextFieldProps: {
+          sx: {
+            minWidth: "250px",
+          },
+        },
+      },
+      { accessorKey: "approvalRequired", header: "Approval" },
+      { accessorKey: "fromAddress", header: "Status" },
       { accessorKey: "toAddress", header: "To Address" },
-      { accessorKey: "gatePassValidity", header: "Validity" },
-      { accessorKey: "remarks", header: "Remarks" },
+      // { accessorKey: "remarks", header: "Remarks" },
       { accessorKey: "reasonForGatePass", header: "Reason" },
       { accessorKey: "assetType", header: "Asset Type" },
+      // { accessorKey: "gatePassValidity", header: "Validity" },
+      {
+        accessorFn: (row) => new Date(row.gatePassValidity),
+        id: "gatePassValidity",
+        header: "Validity",
+        filterVariant: "date",
+        filterFn: "lessThan",
+        sortingFn: "datetime",
+        // Cell: ({ cell }) => cell.getValue()?.toLocaleDateString(),
+        Cell: ({ cell }) => {
+          const date = cell.getValue();
+          // Check for epoch date (Jan 1, 1970)
+          if (
+            date instanceof Date &&
+            date.getTime() === new Date("1970-01-01T00:00:00.000Z").getTime()
+          ) {
+            return "Null"; // or return null;
+          }
+          return date?.toLocaleDateString();
+        },
+        Header: ({ column }) => <em>{column.columnDef.header}</em>,
+        muiFilterTextFieldProps: {
+          sx: {
+            minWidth: "250px",
+          },
+        },
+      },
       {
         accessorKey: "attachment",
         header: "Attachment",
@@ -78,6 +132,19 @@ function GatePassData() {
           ) : (
             "No Attachment"
           ),
+      },
+      {
+        id: "edit",
+        header: "Edit",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton color="primary" aria-label="edit">
+            <NavLink to={`/main/Asset/EditGetPass/${row.original._id}`}>
+              <MdModeEdit />
+            </NavLink>
+          </IconButton>
+        ),
       },
       {
         id: "delete",

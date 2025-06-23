@@ -638,7 +638,7 @@
 
 // export default GetPassImport;
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Autocomplete, Button, TextField } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import { GoPlusCircle } from "react-icons/go";
@@ -687,6 +687,26 @@ function CreateGatePass() {
     quantity: "",
     description: "",
   });
+
+  const fetchGatePass = async () => {
+    try {
+      setIsLoading(true);
+      // const response = await getUser(id);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setFormData(response?.data || []);
+      // setData(response);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGatePass();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -119,10 +119,6 @@ const AddFixedAssets = () => {
     }
   };
 
-  // console.log("departmentData", departmentData);
-  // console.log("Selected department", formData.assetState.department);
-  // console.log("filteredSubDepartments", filteredSubDepartments);
-
   useEffect(() => {
     fetchDetails();
   }, []);
@@ -212,7 +208,6 @@ const AddFixedAssets = () => {
     <div className="w-[100%] h-[94vh] overflow-auto p-6 flex flex-col gap-5 bg-slate-200">
       <h2 className="text-slate-700 font-semibold">NEW ASSET</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-10">
-        {/* Asset Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex gap-1 justify-end">
             <button className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
@@ -231,9 +226,12 @@ const AddFixedAssets = () => {
               </button>
             </NavLink>
           </div>
-          <h3 className="text-slate-700">Asset Information</h3>
-          <div className="flex flex-wrap gap-6 justify-between mt-3">
-            <div className="flex items-center w-[46%]">
+          <h3 className="text-slate-700 font-semibold mb-6">
+            Asset Information
+          </h3>
+          {/* Asset Information fields */}
+          <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="category"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -301,7 +299,7 @@ const AddFixedAssets = () => {
                 <option value="VC">VC</option>
               </select>
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="assetTag"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -325,7 +323,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="criticality"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -352,7 +350,7 @@ const AddFixedAssets = () => {
                 <option value="Non-Critical">Non-Critical</option>
               </select>
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="make"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -376,7 +374,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="model"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -400,7 +398,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="serialNumber"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -424,7 +422,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="expressServiceCode"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -448,7 +446,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="ipAddress"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -472,7 +470,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="operatingSystem"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -496,7 +494,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="cpu"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -520,7 +518,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="hardDisk"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -544,7 +542,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="ram"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -568,7 +566,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="assetImage"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -597,9 +595,9 @@ const AddFixedAssets = () => {
 
         {/* Asset State fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Asset State</h3>
-          <div className="flex flex-wrap gap-6 justify-between mt-3">
-            <div className="flex items-center w-[46%]">
+          <h3 className="text-slate-700 font-semibold mb-6">Asset State</h3>
+          <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="assetIsCurrently"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -631,7 +629,7 @@ const AddFixedAssets = () => {
                 <option value="Sold">Sold</option>
               </select>
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="user"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -670,7 +668,7 @@ const AddFixedAssets = () => {
                 )}
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="department"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -744,7 +742,7 @@ const AddFixedAssets = () => {
                 )}
               /> */}
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="subDepartment"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -818,7 +816,7 @@ const AddFixedAssets = () => {
                 )}
               /> */}
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="comment"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -847,9 +845,11 @@ const AddFixedAssets = () => {
 
         {/* Location Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Location Information</h3>
-          <div className="flex flex-wrap gap-6 justify-between mt-3">
-            <div className="flex items-center w-[46%]">
+          <h3 className="text-slate-700 font-semibold mb-6">
+            Location Information
+          </h3>
+          <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="location"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -923,7 +923,7 @@ const AddFixedAssets = () => {
                 )}
               /> */}
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="subLocation"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -997,7 +997,7 @@ const AddFixedAssets = () => {
                 )}
               /> */}
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="storeLocation"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1026,9 +1026,11 @@ const AddFixedAssets = () => {
 
         {/* Warranty Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Warranty Information</h3>
-          <div className="flex flex-wrap gap-6 justify-between mt-3">
-            <div className="flex items-center w-[46%]">
+          <h3 className="text-slate-700 font-semibold mb-6">
+            Warranty Information
+          </h3>
+          <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="vendor"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1054,7 +1056,7 @@ const AddFixedAssets = () => {
                 <option value="N/A">N/A</option>
               </select>
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="assetType"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1088,7 +1090,7 @@ const AddFixedAssets = () => {
                 <option value="Used">Used</option>
               </select>
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="supportType"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1122,9 +1124,11 @@ const AddFixedAssets = () => {
 
         {/* Finance Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Finance Information</h3>
-          <div className="flex flex-wrap gap-6 justify-between mt-3">
-            <div className="flex items-center w-[46%]">
+          <h3 className="text-slate-700 font-semibold mb-6">
+            Finance Information
+          </h3>
+          <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="poNo"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1148,7 +1152,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="poDate"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1172,7 +1176,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="invoiceNo"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1196,7 +1200,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="invoiceDate"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1220,7 +1224,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="assetCost"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1245,7 +1249,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="residualCost"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1270,7 +1274,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="assetLife"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1295,7 +1299,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="depreciation"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1320,7 +1324,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="hsnCode"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1344,7 +1348,7 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="costCenter"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1375,9 +1379,11 @@ const AddFixedAssets = () => {
 
         {/* Preventive Maintenance fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <h3 className="text-slate-700">Preventive Maintenance</h3>
-          <div className="flex flex-wrap gap-6 justify-between mt-3">
-            <div className="flex items-center w-[46%]">
+          <h3 className="text-slate-700 font-semibold mb-6">
+            Preventive Maintenance
+          </h3>
+          <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="pmCycle"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -1402,14 +1408,14 @@ const AddFixedAssets = () => {
                 }
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            <div className="flex items-center w-[46%] max-lg:w-full">
               <label
                 htmlFor="schedule"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
                 Schedule
               </label>
-              <div className="w-[65%] flex flex-col gap-2 text-sm">
+              <div className="w-[65%] flex flex-col max-lg:flex-row flex-wrap gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <input
                     type="radio"
@@ -1458,7 +1464,7 @@ const AddFixedAssets = () => {
             </div>
 
             {formData.preventiveMaintenance.schedule === "Fixed Schedule" && (
-              <div className="flex items-center w-[46%]">
+              <div className="flex items-center w-[46%] max-lg:w-full">
                 <label
                   htmlFor="istPmDate"
                   className="w-[25%] text-xs font-semibold text-slate-600"

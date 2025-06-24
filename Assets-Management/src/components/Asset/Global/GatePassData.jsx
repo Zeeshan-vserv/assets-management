@@ -14,16 +14,16 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { NavLink } from "react-router-dom";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { getAllAssets } from "../../../api/AssetsRequest"; //Later change this api
+import { getAllGatePass, deleteGatePass } from "../../../api/GatePassRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Assets",
+  filename: "Assets-Management-GatePass",
 });
 
-function GetPass() {
+function GatePassData() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openGetPassDeleteModal, setOpenGetPassDeleteModal] = useState(false);
@@ -34,13 +34,13 @@ function GetPass() {
   const fetchGetPass = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllAssets();
+      const response = await getAllGatePass();
       if (response.status !== 200) {
         throw new Error("Failed to fetch data");
       }
       setData(response?.data.data || []);
     } catch (error) {
-      console.error("Error fetching assets:", error);
+      console.error("Error fetching gate passes:", error);
     } finally {
       setIsLoading(false);
     }
@@ -50,40 +50,33 @@ function GetPass() {
     fetchGetPass();
   }, []);
 
+  console.log(data);
+
   const columns = useMemo(
     () => [
+      { accessorKey: "gatePassId", header: "ID" },
+      { accessorKey: "movementType", header: "Movement Type" },
+      { accessorKey: "gatePassType", header: "Gate Pass Type" },
+      // { accessorKey: "expectedReturnDate", header: "Expected Date of Return" },
       {
-        accessorKey: "assetId",
-        header: "ID",
-      },
-      {
-        accessorKey: "assetInformation.assetTag",
-        header: "Movement Type",
-      },
-      {
-        accessorKey: "assetState.user",
-        header: "Get Pass Type",
-      },
-      {
-        accessorKey: "assetInformation.model",
+        accessorFn: (row) => new Date(row.expectedReturnDate),
+        id: "expectedReturnDate",
         header: "Expected Date of Return",
-      },
-      {
-        accessorKey: "assetInformation.serialNumber",
-        header: "Approval",
-      },
-      {
-        accessorKey: "locationInformation.location",
-        header: "Status",
-      },
-      {
-        accessorFn: (row) => new Date(row.startDate),
-        id: "startDate",
-        header: "Created Date",
         filterVariant: "date",
         filterFn: "lessThan",
         sortingFn: "datetime",
-        Cell: ({ cell }) => cell.getValue()?.toLocaleDateString(),
+        // Cell: ({ cell }) => cell.getValue()?.toLocaleDateString(),
+        Cell: ({ cell }) => {
+          const date = cell.getValue();
+          // Check for epoch date (Jan 1, 1970)
+          if (
+            date instanceof Date &&
+            date.getTime() === new Date("1970-01-01T00:00:00.000Z").getTime()
+          ) {
+            return "Null"; // or return null;
+          }
+          return date?.toLocaleDateString();
+        },
         Header: ({ column }) => <em>{column.columnDef.header}</em>,
         muiFilterTextFieldProps: {
           sx: {
@@ -91,14 +84,32 @@ function GetPass() {
           },
         },
       },
+      { accessorKey: "approvalRequired", header: "Approval" },
+      { accessorKey: "fromAddress", header: "Status" },
+      { accessorKey: "toAddress", header: "To Address" },
+      // { accessorKey: "remarks", header: "Remarks" },
+      { accessorKey: "reasonForGatePass", header: "Reason" },
+      { accessorKey: "assetType", header: "Asset Type" },
+      // { accessorKey: "gatePassValidity", header: "Validity" },
       {
-        accessorFn: (row) => new Date(row.startDate),
-        id: "endDate",
+        accessorFn: (row) => new Date(row.gatePassValidity),
+        id: "gatePassValidity",
         header: "Validity",
         filterVariant: "date",
         filterFn: "lessThan",
         sortingFn: "datetime",
-        Cell: ({ cell }) => cell.getValue()?.toLocaleDateString(),
+        // Cell: ({ cell }) => cell.getValue()?.toLocaleDateString(),
+        Cell: ({ cell }) => {
+          const date = cell.getValue();
+          // Check for epoch date (Jan 1, 1970)
+          if (
+            date instanceof Date &&
+            date.getTime() === new Date("1970-01-01T00:00:00.000Z").getTime()
+          ) {
+            return "Null"; // or return null;
+          }
+          return date?.toLocaleDateString();
+        },
         Header: ({ column }) => <em>{column.columnDef.header}</em>,
         muiFilterTextFieldProps: {
           sx: {
@@ -107,8 +118,20 @@ function GetPass() {
         },
       },
       {
-        accessorKey: "locationInformation.subLocation",
+        accessorKey: "attachment",
         header: "Attachment",
+        Cell: ({ cell }) =>
+          cell.getValue() ? (
+            <a
+              href={`http://localhost:5001/${cell.getValue()}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View
+            </a>
+          ) : (
+            "No Attachment"
+          ),
       },
       {
         id: "edit",
@@ -117,7 +140,7 @@ function GetPass() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton color="primary" aria-label="edit">
-            <NavLink to={`/main/Asset/edit-pass/${row.original._id}`}>
+            <NavLink to={`/main/Asset/EditGetPass/${row.original._id}`}>
               <MdModeEdit />
             </NavLink>
           </IconButton>
@@ -147,15 +170,19 @@ function GetPass() {
     setOpenGetPassDeleteModal(true);
   };
 
-  const deleteGetPassDeleteHandler = async () => {
+  const deleteGetPassDeleteHandler = async (e) => {
+    e.preventDefault();
     try {
-      console.log("Deleted", deleteGetPassId);
-      //call api
+      await deleteGatePass(deleteGetPassId);
       setOpenGetPassDeleteModal(false);
+      setDeleteGetPassId(null);
+      fetchGetPass(); // Refresh data after delete
     } catch (error) {
       console.log("Delete Get pass error", error);
     }
   };
+
+  // ... rest of your code (export, PDF, actions, table config) remains unchanged
 
   const handleExportRows = (rows) => {
     const visibleColumns = table
@@ -233,7 +260,7 @@ function GetPass() {
       margin: { top: 20 },
     });
 
-    doc.save("Assets-Management-Assets.pdf");
+    doc.save("Assets-Management-GatePass.pdf");
   };
 
   //Use for Action button
@@ -252,8 +279,7 @@ function GetPass() {
       return;
     }
     const selectedIds = selectedRows.map((row) => row.original._id);
-    // console.log("Printing Get Passes with IDs:", selectedIds);
-    //logic
+    // logic for printing
     handleClose();
   };
   const closeGetPassHandler = () => {
@@ -263,8 +289,7 @@ function GetPass() {
       return;
     }
     const selectedIds = selectedRows.map((row) => row.original._id);
-    // console.log("Closing Get Passes with IDs:", selectedIds);
-    //logic
+    // logic for closing
     handleClose();
   };
 
@@ -278,7 +303,7 @@ function GetPass() {
     },
     renderTopToolbarCustomActions: ({ table }) => (
       <Box>
-        <NavLink to="/main/Asset/get-pass-import">
+        <NavLink to="/main/Asset/CreateGatePass">
           <Button
             variant="contained"
             size="small"
@@ -449,4 +474,4 @@ function GetPass() {
   );
 }
 
-export default GetPass;
+export default GatePassData;

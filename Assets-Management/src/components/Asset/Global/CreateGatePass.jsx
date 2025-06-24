@@ -1,15 +1,11 @@
-// import React, { useEffect, useState } from "react";
+// import React, { useState } from "react";
 // import { Autocomplete, Button, TextField } from "@mui/material";
-// import { NavLink, useParams } from "react-router-dom";
+// import { NavLink } from "react-router-dom";
 // import { GoPlusCircle } from "react-icons/go";
 // import { FaCheck } from "react-icons/fa6";
 // import { RxCross2 } from "react-icons/rx";
-// import { useSelector } from "react-redux";
-// import { toast } from "react-toastify";
-// import { createGatePass, getGatePassById, updateGatePass } from "../../../api/GatePassRequest";
-// function EditGetPass()  {
-//     const { id } = useParams();
-//   const user = useSelector((state) => state.authReducer.authData);
+
+// function GetPassImport() {
 //   const [attachmentType, setAttachmentType] = useState("");
 //   const [assetType, setAssetType] = useState("");
 //   const [showItemRow, setShowItemRow] = useState(false);
@@ -46,28 +42,6 @@
 //     quantity: "",
 //     description: "",
 //   });
-
-//     const fetchGatePass = async () => {
-//       try {
-//         setIsLoading(true);
-//         const response = await getGatePassById(id);
-//         if (response.status !== 200) {
-//           throw new Error("Failed to fetch data");
-//         }
-//         setFormData(response?.data || []);
-//         setNewItem(response?.data || []);
-//         setOtherItem(response?.data || []);
-//         // setData(response);
-//       } catch (error) {
-//         console.error("Error fetching users:", error);
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-
-//     useEffect(() => {
-//       fetchGatePass();
-//     }, []);
 
 //   const handleChange = (e) => {
 //     const { name, value } = e.target;
@@ -111,60 +85,18 @@
 //     setItems((prev) => prev.filter((item) => item.id !== id));
 //   };
 
-//   const handleFormSubmitHandler = async (e) => {
+//   const handleFormSubmitHandler = (e) => {
 //     e.preventDefault();
-
-//     try {
-//       const fd = new FormData();
-//       fd.append("userId", user?.userId);
-
-//       fd.append("movementType", formData.movementType);
-//       fd.append("gatePassType", formData.gatePassType);
-//       fd.append("expectedReturnDate", formData.returnDate);
-//       fd.append("fromAddress", formData.fromAddress);
-//       fd.append("toAddress", formData.toAddress);
-//       fd.append("gatePassValidity", formData.gatePassValidity);
-//       fd.append("approvalRequired", formData.approvalRequired);
-//       fd.append("approverLevel1", formData.approverOne);
-//       fd.append("approverLevel2", formData.approverTwo);
-//       fd.append("approverLevel3", formData.approverThree);
-//       fd.append("remarks", formData.remarks);
-//       fd.append("reasonForGatePass", formData.reasonForGatePass);
-//       fd.append("toBeReceivedBy", formData.toReceiveBy);
-//       fd.append("receiverNo", formData.receiverNumber);
-//       fd.append("assetType", assetType);
-
-//       // Attach file if present
-//       if (attachmentType === "Yes" && fileData) {
-//         fd.append("attachment", fileData);
-//       }
-
-//       // Asset type specific fields
-//       if (assetType === "Consumables") {
-//         fd.append("consumables", JSON.stringify(items));
-//       }
-//       if (assetType === "Fixed Assets") {
-//         fd.append("asset", fixedAsset);
-//       }
-//       if (assetType === "Asset Components") {
-//         fd.append("assetComponent", assetComponent);
-//       }
-//       if (assetType === "Others") {
-//         fd.append("others", JSON.stringify(otherItem));
-//       }
-
-//       const res = await updateGatePass(id, fd);
-//       if (res.data.success) {
-//         toast.success("Gate Pass created successfully!");
-//         // Optionally reset form here
-//       } else {
-//         toast.error(res.data.message || "Failed to create gate pass");
-//       }
-//     } catch (err) {
-//       toast.error("Error creating gate pass");
-//     }
+//     const submissionData = {
+//       ...formData,
+//       attachment: attachmentType === "Yes" ? fileData : null,
+//       items: assetType === "Consumables" ? items : [],
+//       fixedAsset: assetType === "Fixed Assets" ? fixedAsset : null,
+//       assetComponent: assetType === "Asset Components" ? assetComponent : null,
+//       otherItem: assetType === "Others" ? otherItem : null,
+//     };
+//     console.log("form-submited", submissionData);
 //   };
-
 //   return (
 //     <>
 //       <div className="w-[100%] h-[94vh] overflow-auto p-6 flex flex-col gap-5 bg-slate-200">
@@ -181,7 +113,7 @@
 //               Submit
 //             </button>
 //             <NavLink
-//               to="/main/Asset/GatePassData"
+//               to="/main/Asset/get-pass"
 //               className={({ isActive }) =>
 //                 `hover:underline cursor-pointer ${
 //                   isActive ? "text-blue-400" : ""
@@ -483,6 +415,7 @@
 //                 onChange={(e, value) => {
 //                   setAssetType(value || "");
 //                   setItems([]);
+//                   // setShowItemRow(false);
 //                 }}
 //                 getOptionLabel={(option) => option}
 //                 renderInput={(params) => (
@@ -552,55 +485,55 @@
 //               </div>
 //             )}
 //           </div>
-//           {assetType === "Others" && (
-//             <div className="flex flex-wrap gap-14 justify-between mt-3">
-//               <div className="flex items-center w-[46%] max-md:w-[100%]">
-//                 <label className="w-[28%] text-xs font-semibold text-slate-600">
-//                   Item Name
-//                 </label>
-//                 <input
-//                   type="text"
-//                   name="itemName"
-//                   value={otherItem.itemName}
-//                   onChange={(e) =>
-//                     setOtherItem({ ...otherItem, itemName: e.target.value })
-//                   }
-//                   className="w-[70%] text-xs text-slate-600 border-b-2 border-slate-300 p-1 outline-none"
-//                 />
+//             {assetType === "Others" && (
+//               <div className="flex flex-wrap gap-14 justify-between mt-3">
+//                 <div className="flex items-center w-[46%] max-md:w-[100%]">
+//                   <label className="w-[28%] text-xs font-semibold text-slate-600">
+//                     Item Name
+//                   </label>
+//                   <input
+//                     type="text"
+//                     name="itemName"
+//                     value={otherItem.itemName}
+//                     onChange={(e) =>
+//                       setOtherItem({ ...otherItem, itemName: e.target.value })
+//                     }
+//                     className="w-[70%] text-xs text-slate-600 border-b-2 border-slate-300 p-1 outline-none"
+//                   />
+//                 </div>
+//                 <div className="flex items-center w-[46%] max-md:w-[100%]">
+//                   <label className="w-[28%] text-xs font-semibold text-slate-600">
+//                     Quantity
+//                   </label>
+//                   <input
+//                     type="number"
+//                     name="quantity"
+//                     value={otherItem.quantity}
+//                     onChange={(e) =>
+//                       setOtherItem({ ...otherItem, quantity: e.target.value })
+//                     }
+//                     className="w-[70%] text-xs text-slate-600 border-b-2 border-slate-300 p-1 outline-none"
+//                   />
+//                 </div>
+//                 <div className="flex flex-row flex-wrap gap-4 w-[100%]">
+//                   <label className="w-[25%] text-xs font-semibold text-slate-600">
+//                     Decsription
+//                   </label>
+//                   <textarea
+//                     name="description"
+//                     value={otherItem.description}
+//                     onChange={(e) =>
+//                       setOtherItem({
+//                         ...otherItem,
+//                         description: e.target.value,
+//                       })
+//                     }
+//                     rows={4}
+//                     className="w-[97%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none"
+//                   ></textarea>
+//                 </div>
 //               </div>
-//               <div className="flex items-center w-[46%] max-md:w-[100%]">
-//                 <label className="w-[28%] text-xs font-semibold text-slate-600">
-//                   Quantity
-//                 </label>
-//                 <input
-//                   type="number"
-//                   name="quantity"
-//                   value={otherItem.quantity}
-//                   onChange={(e) =>
-//                     setOtherItem({ ...otherItem, quantity: e.target.value })
-//                   }
-//                   className="w-[70%] text-xs text-slate-600 border-b-2 border-slate-300 p-1 outline-none"
-//                 />
-//               </div>
-//               <div className="flex flex-row flex-wrap gap-4 w-[100%]">
-//                 <label className="w-[25%] text-xs font-semibold text-slate-600">
-//                   Decsription
-//                 </label>
-//                 <textarea
-//                   name="description"
-//                   value={otherItem.description}
-//                   onChange={(e) =>
-//                     setOtherItem({
-//                       ...otherItem,
-//                       description: e.target.value,
-//                     })
-//                   }
-//                   rows={4}
-//                   className="w-[97%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none"
-//                 ></textarea>
-//               </div>
-//             </div>
-//           )}
+//             )}
 //           {assetType === "Consumables" && (
 //             <div className="mt-4">
 //               <Button
@@ -666,7 +599,6 @@
 //                       </td>
 //                       <td className="p-2 border flex items-center justify-center gap-2">
 //                         <button
-//                           type="button"
 //                           onClick={() => {
 //                             if (newItem.itemName && newItem.quantity) {
 //                               setItems([
@@ -686,7 +618,6 @@
 //                           <FaCheck size={22} />
 //                         </button>
 //                         <button
-//                           type="button"
 //                           className="bg-red-100 text-red-600 rounded-full p-1"
 //                           onClick={() => setShowItemRow(false)}
 //                         >
@@ -695,23 +626,6 @@
 //                       </td>
 //                     </tr>
 //                   )}
-//                   {items.map((item, idx) => (
-//                     <tr key={item.id}>
-//                       <td className="p-2 border">{idx + 1}</td>
-//                       <td className="p-2 border">{item.itemName}</td>
-//                       <td className="p-2 border">{item.serialNo}</td>
-//                       <td className="p-2 border">{item.quantity}</td>
-//                       <td className="p-2 border">
-//                         <button
-//                           type="button"
-//                           className="bg-red-100 text-red-600 rounded-full p-1"
-//                           onClick={() => removeItem(item.id)}
-//                         >
-//                           <RxCross2 size={22} />
-//                         </button>
-//                       </td>
-//                     </tr>
-//                   ))}
 //                 </tbody>
 //               </table>
 //             </div>
@@ -722,22 +636,21 @@
 //   );
 // }
 
-// export default EditGetPass;
+// export default GetPassImport;
 
 import React, { useEffect, useState } from "react";
 import { Autocomplete, Button, TextField } from "@mui/material";
-import { NavLink, useParams } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { GoPlusCircle } from "react-icons/go";
 import { FaCheck } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import { getGatePassById, updateGatePass } from "../../../api/GatePassRequest";
+import { createGatePass } from "../../../api/GatePassRequest";
 
-function EditGetPass() {
-  const { id } = useParams();
+function CreateGatePass() {
   const user = useSelector((state) => state.authReducer.authData);
-  const [isLoading, setIsLoading] = useState(false);
+
   const [attachmentType, setAttachmentType] = useState("");
   const [assetType, setAssetType] = useState("");
   const [showItemRow, setShowItemRow] = useState(false);
@@ -773,47 +686,19 @@ function EditGetPass() {
     itemName: "",
     quantity: "",
     description: "",
-  });  
+  });
 
-  // Fetch and map gate pass data
   const fetchGatePass = async () => {
     try {
       setIsLoading(true);
-      const response = await getGatePassById(id);
+      // const response = await getUser(id);
       if (response.status !== 200) {
         throw new Error("Failed to fetch data");
       }
-
-      console.log(response.data);
-      
-      const data = response.data.data || {};
-      setFormData({
-        movementType: data.movementType || "",
-        gatePassType: data.gatePassType || "",
-        returnDate: data.expectedReturnDate || "",
-        fromAddress: data.fromAddress || "",
-        toAddress: data.toAddress || "",
-        gatePassValidity: data.gatePassValidity || "",
-        approvalRequired: data.approvalRequired || "",
-        approverOne: data.approverLevel1 || "",
-        approverTwo: data.approverLevel2 || "",
-        approverThree: data.approverLevel3 || "",
-        remarks: data.remarks || "",
-        reasonForGatePass: data.reasonForGatePass || "",
-        toReceiveBy: data.toBeReceivedBy || "",
-        receiverNumber: data.receiverNo || "",
-      });
-      setAssetType(data.assetType || "");
-      setItems(data.consumables || []);
-      setFixedAsset(data.asset || "");
-      setAssetComponent(data.assetComponent || "");
-      setOtherItem(
-        data.others || { itemName: "", quantity: "", description: "" }
-      );
-      setAttachmentType(data.attachment ? "Yes" : "No");
+      setFormData(response?.data || []);
+      // setData(response);
     } catch (error) {
-      console.error("Error fetching gate pass:", error);
-      toast.error("Failed to fetch gate pass data");
+      console.error("Error fetching users:", error);
     } finally {
       setIsLoading(false);
     }
@@ -821,7 +706,6 @@ function EditGetPass() {
 
   useEffect(() => {
     fetchGatePass();
-    // eslint-disable-next-line
   }, []);
 
   const handleChange = (e) => {
@@ -844,7 +728,6 @@ function EditGetPass() {
       [name]: value,
     }));
   };
-
 
   const addItem = () => {
     if (newItem.itemName && newItem.quantity) {
@@ -909,24 +792,22 @@ function EditGetPass() {
         fd.append("others", JSON.stringify(otherItem));
       }
 
-      const res = await updateGatePass(id, fd);
+      const res = await createGatePass(fd);
       if (res.data.success) {
-        toast.success("Gate Pass updated successfully!");
-        // Optionally redirect or reset form here
+        toast.success("Gate Pass created successfully!");
+        // Optionally reset form here
       } else {
-        toast.error(res.data.message || "Failed to update gate pass");
+        toast.error(res.data.message || "Failed to create gate pass");
       }
     } catch (err) {
-      toast.error("Error updating gate pass");
+      toast.error("Error creating gate pass");
     }
   };
 
   return (
     <>
       <div className="w-[100%] h-[94vh] overflow-auto p-6 flex flex-col gap-5 bg-slate-200">
-        <h2 className="text-md font-semibold mb-4 text-start">
-          EDIT GATE PASS
-        </h2>
+        <h2 className="text-md font-semibold mb-4 text-start">NEW GATE PASS</h2>
         <form
           onSubmit={handleFormSubmitHandler}
           className="flex flex-col w-full p-8 bg-white rounded-md shadow-sm"
@@ -963,7 +844,7 @@ function EditGetPass() {
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, movementType: value }))
                 }
-                options={[]}
+                options={["Floor Movement","Building Movement","Store Movement","To Repair","Office Movement"]}
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField
@@ -990,7 +871,7 @@ function EditGetPass() {
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, gatePassType: value }))
                 }
-                options={[]}
+                options={["Returnable", "Non-Returnable"]}
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField
@@ -1480,4 +1361,4 @@ function EditGetPass() {
   );
 }
 
-export default EditGetPass;
+export default CreateGatePass;

@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer'
-import { signup, login, getUser, updateUser, deleteUser, getAllUsers, uploadUsersFromExcel } from '../controllers/AuthController.js';
+import { signup, login, getUser, updateUser, deleteUser, getAllUsers, uploadUsersFromExcel, getUserById } from '../controllers/AuthController.js';
 import authMiddleware from '../middleware/AuthMiddleware.js';
 
 const upload = multer({ dest: 'uploads/' })
@@ -10,6 +10,7 @@ const router = express.Router();
 router.post('/signup', signup);
 router.post('/login', login);
 router.get("/:id", authMiddleware, getUser)
+router.get('/:id', authMiddleware, getUserById)
 router.get("/", getAllUsers)
 router.put('/:id', authMiddleware , updateUser)
 router.delete('/:id', authMiddleware, deleteUser)

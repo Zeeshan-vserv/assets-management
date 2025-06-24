@@ -3,7 +3,13 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Autocomplete, Box, Button, IconButton } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  IconButton,
+  TextField,
+} from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -12,14 +18,21 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import {
+  createStoreLocation,
+  getAllStoreLocations,
+  updateStoreLocation,
+  deleteStoreLocation,
+} from "../../../api/StoreLocationRequest";
+import { getAllLocation } from "../../../api/LocationRequest";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Department.csv",
+  filename: "Assets-Management-StoreLocation.csv",
 });
 
 function StoreLocation() {
@@ -27,6 +40,7 @@ function StoreLocation() {
   const [isLoading, setIsLoading] = useState(true);
 
   const [addStoreLocationModal, setAddStoreLocationModal] = useState(false);
+  const [locations, setLocations] = useState([]);
   const [addNewStoreLocation, setAddNewStoreLocation] = useState({
     location: "",
     storeLocation: "",
@@ -38,13 +52,25 @@ function StoreLocation() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteStoreLocationId, setDeleteStoreLocationId] = useState(null);
 
+  const user = useSelector((state) => state.authReducer.authData);
+
+  const fetchLocations = async () => {
+    try {
+      const res = await getAllLocation();
+      setLocations(res?.data?.data || []);
+    } catch (error) {
+      setLocations([]);
+    }
+  };
+
+  // Fetch all store locations
   const fetchStoreLocation = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
+      const response = await getAllStoreLocations();
       setData(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching software Name:", error);
+      console.error("Error fetching store locations:", error);
     } finally {
       setIsLoading(false);
     }
@@ -52,20 +78,21 @@ function StoreLocation() {
 
   useEffect(() => {
     fetchStoreLocation();
+    fetchLocations();
   }, []);
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: "departmentId",
+        accessorKey: "storeLocationId",
         header: "Store Location Id",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "locationName",
         header: "Location Name",
       },
       {
-        accessorKey: "departmentHead",
+        accessorKey: "storeLocationName",
         header: "Store Location Name",
       },
       {
@@ -102,7 +129,7 @@ function StoreLocation() {
     [isLoading]
   );
 
-  //Add
+  // Add
   const addNewStoreLocationChangeHandler = (e) => {
     const { name, value } = e.target;
     setAddNewStoreLocation((prev) => ({
@@ -113,18 +140,34 @@ function StoreLocation() {
 
   const addNewStoreLocationHandler = async (e) => {
     e.preventDefault();
-    // console.log("addNewStoreLocation", addNewStoreLocation);
-    //call api
-    setAddStoreLocationModal(false);
+    try {
+      const payload = {
+        userId: user?.userId,
+        locationName: addNewStoreLocation.location,
+        storeLocationName: addNewStoreLocation.storeLocation,
+      };
+      const res = await createStoreLocation(payload);
+      if (res.data.success) {
+        toast.success("Store Location added!");
+        fetchStoreLocation();
+        setAddStoreLocationModal(false);
+        setAddNewStoreLocation({ location: "", storeLocation: "" });
+      } else {
+        toast.error(res.data.message || "Failed to add store location");
+      }
+    } catch (error) {
+      toast.error("Error adding store location");
+    }
   };
 
-  //update
+  // Update
   const handleUpdateStoreLocation = (id) => {
     const storeLocationToEdit = data?.find((d) => d._id === id);
     if (storeLocationToEdit) {
       setEditStoreLocation({
-        location: storeLocationToEdit.location,
-        storeLocation: storeLocationToEdit.storeLocation,
+        _id: storeLocationToEdit._id,
+        location: storeLocationToEdit.locationName,
+        storeLocation: storeLocationToEdit.storeLocationName,
       });
       setOpenUpdateModal(true);
     }
@@ -137,19 +180,30 @@ function StoreLocation() {
       [name]: value,
     }));
   };
+
   const updateStoreLocationHandler = async (e) => {
     e.preventDefault();
     if (!editStoreLocation?._id) return;
     try {
-      // console.log("editStoreLocation", editStoreLocation);
-      //call api
-      setEditStoreLocation(null);
+      const payload = {
+        locationName: editStoreLocation.location,
+        storeLocationName: editStoreLocation.storeLocation,
+      };
+      const res = await updateStoreLocation(editStoreLocation._id, payload);
+      if (res.data.success) {
+        toast.success("Store Location updated!");
+        fetchStoreLocation();
+        setOpenUpdateModal(false);
+        setEditStoreLocation(null);
+      } else {
+        toast.error(res.data.message || "Failed to update store location");
+      }
     } catch (error) {
-      console.error("Error updating store location:", error);
+      toast.error("Error updating store location");
     }
   };
 
-  //delete
+  // Delete
   const handleDeleteStoreLocation = (id) => {
     setDeleteStoreLocationId(id);
     setDeleteConfirmationModal(true);
@@ -158,16 +212,21 @@ function StoreLocation() {
   const deleteStoreLocationHandler = async (e) => {
     e.preventDefault();
     try {
-      // console.log("deleteStoreLocationId", deleteStoreLocationId);
-      //call api
+      const res = await deleteStoreLocation(deleteStoreLocationId);
+      if (res.data.success) {
+        toast.success("Store Location deleted!");
+        fetchStoreLocation();
+      } else {
+        toast.error(res.data.message || "Failed to delete store location");
+      }
     } catch (error) {
-      console.error("Error deleting store location:", error);
+      toast.error("Error deleting store location");
     }
     setDeleteConfirmationModal(false);
     setDeleteStoreLocationId(null);
   };
 
-  //Exports
+  // Exports
   const handleExportRows = (rows) => {
     const visibleColumns = table
       .getAllLeafColumns()
@@ -241,7 +300,7 @@ function StoreLocation() {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-    doc.save("Assets-Management-Components.pdf");
+    doc.save("Assets-Management-StoreLocation.pdf");
   };
 
   const table = useMaterialReactTable({
@@ -380,15 +439,40 @@ function StoreLocation() {
                     <label className="w-40 text-sm font-medium text-gray-500">
                       Location
                     </label>
-                    <TextField
+                    {/* <TextField
                       name="location"
                       required
                       fullWidth
                       value={addNewStoreLocation?.location || ""}
                       onChange={addNewStoreLocationChangeHandler}
                       variant="standard"
-                      label="Select"
+                      label="Location"
                       sx={{ width: 250 }}
+                    /> */}
+                    <Autocomplete
+                      options={locations}
+                      getOptionLabel={(option) => option.locationName || ""}
+                      value={
+                        locations.find(
+                          (loc) =>
+                            loc.locationName === addNewStoreLocation.location
+                        ) || null
+                      }
+                      onChange={(_, newValue) =>
+                        setAddNewStoreLocation((prev) => ({
+                          ...prev,
+                          location: newValue ? newValue.locationName : "",
+                        }))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          label="Location"
+                          variant="standard"
+                          required
+                          sx={{ width: 230 }}
+                        />
+                      )}
                     />
                   </div>
                 </div>
@@ -396,24 +480,15 @@ function StoreLocation() {
                   <label className="w-40 text-sm font-medium text-gray-500">
                     Store Location*
                   </label>
-                  <Autocomplete
+                  <TextField
+                    name="storeLocation"
+                    required
+                    fullWidth
+                    value={addNewStoreLocation?.storeLocation || ""}
+                    onChange={addNewStoreLocationChangeHandler}
+                    variant="standard"
+                    label="Store Location"
                     sx={{ width: 250 }}
-                    options={["DELHI", "NOIDA", "BANGLORE"]}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Store Location"
-                        variant="standard"
-                        required
-                      />
-                    )}
-                    value={addNewStoreLocation.storeLocation || null}
-                    onChange={(event, value) =>
-                      setAddNewStoreLocation((prev) => ({
-                        ...prev,
-                        storeLocation: value,
-                      }))
-                    }
                   />
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
@@ -436,75 +511,86 @@ function StoreLocation() {
           </div>
         )}
         {openUpdateModal && (
-          <>
-            <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-                <h2 className="text-md font-semibold mb-6 text-start">
-                  Edit Store Location
-                </h2>
-                <form
-                  onSubmit={updateStoreLocationHandler}
-                  className="space-y-2"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Location
-                      </label>
-                      <TextField
-                        name="softwareName"
-                        required
-                        fullWidth
-                        value={editStoreLocation?.location || ""}
-                        onChange={updateStoreLocationChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <h2 className="text-md font-semibold mb-6 text-start">
+                Edit Store Location
+              </h2>
+              <form onSubmit={updateStoreLocationHandler} className="space-y-2">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Store Location*
+                      Location
                     </label>
-                    <Autocomplete
+                    {/* <TextField
+                      name="location"
+                      required
+                      fullWidth
+                      value={editStoreLocation?.location || ""}
+                      onChange={updateStoreLocationChangeHandler}
+                      variant="standard"
                       sx={{ width: 250 }}
-                      options={[]}
+                    /> */}
+                    <Autocomplete
+                      options={locations}
+                      getOptionLabel={(option) => option.locationName || ""}
+                      value={
+                        locations.find(
+                          (loc) =>
+                            loc.locationName === editStoreLocation?.location
+                        ) || null
+                      }
+                      onChange={(_, newValue) =>
+                        setEditStoreLocation((prev) => ({
+                          ...prev,
+                          location: newValue ? newValue.locationName : "",
+                        }))
+                      }
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="Select"
+                          label="Location"
                           variant="standard"
                           required
+                          sx={{ width: 230 }}
                         />
                       )}
-                      value={editStoreLocation.storeLocation || null}
-                      onChange={(event, value) =>
-                        setEditStoreLocation((prev) => ({
-                          ...prev,
-                          storeLocation: value,
-                        }))
-                      }
                     />
                   </div>
-                  <div className="flex justify-end gap-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setOpenUpdateModal(false)}
-                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                    >
-                      Update
-                    </button>
-                  </div>
-                </form>
-              </div>
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Store Location*
+                  </label>
+                  <TextField
+                    name="storeLocation"
+                    required
+                    fullWidth
+                    value={editStoreLocation?.storeLocation || ""}
+                    onChange={updateStoreLocationChangeHandler}
+                    variant="standard"
+                    label="Store Location"
+                    sx={{ width: 250 }}
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setOpenUpdateModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                </div>
+              </form>
             </div>
-          </>
+          </div>
         )}
         {deleteConfirmationModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
@@ -513,7 +599,7 @@ function StoreLocation() {
                 Are you sure?
               </h2>
               <p className="text-gray-700 mb-6">
-                This action will permanently delete the department.
+                This action will permanently delete the store location.
               </p>
               <form
                 onSubmit={deleteStoreLocationHandler}

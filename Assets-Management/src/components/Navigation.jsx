@@ -35,10 +35,11 @@ const Navigation = ({ nav, setNav }) => {
       case 'servicedesk':
         return (
           <>
-            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >incidents</h3>
+            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >incidents</h3> */}
+            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}}  ><NavLink to="/main/ServiceDesk/IndicentData" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>incidents</NavLink></h3>
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >service request</h3>
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >tasks</h3>
-            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} ><NavLink to="/main/service-desk/all-vendors" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>vendors</NavLink></h3>
+            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} ><NavLink to="/main/ServiceDesk/AllVendors" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>vendors</NavLink></h3>
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >knowledge base</h3>
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >documents</h3>
           </>
@@ -49,13 +50,13 @@ const Navigation = ({ nav, setNav }) => {
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {toggleSubMenu('assets')}} >assets  {expandedSubMenus.assets ?<IoMdArrowDropdown />: <IoMdArrowDropright />}</h3>
             {expandedSubMenus.assets && (
               <ul className='flex flex-col gap-2 list-disc pl-5 '>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}}  ><NavLink to="/main/asset/AssetData" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Assets</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}}  ><NavLink to="/main/asset/AssetData" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Manage</NavLink></li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/asset/assets-summary" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>summary</NavLink></li>
                 <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/Asset/asset-import" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>assets import</NavLink></li>
                 </ul>
             )}
             <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >preventive</h3>
-            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} ><NavLink to="/main/Asset/get-pass" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>gate pass</NavLink></h3>
+            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} ><NavLink to="/main/Asset/GatePassData" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>gate pass</NavLink></h3>
           </>
         );
       case 'reports':

@@ -13,7 +13,9 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import { useSelector } from "react-redux";
+import { getAllDepartment } from "../../../api/SoftwareCategoryRequest";
+import { createVendorCategory } from "../../../api/VendorStatusCategoryRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -23,12 +25,13 @@ const csvConfig = mkConfig({
 });
 
 function ServiceCategory() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [addServiceCategoryModal, setAddServiceCategoryModal] = useState(false);
   const [addNewServiceCategory, setAddNewServiceCategory] = useState({
-    category: "",
+    categoryName: "",
   });
 
   const [editServiceCategory, setEditServiceCategory] = useState(null);
@@ -108,8 +111,17 @@ function ServiceCategory() {
 
   const addNewServiceCategoryHandler = async (e) => {
     e.preventDefault();
-    console.log("addNewServiceCategory", addNewServiceCategory);
-    //call api
+    try {
+      const formData = {
+        userId: user?.userId,
+        categoryName: addNewServiceCategory.categoryName,
+      };
+      const response = await createVendorCategory(formData);
+      console.log("New service category added:", response);
+    } catch (error) {
+      console.error("Error adding new service category:", error);
+    }
+    setAddNewServiceCategory({ categoryName: "" });
     setAddServiceCategoryModal(false);
   };
 
@@ -378,10 +390,10 @@ function ServiceCategory() {
                       Category
                     </label>
                     <TextField
-                      name="category"
+                      name="categoryName"
                       required
                       fullWidth
-                      value={addNewServiceCategory?.category || ""}
+                      value={addNewServiceCategory?.categoryName || ""}
                       onChange={addNewServiceCategoryChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
@@ -424,10 +436,10 @@ function ServiceCategory() {
                         Category *
                       </label>
                       <TextField
-                        name="category"
+                        name="categoryName"
                         required
                         fullWidth
-                        value={editServiceCategory?.category || ""}
+                        value={editServiceCategory?.categoryName || ""}
                         onChange={updateServiceCategoryChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}

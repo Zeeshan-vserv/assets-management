@@ -1,11 +1,60 @@
 import GatePass from "../models/gatePassModel.js";
 
+// export const createGatePass = async (req, res) => {
+//     try {
+//         const { userId, ...gatePassData } = req.body
+
+//         if(!userId){
+//             return res.status(404).json({message:'User not found'})
+//         }
+
+//         if (req.file) {
+//             gatePassData.attachment = req.file.path;
+//         }
+
+//         const newGatePass = new GatePass({
+//             userId,
+//             ...gatePassData
+//         })
+//         await newGatePass.save()
+
+//         res.status(201).json({success:true, data:newGatePass, message:'Gate Pass created successfully'})
+//     } catch (error) {
+//         res.status(500).json({message:'An error occurred while crearig gate pass'})
+//     }
+// }
+
 export const createGatePass = async (req, res) => {
     try {
         const { userId, ...gatePassData } = req.body
-        
-        if(!userId){
-            return res.status(404).json({message:'User not found'})
+
+        if (!userId) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+
+       // Generate gatePassId with prefix GTP and leading zeros
+        const lastGatePass = await GatePass.findOne().sort({ gatePassId: -1 });
+        let nextNumber = 1;
+        if (lastGatePass && lastGatePass.gatePassId) {
+            const match = lastGatePass.gatePassId.match(/^GTP0*(\d+)$/);
+            if (match) {
+                nextNumber = parseInt(match[1], 10) + 1;
+            }
+        }
+        // Pad the number to 4 digits
+        const newGatePassId = `GTP${String(nextNumber).padStart(4, '0')}`;
+
+        // Parse JSON fields if they exist
+        if (gatePassData.consumables && typeof gatePassData.consumables === "string") {
+            gatePassData.consumables = JSON.parse(gatePassData.consumables);
+        }
+        if (gatePassData.others && typeof gatePassData.others === "string") {
+            gatePassData.others = JSON.parse(gatePassData.others);
+        }
+
+        // Convert approvalRequired to Boolean
+        if (typeof gatePassData.approvalRequired === "string") {
+            gatePassData.approvalRequired = gatePassData.approvalRequired === "true";
         }
 
         if (req.file) {
@@ -14,22 +63,24 @@ export const createGatePass = async (req, res) => {
 
         const newGatePass = new GatePass({
             userId,
+            gatePassId: newGatePassId,
             ...gatePassData
         })
         await newGatePass.save()
 
-        res.status(201).json({success:true, data:newGatePass, message:'Gate Pass created successfully'})
+        res.status(201).json({ success: true, data: newGatePass, message: 'Gate Pass created successfully' })
     } catch (error) {
-        res.status(500).json({message:'An error occurred while crearig gate pass'})
+        console.error(error); // <--- Add this for debugging
+        res.status(500).json({ message: 'An error occurred while creating gate pass' })
     }
 }
 
 export const getAllGatePass = async (req, res) => {
     try {
         const gatePass = await GatePass.find()
-        res.status(200).json({success: true, data: gatePass})
+        res.status(200).json({ success: true, data: gatePass })
     } catch (error) {
-        res.status(500).json({message:'An error occurred while fetchig gate pass'})
+        res.status(500).json({ message: 'An error occurred while fetchig gate pass' })
     }
 }
 
@@ -37,32 +88,44 @@ export const getGatePassById = async (req, res) => {
     try {
         const { id } = req.params
         const gatePass = await GatePass.findById(id)
-        if(!gatePass){
-            return res.status(404).json({success:false, message:'Gate Pass not found'})
+        if (!gatePass) {
+            return res.status(404).json({ success: false, message: 'Gate Pass not found' })
         }
-        res.status(200).json({success: true, data: gatePass})
+        res.status(200).json({ success: true, data: gatePass })
     } catch (error) {
-        res.status(500).json({message:'An errr occurred while fetchig gate pass'})
+        res.status(500).json({ message: 'An errr occurred while fetchig gate pass' })
     }
 }
 
-export const updateGatePass  = async (req, res) => {
+export const updateGatePass = async (req, res) => {
     try {
-       const { id } = req.params
-       let updateData = { ...req.body };
+        const { id } = req.params
+        let updateData = { ...req.body };
 
-       // Handle file upload
+        // Parse JSON fields if they exist
+        if (updateData.consumables && typeof updateData.consumables === "string") {
+            updateData.consumables = JSON.parse(updateData.consumables);
+        }
+        if (updateData.others && typeof updateData.others === "string") {
+            updateData.others = JSON.parse(updateData.others);
+        }
+
+        // Convert approvalRequired to Boolean
+        if (typeof updateData.approvalRequired === "string") {
+            updateData.approvalRequired = updateData.approvalRequired === "true";
+        }
+
         if (req.file) {
             updateData.attachment = req.file.path;
         }
 
-       const updatedGatePass = await GatePass.findByIdAndUpdate(id, updateData, {new: true})
-       if(!updatedGatePass){
-        return res.status(404).json({success:false, message:'Gate Pass Id not found'})
-       } 
-       res.status(201).json({success:true, data: updatedGatePass, message:'Gate Pass updated successfully'})
+        const updatedGatePass = await GatePass.findByIdAndUpdate(id, updateData, { new: true })
+        if (!updatedGatePass) {
+            return res.status(404).json({ success: false, message: 'Gate Pass Id not found' })
+        }
+        res.status(201).json({ success: true, data: updatedGatePass, message: 'Gate Pass updated successfully' })
     } catch (error) {
-        res.status(500).json({message:'An error occurred while updating gate pass'})
+        res.status(500).json({ message: 'An error occurred while updating gate pass' })
     }
 }
 
@@ -70,11 +133,11 @@ export const deleteGatePass = async (req, res) => {
     try {
         const { id } = req.params
         const deletedGatePass = await GatePass.findByIdAndDelete(id)
-        if(!deletedGatePass){
-            return res.status(404).json({success:false, message:'Gate Pass Id not found'})
+        if (!deletedGatePass) {
+            return res.status(404).json({ success: false, message: 'Gate Pass Id not found' })
         }
-        res.status(200).json({success:true, message:'Gate Pass deleted successfully'})
+        res.status(200).json({ success: true, message: 'Gate Pass deleted successfully' })
     } catch (error) {
-        res.status(500).json({message:'An error occurred while deleting gate pass'})
+        res.status(500).json({ message: 'An error occurred while deleting gate pass' })
     }
 }

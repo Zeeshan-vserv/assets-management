@@ -12,6 +12,7 @@ const incidentSchema = mongoose.Schema({
         user: String,
         userContactNumber: Number,
         userEmail: String,
+        userDepartment: String,
         loggedBy: String
     },
     assetDetails: {

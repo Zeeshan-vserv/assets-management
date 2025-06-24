@@ -39,7 +39,7 @@ export const addSubConsumable = async (req, res) => {
             return res.status(400).json({ success: false, message: 'SubConsumable name is required' });
         }
 
-        const consumable = await ConsumableModel.findOne({ consumableId: Number(consumableId) });
+        const consumable = await ConsumableModel.findOne(consumableId);
         if (!consumable) {
             return res.status(404).json({ success: false, message: 'Consumable not found' });
         }

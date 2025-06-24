@@ -638,7 +638,7 @@
 
 // export default GetPassImport;
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Autocomplete, Button, TextField } from "@mui/material";
 import { NavLink } from "react-router-dom";
 import { GoPlusCircle } from "react-icons/go";
@@ -648,7 +648,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { createGatePass } from "../../../api/GatePassRequest";
 
-function GetPassImport() {
+function CreateGatePass() {
   const user = useSelector((state) => state.authReducer.authData);
 
   const [attachmentType, setAttachmentType] = useState("");
@@ -687,6 +687,26 @@ function GetPassImport() {
     quantity: "",
     description: "",
   });
+
+  const fetchGatePass = async () => {
+    try {
+      setIsLoading(true);
+      // const response = await getUser(id);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setFormData(response?.data || []);
+      // setData(response);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGatePass();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -800,7 +820,7 @@ function GetPassImport() {
               Submit
             </button>
             <NavLink
-              to="/main/Asset/get-pass"
+              to="/main/Asset/GatePassData"
               className={({ isActive }) =>
                 `hover:underline cursor-pointer ${
                   isActive ? "text-blue-400" : ""
@@ -824,7 +844,7 @@ function GetPassImport() {
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, movementType: value }))
                 }
-                options={[]}
+                options={["Floor Movement","Building Movement","Store Movement","To Repair","Office Movement"]}
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField
@@ -851,7 +871,7 @@ function GetPassImport() {
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, gatePassType: value }))
                 }
-                options={[]}
+                options={["Returnable", "Non-Returnable"]}
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField
@@ -1341,4 +1361,4 @@ function GetPassImport() {
   );
 }
 
-export default GetPassImport;
+export default CreateGatePass;

@@ -20,6 +20,9 @@ import storeLocation from './routes/storeLocationRoute.js'
 import consumable from './routes/consumableRoute.js'
 import condition from './routes/conditionRoute.js'
 import gatePassAddress from './routes/gatePassAddressRoute.js'
+import vendorCategory from './routes/vendorCategoryRoute.js'
+import status from './routes/statusRoute.js'
+import vendorServiceCategory from './routes/vendorServiceCategoryRoute.js'
 
 const app = express()
 
@@ -36,6 +39,7 @@ mongoose.connect(process.env.MONGODB, {useNewUrlParser: true, useUnifiedTopology
     console.error('MongoDB Connection Error',error)
 })
 
+app.use('/uploads', express.static('uploads'));
 app.use('/auth', authRoute)
 app.use('/asset', assetRoute)
 app.use('/component', componentRoute)
@@ -49,3 +53,6 @@ app.use('/storeLocation', storeLocation)
 app.use('/consumable', consumable)
 app.use('/condition', condition)
 app.use('/gatePassAddress', gatePassAddress)
+app.use('/vendorCategory', vendorCategory)
+app.use('/status', status)
+app.use('/vendorServiceCategory', vendorServiceCategory)

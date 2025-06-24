@@ -102,7 +102,19 @@ export const updateGatePass = async (req, res) => {
         const { id } = req.params
         let updateData = { ...req.body };
 
-        // Handle file upload
+        // Parse JSON fields if they exist
+        if (updateData.consumables && typeof updateData.consumables === "string") {
+            updateData.consumables = JSON.parse(updateData.consumables);
+        }
+        if (updateData.others && typeof updateData.others === "string") {
+            updateData.others = JSON.parse(updateData.others);
+        }
+
+        // Convert approvalRequired to Boolean
+        if (typeof updateData.approvalRequired === "string") {
+            updateData.approvalRequired = updateData.approvalRequired === "true";
+        }
+
         if (req.file) {
             updateData.attachment = req.file.path;
         }

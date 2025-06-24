@@ -132,6 +132,8 @@ const AddUser = () => {
         reportingManager: "",
         departmentHead: "",
         businessHead: "",
+        isVip: false,
+        userRole: "",
         password: "",
         confirmPassword: "",
         users: { isView: false, isEdit: false, isDelete: false },
@@ -276,7 +278,6 @@ const AddUser = () => {
                   />
                 )}
               />
-
             </div>
             <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
@@ -426,6 +427,39 @@ const AddUser = () => {
             </div>
             <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
+                htmlFor="userRole"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                User Role
+                <span className="text-red-500 text-base">*</span>
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                name="userRole"
+                value={formData.userRole}
+                onChange={(e, value) =>
+                  setFormData((prev) => ({ ...prev, movementType: value }))
+                }
+                options={[
+                  "L1 Technician",
+                ]}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Movement Type"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+            </div>
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
+              <label
                 htmlFor="departmentHead"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
@@ -493,7 +527,6 @@ const AddUser = () => {
             </div>
           </div>
         </div>
-
         <h2 className="text-slate-700 font-semibold">USER ROLE PERMISSIONS</h2>
         <div className="w-full flex gap-5 max-lg:flex-col">
           <div className="w-1/2 p-4 bg-white rounded-md shadow-md max-lg:w-full">
@@ -949,7 +982,8 @@ const AddUser = () => {
               </tr>
             </table>
           </div>
-        </div>      <div className="my-2 flex gap-2 justify-end">
+        </div>{" "}
+        <div className="my-2 flex gap-2 justify-end">
           <button
             type="submit"
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
@@ -969,7 +1003,6 @@ const AddUser = () => {
             </button>
           </NavLink>
         </div>
-  
       </form>
     </div>
   );

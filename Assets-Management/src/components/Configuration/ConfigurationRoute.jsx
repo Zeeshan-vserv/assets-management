@@ -20,6 +20,9 @@ import Condition from "./Assets/Condition.jsx";
 import ConsumableCategory from "./Assets/ConsumableCategory.jsx";
 import ConsumableSubCategory from "./Assets/ConsumableSubCategory.jsx";
 import AssetTag from "./Assets/AssetTag.jsx";
+import GatePassAddress from "./GatePass/GatePassAddress.jsx";
+import SupportDepartment from "./Global/SupportDepartment.jsx";
+import SupportGroup from "./Global/SupportGroup.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -35,10 +38,15 @@ function ConfigurationRoute() {
         <Route path="sub-location" element={<SubLocation />} />
         <Route path="import-user" element={<ImportUser />} />
         <Route path="organization" element={<Organization />} />
+        <Route path="supportDepartment" element={<SupportDepartment />} />
+        <Route path="supportGroup" element={<SupportGroup />} />
         
         {/* Incident Routes */}
         <Route path="Category" element={<Category />} />
         <Route path="SubCategory" element={<SubCategory />} />
+
+        {/* Incident Routes */}
+        <Route path="GatePassAddress" element={<GatePassAddress />} />
 
         {/* Assets Routes */}
         <Route path="software-category" element={<SoftwareCategory />} />

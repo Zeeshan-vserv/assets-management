@@ -126,6 +126,7 @@ function GatePassData() {
               href={`http://localhost:5001/${cell.getValue()}`}
               target="_blank"
               rel="noopener noreferrer"
+              className="bg-slate-400 px-6 py-2 rounded-lg border-2 border-slate-600"
             >
               View
             </a>

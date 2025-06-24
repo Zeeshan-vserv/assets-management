@@ -14,8 +14,7 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
 import { useSelector } from "react-redux";
-import { getAllDepartment } from "../../../api/SoftwareCategoryRequest";
-import { createVendorCategory } from "../../../api/VendorStatusCategoryRequest";
+import { getAllDepartment } from "../../../api/DepartmentRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -116,8 +115,8 @@ function ServiceCategory() {
         userId: user?.userId,
         categoryName: addNewServiceCategory.categoryName,
       };
-      const response = await createVendorCategory(formData);
-      console.log("New service category added:", response);
+      // const response = await createVendorCategory(formData);
+      // console.log("New service category added:", response);
     } catch (error) {
       console.error("Error adding new service category:", error);
     }

@@ -410,10 +410,7 @@ function Status() {
                 <h2 className="text-md font-semibold mb-6 text-start">
                   Edit Status
                 </h2>
-                <form
-                  onSubmit={updateStatusHandler}
-                  className="space-y-2"
-                >
+                <form onSubmit={updateStatusHandler} className="space-y-2">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">

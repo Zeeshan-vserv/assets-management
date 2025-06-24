@@ -13,7 +13,14 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import {
+  createStatus,
+  deleteStatus,
+  getAllStatus,
+  updateStatus,
+} from "../../../api/VendorStatusCategoryRequest";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -23,12 +30,13 @@ const csvConfig = mkConfig({
 });
 
 function Status() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [addStatusModal, setAddStatusModal] = useState(false);
   const [addNewStatus, setAddNewStatus] = useState({
-    status: "",
+    statusName: "",
   });
 
   const [editStatus, setEditStatus] = useState(null);
@@ -40,7 +48,7 @@ function Status() {
   const fetchStatus = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
+      const response = await getAllStatus();
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching status:", error);
@@ -56,11 +64,11 @@ function Status() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "departmentId",
+        accessorKey: "statusId",
         header: "Status Id",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "statusName",
         header: "Status Name",
       },
       {
@@ -108,8 +116,20 @@ function Status() {
 
   const addNewStatusHandler = async (e) => {
     e.preventDefault();
-    console.log("addNewStatus", addNewStatus);
-    //call api
+    try {
+      const formData = {
+        userId: user?.userId,
+        statusName: addNewStatus.statusName,
+      };
+      const createStatusResponse = await createStatus(formData);
+      if (createStatusResponse?.data?.success) {
+        toast.success("Status created successfully");
+        setAddNewStatus({ statusName: "" });
+        fetchStatus();
+      }
+    } catch (error) {
+      console.error("Error adding new status:", error);
+    }
     setAddStatusModal(false);
   };
 
@@ -118,7 +138,8 @@ function Status() {
     const statusToEdit = data?.find((d) => d._id === id);
     if (statusToEdit) {
       setEditStatus({
-        status: statusToEdit.status,
+        _id: statusToEdit._id,
+        statusName: statusToEdit.statusName,
       });
       setOpenUpdateModal(true);
     }
@@ -136,8 +157,18 @@ function Status() {
     e.preventDefault();
     if (!editStatus?._id) return;
     try {
-      // console.log("editStatus", editStatus);
-      //call api
+      const updatedData = {
+        statusName: editStatus.statusName,
+      };
+      const updateStatusResponse = await updateStatus(
+        editStatus._id,
+        updatedData
+      );
+      if (updateStatusResponse?.data?.success) {
+        toast.success("Status updated successfully");
+        fetchStatus();
+      }
+      setOpenUpdateModal(false);
       setEditStatus(null);
     } catch (error) {
       console.error("Error updating status:", error);
@@ -153,8 +184,11 @@ function Status() {
   const deleteStatusHandler = async (e) => {
     e.preventDefault();
     try {
-      console.log("deleteStatusId", deleteStatusId);
-      //call api
+      const deleteStatusResponse = await deleteStatus(deleteStatusId);
+      if (deleteStatusResponse?.data?.success) {
+        toast.success("Status deleted successfully");
+        fetchStatus();
+      }
     } catch (error) {
       console.error("Error deleting status:", error);
     }
@@ -374,10 +408,10 @@ function Status() {
                       Status *
                     </label>
                     <TextField
-                      name="status"
+                      name="statusName"
                       required
                       fullWidth
-                      value={addNewStatus?.status || ""}
+                      value={addNewStatus?.statusName || ""}
                       onChange={addNewStatusChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
@@ -417,10 +451,10 @@ function Status() {
                         Status *
                       </label>
                       <TextField
-                        name="status"
+                        name="statusName"
                         required
                         fullWidth
-                        value={editStatus?.status || ""}
+                        value={editStatus?.statusName || ""}
                         onChange={updateStatusChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}

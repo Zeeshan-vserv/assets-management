@@ -30,7 +30,7 @@ function ServiceCategory() {
 
   const [addServiceCategoryModal, setAddServiceCategoryModal] = useState(false);
   const [addNewServiceCategory, setAddNewServiceCategory] = useState({
-    categoryName: "",
+    vendorServiceCategoryName: "",
   });
 
   const [editServiceCategory, setEditServiceCategory] = useState(null);
@@ -42,7 +42,7 @@ function ServiceCategory() {
   const fetchServiceCategory = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
+      const response = await getAllDepartment();
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching service category:", error);
@@ -111,16 +111,10 @@ function ServiceCategory() {
   const addNewServiceCategoryHandler = async (e) => {
     e.preventDefault();
     try {
-      const formData = {
-        userId: user?.userId,
-        categoryName: addNewServiceCategory.categoryName,
-      };
-      // const response = await createVendorCategory(formData);
-      // console.log("New service category added:", response);
     } catch (error) {
       console.error("Error adding new service category:", error);
     }
-    setAddNewServiceCategory({ categoryName: "" });
+    setAddNewServiceCategory({ vendorServiceCategoryName: "" });
     setAddServiceCategoryModal(false);
   };
 
@@ -389,10 +383,10 @@ function ServiceCategory() {
                       Category
                     </label>
                     <TextField
-                      name="categoryName"
+                      name="vendorServiceCategoryName"
                       required
                       fullWidth
-                      value={addNewServiceCategory?.categoryName || ""}
+                      value={addNewServiceCategory?.vendorServiceCategoryName || ""}
                       onChange={addNewServiceCategoryChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
@@ -435,10 +429,10 @@ function ServiceCategory() {
                         Category *
                       </label>
                       <TextField
-                        name="categoryName"
+                        name="vendorServiceCategoryName"
                         required
                         fullWidth
-                        value={editServiceCategory?.categoryName || ""}
+                        value={editServiceCategory?.vendorServiceCategoryName || ""}
                         onChange={updateServiceCategoryChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}

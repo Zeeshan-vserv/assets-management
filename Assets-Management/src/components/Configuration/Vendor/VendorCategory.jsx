@@ -13,7 +13,14 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import {
+  createVendorCategory,
+  deleteVendorCategory,
+  getAllVendorCategory,
+  updateVendorCategory,
+} from "../../../api/VendorStatusCategoryRequest";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -23,12 +30,13 @@ const csvConfig = mkConfig({
 });
 
 function VendorCategory() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [addVendorCategoryModal, setAddVendorCategoryModal] = useState(false);
   const [addNewVendorCategory, setAddNewVendorCategory] = useState({
-    category: "",
+    categoryName: "",
   });
 
   const [editVendorCategory, setEditVendorCategory] = useState(null);
@@ -40,7 +48,7 @@ function VendorCategory() {
   const fetchVendorCategory = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
+      const response = await getAllVendorCategory();
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching vendor category:", error);
@@ -56,11 +64,11 @@ function VendorCategory() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "departmentId",
+        accessorKey: "categoryId",
         header: "Vendor Category Id",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "categoryName",
         header: "Name",
       },
       {
@@ -108,8 +116,20 @@ function VendorCategory() {
 
   const addNewVendorCategoryHandler = async (e) => {
     e.preventDefault();
-    // console.log("addNewVendorCategory", addNewVendorCategory);
-    //call api
+    try {
+      const formData = {
+        userId: user?.userId,
+        categoryName: addNewVendorCategory.categoryName,
+      };
+      const createVendorCategoryResponse = await createVendorCategory(formData);
+      if (createVendorCategoryResponse?.data?.success) {
+        toast.success("Vendor Category created successfully");
+        setAddNewVendorCategory({ categoryName: "" });
+        fetchVendorCategory();
+      }
+    } catch (error) {
+      console.error("Error adding new vendor category:", error);
+    }
     setAddVendorCategoryModal(false);
   };
 
@@ -118,7 +138,8 @@ function VendorCategory() {
     const vendorCategoryToEdit = data?.find((d) => d._id === id);
     if (vendorCategoryToEdit) {
       setEditVendorCategory({
-        category: vendorCategoryToEdit.category,
+        _id: vendorCategoryToEdit._id,
+        categoryName: vendorCategoryToEdit.categoryName,
       });
       setOpenUpdateModal(true);
     }
@@ -134,14 +155,23 @@ function VendorCategory() {
 
   const updateVendorCategoryHandler = async (e) => {
     e.preventDefault();
-    if (!editVendorCategory?._id) return;
     try {
-      // console.log("editVendorCategory", editVendorCategory);
-      //call api
+      const updatedData = {
+        categoryName: editVendorCategory.categoryName,
+      };
+      const updateVendorCategoryResponse = await updateVendorCategory(
+        editVendorCategory._id,
+        updatedData
+      );
+      if (updateVendorCategoryResponse?.data?.success) {
+        toast.success("Vendor category updated successfully");
+        fetchVendorCategory();
+      }
       setEditVendorCategory(null);
     } catch (error) {
       console.error("Error updating vendor category:", error);
     }
+    setOpenUpdateModal(false);
   };
 
   //delete
@@ -152,8 +182,13 @@ function VendorCategory() {
   const deleteVendorCategoryHandler = async (e) => {
     e.preventDefault();
     try {
-      console.log("deleteVendorCategoryId", deleteVendorCategoryId);
-      //call api
+      const deleteVendorCategoryResponse = await deleteVendorCategory(
+        deleteVendorCategoryId
+      );
+      if (deleteVendorCategoryResponse?.data?.success) {
+        toast.success("Vendor category deleted successfully");
+        fetchVendorCategory();
+      }
     } catch (error) {
       console.error("Error deleting vendor category:", error);
     }
@@ -378,10 +413,10 @@ function VendorCategory() {
                       Category
                     </label>
                     <TextField
-                      name="category"
+                      name="categoryName"
                       required
                       fullWidth
-                      value={addNewVendorCategory?.category || ""}
+                      value={addNewVendorCategory?.categoryName || ""}
                       onChange={addNewVendorCategoryChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
@@ -414,17 +449,20 @@ function VendorCategory() {
                 <h2 className="text-md font-semibold mb-6 text-start">
                   Edit Vendor Category
                 </h2>
-                <form onSubmit={updateVendorCategoryHandler} className="space-y-2">
+                <form
+                  onSubmit={updateVendorCategoryHandler}
+                  className="space-y-2"
+                >
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
                         Vendor Category *
                       </label>
                       <TextField
-                        name="category"
+                        name="categoryName"
                         required
                         fullWidth
-                        value={editVendorCategory?.category || ""}
+                        value={editVendorCategory?.categoryName || ""}
                         onChange={updateVendorCategoryChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}

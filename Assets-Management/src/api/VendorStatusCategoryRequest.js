@@ -27,22 +27,22 @@ API.interceptors.response.use(
 
 
 //Category
-const createVendorCategory = (formData) => API.post('/vendorCategory/', formData)
-const getAllVendorCategory = () => API.get('/vendorCategory/')
-const getVendorCategoryById = (id) => API.get(`/vendorCategory/${id}`)
-const updateVendorCategory = (id, updatedData) => API.put(`/vendorCategory/${id}`, updatedData)
-const deleteVendorCategory = (id) => API.delete(`/vendorCategory/${id}`)
+export const createVendorCategory = (formData) => API.post('/vendorCategory/', formData)
+export const getAllVendorCategory = () => API.get('/vendorCategory/')
+export const getVendorCategoryById = (id) => API.get(`/vendorCategory/${id}`)
+export const updateVendorCategory = (id, updatedData) => API.put(`/vendorCategory/${id}`, updatedData)
+export const deleteVendorCategory = (id) => API.delete(`/vendorCategory/${id}`)
 
 //Status
-const createStatus = (formData) => API.post('/status/', formData)
-const getAllStatus = () => API.get('/status/')
-const getStatusById = (id) => API.get(`/status/${id}`)
-const updateStatus = (id, updatedData) => API.put(`/status/${id}`, updatedData)
-const deleteStatus = (id) => API.delete(`/status/${id}`)
+export const createStatus = (formData) => API.post('/status/', formData)
+export const getAllStatus = () => API.get('/status/')
+export const getStatusById = (id) => API.get(`/status/${id}`)
+export const updateStatus = (id, updatedData) => API.put(`/status/${id}`, updatedData)
+export const deleteStatus = (id) => API.delete(`/status/${id}`)
 
 //Service Category
-const createVendorServiceCategory = (formData) => API.post('/vendorServiceCategory/', formData)
-const getAllVendorServiceCategory = () => API.get('/vendorServiceCategory/')
-const getVendorServiceCategoryById = (id) => API.get(`/vendorServiceCategory/${ id}`)
-const updateVendorServiceCategory = (id, updatedData) => API.put(`/vendorServiceCategory/${id}`, updatedData)
-const deleteVendorServiceCategory = (id) => API.delete(`/vendorServiceCategory/${id}`)
+export const createVendorServiceCategory = (formData) => API.post('/vendorServiceCategory/', formData)
+export const getAllVendorServiceCategory = () => API.get('/vendorServiceCategory/')
+export const getVendorServiceCategoryById = (id) => API.get(`/vendorServiceCategory/${id}`)
+export const updateVendorServiceCategory = (id, updatedData) => API.put(`/vendorServiceCategory/${id}`, updatedData)
+export const deleteVendorServiceCategory = (id) => API.delete(`/vendorServiceCategory/${id}`)

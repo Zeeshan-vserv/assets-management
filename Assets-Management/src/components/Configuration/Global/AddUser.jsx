@@ -516,7 +516,12 @@ const AddUser = () => {
                 )}
               />
             </div>
-            {formData.userRole && (
+            {(formData.userRole === "GoCollect Support Department" ||
+              formData.userRole === "Grievance Support Team" ||
+              formData.userRole === "L1 Technician" ||
+              formData.userRole === "L2 Technician" ||
+              formData.userRole === "L3 Technician" ||
+              formData.userRole === "Application Support Team") && (
               <>
                 <div className="flex items-center w-[46%] max-lg:w-[100%]">
                   <label

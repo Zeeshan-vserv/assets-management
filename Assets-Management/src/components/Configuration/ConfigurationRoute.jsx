@@ -23,6 +23,7 @@ import AssetTag from "./Assets/AssetTag.jsx";
 import VendorCategory from "./Vendor/VendorCategory.jsx";
 import Status from "./Vendor/Status.jsx";
 import ServiceCategory from "./Vendor/ServiceCategory.jsx";
+import GatePassAddress from "./GatePass/GatePassAddress.jsx";
 function ConfigurationRoute() {
   return (
     <>

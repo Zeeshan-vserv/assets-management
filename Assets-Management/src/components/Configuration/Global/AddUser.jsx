@@ -425,7 +425,7 @@ const AddUser = () => {
                 )}
               />
             </div>
-            <div className="flex items-center w-[46%] max-lg:w-[100%]">
+            {/* <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="userRole"
                 className="w-[25%] text-xs font-semibold text-slate-600"
@@ -457,7 +457,102 @@ const AddUser = () => {
                   />
                 )}
               />
+            </div> */}
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
+              <label
+                htmlFor="userRole"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                User Role
+                <span className="text-red-500 text-base">*</span>
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                name="userRole"
+                value={formData.userRole}
+                onChange={(e, value) =>
+                  setFormData((prev) => ({ ...prev, userRole: value }))
+                }
+                options={[
+                  "GoCollect Support Department",
+                  "Grievance Support Team",
+                  "L1 Technician",
+                  "L2 Technician",
+                  "L3 Technician",
+                  "Application Support Team",
+                  "Asset Management",
+                  "Admin",
+                  "Super Admin",
+                ]}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Movement Type"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
             </div>
+            {formData.userRole && (
+              <>
+                <div className="flex items-center w-[46%] max-lg:w-[100%]">
+                  <label
+                    htmlFor="supportDepartment"
+                    className="w-[25%] text-xs font-semibold text-slate-600"
+                  >
+                    Support Department
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={[]}
+                    getOptionLabel={(option) => option}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select Support Department"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex items-center w-[46%] max-lg:w-[100%]">
+                  <label
+                    htmlFor="supportGroup"
+                    className="w-[25%] text-xs font-semibold text-slate-600"
+                  >
+                    Support Group
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={[]}
+                    getOptionLabel={(option) => option}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select Support Group"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </>
+            )}
             <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="departmentHead"

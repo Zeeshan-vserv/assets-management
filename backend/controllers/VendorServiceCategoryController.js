@@ -16,7 +16,7 @@ export const createVendorServiceCategory = async (req, res) =>{
                 const lastVedorServiceCategory = await VendorServiceCategoryModel.findOne().sort({ vendorServiceCategoryId: -1 });
                 const nextVendorServiceCategoryId = lastVedorServiceCategory ? lastVedorServiceCategory.vendorServiceCategoryId + 1 : 1;
 
-        const newVendorServiceCategory = new VendorCategoryModel({
+        const newVendorServiceCategory = new VendorServiceCategoryModel({
             userId,
             vendorServiceCategoryId: nextVendorServiceCategoryId,
             vendorServiceCategoryName

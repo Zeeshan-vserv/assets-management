@@ -16,21 +16,21 @@ export const createSupportDepartment = async (req, res) => {
         const nextSupportDepartmentId = lastSupportDepartment ? lastSupportDepartment.supportDepartmentId + 1 : 1;
 
         // Assign serial support groupId to each support department
-        const supportDepartmentsWithIds = supportGroups.map((sub, idx) => ({
-            supportDepartmentId: idx + 1,
-            supportDepartmentName: sub.supportDepartmentName
+        const supportGroupsWithIds = supportGroups.map((sub, idx) => ({
+            supportGroupId: idx + 1,
+            supportGroupName: sub.supportGroupName
         }));
 
         const newSupportDepartment = new SupportDepartmentModel({
             userId,
             supportDepartmentId: nextSupportDepartmentId,
             supportDepartmentName,
-            supportGroups: supportDepartmentsWithIds
+            supportGroups: supportGroupsWithIds
         });
 
         await newSupportDepartment.save();
 
-        res.status(201).json({ success: true, data: newDepartment, message: 'Support Department created successfully' });
+        res.status(201).json({ success: true, data: newSupportDepartment, message: 'Support Department created successfully' });
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while creating support department', error: error.message });
     }
@@ -39,9 +39,9 @@ export const createSupportDepartment = async (req, res) => {
 export const getAllSupportDepartment = async (req, res) => {
     try {
         const supportDepartment = await SupportDepartmentModel.find()
-        res.status(200).json({ success: true, data: supportDepartment})
+        res.status(200).json({ success: true, data: supportDepartment })
     } catch (error) {
-        res.status(500).json({message:'An error occurred while fetching supporty departments'})
+        res.status(500).json({ message: 'An error occurred while fetching supporty departments' })
     }
 }
 
@@ -60,13 +60,13 @@ export const getSupportDepartmentById = async (req, res) => {
         const { id } = req.params
         const supportDepartment = await SupportDepartmentModel.findById(id)
 
-        if(!supportDepartment){
-            return res.status(404).json({ success: false, message:'Support Department id not found'})
+        if (!supportDepartment) {
+            return res.status(404).json({ success: false, message: 'Support Department id not found' })
         }
 
-        res.status(200).json({ success: true, data: supportDepartment})
+        res.status(200).json({ success: true, data: supportDepartment })
     } catch (error) {
-        res.status(500).json({message:'An error occurred while fetching Support Department'})
+        res.status(500).json({ message: 'An error occurred while fetching Support Department' })
     }
 }
 
@@ -89,14 +89,14 @@ export const getSupportGroupById = async (req, res) => {
 export const updateSupportDepartment = async (req, res) => {
     try {
         const { id } = req.params
-        const updateSupportDepartment = await SupportDepartmentModel.findByIdAndUpdate(id, req.body, {new:true})
+        const updateSupportDepartment = await SupportDepartmentModel.findByIdAndUpdate(id, req.body, { new: true })
 
-        if(!updateSupportDepartment){
-            return res.status(404).json({ success: false, message:'Support Department Id not found'})
+        if (!updateSupportDepartment) {
+            return res.status(404).json({ success: false, message: 'Support Department Id not found' })
         }
-        res.status(200).json({ success:true, data: updateSupportDepartment, message:'Support Department updated successfully'})
+        res.status(200).json({ success: true, data: updateSupportDepartment, message: 'Support Department updated successfully' })
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while updating support department'})
+        res.status(500).json({ message: 'An error occurred while updating support department' })
     }
 }
 
@@ -121,9 +121,9 @@ export const updateSupportGroup = async (req, res) => {
 export const addSupportGroup = async (req, res) => {
     try {
         const { supportDepartmentId } = req.params;
-        const { supportDepartmentName } = req.body;
+        const { supportGroupName } = req.body;
 
-        if (!supportDepartmentName) {
+        if (!supportGroupName) {
             return res.status(400).json({ success: false, message: 'Support Group name is required' });
         }
 
@@ -161,10 +161,10 @@ export const deleteSupportDepartment = async (req, res) => {
         const { id } = req.params
         const deletedSupportDepartment = await SupportDepartmentModel.findByIdAndDelete(id)
 
-        if(!deletedSupportDepartment){
-            return res.status(404).json({success:false, message:'Support Department Id not found'})
+        if (!deletedSupportDepartment) {
+            return res.status(404).json({ success: false, message: 'Support Department Id not found' })
         }
-        res.status(200).json({ success:true, data: deletedSupportDepartment, message:"Support Department deleted successfully"})
+        res.status(200).json({ success: true, data: deletedSupportDepartment, message: "Support Department deleted successfully" })
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while deleting support department' });
     }

@@ -6,22 +6,25 @@ const router = express.Router()
 
 //Software
 router.post('/',authMiddleware, createSoftware)
-router.get('/software',authMiddleware, getAllSoftware)
-router.get('/software/:id', authMiddleware, getSoftwareById)
-router.put('/software/:id', authMiddleware, updateSoftware)
-router.delete('/software/:id', authMiddleware, deleteSoftware)
+router.get('/',authMiddleware, getAllSoftware)
+
 
 //Publisher
-router.post('/:softwareId/publisher', authMiddleware, createPublisher)
-router.get('/publishers',authMiddleware, getAllPublisher)
+router.post('/publisher', authMiddleware, createPublisher)
+router.get('/publisher',authMiddleware, getAllPublisher)
 router.get('/publisher/:id', authMiddleware, getPublisherById)
 router.put('/publisher/:id', authMiddleware, updatePublisher)
-router.delete('/:softwareId/publisher/:publisherId', deletePublisher)
+router.delete('/publisher/:id', deletePublisher)
 
 //Software Category
-router.post('/:softwareId/softwareCategory', authMiddleware, createSoftwareCategory)
+router.post('/softwareCategory', authMiddleware, createSoftwareCategory)
 router.get('/softwareCategory',authMiddleware, getAllSoftwareCategory)
 router.get('/softwareCategory/:id', authMiddleware, getSoftwareCategoryById)
 router.put('/softwareCategory/:id', authMiddleware, updateSoftwareCategory)
-router.delete('/:softwareId/softwareCategory/:softwareCategoryId', deleteSoftwareCategory)
+router.delete('/softwareCategory/:id', deleteSoftwareCategory)
+
+router.get('/:id', authMiddleware, getSoftwareById)
+router.put('/:id', authMiddleware, updateSoftware)
+router.delete('/:id', authMiddleware, deleteSoftware)
+
 export default router

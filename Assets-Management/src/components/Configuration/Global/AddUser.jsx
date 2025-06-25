@@ -33,7 +33,7 @@ const AddUser = () => {
     businessHead: "",
     userRole: "",
     supportDepartmentName: "",
-    supportGroups: [],
+    supportGroups: "",
     password: "",
     confirmPassword: "",
     users: {
@@ -150,7 +150,7 @@ const AddUser = () => {
         isVip: false,
         userRole: "",
         supportDepartmentName: "",
-        supportGroups: [],
+        supportGroups: "",
         password: "",
         confirmPassword: "",
         users: { isView: false, isEdit: false, isDelete: false },
@@ -516,7 +516,12 @@ const AddUser = () => {
                 )}
               />
             </div>
-            {formData.userRole && (
+            {(formData.userRole === "GoCollect Support Department" ||
+              formData.userRole === "Grievance Support Team" ||
+              formData.userRole === "L1 Technician" ||
+              formData.userRole === "L2 Technician" ||
+              formData.userRole === "L3 Technician" ||
+              formData.userRole === "Application Support Team") && (
               <>
                 <div className="flex items-center w-[46%] max-lg:w-[100%]">
                   <label
@@ -565,7 +570,7 @@ const AddUser = () => {
                   >
                     Support Group
                   </label>
-                  <Autocomplete
+                  {/* <Autocomplete
                     className="w-[65%]"
                     options={supportGroupData}
                     getOptionLabel={(option) => option.supportGroupName}
@@ -580,6 +585,37 @@ const AddUser = () => {
                       setFormData({
                         ...formData,
                         supportGroups: newValue ? [newValue] : [],
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select Support Group"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  /> */}
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={supportGroupData}
+                    getOptionLabel={(option) => option.supportGroupName}
+                    value={
+                      supportGroupData.find(
+                        (group) =>
+                          group.supportGroupName === formData.supportGroups
+                      ) || null
+                    }
+                    onChange={(event, newValue) => {
+                      setFormData({
+                        ...formData,
+                        supportGroups: newValue
+                          ? newValue.supportGroupName
+                          : "",
                       });
                     }}
                     renderInput={(params) => (

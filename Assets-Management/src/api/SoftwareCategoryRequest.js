@@ -33,11 +33,11 @@ export const updateSoftware = (id, updatedData) => API.put(`/software/${id}`, up
 export const deleteSoftware = (id) => API.delete(`/software/${id}`);
 
 //publisher
-export const createPublisher = (softwareId, formData) =>API.post(`/software/publisher`, formData);
+export const createPublisher = (formData) =>API.post(`/software/publisher`, formData);
 export const getAllPublisher = () => API.get('/software/publisher');
 export const getPublisherById = (id) => API.get(`/software/publisher/${id}`);
 export const updatePublisher = (id, updatedData) => API.put(`/software/publisher/${id}`, updatedData);
-export const deletePublisher = (softwareId, publisherId) =>API.delete(`/software/publisher/${publisherId}`);
+export const deletePublisher = (publisherId) =>API.delete(`/software/publisher/${publisherId}`);
 
 //Software Category
 // export const createSoftwareCategory = (softwareId, formData) =>API.post(`/software/softwareCategory`, formData);

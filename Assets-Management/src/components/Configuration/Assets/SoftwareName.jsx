@@ -1,9 +1,789 @@
+// import React, { useEffect, useMemo, useState } from "react";
+// import {
+//   MaterialReactTable,
+//   useMaterialReactTable,
+// } from "material-react-table";
+// import { Autocomplete, Box, Button, IconButton } from "@mui/material";
+// import { MdModeEdit } from "react-icons/md";
+// import DeleteIcon from "@mui/icons-material/Delete";
+// import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+// import { AiOutlineFileExcel } from "react-icons/ai";
+// import { AiOutlineFilePdf } from "react-icons/ai";
+// import { mkConfig, generateCsv, download } from "export-to-csv";
+// import { jsPDF } from "jspdf";
+// import { autoTable } from "jspdf-autotable";
+// import { TextField } from "@mui/material";
+// import {
+//   createSoftware,
+//   deleteSoftware,
+//   getAllPublisher,
+//   getAllSoftware,
+//   getAllSoftwareCategory,
+//   updateSoftware,
+// } from "../../../api/SoftwareCategoryRequest";
+// import { toast } from "react-toastify";
+
+// const csvConfig = mkConfig({
+//   fieldSeparator: ",",
+//   decimalSeparator: ".",
+//   useKeysAsHeaders: true,
+//   filename: "Assets-Management-Department.csv",
+// });
+
+// function SoftwareName() {
+//   const [data, setData] = useState([]);
+//   const [isLoading, setIsLoading] = useState(true);
+
+//   const [addSoftwareNameModal, setAddSoftwareNameModal] = useState(false);
+//   const [addNewSoftwareName, setAddNewSoftwareName] = useState({
+//     softwareName: "",
+//     publishers: "",
+//     softwareCategory: "",
+//   });
+//   const [publishers, setPublishers] = useState([]);
+//   const [softwareCategories, setSoftwareCategories] = useState([]);
+
+//   const [editSoftwareName, setEditSoftwareName] = useState(null);
+//   const [openUpdateModal, setOpenUpdateModal] = useState(false);
+
+//   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
+//   const [deleteSoftwareNameId, setDeleteSoftwareNameId] = useState(null);
+
+//   // Fetch and flatten software data so each row has a single publisher
+//   const fetchSoftwareName = async () => {
+//     try {
+//       setIsLoading(true);
+//       const response = await getAllSoftware();
+//       let rawData = response?.data?.data || [];
+//       let flattened = [];
+//       rawData.forEach((item) => {
+//         if (Array.isArray(item.publishers) && item.publishers.length > 0) {
+//           item.publishers.forEach((pub) => {
+//             flattened.push({
+//               ...item,
+//               publishers: pub,
+//             });
+//           });
+//         } else {
+//           flattened.push({
+//             ...item,
+//             publishers: item.publishers || null,
+//           });
+//         }
+//       });
+//       setData(flattened);
+//     } catch (error) {
+//       console.error("Error fetching software Name:", error);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchSoftwareName();
+//   }, []);
+
+//   const fetchPublisherData = async () => {
+//     try {
+//       setIsLoading(true);
+//       const getAllPublisherResponse = await getAllPublisher();
+//       setPublishers(getAllPublisherResponse?.data?.data || []);
+//     } catch (error) {
+//       console.error("Error fetching publisher:", error);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+//   useEffect(() => {
+//     fetchPublisherData();
+//   }, []);
+
+//   const fetchSoftwareCategory = async () => {
+//     try {
+//       setIsLoading(true);
+//       const getAllSoftwareCategoryResponse = await getAllSoftwareCategory();
+//       setSoftwareCategories(getAllSoftwareCategoryResponse?.data?.data || []);
+//     } catch (error) {
+//       console.error("Error fetching software category:", error);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+//   useEffect(() => {
+//     fetchSoftwareCategory();
+//   }, []);
+
+//   const publisherMap = useMemo(() => {
+//     const map = {};
+//     publishers.forEach((pub) => {
+//       map[pub.publisherId] = pub.publisherName;
+//     });
+//     return map;
+//   }, [publishers]);
+
+//   const categoryMap = useMemo(() => {
+//     const map = {};
+//     softwareCategories.forEach((cat) => {
+//       map[cat.softwareCategoryId] = cat.softwareCategoryName;
+//     });
+//     return map;
+//   }, [softwareCategories]);
+
+//   const columns = useMemo(
+//     () => [
+//       {
+//         accessorKey: "softwareNameId",
+//         header: "Software Name Id",
+//       },
+//       {
+//         accessorKey: "softwareCategory",
+//         header: "Software Category",
+//         Cell: ({ row }) => {
+//           const cat = Array.isArray(row.original.softwareCategory)
+//             ? row.original.softwareCategory[0]
+//             : row.original.softwareCategory;
+//           return cat
+//             ? cat.softwareCategoryName ||
+//                 categoryMap[cat.softwareCategoryId] ||
+//                 ""
+//             : "";
+//         },
+//       },
+//       {
+//         accessorKey: "publishers",
+//         header: "Publisher",
+//         Cell: ({ row }) => {
+//           const pub = row.original.publishers;
+//           return pub
+//             ? pub.publisherName || publisherMap[pub.publisherId] || ""
+//             : "";
+//         },
+//       },
+//       {
+//         accessorKey: "softwareName",
+//         header: "Software Name",
+//       },
+//       {
+//         id: "edit",
+//         header: "Edit",
+//         size: 80,
+//         enableSorting: false,
+//         Cell: ({ row }) => (
+//           <IconButton
+//             onClick={() => handleUpdateSoftwareName(row.original._id)}
+//             color="primary"
+//             aria-label="edit"
+//           >
+//             <MdModeEdit />
+//           </IconButton>
+//         ),
+//       },
+//       {
+//         id: "delete",
+//         header: "Delete",
+//         size: 80,
+//         enableSorting: false,
+//         Cell: ({ row }) => (
+//           <IconButton
+//             onClick={() => handleDeleteSoftwareName(row.original._id)}
+//             color="error"
+//             aria-label="delete"
+//           >
+//             <DeleteIcon />
+//           </IconButton>
+//         ),
+//       },
+//     ],
+//     [isLoading, categoryMap, publisherMap]
+//   );
+
+//   //Add
+//   const addNewSoftwareNameChangeHandler = (e) => {
+//     const { name, value } = e.target;
+//     setAddNewSoftwareName((prev) => ({
+//       ...prev,
+//       [name]: value,
+//     }));
+//   };
+
+//   const addNewSoftwareNameHandler = async (e) => {
+//     e.preventDefault();
+//     const selectedPublisher = publishers.find(
+//       (pub) => pub.publisherName === addNewSoftwareName.publishers
+//     );
+//     const formData = {
+//       softwareName: addNewSoftwareName.softwareName,
+//       publishers: selectedPublisher
+//         ? [
+//             {
+//               publisherId: selectedPublisher.publisherId,
+//               publisherName: selectedPublisher.publisherName,
+//             },
+//           ]
+//         : [],
+//       softwareCategory: softwareCategories.find(
+//         (cat) =>
+//           cat.softwareCategoryName === addNewSoftwareName.softwareCategory
+//       )
+//         ? [
+//             {
+//               softwareCategoryId: softwareCategories.find(
+//                 (cat) =>
+//                   cat.softwareCategoryName ===
+//                   addNewSoftwareName.softwareCategory
+//               ).softwareCategoryId,
+//               softwareCategoryName: addNewSoftwareName.softwareCategory,
+//             },
+//           ]
+//         : [],
+//     };
+//     try {
+//       const createSoftwareResponse = await createSoftware(formData);
+//       if (createSoftwareResponse?.data?.success) {
+//         toast.success("Software created successfully");
+//         fetchSoftwareName();
+//       }
+//       setAddNewSoftwareName({
+//         softwareName: "",
+//         publishers: "",
+//         softwareCategory: "",
+//       });
+//     } catch (error) {
+//       console.error("Error adding new software name:", error);
+//     }
+//     setAddSoftwareNameModal(false);
+//   };
+
+//   //update
+//   const handleUpdateSoftwareName = (id) => {
+//     const softwareNameToEdit = data?.find((d) => d._id === id);
+//     if (softwareNameToEdit) {
+//       setEditSoftwareName({
+//         _id: softwareNameToEdit._id,
+//         softwareName: softwareNameToEdit.softwareName,
+//         publisher:
+//           softwareNameToEdit.publishers?.publisherName ||
+//           softwareNameToEdit.publishers ||
+//           "",
+//         softwareCategory:
+//           Array.isArray(softwareNameToEdit.softwareCategory) &&
+//           softwareNameToEdit.softwareCategory.length > 0
+//             ? softwareNameToEdit.softwareCategory[0].softwareCategoryName
+//             : softwareNameToEdit.softwareCategory?.softwareCategoryName || "",
+//       });
+//       setOpenUpdateModal(true);
+//     }
+//   };
+
+//   const updateSoftwareNameChangeHandler = (e) => {
+//     const { name, value } = e.target;
+//     setEditSoftwareName((prev) => ({
+//       ...prev,
+//       [name]: value,
+//     }));
+//   };
+
+//   const updateSoftwareNameHandler = async (e) => {
+//     e.preventDefault();
+//     if (!editSoftwareName?._id) return;
+//     try {
+//       const updatedData = {
+//         softwareName: editSoftwareName.softwareName,
+//         publishers: [
+//           {
+//             publisherId: publishers.find(
+//               (pub) => pub.publisherName === editSoftwareName.publisher
+//             ).publisherId,
+//             publisherName: editSoftwareName.publisher,
+//           },
+//         ],
+//         softwareCategory: softwareCategories.find(
+//           (cat) =>
+//             cat.softwareCategoryName === editSoftwareName.softwareCategory
+//         )
+//           ? [
+//               {
+//                 softwareCategoryId: softwareCategories.find(
+//                   (cat) =>
+//                     cat.softwareCategoryName ===
+//                     editSoftwareName.softwareCategory
+//                 ).softwareCategoryId,
+//                 softwareCategoryName: editSoftwareName.softwareCategory,
+//               },
+//             ]
+//           : [],
+//       };
+//       const updateSoftwareResponse = await updateSoftware(
+//         editSoftwareName._id,
+//         updatedData
+//       );
+//       if (updateSoftwareResponse?.data?.success) {
+//         toast.success("Software updated successfully");
+//       }
+//       setEditSoftwareName(null);
+//       setOpenUpdateModal(false);
+//       fetchSoftwareName();
+//     } catch (error) {
+//       console.error("Error updating software Name:", error);
+//     }
+//   };
+
+//   //delete
+//   const handleDeleteSoftwareName = (id) => {
+//     setDeleteSoftwareNameId(id);
+//     setDeleteConfirmationModal(true);
+//   };
+//   const deleteSoftwareNameHandler = async (e) => {
+//     e.preventDefault();
+//     try {
+//       const deleteSoftwareResponse = await deleteSoftware(deleteSoftwareNameId);
+//       if (deleteSoftwareResponse?.data?.success) {
+//         toast.success("Software deleted successfully");
+//         fetchSoftwareName();
+//       }
+//     } catch (error) {
+//       console.error("Error deleting software Name:", error);
+//     }
+//     setDeleteConfirmationModal(false);
+//     setDeleteSoftwareNameId(null);
+//   };
+
+//   //Exports
+//   const handleExportRows = (rows) => {
+//     const visibleColumns = table
+//       .getAllLeafColumns()
+//       .filter(
+//         (col) =>
+//           col.getIsVisible() &&
+//           col.id !== "mrt-row-select" &&
+//           col.id !== "edit" &&
+//           col.id !== "delete"
+//       );
+
+//     const rowData = rows.map((row) => {
+//       const result = {};
+//       visibleColumns.forEach((col) => {
+//         const key = col.id || col.accessorKey;
+//         result[key] = row.original[key];
+//       });
+//       return result;
+//     });
+
+//     const csv = generateCsv(csvConfig)(rowData);
+//     download(csvConfig)(csv);
+//   };
+//   const handleExportData = () => {
+//     const visibleColumns = table
+//       .getAllLeafColumns()
+//       .filter(
+//         (col) =>
+//           col.getIsVisible() &&
+//           col.id !== "mrt-row-select" &&
+//           col.id !== "edit" &&
+//           col.id !== "delete"
+//       );
+
+//     const exportData = data.map((item) => {
+//       const result = {};
+//       visibleColumns.forEach((col) => {
+//         const key = col.id || col.accessorKey;
+//         result[key] = item[key];
+//       });
+//       return result;
+//     });
+
+//     const csv = generateCsv(csvConfig)(exportData);
+//     download(csvConfig)(csv);
+//   };
+//   const handlePdfData = () => {
+//     const excludedColumns = ["mrt-row-select", "edit", "delete"];
+
+//     const visibleColumns = table
+//       .getAllLeafColumns()
+//       .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
+
+//     // Prepare headers for PDF
+//     const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
+
+//     // Prepare data rows for PDF
+//     const exportData = data.map((item) =>
+//       visibleColumns.map((col) => {
+//         const key = col.id || col.accessorKey;
+//         let value = item[key];
+//         return value ?? "";
+//       })
+//     );
+
+//     const doc = new jsPDF({});
+//     autoTable(doc, {
+//       head: [headers],
+//       body: exportData,
+//       styles: { fontSize: 8 },
+//       headStyles: { fillColor: [66, 139, 202] },
+//       margin: { top: 20 },
+//     });
+//     doc.save("Assets-Management-Components.pdf");
+//   };
+
+//   const table = useMaterialReactTable({
+//     data,
+//     columns,
+//     getRowId: (row) => row?._id?.toString(),
+//     enableRowSelection: true,
+//     initialState: {
+//       density: "compact",
+//       pagination: { pageSize: 5 },
+//     },
+//     renderTopToolbarCustomActions: ({ table }) => {
+//       return (
+//         <Box>
+//           <Button
+//             onClick={() => setAddSoftwareNameModal(true)}
+//             variant="contained"
+//             size="small"
+//             startIcon={<AddCircleOutlineIcon />}
+//             sx={{
+//               backgroundColor: "#2563eb",
+//               color: "#fff",
+//               textTransform: "none",
+//               mt: 1,
+//               mb: 1,
+//             }}
+//           >
+//             {data.length === 0 ? "New" : "New"}
+//           </Button>
+//           <Button
+//             onClick={handlePdfData}
+//             startIcon={<AiOutlineFilePdf />}
+//             size="small"
+//             variant="outlined"
+//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+//           >
+//             Export as PDF
+//           </Button>
+//           <Button
+//             onClick={handleExportData}
+//             startIcon={<AiOutlineFileExcel />}
+//             size="small"
+//             variant="outlined"
+//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+//           >
+//             Export All Data
+//           </Button>
+//           <Button
+//             disabled={table.getPrePaginationRowModel().rows.length === 0}
+//             onClick={() =>
+//               handleExportRows(table.getPrePaginationRowModel().rows)
+//             }
+//             startIcon={<AiOutlineFileExcel />}
+//             size="small"
+//             variant="outlined"
+//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+//           >
+//             Export All Rows
+//           </Button>
+//           <Button
+//             disabled={table.getRowModel().rows.length === 0}
+//             onClick={() => handleExportRows(table.getRowModel().rows)}
+//             startIcon={<AiOutlineFileExcel />}
+//             size="small"
+//             variant="outlined"
+//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+//           >
+//             Export Page Rows
+//           </Button>
+//           <Button
+//             disabled={
+//               !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
+//             }
+//             onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
+//             startIcon={<AiOutlineFileExcel />}
+//             size="small"
+//             variant="outlined"
+//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+//           >
+//             Export Selected Rows
+//           </Button>
+//         </Box>
+//       );
+//     },
+
+//     muiTableProps: {
+//       sx: {
+//         border: "1px solid rgba(81, 81, 81, .5)",
+//         caption: {
+//           captionSide: "top",
+//         },
+//       },
+//     },
+
+//     paginationDisplayMode: "pages",
+//     positionToolbarAlertBanner: "bottom",
+//     muiPaginationProps: {
+//       color: "secondary",
+//       rowsPerPageOptions: [10, 15, 20],
+//       shape: "rounded",
+//       variant: "outlined",
+//     },
+//     enablePagination: true,
+
+//     muiTableHeadCellProps: {
+//       sx: {
+//         backgroundColor: "#f1f5fa",
+//         color: "#303E67",
+//         fontSize: "14px",
+//         fontWeight: "500",
+//       },
+//     },
+//     muiTableBodyRowProps: ({ row }) => ({
+//       sx: {
+//         backgroundColor: row.index % 2 === 1 ? "#f1f5fa" : "inherit",
+//       },
+//     }),
+//   });
+
+//   return (
+//     <>
+//       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
+//         <h2 className="text-lg font-semibold mb-6 text-start">SOFTWARE NAME</h2>
+//         <MaterialReactTable table={table} />
+//         {addSoftwareNameModal && (
+//           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+//             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+//               <h2 className="text-md font-semibold mb-6 text-start">
+//                 Add Software Name
+//               </h2>
+//               <form onSubmit={addNewSoftwareNameHandler} className="space-y-2">
+//                 <div className="space-y-4">
+//                   <div className="flex items-center gap-2">
+//                     <label className="w-40 text-sm font-medium text-gray-500">
+//                       Software Name
+//                     </label>
+//                     <TextField
+//                       name="softwareName"
+//                       required
+//                       fullWidth
+//                       value={addNewSoftwareName?.softwareName || ""}
+//                       onChange={addNewSoftwareNameChangeHandler}
+//                       variant="standard"
+//                       sx={{ width: 250 }}
+//                     />
+//                   </div>
+//                 </div>
+//                 <div className="flex items-center gap-2 mt-1">
+//                   <label className="w-40 text-sm font-medium text-gray-500">
+//                     Publisher
+//                   </label>
+//                   <Autocomplete
+//                     sx={{ width: 250 }}
+//                     options={publishers.map(
+//                       (publisher) => publisher.publisherName
+//                     )}
+//                     renderInput={(params) => (
+//                       <TextField
+//                         {...params}
+//                         label="Select"
+//                         variant="standard"
+//                         // required
+//                       />
+//                     )}
+//                     value={addNewSoftwareName.publishers || null}
+//                     onChange={(event, value) =>
+//                       setAddNewSoftwareName((prev) => ({
+//                         ...prev,
+//                         publishers: value,
+//                       }))
+//                     }
+//                   />
+//                 </div>
+//                 <div className="flex items-center gap-2 mt-1">
+//                   <label className="w-40 text-sm font-medium text-gray-500">
+//                     Software Category
+//                   </label>
+//                   <Autocomplete
+//                     sx={{ width: 250 }}
+//                     options={softwareCategories.map(
+//                       (category) => category.softwareCategoryName
+//                     )}
+//                     renderInput={(params) => (
+//                       <TextField
+//                         {...params}
+//                         label="Select"
+//                         variant="standard"
+//                         // required
+//                       />
+//                     )}
+//                     value={addNewSoftwareName.softwareCategory || null}
+//                     onChange={(event, value) =>
+//                       setAddNewSoftwareName((prev) => ({
+//                         ...prev,
+//                         softwareCategory: value,
+//                       }))
+//                     }
+//                   />
+//                 </div>
+//                 <div className="flex justify-end gap-3 pt-4">
+//                   <button
+//                     type="button"
+//                     onClick={() => setAddSoftwareNameModal(false)}
+//                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+//                   >
+//                     Cancel
+//                   </button>
+//                   <button
+//                     type="submit"
+//                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+//                   >
+//                     Add
+//                   </button>
+//                 </div>
+//               </form>
+//             </div>
+//           </div>
+//         )}
+//         {openUpdateModal && (
+//           <>
+//             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+//               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+//                 <h2 className="text-md font-semibold mb-6 text-start">
+//                   Edit Software Name
+//                 </h2>
+//                 <form
+//                   onSubmit={updateSoftwareNameHandler}
+//                   className="space-y-2"
+//                 >
+//                   <div className="space-y-2">
+//                     <div className="flex items-center gap-2">
+//                       <label className="w-40 text-sm font-medium text-gray-500">
+//                         Software Name
+//                       </label>
+//                       <TextField
+//                         name="softwareName"
+//                         required
+//                         fullWidth
+//                         value={editSoftwareName?.softwareName || ""}
+//                         onChange={updateSoftwareNameChangeHandler}
+//                         variant="standard"
+//                         sx={{ width: 250 }}
+//                       />
+//                     </div>
+//                   </div>
+//                   <div className="flex items-center gap-2 mt-1">
+//                     <label className="w-40 text-sm font-medium text-gray-500">
+//                       Publisher
+//                     </label>
+//                     <Autocomplete
+//                       sx={{ width: 250 }}
+//                       options={publishers.map(
+//                         (publisher) => publisher.publisherName
+//                       )}
+//                       renderInput={(params) => (
+//                         <TextField
+//                           {...params}
+//                           label="Select"
+//                           variant="standard"
+//                           required
+//                         />
+//                       )}
+//                       value={editSoftwareName?.publisher || null}
+//                       onChange={(event, value) =>
+//                         setEditSoftwareName((prev) => ({
+//                           ...prev,
+//                           publisher: value,
+//                         }))
+//                       }
+//                     />
+//                   </div>
+//                   <div className="flex items-center gap-2 mt-1">
+//                     <label className="w-40 text-sm font-medium text-gray-500">
+//                       Software Category
+//                     </label>
+//                     <Autocomplete
+//                       sx={{ width: 250 }}
+//                       options={softwareCategories.map(
+//                         (category) => category.softwareCategoryName
+//                       )}
+//                       renderInput={(params) => (
+//                         <TextField
+//                           {...params}
+//                           label="Select"
+//                           variant="standard"
+//                           required
+//                         />
+//                       )}
+//                       value={editSoftwareName?.softwareCategory || null}
+//                       onChange={(event, value) =>
+//                         setEditSoftwareName((prev) => ({
+//                           ...prev,
+//                           softwareCategory: value,
+//                         }))
+//                       }
+//                     />
+//                   </div>
+//                   <div className="flex justify-end gap-3 pt-4">
+//                     <button
+//                       type="button"
+//                       onClick={() => setOpenUpdateModal(false)}
+//                       className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+//                     >
+//                       Cancel
+//                     </button>
+//                     <button
+//                       type="submit"
+//                       className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+//                     >
+//                       Update
+//                     </button>
+//                   </div>
+//                 </form>
+//               </div>
+//             </div>
+//           </>
+//         )}
+//         {deleteConfirmationModal && (
+//           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+//             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
+//               <h2 className="text-xl font-semibold text-red-600 mb-3">
+//                 Are you sure?
+//               </h2>
+//               <p className="text-gray-700 mb-6">
+//                 This action will permanently delete the department.
+//               </p>
+//               <form
+//                 onSubmit={deleteSoftwareNameHandler}
+//                 className="flex justify-end gap-3"
+//               >
+//                 <button
+//                   type="button"
+//                   onClick={() => setDeleteConfirmationModal(false)}
+//                   className="shadow-md px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:border-gray-500 transition-all"
+//                 >
+//                   Cancel
+//                 </button>
+//                 <button
+//                   type="submit"
+//                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+//                 >
+//                   Delete
+//                 </button>
+//               </form>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </>
+//   );
+// }
+
+// export default SoftwareName;
+
+
 import React, { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Autocomplete, Box, Button, IconButton } from "@mui/material";
+import { Autocomplete, Box, Button, IconButton, TextField } from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -12,7 +792,6 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { TextField } from "@mui/material";
 import {
   createSoftware,
   deleteSoftware,
@@ -27,7 +806,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Department.csv",
+  filename: "Assets-Management-SoftwareName.csv",
 });
 
 function SoftwareName() {
@@ -37,7 +816,7 @@ function SoftwareName() {
   const [addSoftwareNameModal, setAddSoftwareNameModal] = useState(false);
   const [addNewSoftwareName, setAddNewSoftwareName] = useState({
     softwareName: "",
-    publishers: "",
+    publisher: "",
     softwareCategory: "",
   });
   const [publishers, setPublishers] = useState([]);
@@ -49,85 +828,44 @@ function SoftwareName() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteSoftwareNameId, setDeleteSoftwareNameId] = useState(null);
 
-  // Fetch and flatten software data so each row has a single publisher
+  // Fetch all software names
   const fetchSoftwareName = async () => {
     try {
       setIsLoading(true);
       const response = await getAllSoftware();
-      let rawData = response?.data?.data || [];
-      let flattened = [];
-      rawData.forEach((item) => {
-        if (Array.isArray(item.publishers) && item.publishers.length > 0) {
-          item.publishers.forEach((pub) => {
-            flattened.push({
-              ...item,
-              publishers: pub,
-            });
-          });
-        } else {
-          flattened.push({
-            ...item,
-            publishers: item.publishers || null,
-          });
-        }
-      });
-      setData(flattened);
+      setData(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching software Name:", error);
+      console.error("Error fetching software names:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Fetch publishers
+  const fetchPublisherData = async () => {
+    try {
+      const res = await getAllPublisher();
+      setPublishers(res?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching publishers:", error);
+    }
+  };
+
+  // Fetch software categories
+  const fetchSoftwareCategory = async () => {
+    try {
+      const res = await getAllSoftwareCategory();
+      setSoftwareCategories(res?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching software categories:", error);
     }
   };
 
   useEffect(() => {
     fetchSoftwareName();
-  }, []);
-
-  const fetchPublisherData = async () => {
-    try {
-      setIsLoading(true);
-      const getAllPublisherResponse = await getAllPublisher();
-      setPublishers(getAllPublisherResponse?.data?.data || []);
-    } catch (error) {
-      console.error("Error fetching publisher:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  useEffect(() => {
     fetchPublisherData();
-  }, []);
-
-  const fetchSoftwareCategory = async () => {
-    try {
-      setIsLoading(true);
-      const getAllSoftwareCategoryResponse = await getAllSoftwareCategory();
-      setSoftwareCategories(getAllSoftwareCategoryResponse?.data?.data || []);
-    } catch (error) {
-      console.error("Error fetching software category:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  useEffect(() => {
     fetchSoftwareCategory();
   }, []);
-
-  const publisherMap = useMemo(() => {
-    const map = {};
-    publishers.forEach((pub) => {
-      map[pub.publisherId] = pub.publisherName;
-    });
-    return map;
-  }, [publishers]);
-
-  const categoryMap = useMemo(() => {
-    const map = {};
-    softwareCategories.forEach((cat) => {
-      map[cat.softwareCategoryId] = cat.softwareCategoryName;
-    });
-    return map;
-  }, [softwareCategories]);
 
   const columns = useMemo(
     () => [
@@ -138,26 +876,12 @@ function SoftwareName() {
       {
         accessorKey: "softwareCategory",
         header: "Software Category",
-        Cell: ({ row }) => {
-          const cat = Array.isArray(row.original.softwareCategory)
-            ? row.original.softwareCategory[0]
-            : row.original.softwareCategory;
-          return cat
-            ? cat.softwareCategoryName ||
-                categoryMap[cat.softwareCategoryId] ||
-                ""
-            : "";
-        },
+        Cell: ({ row }) => row.original.softwareCategory || "",
       },
       {
-        accessorKey: "publishers",
+        accessorKey: "publisher",
         header: "Publisher",
-        Cell: ({ row }) => {
-          const pub = row.original.publishers;
-          return pub
-            ? pub.publisherName || publisherMap[pub.publisherId] || ""
-            : "";
-        },
+        Cell: ({ row }) => row.original.publisher || "",
       },
       {
         accessorKey: "softwareName",
@@ -194,10 +918,10 @@ function SoftwareName() {
         ),
       },
     ],
-    [isLoading, categoryMap, publisherMap]
+    [isLoading]
   );
 
-  //Add
+  // Add
   const addNewSoftwareNameChangeHandler = (e) => {
     const { name, value } = e.target;
     setAddNewSoftwareName((prev) => ({
@@ -208,34 +932,10 @@ function SoftwareName() {
 
   const addNewSoftwareNameHandler = async (e) => {
     e.preventDefault();
-    const selectedPublisher = publishers.find(
-      (pub) => pub.publisherName === addNewSoftwareName.publishers
-    );
     const formData = {
       softwareName: addNewSoftwareName.softwareName,
-      publishers: selectedPublisher
-        ? [
-            {
-              publisherId: selectedPublisher.publisherId,
-              publisherName: selectedPublisher.publisherName,
-            },
-          ]
-        : [],
-      softwareCategory: softwareCategories.find(
-        (cat) =>
-          cat.softwareCategoryName === addNewSoftwareName.softwareCategory
-      )
-        ? [
-            {
-              softwareCategoryId: softwareCategories.find(
-                (cat) =>
-                  cat.softwareCategoryName ===
-                  addNewSoftwareName.softwareCategory
-              ).softwareCategoryId,
-              softwareCategoryName: addNewSoftwareName.softwareCategory,
-            },
-          ]
-        : [],
+      publisher: addNewSoftwareName.publisher,
+      softwareCategory: addNewSoftwareName.softwareCategory,
     };
     try {
       const createSoftwareResponse = await createSoftware(formData);
@@ -245,7 +945,7 @@ function SoftwareName() {
       }
       setAddNewSoftwareName({
         softwareName: "",
-        publishers: "",
+        publisher: "",
         softwareCategory: "",
       });
     } catch (error) {
@@ -254,22 +954,15 @@ function SoftwareName() {
     setAddSoftwareNameModal(false);
   };
 
-  //update
+  // Update
   const handleUpdateSoftwareName = (id) => {
     const softwareNameToEdit = data?.find((d) => d._id === id);
     if (softwareNameToEdit) {
       setEditSoftwareName({
         _id: softwareNameToEdit._id,
         softwareName: softwareNameToEdit.softwareName,
-        publisher:
-          softwareNameToEdit.publishers?.publisherName ||
-          softwareNameToEdit.publishers ||
-          "",
-        softwareCategory:
-          Array.isArray(softwareNameToEdit.softwareCategory) &&
-          softwareNameToEdit.softwareCategory.length > 0
-            ? softwareNameToEdit.softwareCategory[0].softwareCategoryName
-            : softwareNameToEdit.softwareCategory?.softwareCategoryName || "",
+        publisher: softwareNameToEdit.publisher || "",
+        softwareCategory: softwareNameToEdit.softwareCategory || "",
       });
       setOpenUpdateModal(true);
     }
@@ -286,49 +979,28 @@ function SoftwareName() {
   const updateSoftwareNameHandler = async (e) => {
     e.preventDefault();
     if (!editSoftwareName?._id) return;
+    const updatedData = {
+      softwareName: editSoftwareName.softwareName,
+      publisher: editSoftwareName.publisher,
+      softwareCategory: editSoftwareName.softwareCategory,
+    };
     try {
-      const updatedData = {
-        softwareName: editSoftwareName.softwareName,
-        publishers: [
-          {
-            publisherId: publishers.find(
-              (pub) => pub.publisherName === editSoftwareName.publisher
-            ).publisherId,
-            publisherName: editSoftwareName.publisher,
-          },
-        ],
-        softwareCategory: softwareCategories.find(
-          (cat) =>
-            cat.softwareCategoryName === editSoftwareName.softwareCategory
-        )
-          ? [
-              {
-                softwareCategoryId: softwareCategories.find(
-                  (cat) =>
-                    cat.softwareCategoryName ===
-                    editSoftwareName.softwareCategory
-                ).softwareCategoryId,
-                softwareCategoryName: editSoftwareName.softwareCategory,
-              },
-            ]
-          : [],
-      };
       const updateSoftwareResponse = await updateSoftware(
         editSoftwareName._id,
         updatedData
       );
       if (updateSoftwareResponse?.data?.success) {
         toast.success("Software updated successfully");
+        fetchSoftwareName();
       }
       setEditSoftwareName(null);
       setOpenUpdateModal(false);
-      fetchSoftwareName();
     } catch (error) {
-      console.error("Error updating software Name:", error);
+      console.error("Error updating software name:", error);
     }
   };
 
-  //delete
+  // Delete
   const handleDeleteSoftwareName = (id) => {
     setDeleteSoftwareNameId(id);
     setDeleteConfirmationModal(true);
@@ -342,37 +1014,92 @@ function SoftwareName() {
         fetchSoftwareName();
       }
     } catch (error) {
-      console.error("Error deleting software Name:", error);
+      console.error("Error deleting software name:", error);
     }
     setDeleteConfirmationModal(false);
     setDeleteSoftwareNameId(null);
   };
 
-  //Exports
-  const handleExportRows = (rows) => {
-    const visibleColumns = table
-      .getAllLeafColumns()
-      .filter(
-        (col) =>
-          col.getIsVisible() &&
-          col.id !== "mrt-row-select" &&
-          col.id !== "edit" &&
-          col.id !== "delete"
-      );
+  // Exports
+  const table = useMaterialReactTable({
+    data,
+    columns,
+    getRowId: (row) => row?._id?.toString(),
+    enableRowSelection: true,
+    initialState: {
+      density: "compact",
+      pagination: { pageSize: 5 },
+    },
+    renderTopToolbarCustomActions: ({ table }) => (
+      <Box>
+        <Button
+          onClick={() => setAddSoftwareNameModal(true)}
+          variant="contained"
+          size="small"
+          startIcon={<AddCircleOutlineIcon />}
+          sx={{
+            backgroundColor: "#2563eb",
+            color: "#fff",
+            textTransform: "none",
+            mt: 1,
+            mb: 1,
+          }}
+        >
+          New
+        </Button>
+        <Button
+          onClick={handlePdfData}
+          startIcon={<AiOutlineFilePdf />}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+        >
+          Export as PDF
+        </Button>
+        <Button
+          onClick={handleExportData}
+          startIcon={<AiOutlineFileExcel />}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+        >
+          Export All Data
+        </Button>
+      </Box>
+    ),
+      muiTableProps: {
+      sx: {
+        border: "1px solid rgba(81, 81, 81, .5)",
+        caption: {
+          captionSide: "top",
+        },
+      },
+    },
+    paginationDisplayMode: "pages",
+    positionToolbarAlertBanner: "bottom",
+    muiPaginationProps: {
+      color: "secondary",
+      rowsPerPageOptions: [10, 15, 20],
+      shape: "rounded",
+      variant: "outlined",
+    },
+    enablePagination: true,
+    muiTableHeadCellProps: {
+      sx: {
+        backgroundColor: "#f1f5fa",
+        color: "#303E67",
+        fontSize: "14px",
+        fontWeight: "500",
+      },
+    },
+    muiTableBodyRowProps: ({ row }) => ({
+      sx: {
+        backgroundColor: row.index % 2 === 1 ? "#f1f5fa" : "inherit",
+      },
+    }),
+  });
 
-    const rowData = rows.map((row) => {
-      const result = {};
-      visibleColumns.forEach((col) => {
-        const key = col.id || col.accessorKey;
-        result[key] = row.original[key];
-      });
-      return result;
-    });
-
-    const csv = generateCsv(csvConfig)(rowData);
-    download(csvConfig)(csv);
-  };
-  const handleExportData = () => {
+  function handleExportData() {
     const visibleColumns = table
       .getAllLeafColumns()
       .filter(
@@ -394,18 +1121,14 @@ function SoftwareName() {
 
     const csv = generateCsv(csvConfig)(exportData);
     download(csvConfig)(csv);
-  };
-  const handlePdfData = () => {
-    const excludedColumns = ["mrt-row-select", "edit", "delete"];
+  }
 
+  function handlePdfData() {
+    const excludedColumns = ["mrt-row-select", "edit", "delete"];
     const visibleColumns = table
       .getAllLeafColumns()
       .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
-
-    // Prepare headers for PDF
     const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
-
-    // Prepare data rows for PDF
     const exportData = data.map((item) =>
       visibleColumns.map((col) => {
         const key = col.id || col.accessorKey;
@@ -413,7 +1136,6 @@ function SoftwareName() {
         return value ?? "";
       })
     );
-
     const doc = new jsPDF({});
     autoTable(doc, {
       head: [headers],
@@ -422,131 +1144,15 @@ function SoftwareName() {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-    doc.save("Assets-Management-Components.pdf");
-  };
-
-  const table = useMaterialReactTable({
-    data,
-    columns,
-    getRowId: (row) => row?._id?.toString(),
-    enableRowSelection: true,
-    initialState: {
-      density: "compact",
-      pagination: { pageSize: 5 },
-    },
-    renderTopToolbarCustomActions: ({ table }) => {
-      return (
-        <Box>
-          <Button
-            onClick={() => setAddSoftwareNameModal(true)}
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlineIcon />}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "#fff",
-              textTransform: "none",
-              mt: 1,
-              mb: 1,
-            }}
-          >
-            {data.length === 0 ? "New" : "New"}
-          </Button>
-          <Button
-            onClick={handlePdfData}
-            startIcon={<AiOutlineFilePdf />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export as PDF
-          </Button>
-          <Button
-            onClick={handleExportData}
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export All Data
-          </Button>
-          <Button
-            disabled={table.getPrePaginationRowModel().rows.length === 0}
-            onClick={() =>
-              handleExportRows(table.getPrePaginationRowModel().rows)
-            }
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export All Rows
-          </Button>
-          <Button
-            disabled={table.getRowModel().rows.length === 0}
-            onClick={() => handleExportRows(table.getRowModel().rows)}
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export Page Rows
-          </Button>
-          <Button
-            disabled={
-              !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
-            }
-            onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export Selected Rows
-          </Button>
-        </Box>
-      );
-    },
-
-    muiTableProps: {
-      sx: {
-        border: "1px solid rgba(81, 81, 81, .5)",
-        caption: {
-          captionSide: "top",
-        },
-      },
-    },
-
-    paginationDisplayMode: "pages",
-    positionToolbarAlertBanner: "bottom",
-    muiPaginationProps: {
-      color: "secondary",
-      rowsPerPageOptions: [10, 15, 20],
-      shape: "rounded",
-      variant: "outlined",
-    },
-    enablePagination: true,
-
-    muiTableHeadCellProps: {
-      sx: {
-        backgroundColor: "#f1f5fa",
-        color: "#303E67",
-        fontSize: "14px",
-        fontWeight: "500",
-      },
-    },
-    muiTableBodyRowProps: ({ row }) => ({
-      sx: {
-        backgroundColor: row.index % 2 === 1 ? "#f1f5fa" : "inherit",
-      },
-    }),
-  });
+    doc.save("Assets-Management-SoftwareName.pdf");
+  }
 
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
         <h2 className="text-lg font-semibold mb-6 text-start">SOFTWARE NAME</h2>
         <MaterialReactTable table={table} />
+        {/* Add Modal */}
         {addSoftwareNameModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
@@ -554,21 +1160,19 @@ function SoftwareName() {
                 Add Software Name
               </h2>
               <form onSubmit={addNewSoftwareNameHandler} className="space-y-2">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Software Name
-                    </label>
-                    <TextField
-                      name="softwareName"
-                      required
-                      fullWidth
-                      value={addNewSoftwareName?.softwareName || ""}
-                      onChange={addNewSoftwareNameChangeHandler}
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Software Name
+                  </label>
+                  <TextField
+                    name="softwareName"
+                    required
+                    fullWidth
+                    value={addNewSoftwareName.softwareName || ""}
+                    onChange={addNewSoftwareNameChangeHandler}
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
                 </div>
                 <div className="flex items-center gap-2 mt-1">
                   <label className="w-40 text-sm font-medium text-gray-500">
@@ -576,22 +1180,15 @@ function SoftwareName() {
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
-                    options={publishers.map(
-                      (publisher) => publisher.publisherName
-                    )}
+                    options={publishers.map((publisher) => publisher.publisherName)}
                     renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Select"
-                        variant="standard"
-                        // required
-                      />
+                      <TextField {...params} label="Select" variant="standard" />
                     )}
-                    value={addNewSoftwareName.publishers || null}
+                    value={addNewSoftwareName.publisher || null}
                     onChange={(event, value) =>
                       setAddNewSoftwareName((prev) => ({
                         ...prev,
-                        publishers: value,
+                        publisher: value,
                       }))
                     }
                   />
@@ -606,12 +1203,7 @@ function SoftwareName() {
                       (category) => category.softwareCategoryName
                     )}
                     renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Select"
-                        variant="standard"
-                        // required
-                      />
+                      <TextField {...params} label="Select" variant="standard" />
                     )}
                     value={addNewSoftwareName.softwareCategory || null}
                     onChange={(event, value) =>
@@ -641,105 +1233,88 @@ function SoftwareName() {
             </div>
           </div>
         )}
+        {/* Edit Modal */}
         {openUpdateModal && (
-          <>
-            <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-                <h2 className="text-md font-semibold mb-6 text-start">
-                  Edit Software Name
-                </h2>
-                <form
-                  onSubmit={updateSoftwareNameHandler}
-                  className="space-y-2"
-                >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Software Name
-                      </label>
-                      <TextField
-                        name="softwareName"
-                        required
-                        fullWidth
-                        value={editSoftwareName?.softwareName || ""}
-                        onChange={updateSoftwareNameChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Publisher
-                    </label>
-                    <Autocomplete
-                      sx={{ width: 250 }}
-                      options={publishers.map(
-                        (publisher) => publisher.publisherName
-                      )}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Select"
-                          variant="standard"
-                          required
-                        />
-                      )}
-                      value={editSoftwareName?.publisher || null}
-                      onChange={(event, value) =>
-                        setEditSoftwareName((prev) => ({
-                          ...prev,
-                          publisher: value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 mt-1">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Software Category
-                    </label>
-                    <Autocomplete
-                      sx={{ width: 250 }}
-                      options={softwareCategories.map(
-                        (category) => category.softwareCategoryName
-                      )}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Select"
-                          variant="standard"
-                          required
-                        />
-                      )}
-                      value={editSoftwareName?.softwareCategory || null}
-                      onChange={(event, value) =>
-                        setEditSoftwareName((prev) => ({
-                          ...prev,
-                          softwareCategory: value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="flex justify-end gap-3 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setOpenUpdateModal(false)}
-                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                    >
-                      Update
-                    </button>
-                  </div>
-                </form>
-              </div>
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <h2 className="text-md font-semibold mb-6 text-start">
+                Edit Software Name
+              </h2>
+              <form onSubmit={updateSoftwareNameHandler} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Software Name
+                  </label>
+                  <TextField
+                    name="softwareName"
+                    required
+                    fullWidth
+                    value={editSoftwareName?.softwareName || ""}
+                    onChange={updateSoftwareNameChangeHandler}
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Publisher
+                  </label>
+                  <Autocomplete
+                    sx={{ width: 250 }}
+                    options={publishers.map((publisher) => publisher.publisherName)}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Select" variant="standard" required />
+                    )}
+                    value={editSoftwareName?.publisher || null}
+                    onChange={(event, value) =>
+                      setEditSoftwareName((prev) => ({
+                        ...prev,
+                        publisher: value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="flex items-center gap-2 mt-1">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Software Category
+                  </label>
+                  <Autocomplete
+                    sx={{ width: 250 }}
+                    options={softwareCategories.map(
+                      (category) => category.softwareCategoryName
+                    )}
+                    renderInput={(params) => (
+                      <TextField {...params} label="Select" variant="standard" required />
+                    )}
+                    value={editSoftwareName?.softwareCategory || null}
+                    onChange={(event, value) =>
+                      setEditSoftwareName((prev) => ({
+                        ...prev,
+                        softwareCategory: value,
+                      }))
+                    }
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setOpenUpdateModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                </div>
+              </form>
             </div>
-          </>
+          </div>
         )}
+        {/* Delete Modal */}
         {deleteConfirmationModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
@@ -747,7 +1322,7 @@ function SoftwareName() {
                 Are you sure?
               </h2>
               <p className="text-gray-700 mb-6">
-                This action will permanently delete the department.
+                This action will permanently delete the software name.
               </p>
               <form
                 onSubmit={deleteSoftwareNameHandler}

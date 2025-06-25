@@ -960,7 +960,7 @@ const Navigation = ({ nav, setNav }) => {
                 </li>
               </ul>
             )}
-            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >gate pass</h3>
+            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >gate pass</h3> */}
             {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >vendor</h3> */}
             {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >license</h3> */}
 

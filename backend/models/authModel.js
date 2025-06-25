@@ -14,6 +14,8 @@ const authSchema = mongoose.Schema(
         reportingManager: String,
         departmentHead : String,
         businessHead : String,
+        isVip: { type: Boolean, default: false },
+        userRole: String,
         password : String,
         confirmPassword : String,
         users: {

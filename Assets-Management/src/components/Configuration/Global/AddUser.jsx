@@ -12,6 +12,10 @@ import {
   getAllSubDepartment,
 } from "../../../api/DepartmentRequest";
 import { Autocomplete, TextField } from "@mui/material";
+import {
+  getAllSupportDepartment,
+  getAllSupportGroup,
+} from "../../../api/SuportDepartmentRequest";
 
 const AddUser = () => {
   const [formData, setFormData] = useState({
@@ -27,6 +31,9 @@ const AddUser = () => {
     reportingManager: "",
     departmentHead: "",
     businessHead: "",
+    userRole: "",
+    supportDepartmentName: "",
+    supportGroups: [],
     password: "",
     confirmPassword: "",
     users: {
@@ -81,6 +88,8 @@ const AddUser = () => {
   const [departmentData, setDepartmentData] = useState([]);
   const [subDepartmentData, setSubDepartmentData] = useState([]);
   const [reportingManagerData, setReportingManagerData] = useState([]);
+  const [supportDepartmentData, setSupportDepartmentData] = useState([]);
+  const [supportGroupData, setSupportGroupData] = useState([]);
 
   const fetchDetails = async () => {
     try {
@@ -99,6 +108,12 @@ const AddUser = () => {
 
       const responseReportingManager = await getAllUsers();
       setReportingManagerData(responseReportingManager?.data || []);
+
+      const responseSupportDepartment = await getAllSupportDepartment();
+      setSupportDepartmentData(responseSupportDepartment?.data?.data || []);
+
+      const responseSupportGroup = await getAllSupportGroup();
+      setSupportGroupData(responseSupportGroup?.data?.data || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
@@ -132,6 +147,10 @@ const AddUser = () => {
         reportingManager: "",
         departmentHead: "",
         businessHead: "",
+        isVip: false,
+        userRole: "",
+        supportDepartmentName: "",
+        supportGroups: [],
         password: "",
         confirmPassword: "",
         users: { isView: false, isEdit: false, isDelete: false },
@@ -276,7 +295,6 @@ const AddUser = () => {
                   />
                 )}
               />
-
             </div>
             <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
@@ -424,6 +442,167 @@ const AddUser = () => {
                 )}
               />
             </div>
+            {/* <div className="flex items-center w-[46%] max-lg:w-[100%]">
+              <label
+                htmlFor="userRole"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                User Role
+                <span className="text-red-500 text-base">*</span>
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                name="userRole"
+                value={formData.userRole}
+                onChange={(e, value) =>
+                  setFormData((prev) => ({ ...prev, movementType: value }))
+                }
+                options={[
+                  "L1 Technician",
+                ]}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Movement Type"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+            </div> */}
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
+              <label
+                htmlFor="userRole"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                User Role
+                <span className="text-red-500 text-base">*</span>
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                name="userRole"
+                value={formData.userRole}
+                onChange={(e, value) =>
+                  setFormData((prev) => ({ ...prev, userRole: value }))
+                }
+                options={[
+                  "GoCollect Support Department",
+                  "Grievance Support Team",
+                  "L1 Technician",
+                  "L2 Technician",
+                  "L3 Technician",
+                  "Application Support Team",
+                  "Asset Management",
+                  "Admin",
+                  "Super Admin",
+                ]}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Movement Type"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+            </div>
+            {(formData.userRole === "GoCollect Support Department" ||
+              formData.userRole === "Grievance Support Team" ||
+              formData.userRole === "L1 Technician" ||
+              formData.userRole === "L2 Technician" ||
+              formData.userRole === "L3 Technician" ||
+              formData.userRole === "Application Support Team") && (
+              <>
+                <div className="flex items-center w-[46%] max-lg:w-[100%]">
+                  <label
+                    htmlFor="supportDepartment"
+                    className="w-[25%] text-xs font-semibold text-slate-600"
+                  >
+                    Support Department
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={supportDepartmentData}
+                    getOptionLabel={(option) => option.supportDepartmentName}
+                    value={
+                      supportDepartmentData.find(
+                        (dept) =>
+                          dept.supportDepartmentName ===
+                          formData.supportDepartmentName
+                      ) || null
+                    }
+                    onChange={(event, newValue) => {
+                      setFormData({
+                        ...formData,
+                        supportDepartmentName: newValue
+                          ? newValue.supportDepartmentName
+                          : "",
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select Support Department"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex items-center w-[46%] max-lg:w-[100%]">
+                  <label
+                    htmlFor="supportGroup"
+                    className="w-[25%] text-xs font-semibold text-slate-600"
+                  >
+                    Support Group
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={supportGroupData}
+                    getOptionLabel={(option) => option.supportGroupName}
+                    value={
+                      supportGroupData.find(
+                        (group) =>
+                          group.supportGroupName ===
+                          formData.supportGroups[0]?.supportGroupName
+                      ) || null
+                    }
+                    onChange={(event, newValue) => {
+                      setFormData({
+                        ...formData,
+                        supportGroups: newValue ? [newValue] : [],
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select Support Group"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </>
+            )}
             <div className="flex items-center w-[46%] max-lg:w-[100%]">
               <label
                 htmlFor="departmentHead"
@@ -493,7 +672,6 @@ const AddUser = () => {
             </div>
           </div>
         </div>
-
         <h2 className="text-slate-700 font-semibold">USER ROLE PERMISSIONS</h2>
         <div className="w-full flex gap-5 max-lg:flex-col">
           <div className="w-1/2 p-4 bg-white rounded-md shadow-md max-lg:w-full">
@@ -949,7 +1127,8 @@ const AddUser = () => {
               </tr>
             </table>
           </div>
-        </div>      <div className="my-2 flex gap-2 justify-end">
+        </div>{" "}
+        <div className="my-2 flex gap-2 justify-end">
           <button
             type="submit"
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
@@ -969,7 +1148,6 @@ const AddUser = () => {
             </button>
           </NavLink>
         </div>
-  
       </form>
     </div>
   );

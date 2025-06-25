@@ -647,6 +647,7 @@ import { RxCross2 } from "react-icons/rx";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { createGatePass } from "../../../api/GatePassRequest";
+import { getAllGatePassAddress } from "../../../api/gatePassAddressRequest";
 
 function CreateGatePass() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -654,6 +655,9 @@ function CreateGatePass() {
   const [attachmentType, setAttachmentType] = useState("");
   const [assetType, setAssetType] = useState("");
   const [showItemRow, setShowItemRow] = useState(false);
+  const [gpAddress, setGpAddress] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [items, setItems] = useState([]);
   const [newItem, setNewItem] = useState({
     itemName: "",
@@ -688,25 +692,42 @@ function CreateGatePass() {
     description: "",
   });
 
-  const fetchGatePass = async () => {
+  const fetchDetails = async () => {
     try {
       setIsLoading(true);
-      // const response = await getUser(id);
-      if (response.status !== 200) {
-        throw new Error("Failed to fetch data");
-      }
-      setFormData(response?.data || []);
-      // setData(response);
+      const responseLocation = await getAllGatePassAddress();
+      // console.log(responseLocation?.data?.data || []);
+      setGpAddress(responseLocation?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching locations:", error);
     } finally {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
-    fetchGatePass();
+    fetchDetails();
   }, []);
+
+  console.log(gpAddress);
+  // const fetchGatePass = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     // const response = await getUser(id);
+  //     if (response.status !== 200) {
+  //       throw new Error("Failed to fetch data");
+  //     }
+  //     setFormData(response?.data || []);
+  //     // setData(response);
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchGatePass();
+  // }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -844,7 +865,13 @@ function CreateGatePass() {
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, movementType: value }))
                 }
-                options={["Floor Movement","Building Movement","Store Movement","To Repair","Office Movement"]}
+                options={[
+                  "Floor Movement",
+                  "Building Movement",
+                  "Store Movement",
+                  "To Repair",
+                  "Office Movement",
+                ]}
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField
@@ -907,12 +934,15 @@ function CreateGatePass() {
               <Autocomplete
                 className="w-[65%]"
                 name="fromAddress"
-                value={formData.fromAddress}
+                options={gpAddress.map((addr) => addr.addressName)}
+                value={formData.fromAddress || ""}
                 onChange={(e, value) =>
-                  setFormData((prev) => ({ ...prev, fromAddress: value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    fromAddress: value || "",
+                  }))
                 }
-                options={[]}
-                getOptionLabel={(option) => option}
+                getOptionLabel={(option) => option || ""}
                 renderInput={(params) => (
                   <TextField
                     {...params}

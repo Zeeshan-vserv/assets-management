@@ -4,7 +4,7 @@ import { createVedorCategory, deleteVendorCategory, getAllVendorCategory, getVen
 
 const router = express.Router()
 
-router.post('/', authMiddleware, createVedorCategory)
+router.post('/', createVedorCategory)
 router.get('/', authMiddleware, getAllVendorCategory)
 router.get('/:id', authMiddleware, getVendorCategoryById)
 router.put('/:id', authMiddleware, updateVendorCategory)

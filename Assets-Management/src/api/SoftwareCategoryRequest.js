@@ -26,11 +26,11 @@ API.interceptors.response.use(
 );
 
 //Software 
-export const createSoftware = (formData)=>API.post("/softwareName/")
+export const createSoftware = (formData)=>API.post("/softwareName/",formData)
 export const getAllSoftware = () => API.get('/softwareName/software');
 export const getSoftwareById = (id) => API.get(`/softwareName/software/${id}`);
-export const updateSoftware = (id, updatedData) => API.put(`/software/${id}`, updatedData);
-export const deleteSoftware = (id) => API.delete(`/software/${id}`);
+export const updateSoftware = (id, updatedData) => API.put(`/softwareName/software/${id}`, updatedData);
+export const deleteSoftware = (id) => API.delete(`/softwareName/software/${id}`);
 
 //publisher
 export const createPublisher = (softwareId, formData) =>API.post(`/softwareName/${softwareId}/publisher`, formData);

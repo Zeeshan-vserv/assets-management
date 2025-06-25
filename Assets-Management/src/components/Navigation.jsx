@@ -7,18 +7,19 @@ import { TbReportSearch } from "react-icons/tb";
 import { IoMdArrowDropdown, IoMdArrowDropright } from "react-icons/io";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { getUserById } from "../api/AuthRequest";
 
 const Navigation = ({ nav, setNav }) => {
   const user = useSelector((state) => state.authReducer.authData);
   const [isLoading, setIsLoading] = useState(true);
-  const [userData, setUserData] = useState({})
+  const [userData, setUserData] = useState({});
   const [activeMenu, setActiveMenu] = useState("dashboard");
   const [expandedSubMenus, setExpandedSubMenus] = useState({});
 
   const fetchUser = async () => {
     try {
       setIsLoading(true);
-      const response = await getUser(user.userId);
+      const response = await getUserById(user.userId);
       if (response.status !== 200) {
         throw new Error("Failed to fetch data");
       }
@@ -34,8 +35,7 @@ const Navigation = ({ nav, setNav }) => {
     fetchUser();
   }, []);
 
-  console.log(userData);
-  
+  // console.log(userData);
 
   const toggleSubMenu = (menu) => {
     setExpandedSubMenus((prev) => ({
@@ -223,23 +223,25 @@ const Navigation = ({ nav, setNav }) => {
                     summary
                   </NavLink>
                 </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/Asset/asset-import"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                {userData.importAsset.isView && (
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    assets import
-                  </NavLink>
-                </li>
+                    <NavLink
+                      to="/main/Asset/asset-import"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      assets import
+                    </NavLink>
+                  </li>
+                )}
               </ul>
             )}
             <h3
@@ -407,7 +409,7 @@ const Navigation = ({ nav, setNav }) => {
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => toggleSubMenu("global")}
             >
-              global{" "}
+              global
               {expandedSubMenus.global ? (
                 <IoMdArrowDropdown />
               ) : (
@@ -416,23 +418,26 @@ const Navigation = ({ nav, setNav }) => {
             </h3>
             {expandedSubMenus.global && (
               <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/Users"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                {console.log(userData)}
+                {userData.users.isView && (
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Users
-                  </NavLink>
-                </li>
+                    <NavLink
+                      to="/main/configuration/Users"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Users
+                    </NavLink>
+                  </li>
+                )}
                 <li
                   className="text-[11px] hover:underline"
                   onClick={() => {

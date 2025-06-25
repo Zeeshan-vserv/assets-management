@@ -31,6 +31,8 @@ export const login = (formData) => API.post('auth/login', formData)
 
 export const getUser = (id) => API.get(`auth/${id}`)
 
+export const getUserById = (id) => API.get(`auth/${id}`)
+
 export const updateUser = (id, formData) => API.put(`auth/${id}`, formData)
 
 export const deleteUser = (id) => API.delete(`auth/${id}`)

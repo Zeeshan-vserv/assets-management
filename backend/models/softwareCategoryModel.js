@@ -5,18 +5,23 @@ const softwareCategorySchema = mongoose.Schema({
     softwareCategoryName: String
 })
 
+export const SoftwareCategoryModel = mongoose.model('SoftwareCategory', softwareCategorySchema)
+
+
+
 const publisherSchema = mongoose.Schema({
     publisherId : Number,
     publisherName : String,
 })
 
+export const PublisherModel = mongoose.model('Publisher', publisherSchema)
+
+
 const softwareShema = mongoose.Schema({
     softwareNameId: Number,
     softwareName: String,
-    publishers: [publisherSchema],
-    softwareCategory: [softwareCategorySchema]
+    publisher: String,
+    softwareCategory: String
 }, { timestamps: true})
 
-const SoftwareCategoryModel = mongoose.model('SoftwareCategory', softwareShema)
-
-export default SoftwareCategoryModel
+export const SoftwareModel = mongoose.model('SoftwareName', softwareShema)

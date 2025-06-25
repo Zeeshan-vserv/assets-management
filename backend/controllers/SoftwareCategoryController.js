@@ -1,33 +1,22 @@
-import SoftwareCategoryModel from "../models/softwareCategoryModel.js";
+import { PublisherModel, SoftwareCategoryModel, SoftwareModel } from "../models/softwareCategoryModel.js";
 
 export const createSoftware = async (req, res) => {
     try {
-        const { softwareName, publishers = [], softwareCategory = [] } = req.body;
+        const { softwareName, publisher, softwareCategory } = req.body;
 
         if (!softwareName) {
             return res.status(400).json({ message: 'Software name required' });
         }
 
         // Get next softwareNameId
-        const lastSoftware = await SoftwareCategoryModel.findOne().sort({ softwareNameId: -1 });
+        const lastSoftware = await SoftwareModel.findOne().sort({ softwareNameId: -1 });
         const nextSoftwareNameId = lastSoftware ? lastSoftware.softwareNameId + 1 : 1;
 
-        // Generate publisherId for each publisher
-        let lastPublisherId = 0;
-        publishers.forEach((pub, idx) => {
-            pub.publisherId = ++lastPublisherId;
-        });
 
-        // Generate softwareCategoryId for each category
-        let lastCategoryId = 0;
-        softwareCategory.forEach((cat, idx) => {
-            cat.softwareCategoryId = ++lastCategoryId;
-        });
-
-        const newSoftware = new SoftwareCategoryModel({
+        const newSoftware = new SoftwareModel({
             softwareNameId: nextSoftwareNameId,
             softwareName,
-            publishers,
+            publisher,
             softwareCategory
         });
 
@@ -40,91 +29,85 @@ export const createSoftware = async (req, res) => {
 
 export const createPublisher = async (req, res) => {
     try {
-        const { softwareId } = req.params
-        const { publisherName } = req.body
+        const { userId, publisherName } = req.body;
+
+        if (!userId) {
+            return res.status(404).json({ message: 'User not found'})
+        }
+
         if(!publisherName){
-            return res.status(400).json({ success: false, message: 'Publisher name required'})
+            return res.status(400).json({ message: 'Publisher name is required'})
         }
 
-        const software = await SoftwareCategoryModel.findById(softwareId)
-        if(!software){
-            return res.status(404).json({ success: false, message: 'Software Id not found'})
-        }
+        // Get next storeLocationId
+                const lastPublisher = await PublisherModel.findOne().sort({ publisherId: -1 });
+                const nextPublisherId = lastPublisher ? lastPublisher.publisherId + 1 : 1;
 
-        // Find the next serial publisherId
-        const lastPub = software.publishers.length > 0
-            ? Math.max(...software.publishers.map(pub => pub.publisherId))
-            : 0;
-        const nextPubId = lastPub + 1;
-
-        software.publishers.push({
-            publisherId: nextPubId,
+        const newPublisher = new PublisherModel({
+            userId,
+            publisherId: nextPublisherId,
             publisherName
         })
-        await software.save()
-        
-        res.status(201).json({success:true, data:software, message:'Publisher created successfullly'})
-    } catch (error) {
-        res.status(500).json({ message: 'An error occurred while adding publisher', error: error.message });
 
+        await newPublisher.save();
+        res.status(201).json({ success: true, data: newPublisher, message: 'Publisher created successfully'})
+
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error'})
     }
 }
 
 export const createSoftwareCategory = async (req, res) => {
     try {
-        const { softwareId } = req.params
-        const { softwareCategoryName } = req.body
+        const { userId, softwareCategoryName} = req.body;
+
+        if (!userId) {
+            return res.status(404).json({ message: 'User not found'})
+        }
+
         if(!softwareCategoryName){
-            return res.status(400).json({ success: false, message: 'Software category name required'})
+            return res.status(400).json({ message: 'Software Category name is required'})
         }
 
-        const software = await SoftwareCategoryModel.findById(softwareId)
-        if(!software){
-            return res.status(404).json({ success: false, message: 'Software Id not found'})
-        }
+        // Get next storeLocationId
+                const lastSoftwareCategory = await SoftwareCategoryModel.findOne().sort({ softwareCategoryId: -1 });
+                const nextSoftwareCategoryId = lastSoftwareCategory ? lastSoftwareCategory.softwareCategoryId + 1 : 1;
 
-        // Find the next serial publisherId
-        const lastPub = software.softwareCategory.length > 0
-            ? Math.max(...software.softwareCategory.map(pub => pub.softwareCategoryId))
-            : 0;
-        const nextPubId = lastPub + 1;
-
-        software.softwareCategory.push({
-            softwareCategoryId: nextPubId,
+        const newSoftwareCategory = new SoftwareCategoryModel({
+            userId,
+            softwareCategoryId: nextSoftwareCategoryId,
             softwareCategoryName
         })
-        await software.save()
-        
-        res.status(201).json({success:true, data:software, message:'Software Category created successfullly'})
-    } catch (error) {
-        res.status(500).json({ message: 'An error occurred while adding software category', error: error.message });
 
+        await newSoftwareCategory.save();
+        res.status(201).json({ success: true, data: newSoftwareCategory, message: 'Software category created successfully'})
+
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error'})
     }
 }
 
 export const getAllPublisher = async (req, res) => {
     try {
-        const software = await SoftwareCategoryModel.find()
-        const AllPublishers = software.flatMap(soft => soft.publishers)
-        res.status(200).json({ success: true, data: AllPublishers })
+        const publisher = await PublisherModel.find()
+        res.status(200).json({ success: true, data: publisher})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while fetching publishers' })
+        res.status(500).json({ message: 'Internal server error'})
     }
 }
 
 export const getAllSoftwareCategory = async (req, res) => {
     try {
-        const software = await SoftwareCategoryModel.find()
-        const allSoftwareCategory = software.flatMap(soft => soft.softwareCategory)
-        res.status(200).json({ success: true, data: allSoftwareCategory })
+        const softwareCategory = await SoftwareCategoryModel.find()
+        res.status(200).json({ success: true, data: softwareCategory})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while fetching software category' })
+        res.status(500).json({ message: 'Internal server error'})
     }
 }
 
 export const getAllSoftware = async (req, res) => {
     try {
-        const software = await SoftwareCategoryModel.find()
+        const software = await SoftwareModel.find()
         res.status(200).json({ success: true, data: software })
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while fetching software' })
@@ -135,160 +118,119 @@ export const getAllSoftware = async (req, res) => {
 export const getPublisherById = async (req, res) => {
     try {
         const { id } = req.params
-        const software = await SoftwareCategoryModel.find()
-        for (const soft of software) {
-            const pub = soft.publishers.id(id)
-            if (pub) {
-                return res.status(200).json({ success: true, data: pub })
-            }
+        const publisher = await PublisherModel.findById(id);
+        if(!publisher){
+            return res.status(404).json({ success: false, message: 'Publisher not found'})
         }
-        res.status(404).json({ success: false, message: 'Publisher Id not found' })
+        res.status(200).json({ success:true, data: publisher})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while fetching publisher' })
-
+        res.status(500).json({ message: 'Internal server error while fetching publisher'})
     }
 }
 
 export const getSoftwareCategoryById = async (req, res) => {
     try {
         const { id } = req.params
-        const software = await SoftwareCategoryModel.find()
-        for (const cat of software) {
-            const softCat = cat.softwareCategory.id(id)
-            if (softCat) {
-                return res.status(200).json({ success: true, data: softCat })
-            }
+        const softwareCategory = await SoftwareCategoryModel.findById(id);
+        if(!softwareCategory){
+            return res.status(404).json({ success: false, message: 'Software Category not found'})
         }
-        res.status(404).json({ success: false, message: 'Software Category Id not found' })
+        res.status(200).json({ success:true, data: softwareCategory})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while fetching software category' })
-
+        res.status(500).json({ message: 'Internal server error while fetching Software Category'})
     }
 }
 
 export const getSoftwareById = async (req, res) => {
     try {
         const { id } = req.params
-        const software = await SoftwareCategoryModel.findById(id)
-
-        if (!software) {
-            return res.status(404).json({ success: false, message: 'Software id not found' })
+        const software = await SoftwareModel.findById(id);
+        if(!software){
+            return res.status(404).json({ success: false, message: 'Software not found'})
         }
-        res.status(200).json({ success: true, data: software })
-
+        res.status(200).json({ success:true, data: software})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while fetching software' })
-
+        res.status(500).json({ message: 'Internal server error while fetching software'})
     }
 }
 
 export const updatePublisher = async (req, res) => {
     try {
         const { id } = req.params
-        const software = await SoftwareCategoryModel.find()
-        for (const soft of software) {
-            const pub = soft.publishers.id(id)
-            if (pub) {
-                Object.assign(pub, req.body)
-                await soft.save()
-                return res.status(200).json({ success: true, data: pub, message: 'Publisher updated successfully' })
-            }
+        const publisherData = await PublisherModel.findByIdAndUpdate(id, req.body, { new:true})
+
+        if (!publisherData) {
+            return res.status(40).json({ success: false, message: 'Publisher location not found'})
         }
-        res.status(404).json({ success: false, message: 'Publisher Id not found' })
+        res.status(200).json({ success: true, data: publisherData, message: 'Publisher updated successfully'})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while updating publisher' });
+        res.status(500).json({ message: 'Internal server error while fetching publisher'})
     }
 }
 
 export const updateSoftwareCategory = async (req, res) => {
     try {
         const { id } = req.params
-        const software = await SoftwareCategoryModel.find()
-        for (const soft of software) {
-            const cat = soft.softwareCategory.id(id)
-            if (cat) {
-                Object.assign(cat, req.body)
-                await soft.save()
-                return res.status(200).json({ success: true, data: cat, message: 'Software category updated successfully' })
-            }
+        const softwareCategoryData = await SoftwareCategoryModel.findByIdAndUpdate(id, req.body, { new:true})
+
+        if (!softwareCategoryData) {
+            return res.status(40).json({ success: false, message: 'Software category not found'})
         }
-        res.status(404).json({ success: false, message: 'Software category Id not found' })
+        res.status(200).json({ success: true, data: softwareCategoryData, message: 'Software category updated successfully'})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while updating software category' });
+        res.status(500).json({ message: 'Internal server error while fetching Software category'})
     }
 }
 
 export const updateSoftware = async (req, res) => {
     try {
         const { id } = req.params
-        const updateSoftware = await SoftwareCategoryModel.findByIdAndUpdate(id, req.body, { new: true })
+        const softwareData = await SoftwareModel.findByIdAndUpdate(id, req.body, { new:true})
 
-        if (!updateSoftware) {
-            return res.status(404).json({ success: false, message: 'Software Id not found' })
+        if (!softwareData) {
+            return res.status(40).json({ success: false, message: 'Software not found'})
         }
-
-        res.status(200).json({ success: true, data: updateSoftware, message: 'Software updated successfully' })
+        res.status(200).json({ success: true, data: softwareData, message: 'Software updated successfully'})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while updating Software' })
-
+        res.status(500).json({ message: 'Internal server error while updating software'})
     }
 }
 
 export const deletePublisher = async (req, res) => {
     try {
-        const { softwareId, publisherId } = req.params
-
-        const software = await SoftwareCategoryModel.findById(softwareId)
-        if (!software) {
-            return res.status(400).json({ success: false, message: 'Software Id not found' })
+        const { id }= req.params
+        const deletedPublisher = await PublisherModel.findByIdAndDelete(id)
+        if (!deletedPublisher){
+            return res.status(404).json({ success: false, message: 'Publisher not found'})
         }
-        const subIndex = software.publishers.findIndex(
-            (sub) => sub._id.toString() === publisherId
-        )
-        if (subIndex === -1) {
-            return res.status(404).json({ success: false, message: 'Publisher Id not found' })
-        }
-        software.publishers.splice(subIndex, 1)
-        await software.save()
-        res.status(200).json({ success: true, message: 'Publisher deleted successfully' })
+        res.status(200).json({ success: true, message: 'Publisher deleted successfully'})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while deleting publisher' });
-
+        res.status(500).json({ message: 'Internal server error while deleting publisher'})
     }
 }
 
 export const deleteSoftwareCategory = async (req, res) => {
     try {
-        const { softwareId, softwareCategoryId } = req.params
-        const software = await SoftwareCategoryModel.findById(softwareId)
-        if (!software) {
-            return res.status(400).json({ success: false, message: 'Software Id not found' })
+        const { id }= req.params
+        const deletedSoftwareCategory = await SoftwareCategoryModel.findByIdAndDelete(id)
+        if (!deletedSoftwareCategory){
+            return res.status(404).json({ success: false, message: 'Software catrgory not found'})
         }
-        const subIndex = software.softwareCategory.findIndex(
-            (sub) => sub._id.toString() === softwareCategoryId
-        )
-        if (subIndex === -1) {
-            return res.status(404).json({ success: false, message: 'Software category Id not found' })
-        }
-        software.softwareCategory.splice(subIndex, 1)
-        await software.save()
-        res.status(200).json({ success: true, message: 'Software category deleted successfully' })
+        res.status(200).json({ success: true, message: 'Software category deleted successfully'})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while deleting software category' });
-
+        res.status(500).json({ message: 'Internal server error while deleting software category'})
     }
 }
 
 export const deleteSoftware = async (req, res) => {
     try {
-        const { id } = req.params
-        const deleteSoftware = await SoftwareCategoryModel.findByIdAndDelete(id)
-
-        if(!deleteSoftware){
-            return res.status(404).json({ success: false, message:'Software id not found'})
+        const { id }= req.params
+        const deletedSoftware = await SoftwareModel.findByIdAndDelete(id)
+        if (!deletedSoftware){
+            return res.status(404).json({ success: false, message: 'Software not found'})
         }
-        res.status(200).json({ success:true, message:'Software deleted successfully'})
+        res.status(200).json({ success: true, message: 'Software deleted successfully'})
     } catch (error) {
-        res.status(500).json({ message: 'An error occurred while deleting software' });
+        res.status(500).json({ message: 'Internal server error while deleting software'})
     }
 }

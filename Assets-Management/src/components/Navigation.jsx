@@ -960,7 +960,18 @@ const Navigation = ({ nav, setNav }) => {
                 </li>
               </ul>
             )}
-            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >gate pass</h3> */}
+            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >gate pass</h3>
+            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >vendor</h3> */}
+            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >license</h3> */}
+
+            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => toggleSubMenu('vendor')}>vendor {expandedSubMenus.vendor ?<IoMdArrowDropdown />: <IoMdArrowDropright />}</h3>
+            {expandedSubMenus.vendor && (
+              <ul className='flex flex-col gap-2 list-disc pl-5 '>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/vendor-category" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Category</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/status"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Status</NavLink></li>
+                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/service-category"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Service Category</NavLink></li>
+                </ul>
+            )}
           </>
         );
       default:

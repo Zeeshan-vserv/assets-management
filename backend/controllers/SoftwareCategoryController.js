@@ -3,7 +3,6 @@ import SoftwareCategoryModel from "../models/softwareCategoryModel.js";
 export const createSoftware = async (req, res) => {
     try {
         const { softwareName, publishers = [], softwareCategory = [] } = req.body;
-
         if (!softwareName) {
             return res.status(400).json({ message: 'Software name required' });
         }

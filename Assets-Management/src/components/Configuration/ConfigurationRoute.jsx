@@ -20,9 +20,9 @@ import Condition from "./Assets/Condition.jsx";
 import ConsumableCategory from "./Assets/ConsumableCategory.jsx";
 import ConsumableSubCategory from "./Assets/ConsumableSubCategory.jsx";
 import AssetTag from "./Assets/AssetTag.jsx";
-import GatePassAddress from "./GatePass/GatePassAddress.jsx";
-import SupportDepartment from "./Global/SupportDepartment.jsx";
-import SupportGroup from "./Global/SupportGroup.jsx";
+import VendorCategory from "./Vendor/VendorCategory.jsx";
+import Status from "./Vendor/Status.jsx";
+import ServiceCategory from "./Vendor/ServiceCategory.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -38,9 +38,6 @@ function ConfigurationRoute() {
         <Route path="sub-location" element={<SubLocation />} />
         <Route path="import-user" element={<ImportUser />} />
         <Route path="organization" element={<Organization />} />
-        <Route path="supportDepartment" element={<SupportDepartment />} />
-        <Route path="supportGroup" element={<SupportGroup />} />
-        
         {/* Incident Routes */}
         <Route path="Category" element={<Category />} />
         <Route path="SubCategory" element={<SubCategory />} />
@@ -60,6 +57,11 @@ function ConfigurationRoute() {
           element={<ConsumableSubCategory />}
         />
         <Route path="asset-tag" element={<AssetTag />} />
+
+        {/* Vendor Routes */}
+        <Route path="vendor-category" element={<VendorCategory />} />
+        <Route path="status" element={<Status />} />
+        <Route path="service-category" element={<ServiceCategory />} />
       </Routes>
     </>
   );

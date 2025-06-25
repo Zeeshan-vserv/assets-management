@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Autocomplete, Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -14,12 +14,12 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
 import {
-  createPublisher,
-  deletePublisher,
-  getAllPublisher,
-  getAllSoftware,
-  updatePublisher,
-} from "../../../api/SoftwareCategoryRequest";
+  createStatus,
+  deleteStatus,
+  getAllStatus,
+  updateStatus,
+} from "../../../api/VendorStatusCategoryRequest";
+import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
@@ -29,67 +29,48 @@ const csvConfig = mkConfig({
   filename: "Assets-Management-Department.csv",
 });
 
-function Publisher() {
+function Status() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
-  const [softwareData, setSoftwareData] = useState([]);
-  const [SelectedSoftwareId, setSelectedSoftwareId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [addPublisherModal, setAddPublisherModal] = useState(false);
-  const [addNewPublisher, setAddNewPublisher] = useState({
-    publisherName: "",
+  const [addStatusModal, setAddStatusModal] = useState(false);
+  const [addNewStatus, setAddNewStatus] = useState({
+    statusName: "",
   });
 
-  const [editPublisher, setEditPublisher] = useState(null);
+  const [editStatus, setEditStatus] = useState(null);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-  const [deletePublisherId, setDeletePublisherId] = useState(null);
-  const [deleteSoftwareId, setDeleteSoftwareId] = useState(null);
+  const [deleteStatusId, setDeleteStatusId] = useState(null);
 
-  const fetchPublisher = async () => {
+  const fetchStatus = async () => {
     try {
       setIsLoading(true);
-      const getAllPublisherResponse = await getAllPublisher();
-      setData(getAllPublisherResponse?.data?.data || []);
+      const response = await getAllStatus();
+      setData(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching software Name:", error);
+      console.error("Error fetching status:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPublisher();
+    fetchStatus();
   }, []);
 
-  const fetchgetAllSoftware = async () => {
-    try {
-      setIsLoading(true);
-      const getAllSoftwareResponse = await getAllSoftware();
-      setSoftwareData(getAllSoftwareResponse?.data?.data || []);
-    } catch (error) {
-      console.error("Error fetching software Name:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchgetAllSoftware();
-  }, []);
-
-  // console.log("softwareData", softwareData?.length);
   const columns = useMemo(
     () => [
       {
-        accessorKey: "publisherId",
-        header: "Publisher Id",
+        accessorKey: "statusId",
+        header: "Status Id",
       },
       {
-        accessorKey: "publisherName",
-        header: "Publisher Name",
+        accessorKey: "statusName",
+        header: "Status Name",
       },
-
       {
         id: "edit",
         header: "Edit",
@@ -97,7 +78,7 @@ function Publisher() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleUpdatePublisher(row.original._id)}
+            onClick={() => handleUpdateStatus(row.original._id)}
             color="primary"
             aria-label="edit"
           >
@@ -112,9 +93,7 @@ function Publisher() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() =>
-              handleDeletePublisher(row.original._id, softwareData)
-            }
+            onClick={() => handleDeleteStatus(row.original._id)}
             color="error"
             aria-label="delete"
           >
@@ -127,110 +106,94 @@ function Publisher() {
   );
 
   //Add
-  const openAddPublisherModal = (softwareId) => {
-    setSelectedSoftwareId(softwareId);
-    setAddPublisherModal(true);
-  };
-
-  const addNewPublisherChangeHandler = (e) => {
+  const addNewStatusChangeHandler = (e) => {
     const { name, value } = e.target;
-    setAddNewPublisher((prev) => ({
+    setAddNewStatus((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const addNewPublisherHandler = async (e) => {
+  const addNewStatusHandler = async (e) => {
     e.preventDefault();
-    const formData = {
-      publisherName: addNewPublisher.publisherName,
-    };
-
-    const createPublisherResponse = await createPublisher(
-      SelectedSoftwareId,
-      formData
-    );
-    if (createPublisherResponse?.data?.success) {
-      toast.success("Publisher created successfullly");
-      await fetchPublisher();
-      await fetchgetAllSoftware();
+    try {
+      const formData = {
+        userId: user?.userId,
+        statusName: addNewStatus.statusName,
+      };
+      const createStatusResponse = await createStatus(formData);
+      if (createStatusResponse?.data?.success) {
+        toast.success("Status created successfully");
+        setAddNewStatus({ statusName: "" });
+        fetchStatus();
+      }
+    } catch (error) {
+      console.error("Error adding new status:", error);
     }
-    setAddPublisherModal(false);
+    setAddStatusModal(false);
   };
 
   //update
-  const handleUpdatePublisher = (id) => {
-    const publisherToEdit = data?.find((d) => d._id === id);
-    if (publisherToEdit) {
-      setEditPublisher({
-        _id: publisherToEdit._id,
-        publisherName: publisherToEdit.publisherName,
+  const handleUpdateStatus = (id) => {
+    const statusToEdit = data?.find((d) => d._id === id);
+    if (statusToEdit) {
+      setEditStatus({
+        _id: statusToEdit._id,
+        statusName: statusToEdit.statusName,
       });
       setOpenUpdateModal(true);
     }
   };
 
-  const updatePublisherChangeHandler = (e) => {
+  const updateStatusChangeHandler = (e) => {
     const { name, value } = e.target;
-    setEditPublisher((prev) => ({
+    setEditStatus((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
-  const updatePublisherHandler = async (e) => {
+
+  const updateStatusHandler = async (e) => {
     e.preventDefault();
+    if (!editStatus?._id) return;
     try {
       const updatedData = {
-        publisherName: editPublisher?.publisherName,
+        statusName: editStatus.statusName,
       };
-      const updatePublisherResponse = await updatePublisher(
-        editPublisher._id,
+      const updateStatusResponse = await updateStatus(
+        editStatus._id,
         updatedData
       );
-      if (updatePublisherResponse?.data.success) {
-        toast.success("Publisher updated successfully");
-        await fetchPublisher();
-        await fetchgetAllSoftware();
+      if (updateStatusResponse?.data?.success) {
+        toast.success("Status updated successfully");
+        fetchStatus();
       }
-    } catch (error) {
-      console.error("Error updating publisher:", error);
-    } finally {
       setOpenUpdateModal(false);
+      setEditStatus(null);
+    } catch (error) {
+      console.error("Error updating status:", error);
     }
   };
 
   //delete
-  const handleDeletePublisher = (publisherId, softwareDatas) => {
-    const softwareWithPublisher = softwareDatas.find((software) =>
-      software.publishers.some((pub) => pub._id === publisherId)
-    );
-    if (softwareWithPublisher) {
-      setDeleteSoftwareId(softwareWithPublisher._id);
-      setDeletePublisherId(publisherId);
-      setDeleteConfirmationModal(true);
-    }
+  const handleDeleteStatus = (id) => {
+    setDeleteStatusId(id);
+    setDeleteConfirmationModal(true);
   };
 
-  const deletePublisherHandler = async (e) => {
+  const deleteStatusHandler = async (e) => {
     e.preventDefault();
     try {
-      const deletePublisherResponse = await deletePublisher(
-        deleteSoftwareId,
-        deletePublisherId
-      );
-      console.log("deletePublisherResponse", deletePublisherResponse);
-      if (deletePublisherResponse?.data.success) {
-        toast.success("Publisher deleted successfully");
-        await fetchPublisher();
-        await fetchgetAllSoftware();
+      const deleteStatusResponse = await deleteStatus(deleteStatusId);
+      if (deleteStatusResponse?.data?.success) {
+        toast.success("Status deleted successfully");
+        fetchStatus();
       }
     } catch (error) {
-      console.error("Error deleting publisher:", error);
-    } finally {
-      setDeleteConfirmationModal(false);
-      setDeletePublisherId(null);
-      setDeleteSoftwareId(null);
+      console.error("Error deleting status:", error);
     }
+    setDeleteConfirmationModal(false);
+    setDeleteStatusId(null);
   };
 
   //Exports
@@ -322,24 +285,21 @@ function Publisher() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          {softwareData.map((software) => (
-            <Button
-              key={software?._id}
-              onClick={() => openAddPublisherModal(software?._id)}
-              variant="contained"
-              size="small"
-              startIcon={<AddCircleOutlineIcon />}
-              sx={{
-                backgroundColor: "#2563eb",
-                color: "#fff",
-                textTransform: "none",
-                mt: 1,
-                mb: 1,
-              }}
-            >
-              New
-            </Button>
-          ))}
+          <Button
+            onClick={() => setAddStatusModal(true)}
+            variant="contained"
+            size="small"
+            startIcon={<AddCircleOutlineIcon />}
+            sx={{
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+            }}
+          >
+            New
+          </Button>
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -433,26 +393,26 @@ function Publisher() {
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">PUBLISHER</h2>
+        <h2 className="text-lg font-semibold mb-6 text-start">STATUS</h2>
         <MaterialReactTable table={table} />
-        {addPublisherModal && (
+        {addStatusModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
               <h2 className="text-md font-semibold mb-6 text-start">
-                Add Publisher
+                Add Status
               </h2>
-              <form onSubmit={addNewPublisherHandler} className="space-y-2">
+              <form onSubmit={addNewStatusHandler} className="space-y-2">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Publisher *
+                      Status *
                     </label>
                     <TextField
-                      name="publisherName"
+                      name="statusName"
                       required
                       fullWidth
-                      value={addNewPublisher?.publisherName || ""}
-                      onChange={addNewPublisherChangeHandler}
+                      value={addNewStatus?.statusName || ""}
+                      onChange={addNewStatusChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
                     />
@@ -461,7 +421,7 @@ function Publisher() {
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => setAddPublisherModal(false)}
+                    onClick={() => setAddStatusModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
@@ -482,20 +442,20 @@ function Publisher() {
             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
                 <h2 className="text-md font-semibold mb-6 text-start">
-                  Edit Publisher
+                  Edit Status
                 </h2>
-                <form onSubmit={updatePublisherHandler} className="space-y-2">
+                <form onSubmit={updateStatusHandler} className="space-y-2">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Publisher *
+                        Status *
                       </label>
                       <TextField
-                        name="publisherName"
+                        name="statusName"
                         required
                         fullWidth
-                        value={editPublisher?.publisherName || ""}
-                        onChange={updatePublisherChangeHandler}
+                        value={editStatus?.statusName || ""}
+                        onChange={updateStatusChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}
                       />
@@ -531,7 +491,7 @@ function Publisher() {
                 This action will permanently delete the department.
               </p>
               <form
-                onSubmit={deletePublisherHandler}
+                onSubmit={deleteStatusHandler}
                 className="flex justify-end gap-3"
               >
                 <button
@@ -556,4 +516,4 @@ function Publisher() {
   );
 }
 
-export default Publisher;
+export default Status;

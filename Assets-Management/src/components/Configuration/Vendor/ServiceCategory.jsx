@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Autocomplete, Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -13,14 +13,8 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import {
-  createPublisher,
-  deletePublisher,
-  getAllPublisher,
-  getAllSoftware,
-  updatePublisher,
-} from "../../../api/SoftwareCategoryRequest";
-import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+import { getAllDepartment } from "../../../api/DepartmentRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -29,67 +23,48 @@ const csvConfig = mkConfig({
   filename: "Assets-Management-Department.csv",
 });
 
-function Publisher() {
+function ServiceCategory() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
-  const [softwareData, setSoftwareData] = useState([]);
-  const [SelectedSoftwareId, setSelectedSoftwareId] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [addPublisherModal, setAddPublisherModal] = useState(false);
-  const [addNewPublisher, setAddNewPublisher] = useState({
-    publisherName: "",
+  const [addServiceCategoryModal, setAddServiceCategoryModal] = useState(false);
+  const [addNewServiceCategory, setAddNewServiceCategory] = useState({
+    vendorServiceCategoryName: "",
   });
 
-  const [editPublisher, setEditPublisher] = useState(null);
+  const [editServiceCategory, setEditServiceCategory] = useState(null);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-  const [deletePublisherId, setDeletePublisherId] = useState(null);
-  const [deleteSoftwareId, setDeleteSoftwareId] = useState(null);
+  const [deleteServiceCategoryId, setDeleteServiceCategoryId] = useState(null);
 
-  const fetchPublisher = async () => {
+  const fetchServiceCategory = async () => {
     try {
       setIsLoading(true);
-      const getAllPublisherResponse = await getAllPublisher();
-      setData(getAllPublisherResponse?.data?.data || []);
+      const response = await getAllDepartment();
+      setData(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching software Name:", error);
+      console.error("Error fetching service category:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPublisher();
+    fetchServiceCategory();
   }, []);
 
-  const fetchgetAllSoftware = async () => {
-    try {
-      setIsLoading(true);
-      const getAllSoftwareResponse = await getAllSoftware();
-      setSoftwareData(getAllSoftwareResponse?.data?.data || []);
-    } catch (error) {
-      console.error("Error fetching software Name:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchgetAllSoftware();
-  }, []);
-
-  // console.log("softwareData", softwareData?.length);
   const columns = useMemo(
     () => [
       {
-        accessorKey: "publisherId",
-        header: "Publisher Id",
+        accessorKey: "departmentId",
+        header: "Vendor Service Category Id",
       },
       {
-        accessorKey: "publisherName",
-        header: "Publisher Name",
+        accessorKey: "departmentName",
+        header: "Name",
       },
-
       {
         id: "edit",
         header: "Edit",
@@ -97,7 +72,7 @@ function Publisher() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleUpdatePublisher(row.original._id)}
+            onClick={() => handleUpdateServiceCategory(row.original._id)}
             color="primary"
             aria-label="edit"
           >
@@ -112,9 +87,7 @@ function Publisher() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() =>
-              handleDeletePublisher(row.original._id, softwareData)
-            }
+            onClick={() => handleDeleteServiceCategory(row.original._id)}
             color="error"
             aria-label="delete"
           >
@@ -127,110 +100,70 @@ function Publisher() {
   );
 
   //Add
-  const openAddPublisherModal = (softwareId) => {
-    setSelectedSoftwareId(softwareId);
-    setAddPublisherModal(true);
-  };
-
-  const addNewPublisherChangeHandler = (e) => {
+  const addNewServiceCategoryChangeHandler = (e) => {
     const { name, value } = e.target;
-    setAddNewPublisher((prev) => ({
+    setAddNewServiceCategory((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
-  const addNewPublisherHandler = async (e) => {
+  const addNewServiceCategoryHandler = async (e) => {
     e.preventDefault();
-    const formData = {
-      publisherName: addNewPublisher.publisherName,
-    };
-
-    const createPublisherResponse = await createPublisher(
-      SelectedSoftwareId,
-      formData
-    );
-    if (createPublisherResponse?.data?.success) {
-      toast.success("Publisher created successfullly");
-      await fetchPublisher();
-      await fetchgetAllSoftware();
+    try {
+    } catch (error) {
+      console.error("Error adding new service category:", error);
     }
-    setAddPublisherModal(false);
+    setAddNewServiceCategory({ vendorServiceCategoryName: "" });
+    setAddServiceCategoryModal(false);
   };
 
   //update
-  const handleUpdatePublisher = (id) => {
-    const publisherToEdit = data?.find((d) => d._id === id);
-    if (publisherToEdit) {
-      setEditPublisher({
-        _id: publisherToEdit._id,
-        publisherName: publisherToEdit.publisherName,
+  const handleUpdateServiceCategory = (id) => {
+    const serviceCategoryToEdit = data?.find((d) => d._id === id);
+    if (serviceCategoryToEdit) {
+      setEditServiceCategory({
+        category: serviceCategoryToEdit.category,
       });
       setOpenUpdateModal(true);
     }
   };
 
-  const updatePublisherChangeHandler = (e) => {
+  const updateServiceCategoryChangeHandler = (e) => {
     const { name, value } = e.target;
-    setEditPublisher((prev) => ({
+    setEditServiceCategory((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
-  const updatePublisherHandler = async (e) => {
+
+  const updateServiceCategoryHandler = async (e) => {
     e.preventDefault();
+    if (!editServiceCategory?._id) return;
     try {
-      const updatedData = {
-        publisherName: editPublisher?.publisherName,
-      };
-      const updatePublisherResponse = await updatePublisher(
-        editPublisher._id,
-        updatedData
-      );
-      if (updatePublisherResponse?.data.success) {
-        toast.success("Publisher updated successfully");
-        await fetchPublisher();
-        await fetchgetAllSoftware();
-      }
+      // console.log("editServiceCategory", editServiceCategory);
+      //call api
+      setEditServiceCategory(null);
     } catch (error) {
-      console.error("Error updating publisher:", error);
-    } finally {
-      setOpenUpdateModal(false);
+      console.error("Error updating service category:", error);
     }
   };
 
   //delete
-  const handleDeletePublisher = (publisherId, softwareDatas) => {
-    const softwareWithPublisher = softwareDatas.find((software) =>
-      software.publishers.some((pub) => pub._id === publisherId)
-    );
-    if (softwareWithPublisher) {
-      setDeleteSoftwareId(softwareWithPublisher._id);
-      setDeletePublisherId(publisherId);
-      setDeleteConfirmationModal(true);
-    }
+  const handleDeleteServiceCategory = (id) => {
+    setDeleteServiceCategoryId(id);
+    setDeleteConfirmationModal(true);
   };
-
-  const deletePublisherHandler = async (e) => {
+  const deleteServiceCategoryHandler = async (e) => {
     e.preventDefault();
     try {
-      const deletePublisherResponse = await deletePublisher(
-        deleteSoftwareId,
-        deletePublisherId
-      );
-      console.log("deletePublisherResponse", deletePublisherResponse);
-      if (deletePublisherResponse?.data.success) {
-        toast.success("Publisher deleted successfully");
-        await fetchPublisher();
-        await fetchgetAllSoftware();
-      }
+      console.log("deleteServiceCategoryId", deleteServiceCategoryId);
+      //call api
     } catch (error) {
-      console.error("Error deleting publisher:", error);
-    } finally {
-      setDeleteConfirmationModal(false);
-      setDeletePublisherId(null);
-      setDeleteSoftwareId(null);
+      console.error("Error deleting service category:", error);
     }
+    setDeleteConfirmationModal(false);
+    setDeleteServiceCategoryId(null);
   };
 
   //Exports
@@ -322,24 +255,21 @@ function Publisher() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          {softwareData.map((software) => (
-            <Button
-              key={software?._id}
-              onClick={() => openAddPublisherModal(software?._id)}
-              variant="contained"
-              size="small"
-              startIcon={<AddCircleOutlineIcon />}
-              sx={{
-                backgroundColor: "#2563eb",
-                color: "#fff",
-                textTransform: "none",
-                mt: 1,
-                mb: 1,
-              }}
-            >
-              New
-            </Button>
-          ))}
+          <Button
+            onClick={() => setAddServiceCategoryModal(true)}
+            variant="contained"
+            size="small"
+            startIcon={<AddCircleOutlineIcon />}
+            sx={{
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+            }}
+          >
+            New
+          </Button>
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -433,26 +363,31 @@ function Publisher() {
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">PUBLISHER</h2>
+        <h2 className="text-lg font-semibold mb-6 text-start">
+          VENDOR SERVICE CATEGORY
+        </h2>
         <MaterialReactTable table={table} />
-        {addPublisherModal && (
+        {addServiceCategoryModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
               <h2 className="text-md font-semibold mb-6 text-start">
-                Add Publisher
+                Add Vendor Service Category
               </h2>
-              <form onSubmit={addNewPublisherHandler} className="space-y-2">
+              <form
+                onSubmit={addNewServiceCategoryHandler}
+                className="space-y-2"
+              >
                 <div className="space-y-4">
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Publisher *
+                      Category
                     </label>
                     <TextField
-                      name="publisherName"
+                      name="vendorServiceCategoryName"
                       required
                       fullWidth
-                      value={addNewPublisher?.publisherName || ""}
-                      onChange={addNewPublisherChangeHandler}
+                      value={addNewServiceCategory?.vendorServiceCategoryName || ""}
+                      onChange={addNewServiceCategoryChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
                     />
@@ -461,7 +396,7 @@ function Publisher() {
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="button"
-                    onClick={() => setAddPublisherModal(false)}
+                    onClick={() => setAddServiceCategoryModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
@@ -482,20 +417,23 @@ function Publisher() {
             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
                 <h2 className="text-md font-semibold mb-6 text-start">
-                  Edit Publisher
+                  Edit Vendor Category
                 </h2>
-                <form onSubmit={updatePublisherHandler} className="space-y-2">
+                <form
+                  onSubmit={updateServiceCategoryHandler}
+                  className="space-y-2"
+                >
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Publisher *
+                        Category *
                       </label>
                       <TextField
-                        name="publisherName"
+                        name="vendorServiceCategoryName"
                         required
                         fullWidth
-                        value={editPublisher?.publisherName || ""}
-                        onChange={updatePublisherChangeHandler}
+                        value={editServiceCategory?.vendorServiceCategoryName || ""}
+                        onChange={updateServiceCategoryChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}
                       />
@@ -531,7 +469,7 @@ function Publisher() {
                 This action will permanently delete the department.
               </p>
               <form
-                onSubmit={deletePublisherHandler}
+                onSubmit={deleteServiceCategoryHandler}
                 className="flex justify-end gap-3"
               >
                 <button
@@ -556,4 +494,4 @@ function Publisher() {
   );
 }
 
-export default Publisher;
+export default ServiceCategory;

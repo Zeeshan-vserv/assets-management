@@ -12,6 +12,10 @@ import {
   getAllSubDepartment,
 } from "../../../api/DepartmentRequest";
 import { Autocomplete, TextField } from "@mui/material";
+import {
+  getAllSupportDepartment,
+  getAllSupportGroup,
+} from "../../../api/SuportDepartmentRequest";
 
 const AddUser = () => {
   const [formData, setFormData] = useState({
@@ -27,6 +31,9 @@ const AddUser = () => {
     reportingManager: "",
     departmentHead: "",
     businessHead: "",
+    userRole: "",
+    supportDepartmentName: "",
+    supportGroups: [],
     password: "",
     confirmPassword: "",
     users: {
@@ -81,6 +88,8 @@ const AddUser = () => {
   const [departmentData, setDepartmentData] = useState([]);
   const [subDepartmentData, setSubDepartmentData] = useState([]);
   const [reportingManagerData, setReportingManagerData] = useState([]);
+  const [supportDepartmentData, setSupportDepartmentData] = useState([]);
+  const [supportGroupData, setSupportGroupData] = useState([]);
 
   const fetchDetails = async () => {
     try {
@@ -99,6 +108,12 @@ const AddUser = () => {
 
       const responseReportingManager = await getAllUsers();
       setReportingManagerData(responseReportingManager?.data || []);
+
+      const responseSupportDepartment = await getAllSupportDepartment();
+      setSupportDepartmentData(responseSupportDepartment?.data?.data || []);
+
+      const responseSupportGroup = await getAllSupportGroup();
+      setSupportGroupData(responseSupportGroup?.data?.data || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
@@ -134,6 +149,8 @@ const AddUser = () => {
         businessHead: "",
         isVip: false,
         userRole: "",
+        supportDepartmentName: "",
+        supportGroups: [],
         password: "",
         confirmPassword: "",
         users: { isView: false, isEdit: false, isDelete: false },
@@ -510,8 +527,23 @@ const AddUser = () => {
                   </label>
                   <Autocomplete
                     className="w-[65%]"
-                    options={[]}
-                    getOptionLabel={(option) => option}
+                    options={supportDepartmentData}
+                    getOptionLabel={(option) => option.supportDepartmentName}
+                    value={
+                      supportDepartmentData.find(
+                        (dept) =>
+                          dept.supportDepartmentName ===
+                          formData.supportDepartmentName
+                      ) || null
+                    }
+                    onChange={(event, newValue) => {
+                      setFormData({
+                        ...formData,
+                        supportDepartmentName: newValue
+                          ? newValue.supportDepartmentName
+                          : "",
+                      });
+                    }}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -535,8 +567,21 @@ const AddUser = () => {
                   </label>
                   <Autocomplete
                     className="w-[65%]"
-                    options={[]}
-                    getOptionLabel={(option) => option}
+                    options={supportGroupData}
+                    getOptionLabel={(option) => option.supportGroupName}
+                    value={
+                      supportGroupData.find(
+                        (group) =>
+                          group.supportGroupName ===
+                          formData.supportGroups[0]?.supportGroupName
+                      ) || null
+                    }
+                    onChange={(event, newValue) => {
+                      setFormData({
+                        ...formData,
+                        supportGroups: newValue ? [newValue] : [],
+                      });
+                    }}
                     renderInput={(params) => (
                       <TextField
                         {...params}

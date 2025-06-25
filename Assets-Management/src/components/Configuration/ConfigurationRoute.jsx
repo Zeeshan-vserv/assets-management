@@ -24,11 +24,8 @@ import VendorCategory from "./Vendor/VendorCategory.jsx";
 import Status from "./Vendor/Status.jsx";
 import ServiceCategory from "./Vendor/ServiceCategory.jsx";
 import GatePassAddress from "./GatePass/GatePassAddress.jsx";
-<<<<<<< HEAD
-=======
 import SupportDepartment from "./Global/SupportDepartment.jsx";
 import SupportGroup from "./Global/SupportGroup.jsx";
->>>>>>> 3a33ead1927622c535f4d654f4b73a679ac36f94
 function ConfigurationRoute() {
   return (
     <>

@@ -24,6 +24,7 @@ import vendorCategory from './routes/vendorCategoryRoute.js'
 import status from './routes/statusRoute.js'
 import vendorServiceCategory from './routes/vendorServiceCategoryRoute.js'
 import supportDepartment from './routes/supportDepartmentRoute.js'
+import globalIncident from './routes/globalIncidentRoute.js'
 
 const app = express()
 
@@ -58,3 +59,4 @@ app.use('/vendorCategory', vendorCategory)
 app.use('/status', status)
 app.use('/vendorServiceCategory', vendorServiceCategory)
 app.use('/supportDepartment', supportDepartment)
+app.use('/globalIncident', globalIncident)

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const softwareCategorySchema = mongoose.Schema({
     softwareCategoryId: Number,
     softwareCategoryName: String
-})
+}, { timestamps: true})
 
 export const SoftwareCategoryModel = mongoose.model('SoftwareCategory', softwareCategorySchema)
 
@@ -12,7 +12,7 @@ export const SoftwareCategoryModel = mongoose.model('SoftwareCategory', software
 const publisherSchema = mongoose.Schema({
     publisherId : Number,
     publisherName : String,
-})
+}, { timestamps: true})
 
 export const PublisherModel = mongoose.model('Publisher', publisherSchema)
 

@@ -5,7 +5,7 @@ import { addSubConsumable, createConsumable, deleteConsumable, deleteSubConsumab
 const router = express.Router()
 
 router.post('/', authMiddleware, createConsumable)
-router.post('/:consumableId/subConsumable', authMiddleware, addSubConsumable)
+router.post('/:consumableId/subConsumable', addSubConsumable)
 router.get('/', authMiddleware, getAllConsumables)
 router.get('/subConsumable', authMiddleware, getAllSubConsumables)
 router.get('/:id', authMiddleware, getConsumableById)

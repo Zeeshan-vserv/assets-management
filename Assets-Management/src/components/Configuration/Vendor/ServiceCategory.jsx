@@ -14,7 +14,13 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
 import { useSelector } from "react-redux";
-import { getAllDepartment } from "../../../api/DepartmentRequest";
+import {
+  createVendorServiceCategory,
+  deleteVendorServiceCategory,
+  getAllVendorServiceCategory,
+  updateVendorServiceCategory,
+} from "../../../api/VendorStatusCategoryRequest";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -39,30 +45,30 @@ function ServiceCategory() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteServiceCategoryId, setDeleteServiceCategoryId] = useState(null);
 
-  const fetchServiceCategory = async () => {
+  const fetchVendorServiceCategory = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment();
+      const response = await getAllVendorServiceCategory();
       setData(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching service category:", error);
+      console.error("Error fetching vendor service category:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchServiceCategory();
+    fetchVendorServiceCategory();
   }, []);
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: "departmentId",
+        accessorKey: "vendorServiceCategoryId",
         header: "Vendor Service Category Id",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "vendorServiceCategoryName",
         header: "Name",
       },
       {
@@ -111,6 +117,16 @@ function ServiceCategory() {
   const addNewServiceCategoryHandler = async (e) => {
     e.preventDefault();
     try {
+      const formData = {
+        userId: user?.userId,
+        vendorServiceCategoryName:
+          addNewServiceCategory?.vendorServiceCategoryName,
+      };
+      const response = await createVendorServiceCategory(formData);
+      if (response?.data.success) {
+        toast.success("Vendor Service Category created successfully");
+        fetchVendorServiceCategory();
+      }
     } catch (error) {
       console.error("Error adding new service category:", error);
     }
@@ -123,7 +139,9 @@ function ServiceCategory() {
     const serviceCategoryToEdit = data?.find((d) => d._id === id);
     if (serviceCategoryToEdit) {
       setEditServiceCategory({
-        category: serviceCategoryToEdit.category,
+        _id: serviceCategoryToEdit._id,
+        vendorServiceCategoryName:
+          serviceCategoryToEdit.vendorServiceCategoryName,
       });
       setOpenUpdateModal(true);
     }
@@ -141,9 +159,20 @@ function ServiceCategory() {
     e.preventDefault();
     if (!editServiceCategory?._id) return;
     try {
-      // console.log("editServiceCategory", editServiceCategory);
-      //call api
+      const updatedData = {
+        vendorServiceCategoryName:
+          editServiceCategory?.vendorServiceCategoryName,
+      };
+      const response = await updateVendorServiceCategory(
+        editServiceCategory._id,
+        updatedData
+      );
+      if (response?.data.success) {
+        toast.success("Vendor service category updated successfully");
+        fetchVendorServiceCategory();
+      }
       setEditServiceCategory(null);
+      setOpenUpdateModal(false);
     } catch (error) {
       console.error("Error updating service category:", error);
     }
@@ -157,8 +186,13 @@ function ServiceCategory() {
   const deleteServiceCategoryHandler = async (e) => {
     e.preventDefault();
     try {
-      console.log("deleteServiceCategoryId", deleteServiceCategoryId);
-      //call api
+      const response = await deleteVendorServiceCategory(
+        deleteServiceCategoryId
+      );
+      if (response?.data.success) {
+        toast.success("Vendor service category deleted successfully");
+        fetchVendorServiceCategory();
+      }
     } catch (error) {
       console.error("Error deleting service category:", error);
     }
@@ -386,7 +420,9 @@ function ServiceCategory() {
                       name="vendorServiceCategoryName"
                       required
                       fullWidth
-                      value={addNewServiceCategory?.vendorServiceCategoryName || ""}
+                      value={
+                        addNewServiceCategory?.vendorServiceCategoryName || ""
+                      }
                       onChange={addNewServiceCategoryChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
@@ -432,7 +468,9 @@ function ServiceCategory() {
                         name="vendorServiceCategoryName"
                         required
                         fullWidth
-                        value={editServiceCategory?.vendorServiceCategoryName || ""}
+                        value={
+                          editServiceCategory?.vendorServiceCategoryName || ""
+                        }
                         onChange={updateServiceCategoryChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}

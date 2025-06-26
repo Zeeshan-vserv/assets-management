@@ -601,6 +601,57 @@ const Navigation = ({ nav, setNav }) => {
                   }}
                 >
                   <NavLink
+                    to="/main/configuration/CloserCode"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Closer Code
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/configuration/PredefinedReplies"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Predefined Replies
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/configuration/PendingReason"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Pending Reason
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
                     to="/main/configuration/Category"
                     className={({ isActive }) =>
                       `hover:underline cursor-pointer ${
@@ -636,7 +687,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
+                       <NavLink
+                    to="/main/configuration/IncidentRules"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
                   rules
+                  </NavLink>
                 </li>
                 <li
                   className="text-[11px] hover:underline"

@@ -26,6 +26,10 @@ import ServiceCategory from "./Vendor/ServiceCategory.jsx";
 import GatePassAddress from "./GatePass/GatePassAddress.jsx";
 import SupportDepartment from "./Global/SupportDepartment.jsx";
 import SupportGroup from "./Global/SupportGroup.jsx";
+import CloserCode from "./Incident/CloserCode.jsx";
+import PredefinedReplies from "./Incident/PredefinedReplies.jsx";
+import PendingReason from "./Incident/PendingReason.jsx";
+import IncidentRules from "./Incident/IncidentRules.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -46,8 +50,12 @@ function ConfigurationRoute() {
         {/* Incident Routes */}
         <Route path="Category" element={<Category />} />
         <Route path="SubCategory" element={<SubCategory />} />
+        <Route path="CloserCode" element={<CloserCode />} />
+        <Route path="PredefinedReplies" element={<PredefinedReplies />} />
+        <Route path="PendingReason" element={<PendingReason />} />
+        <Route path="IncidentRules" element={<IncidentRules />} />
 
-        {/* Incident Routes */}
+        {/* GatePass Routes */}
         <Route path="GatePassAddress" element={<GatePassAddress />} />
 
         {/* Assets Routes */}

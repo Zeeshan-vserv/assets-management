@@ -1,6 +1,6 @@
 import express from 'express';
-import authMiddleware from '../middleware/AuthMiddleware';
-import { createAutoCloseTime, createClosureCode, createPendingReason, createPredefinedResponse, createRule, deleteAutoCloseTime, deleteClosureCode, deletePendingReason, deletePredefinedResponse, deleteRule, getAllAutoCloseTimes, getAllClosureCodes, getAllPendingReasons, getAllPredefinedResponses, getAllRules, getAutoCloseTimeById, getClosureCodeById, getPendingReasonById, getPredefinedResponseById, getRuleById, updateAutoCloseTime, updateClosureCode, updatePendingReason, updatePredefinedResponse, updateRule } from '../controllers/GlobalIncidentController';
+import authMiddleware from '../middleware/AuthMiddleware.js';
+import { createAutoCloseTime, createClosureCode, createPendingReason, createPredefinedResponse, createRule, deleteAutoCloseTime, deleteClosureCode, deletePendingReason, deletePredefinedResponse, deleteRule, getAllAutoCloseTimes, getAllClosureCodes, getAllPendingReasons, getAllPredefinedResponses, getAllRules, getAutoCloseTimeById, getClosureCodeById, getPendingReasonById, getPredefinedResponseById, getRuleById, updateAutoCloseTime, updateClosureCode, updatePendingReason, updatePredefinedResponse, updateRule } from '../controllers/GlobalIncidentController.js';
 
 const router = express.Router();
 

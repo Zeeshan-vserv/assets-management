@@ -263,7 +263,7 @@ export const createPendingReason = async (req, res) => {
                 const lastPendingReason = await IncidentPendingReasonModel.findOne().sort({ pendingReasonId: -1 });
                 const nextPendingReasonId = lastPendingReason ? lastPendingReason.pendingReasonId + 1 : 1;
 
-        const newPendingResponse = new IncidentPredefinedResponseModel({
+        const newPendingResponse = new IncidentPendingReasonModel({
             userId,
             pendingReasonId: nextPendingReasonId,
             pendingReason
@@ -307,7 +307,7 @@ export const updatePendingReason = async (req, res) => {
         if (!pendingReason) {
             return res.status(40).json({ success: false, message: 'Pending reason time not found'})
         }
-        res.status(200).json({ success: true, data: predefineResponse, message: 'Pending reason updated successfully'})
+        res.status(200).json({ success: true, data: pendingReason, message: 'Pending reason updated successfully'})
     } catch (error) {
         res.status(500).json({ message: 'Internal server error while fetching auto pending reason'})
     }
@@ -336,7 +336,7 @@ export const createRule = async (req, res) => {
             return res.status(404).json({ message: 'User not found'})
         }
 
-        const newRule = new IncidentPredefinedResponseModel({
+        const newRule = new IncidentRuleModel({
             userId,
             ...ruleData
         })
@@ -377,7 +377,7 @@ export const updateRule = async (req, res) => {
         const ruleData = await IncidentRuleModel.findByIdAndUpdate(id, req.body, { new:true})
 
         if (!ruleData) {
-            return res.status(40).json({ success: false, message: 'Rule not found'})
+            return res.status(404).json({ success: false, message: 'Rule not found'})
         }
         res.status(200).json({ success: true, data: ruleData, message: 'Rule updated successfully'})
     } catch (error) {

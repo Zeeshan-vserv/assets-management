@@ -21,6 +21,7 @@ import QrCodeIcon from "@mui/icons-material/QrCode";
 import { RxCross2 } from "react-icons/rx";
 import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
 import QRCodeGenerator from "qrcode";
+import { ImEye } from "react-icons/im";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -105,6 +106,20 @@ const AssetData = () => {
       {
         accessorKey: "assetInformation.assetTag",
         header: "Asset Tag",
+        Cell: ({ row }) => (
+          <div className="flex items-center gap-1">
+            <NavLink
+              to={`/main/asset/asset-details/${row.original._id}`}
+              className="flex items-center gap-2"
+            >
+              <ImEye
+                className="ml-1 text-slate-500 hover:text-slate-700"
+                size={14}
+              />
+              {row.original.assetInformation?.assetTag || ""}
+            </NavLink>
+          </div>
+        ),
       },
       {
         accessorKey: "assetState.user",

@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 
 const assetSchema = mongoose.Schema(
     {
-        userId:String,
-        assetId:Number,
+        userId: String,
+        assetId: Number,
         assetInformation: {
             category: String,
             assetTag: String,
@@ -19,7 +19,7 @@ const assetSchema = mongoose.Schema(
             ram: String,
             assetImage: String,
         },
-        assetState:{
+        assetState: {
             assetIsCurrently: String,
             user: String,
             department: String,
@@ -52,7 +52,15 @@ const assetSchema = mongoose.Schema(
             pmCycle: String,
             schedule: String,
             istPmDate: Date
-        }
+        },
+        updateHistory: [
+            {
+                updatedBy: String,     
+                updatedAt: { type: Date, default: Date.now },
+                changes: Object   
+            }
+        ],
+
     },
     { timestamps: true }
 )

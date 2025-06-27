@@ -336,7 +336,7 @@ export const createRule = async (req, res) => {
             return res.status(404).json({ message: 'User not found'})
         }
 
-        const newRule = new IncidentPredefinedResponseModel({
+        const newRule = new IncidentRuleModel({
             userId,
             ...ruleData
         })
@@ -377,7 +377,7 @@ export const updateRule = async (req, res) => {
         const ruleData = await IncidentRuleModel.findByIdAndUpdate(id, req.body, { new:true})
 
         if (!ruleData) {
-            return res.status(40).json({ success: false, message: 'Rule not found'})
+            return res.status(404).json({ success: false, message: 'Rule not found'})
         }
         res.status(200).json({ success: true, data: ruleData, message: 'Rule updated successfully'})
     } catch (error) {

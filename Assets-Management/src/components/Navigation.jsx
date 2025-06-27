@@ -601,6 +601,23 @@ const Navigation = ({ nav, setNav }) => {
                   }}
                 >
                   <NavLink
+                    to="/main/configuration/AutoCloseTime"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Auto Close Time
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
                     to="/main/configuration/CloserCode"
                     className={({ isActive }) =>
                       `hover:underline cursor-pointer ${

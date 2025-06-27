@@ -30,6 +30,8 @@ import CloserCode from "./Incident/CloserCode.jsx";
 import PredefinedReplies from "./Incident/PredefinedReplies.jsx";
 import PendingReason from "./Incident/PendingReason.jsx";
 import IncidentRules from "./Incident/IncidentRules.jsx";
+import IncidentAutoCloserTime from "./Incident/IncidentAutoCloserTime.jsx";
+import AddRule from "./Incident/AddRule.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -48,12 +50,14 @@ function ConfigurationRoute() {
         <Route path="supportDepartment" element={<SupportDepartment />} />
         <Route path="supportGroup" element={<SupportGroup />} />
         {/* Incident Routes */}
+        <Route path="AutoCloseTime" element={<IncidentAutoCloserTime />} />
         <Route path="Category" element={<Category />} />
         <Route path="SubCategory" element={<SubCategory />} />
         <Route path="CloserCode" element={<CloserCode />} />
         <Route path="PredefinedReplies" element={<PredefinedReplies />} />
         <Route path="PendingReason" element={<PendingReason />} />
         <Route path="IncidentRules" element={<IncidentRules />} />
+        <Route path="AddRule" element={<AddRule />} />
 
         {/* GatePass Routes */}
         <Route path="GatePassAddress" element={<GatePassAddress />} />

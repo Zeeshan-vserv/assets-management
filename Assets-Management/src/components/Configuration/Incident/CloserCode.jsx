@@ -10,37 +10,33 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import {
-  createIncidentCategory,
-  deleteCategory,
-  getAllCategory,
-  updateCategory,
-} from "../../../api/IncidentCategoryRequest";
+  createClosureCode,
+  deleteClosureCode,
+  getAllClosureCodes,
+  updateClosureCode,
+} from "../../../api/ConfigurationIncidentRequest";
 
 const CloserCode = () => {
   const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Add Modal State
   const [openAddModal, setOpenAddModal] = useState(false);
-  const [addForm, setAddForm] = useState({ categoryName: "" });
+  const [addForm, setAddForm] = useState({ closureCodeValue: "" });
 
-  // Edit Modal State
   const [openEditModal, setOpenEditModal] = useState(false);
   const [editForm, setEditForm] = useState(null);
 
-  // Delete Modal State
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  // Fetch categories
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const res = await getAllCategory();
+      const res = await getAllClosureCodes();
       setData(res?.data?.data || []);
     } catch (err) {
-      toast.error("Failed to fetch categories");
+      toast.error("Failed to fetch closure codes");
     } finally {
       setIsLoading(false);
     }
@@ -50,11 +46,10 @@ const CloserCode = () => {
     fetchCategories();
   }, []);
 
-  // Table columns
   const columns = useMemo(
     () => [
-      { accessorKey: "categoryId", header: "Closure Code Id" },
-      { accessorKey: "categoryName", header: "Closure Code Value" },
+      { accessorKey: "closureCodeId", header: "Closure Code ID" },
+      { accessorKey: "closureCodeValue", header: "Closure Code Value" },
       {
         id: "edit",
         header: "Edit",
@@ -65,7 +60,7 @@ const CloserCode = () => {
             onClick={() => {
               setEditForm({
                 _id: row.original._id,
-                categoryName: row.original.categoryName,
+                closureCodeValue: row.original.closureCodeValue,
               });
               setOpenEditModal(true);
             }}
@@ -155,68 +150,74 @@ const CloserCode = () => {
 
   const handleAddCategory = async (e) => {
     e.preventDefault();
+    if (!addForm.closureCodeValue.trim()) {
+      toast.error("Closure Code cannot be empty");
+      return;
+    }
+
     try {
       const formData = {
         userId: user?.userId,
-        categoryName: addForm.categoryName,
+        closureCodeValue: addForm.closureCodeValue.trim(),
       };
-      const res = await createIncidentCategory(formData);
+      const res = await createClosureCode(formData);
       if (res?.data?.success) {
-        toast.success("Category created successfully");
+        toast.success("Closure code created successfully");
         setOpenAddModal(false);
-        setAddForm({ categoryName: "" });
+        setAddForm({ closureCodeValue: "" });
         fetchCategories();
       }
     } catch (err) {
-      toast.error("Failed to create category");
+      toast.error("Failed to create closure code");
     }
   };
 
-  // Edit Category Handler
   const handleEditCategory = async (e) => {
     e.preventDefault();
+    if (!editForm.closureCodeValue.trim()) {
+      toast.error("Closure Code cannot be empty");
+      return;
+    }
+
     try {
       const updateData = {
-        categoryName: editForm.categoryName,
+        closureCodeValue: editForm.closureCodeValue.trim(),
       };
-      const res = await updateCategory(editForm._id, updateData);
+      const res = await updateClosureCode(editForm._id, updateData);
       if (res?.data?.success) {
-        toast.success("Category updated successfully");
+        toast.success("Closure code updated successfully");
         setOpenEditModal(false);
         setEditForm(null);
         fetchCategories();
       }
     } catch (err) {
-      toast.error("Failed to update category");
+      toast.error("Failed to update closure code");
     }
   };
 
-  // Delete Category Handler
   const handleDeleteCategory = async () => {
     try {
-      await deleteCategory(deleteId);
-      toast.success("Category deleted successfully");
+      await deleteClosureCode(deleteId);
+      toast.success("Closure code deleted successfully");
       setDeleteModal(false);
       setDeleteId(null);
       fetchCategories();
     } catch (err) {
-      toast.error("Failed to delete category");
+      toast.error("Failed to delete closure code");
     }
   };
 
   return (
     <>
-      <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">
-          CLOSURE CODE
-        </h2>
+      <div className="flex flex-col w-full min-h-full p-4 bg-slate-100">
+        <h2 className="text-lg font-semibold mb-6 text-start">CLOSURE CODE</h2>
         <MaterialReactTable table={table} />
       </div>
 
       {/* Add Modal */}
       {openAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6">
               Add Closure Code
             </h2>
@@ -226,11 +227,13 @@ const CloserCode = () => {
                   Closure code*
                 </label>
                 <TextField
-                  name="categoryName"
+                  name="closureCodeValue"
                   required
                   fullWidth
-                  value={addForm.categoryName}
-                  onChange={(e) => setAddForm({ categoryName: e.target.value })}
+                  value={addForm.closureCodeValue}
+                  onChange={(e) =>
+                    setAddForm({ closureCodeValue: e.target.value })
+                  }
                   placeholder="Enter Closure Code"
                   variant="standard"
                   sx={{ width: 250 }}
@@ -240,13 +243,13 @@ const CloserCode = () => {
                 <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
-                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
                 >
                   Add
                 </button>
@@ -259,7 +262,7 @@ const CloserCode = () => {
       {/* Edit Modal */}
       {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6">
               Edit Closure Code
             </h2>
@@ -269,14 +272,14 @@ const CloserCode = () => {
                   Closure code*
                 </label>
                 <TextField
-                  name="categoryName"
+                  name="closureCodeValue"
                   required
                   fullWidth
-                  value={editForm.categoryName}
+                  value={editForm.closureCodeValue}
                   onChange={(e) =>
                     setEditForm((prev) => ({
                       ...prev,
-                      categoryName: e.target.value,
+                      closureCodeValue: e.target.value,
                     }))
                   }
                   placeholder="Enter Closure Code"
@@ -288,13 +291,13 @@ const CloserCode = () => {
                 <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
-                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
                 >
                   Update
                 </button>
@@ -312,20 +315,20 @@ const CloserCode = () => {
               Are you sure?
             </h2>
             <p className="text-gray-700 mb-6">
-              This action will permanently delete the category.
+              This action will permanently delete the closure code.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setDeleteModal(false)}
-                className="shadow-md px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:border-gray-500 transition-all"
+                className="border px-4 py-2 rounded-lg text-sm"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleDeleteCategory}
-                className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm"
               >
                 Delete
               </button>

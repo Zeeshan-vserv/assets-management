@@ -15,6 +15,7 @@ import {
   getAllCategory,
   updateCategory,
 } from "../../../api/IncidentCategoryRequest";
+import { NavLink } from "react-router-dom";
 
 const IncidentRules = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -107,21 +108,23 @@ const IncidentRules = () => {
     initialState: { density: "compact", pagination: { pageSize: 5 } },
     renderTopToolbarCustomActions: () => (
       <Box>
-        <Button
-          onClick={() => setOpenAddModal(true)}
-          variant="contained"
-          size="small"
-          startIcon={<AddCircleOutlineIcon />}
-          sx={{
-            backgroundColor: "#2563eb",
-            color: "#fff",
-            textTransform: "none",
-            mt: 1,
-            mb: 1,
-          }}
-        >
-          New
-        </Button>
+        <NavLink to="/main/configuration/AddRule">
+          <Button
+            onClick={() => setOpenAddModal(true)}
+            variant="contained"
+            size="small"
+            startIcon={<AddCircleOutlineIcon />}
+            sx={{
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+            }}
+          >
+            New
+          </Button>
+        </NavLink>
       </Box>
     ),
     muiTableProps: {
@@ -154,72 +157,72 @@ const IncidentRules = () => {
     }),
   });
 
-  const handleAddCategory = async (e) => {
-    e.preventDefault();
-    try {
-      const formData = {
-        userId: user?.userId,
-        categoryName: addForm.categoryName,
-      };
-      const res = await createIncidentCategory(formData);
-      if (res?.data?.success) {
-        toast.success("Category created successfully");
-        setOpenAddModal(false);
-        setAddForm({ categoryName: "" });
-        fetchCategories();
-      }
-    } catch (err) {
-      toast.error("Failed to create category");
-    }
-  };
+  // const handleAddCategory = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const formData = {
+  //       userId: user?.userId,
+  //       categoryName: addForm.categoryName,
+  //     };
+  //     const res = await createIncidentCategory(formData);
+  //     if (res?.data?.success) {
+  //       toast.success("Category created successfully");
+  //       setOpenAddModal(false);
+  //       setAddForm({ categoryName: "" });
+  //       fetchCategories();
+  //     }
+  //   } catch (err) {
+  //     toast.error("Failed to create category");
+  //   }
+  // };
 
   // Edit Category Handler
-  const handleEditCategory = async (e) => {
-    e.preventDefault();
-    try {
-      const updateData = {
-        categoryName: editForm.categoryName,
-      };
-      const res = await updateCategory(editForm._id, updateData);
-      if (res?.data?.success) {
-        toast.success("Category updated successfully");
-        setOpenEditModal(false);
-        setEditForm(null);
-        fetchCategories();
-      }
-    } catch (err) {
-      toast.error("Failed to update category");
-    }
-  };
+  // const handleEditCategory = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     const updateData = {
+  //       categoryName: editForm.categoryName,
+  //     };
+  //     const res = await updateCategory(editForm._id, updateData);
+  //     if (res?.data?.success) {
+  //       toast.success("Category updated successfully");
+  //       setOpenEditModal(false);
+  //       setEditForm(null);
+  //       fetchCategories();
+  //     }
+  //   } catch (err) {
+  //     toast.error("Failed to update category");
+  //   }
+  // };
 
   // Delete Category Handler
-  const handleDeleteCategory = async () => {
-    try {
-      await deleteCategory(deleteId);
-      toast.success("Category deleted successfully");
-      setDeleteModal(false);
-      setDeleteId(null);
-      fetchCategories();
-    } catch (err) {
-      toast.error("Failed to delete category");
-    }
-  };
+  // const handleDeleteCategory = async () => {
+  //   try {
+  //     await deleteCategory(deleteId);
+  //     toast.success("Category deleted successfully");
+  //     setDeleteModal(false);
+  //     setDeleteId(null);
+  //     fetchCategories();
+  //   } catch (err) {
+  //     toast.error("Failed to delete category");
+  //   }
+  // };
 
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
         <h2 className="text-lg font-semibold mb-6 text-start">
-          CLOSURE CODE
+          INCIDENT RULE DETAILS
         </h2>
         <MaterialReactTable table={table} />
       </div>
 
       {/* Add Modal */}
-      {openAddModal && (
+      {/* {openAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6">
-              Add Closure Code
+              INCIDENT RULE DETAILS
             </h2>
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div className="flex items-center gap-2">
@@ -255,10 +258,10 @@ const IncidentRules = () => {
             </form>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Edit Modal */}
-      {openEditModal && editForm && (
+      {/* {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
             <h2 className="text-xl font-bold text-gray-800 mb-6">
@@ -303,10 +306,10 @@ const IncidentRules = () => {
             </form>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Delete Modal */}
-      {deleteModal && (
+      {/* {deleteModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
             <h2 className="text-xl font-semibold text-red-600 mb-3">
@@ -333,9 +336,9 @@ const IncidentRules = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 };
 
-export default IncidentRules
+export default IncidentRules;

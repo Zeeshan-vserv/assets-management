@@ -390,11 +390,12 @@ const IncidentsData = () => {
       description: "Total",
     },
   ];
+  
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
         <h2 className="text-lg font-semibold mb-6 text-start">
-          IT ASSETS SUMMARY
+          INCIDENT DATA
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">

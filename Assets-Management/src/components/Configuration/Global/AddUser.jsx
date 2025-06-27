@@ -707,9 +707,9 @@ const AddUser = () => {
         <div className="w-full flex gap-5 max-lg:flex-col">
           <div className="w-1/2 p-4 bg-white rounded-md shadow-md max-lg:w-full">
             <table>
-              <h2 className="text-slate-700 font-semibold mb-3">
-                Page View Permissions
-              </h2>
+            <h2 className="text-slate-700 font-semibold mb-3">
+              Page View Permissions
+            </h2>
               <tr>
                 <th className="w-[85%]">Page Name</th>
                 <th>View</th>
@@ -823,9 +823,9 @@ const AddUser = () => {
           </div>
           <div className="w-1/2 p-4 bg-white rounded-md shadow-md max-lg:w-full">
             <table>
-              <h2 className="text-slate-700 font-semibold mb-3">
-                Data Permissions
-              </h2>
+            <h2 className="text-slate-700 font-semibold mb-3">
+              Data Permissions
+            </h2>
               <tr>
                 <th className="w-[70%]">Data Name</th>
                 <th>View</th>

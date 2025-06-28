@@ -26,6 +26,14 @@ import ServiceCategory from "./Vendor/ServiceCategory.jsx";
 import GatePassAddress from "./GatePass/GatePassAddress.jsx";
 import SupportDepartment from "./Global/SupportDepartment.jsx";
 import SupportGroup from "./Global/SupportGroup.jsx";
+import SlaCreation from "./SLA/SlaCreation.jsx";
+import SlaMapping from "./SLA/SlaMapping.jsx";
+import SlaTimeLines from "./SLA/SlaTimeLines.jsx";
+import PriorityMatrix from "./SLA/PriorityMatrix.jsx";
+import HolidayCalendar from "./SLA/HolidayCalendar.jsx";
+import HoliDayList from "./SLA/HoliDayList.jsx";
+import NewSlaCreation from "./SLA/NewSlaCreation.jsx";
+import EditSlaCreation from "./SLA/EditSlaCreation.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -67,6 +75,16 @@ function ConfigurationRoute() {
         <Route path="vendor-category" element={<VendorCategory />} />
         <Route path="status" element={<Status />} />
         <Route path="service-category" element={<ServiceCategory />} />
+
+        {/* SLA */}
+        <Route path="sla-creation" element={<SlaCreation />} />
+        <Route path="new-sla-creation" element={<NewSlaCreation />} />
+        <Route path="edit-sla/:id" element={<EditSlaCreation />} />
+        <Route path="sla-mapping" element={<SlaMapping />} />
+        <Route path="sla-time-lines" element={<SlaTimeLines />} />
+        <Route path="priority-matrix" element={<PriorityMatrix />} />
+        <Route path="holiday-calendar" element={<HolidayCalendar />} />
+        <Route path="holiday-list" element={<HoliDayList />} />
       </Routes>
     </>
   );

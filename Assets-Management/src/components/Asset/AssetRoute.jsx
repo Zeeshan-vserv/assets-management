@@ -10,12 +10,14 @@ import AssetsSummary from "./Global/AssetsSummary";
 import EditGetPass from "./Global/EditGetPass";
 import GatePassData from "./Global/GatePassData";
 import CreateGatePass from "./Global/CreateGatePass";
+import AssetDetails from "./Global/AssetDetails/AssetDetails";
 const AssetRoute = () => {
   return (
     <Routes>
       <Route path="AddFixedAssets" element={<AddFixedAssets />} />
       <Route path="asset-import" element={<AssetImport />} />
       <Route path="AssetData" element={<AssetData />} />
+      <Route path="asset-details/:id" element={<AssetDetails />} />
       <Route path=":id" element={<EditAsset />} />
       <Route path="assets-summary" element={<AssetsSummary />} />
       <Route path="GatePassData" element={<GatePassData />} />

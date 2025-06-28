@@ -4,7 +4,7 @@ import { getAssetById } from "../../../../api/AssetsRequest";
 import Dashboard from "./Dashboard";
 import Summary from "./Summary";
 import AssetMapping from "./AssetMapping";
-import Relationship from "./Relationship";
+// import Relationship from "./Relationship";
 import Preventive from "./Preventive";
 import Task from "./Task";
 import Incidents from "./Incidents";
@@ -50,8 +50,8 @@ function AssetDetails() {
             id={id}
           />
         );
-      case "relationship":
-        return <Relationship />;
+      // case "relationship":
+      //   return <Relationship />;
       case "preventive":
         return <Preventive id={id} />;
       case "task":
@@ -121,7 +121,7 @@ function AssetDetails() {
               >
                 Asset Mapping
               </button>
-              <button
+              {/* <button
                 onClick={() => setActiveTab("relationship")}
                 className={`px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${
                   activeTab === "relationship"
@@ -130,7 +130,7 @@ function AssetDetails() {
                 }`}
               >
                 Relationship
-              </button>
+              </button> */}
               <button
                 onClick={() => setActiveTab("preventive")}
                 className={`flex items-center justify-between px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${

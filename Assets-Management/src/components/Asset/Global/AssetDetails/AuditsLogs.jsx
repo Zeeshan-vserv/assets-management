@@ -21,7 +21,7 @@ const csvConfig = mkConfig({
 function AuditsLogs({ id }) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
+ 
   const fetchAuditsLogs = async () => {
     try {
       setIsLoading(true);

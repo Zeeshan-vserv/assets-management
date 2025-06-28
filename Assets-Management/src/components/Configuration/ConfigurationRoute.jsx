@@ -32,6 +32,7 @@ import PendingReason from "./Incident/PendingReason.jsx";
 import IncidentRules from "./Incident/IncidentRules.jsx";
 import IncidentAutoCloserTime from "./Incident/IncidentAutoCloserTime.jsx";
 import AddRule from "./Incident/AddRule.jsx";
+import EditRule from "./Incident/EditRule.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -58,6 +59,7 @@ function ConfigurationRoute() {
         <Route path="PendingReason" element={<PendingReason />} />
         <Route path="IncidentRules" element={<IncidentRules />} />
         <Route path="AddRule" element={<AddRule />} />
+        <Route path="EditRule/:id" element={<EditRule />} />
 
         {/* GatePass Routes */}
         <Route path="GatePassAddress" element={<GatePassAddress />} />

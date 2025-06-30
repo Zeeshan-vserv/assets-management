@@ -41,7 +41,7 @@ function SlaTimeLines() {
   const fetchSlaTimeLines = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllSLATimelines(); //later change
+      const response = await getAllSLATimelines();
       if (response.status !== 200) {
         throw new Error("Failed to fetch data");
       }

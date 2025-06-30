@@ -40,7 +40,6 @@ import PredefinedReplies from "./Incident/PredefinedReplies.jsx";
 import PendingReason from "./Incident/PendingReason.jsx";
 import IncidentRules from "./Incident/IncidentRules.jsx";
 import AddRule from "./Incident/AddRule.jsx";
-import ImportUser from "./Global/ImportUser.jsx";
 
 function ConfigurationRoute() {
   return (

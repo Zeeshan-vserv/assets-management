@@ -87,11 +87,11 @@ const IncidentsData = () => {
         header: "Logged Time",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "classificaton.severityLevel",
         header: "Severity",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "classificaton.technician",
         header: "Assigned To",
       },
       {

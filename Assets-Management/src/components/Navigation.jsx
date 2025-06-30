@@ -704,7 +704,7 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                       <NavLink
+                  <NavLink
                     to="/main/configuration/IncidentRules"
                     className={({ isActive }) =>
                       `hover:underline cursor-pointer ${
@@ -712,7 +712,7 @@ const Navigation = ({ nav, setNav }) => {
                       }`
                     }
                   >
-                  rules
+                    rules
                   </NavLink>
                 </li>
                 <li
@@ -745,7 +745,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  sla creation
+                  <NavLink
+                    to="/main/configuration/sla-creation"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    sla creation
+                  </NavLink>
                 </li>
                 <li
                   className="text-[11px] hover:underline"
@@ -753,7 +762,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  sla mapping
+                  <NavLink
+                    to="/main/configuration/sla-mapping"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    sla mapping
+                  </NavLink>
                 </li>
                 <li
                   className="text-[11px] hover:underline"
@@ -761,7 +779,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  sla timelines
+                  <NavLink
+                    to="/main/configuration/sla-time-lines"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    sla timelines
+                  </NavLink>
                 </li>
                 <li
                   className="text-[11px] hover:underline"
@@ -769,7 +796,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  priority matix
+                  <NavLink
+                    to="/main/configuration/priority-matrix"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    priority matix
+                  </NavLink>
                 </li>
                 <li
                   className="text-[11px] hover:underline"
@@ -777,7 +813,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  holiday calendar
+                  <NavLink
+                    to="/main/configuration/holiday-calendar"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    holiday calendar
+                  </NavLink>
                 </li>
                 <li
                   className="text-[11px] hover:underline"
@@ -785,7 +830,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  holiday list
+                  <NavLink
+                    to="/main/configuration/holiday-list"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    holiday list
+                  </NavLink>
                 </li>
               </ul>
             )}
@@ -1041,13 +1095,71 @@ const Navigation = ({ nav, setNav }) => {
             {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >vendor</h3> */}
             {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >license</h3> */}
 
-            <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => toggleSubMenu('vendor')}>vendor {expandedSubMenus.vendor ?<IoMdArrowDropdown />: <IoMdArrowDropright />}</h3>
+            <h3
+              className="flex items-center justify-between hover:underline cursor-pointer"
+              onClick={() => toggleSubMenu("vendor")}
+            >
+              vendor{" "}
+              {expandedSubMenus.vendor ? (
+                <IoMdArrowDropdown />
+              ) : (
+                <IoMdArrowDropright />
+              )}
+            </h3>
             {expandedSubMenus.vendor && (
-              <ul className='flex flex-col gap-2 list-disc pl-5 '>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/vendor-category" className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Category</NavLink></li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/status"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Status</NavLink></li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} ><NavLink to="/main/configuration/service-category"className={({ isActive }) => `hover:underline cursor-pointer ${isActive ? 'text-blue-400' : ''}`}>Service Category</NavLink></li>
-                </ul>
+              <ul className="flex flex-col gap-2 list-disc pl-5 ">
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/configuration/vendor-category"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Category
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/configuration/status"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Status
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/configuration/service-category"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Service Category
+                  </NavLink>
+                </li>
+              </ul>
             )}
           </>
         );

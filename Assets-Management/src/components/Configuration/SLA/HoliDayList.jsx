@@ -1,0 +1,427 @@
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+} from "material-react-table";
+import { Autocomplete, Box, Button, IconButton } from "@mui/material";
+import { MdModeEdit } from "react-icons/md";
+import DeleteIcon from "@mui/icons-material/Delete";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { TextField } from "@mui/material";
+import { getAllAssets } from "../../../api/AssetsRequest"; //later chnage it
+
+function HoliDayList() {
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [addHolidayListModal, setAddHolidatListModal] = useState(false);
+  const [addHolidayList, setAddHolidayList] = useState({
+    holidayCalendar: "",
+    holidayDate: "",
+    holidayRemarks: "",
+  });
+
+  const [editHolidayList, setEditHolidayList] = useState(null);
+  const [openUpdateModal, setOpenUpdateModal] = useState(false);
+
+  const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
+  const [deleteHolidayListId, setDeleteHolidayListId] = useState(null);
+
+  const fetchHolidayListId = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllAssets(); //later chnage it
+      setData(response?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching holiday calendar:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchHolidayListId();
+  }, []);
+
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "assetState.user",
+        header: "Calendar Name",
+      },
+      {
+        accessorKey: "assetInformation.model",
+        header: "Holiday Remarks",
+      },
+      {
+        accessorFn: (row) => new Date(row.holidayDate),
+        id: "holidayDate",
+        header: "Holiday Date",
+        filterVariant: "date",
+        filterFn: "lessThan",
+        sortingFn: "datetime",
+        Cell: ({ cell }) => cell.getValue()?.toLocaleDateString(),
+        Header: ({ column }) => <em>{column.columnDef.header}</em>,
+        muiFilterTextFieldProps: {
+          sx: {
+            minWidth: "250px",
+          },
+        },
+      },
+      {
+        id: "edit",
+        header: "Edit",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton
+            onClick={() => handleUpdateHolidayList(row.original._id)}
+            color="primary"
+            aria-label="edit"
+          >
+            <MdModeEdit />
+          </IconButton>
+        ),
+      },
+      {
+        id: "delete",
+        header: "Delete",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton
+            onClick={() => handleDeleteHolidayList(row.original._id)}
+            color="error"
+            aria-label="delete"
+          >
+            <DeleteIcon />
+          </IconButton>
+        ),
+      },
+    ],
+    [isLoading]
+  );
+
+  //Add
+  const addNewHolidayListChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setAddHolidayList((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const addNewHolidatListHandler = async (e) => {
+    e.preventDefault();
+    console.log("addHolidayList", addHolidayList);
+    //call api
+    setAddHolidatListModal(false);
+  };
+
+  //update
+  const handleUpdateHolidayList = (id) => {
+    const holidayListToEdit = data?.find((d) => d._id === id);
+    if (holidayListToEdit) {
+      setEditHolidayList({
+        holidayCalendar: holidayListToEdit.holidayCalendar,
+        holidayDate: holidayListToEdit.holidayDate,
+        holidayRemarks: holidayListToEdit.holidayRemarks,
+      });
+      setOpenUpdateModal(true);
+    }
+  };
+
+  const updateHolidayListChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setEditHolidayList((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const updateHolidayListHandler = async (e) => {
+    e.preventDefault();
+    if (!editHolidayList?._id) return;
+    try {
+      console.log("editHolidayList", editHolidayList);
+      //call api
+      setEditHolidayList(null);
+    } catch (error) {
+      console.error("Error updating holiday list:", error);
+    }
+  };
+
+  //delete
+  const handleDeleteHolidayList = (id) => {
+    setDeleteHolidayListId(id);
+    setDeleteConfirmationModal(true);
+  };
+  const deleteHolidayListHandler = async (e) => {
+    e.preventDefault();
+    try {
+      console.log("deleteHolidayListId", deleteHolidayListId);
+      //call api
+    } catch (error) {
+      console.error("Error deleting holiday list:", error);
+    }
+    setDeleteConfirmationModal(false);
+    setDeleteHolidayListId(null);
+  };
+
+  const table = useMaterialReactTable({
+    data,
+    columns,
+    getRowId: (row) => row?._id?.toString(),
+    enableRowSelection: true,
+    initialState: {
+      density: "compact",
+      pagination: { pageSize: 5 },
+    },
+    renderTopToolbarCustomActions: ({ table }) => {
+      return (
+        <Box>
+          <Button
+            onClick={() => setAddHolidatListModal(true)}
+            variant="contained"
+            size="small"
+            startIcon={<AddCircleOutlineIcon />}
+            sx={{
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+            }}
+          >
+            New
+          </Button>
+        </Box>
+      );
+    },
+
+    muiTableProps: {
+      sx: {
+        border: "1px solid rgba(81, 81, 81, .5)",
+        caption: {
+          captionSide: "top",
+        },
+      },
+    },
+
+    paginationDisplayMode: "pages",
+    positionToolbarAlertBanner: "bottom",
+    muiPaginationProps: {
+      color: "secondary",
+      rowsPerPageOptions: [10, 15, 20],
+      shape: "rounded",
+      variant: "outlined",
+    },
+    enablePagination: true,
+
+    muiTableHeadCellProps: {
+      sx: {
+        backgroundColor: "#f1f5fa",
+        color: "#303E67",
+        fontSize: "14px",
+        fontWeight: "500",
+      },
+    },
+    muiTableBodyRowProps: ({ row }) => ({
+      sx: {
+        backgroundColor: row.index % 2 === 1 ? "#f1f5fa" : "inherit",
+      },
+    }),
+  });
+
+  return (
+    <>
+      <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
+        <h2 className="text-lg font-semibold mb-6 text-start">
+          HOLIDAY CALENDAR LIST
+        </h2>
+        <MaterialReactTable table={table} />
+        {addHolidayListModal && (
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <h2 className="text-md font-semibold mb-6 text-start">
+                Add Holiday Calendar
+              </h2>
+              <form onSubmit={addNewHolidatListHandler} className="space-y-2">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Holiday Calendar
+                    </label>
+                    <Autocomplete
+                      className="w-[65%]"
+                      options={["Pan India"]}
+                      getOptionLabel={(option) => option}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="standard"
+                          className="text-xs text-slate-600"
+                          placeholder="Select"
+                          inputProps={{
+                            ...params.inputProps,
+                            style: { fontSize: "0.8rem" },
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Holiday Date
+                    </label>
+                    <input
+                      type="date"
+                      className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Holiday Remarks
+                    </label>
+                    <TextField
+                      name="holidayRemarks"
+                      required
+                      fullWidth
+                      value={addHolidayList?.holidayRemarks || ""}
+                      onChange={addNewHolidayListChangeHandler}
+                      variant="standard"
+                      sx={{ width: 250 }}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => setAddHolidatListModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        {openUpdateModal && (
+          <>
+            <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+                <h2 className="text-md font-semibold mb-6 text-start">
+                  Edit Holiday Calendar
+                </h2>
+                <form onSubmit={updateHolidayListHandler} className="space-y-2">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <label className="w-40 text-sm font-medium text-gray-500">
+                        Holiday Calendar
+                      </label>
+                      <Autocomplete
+                        className="w-[65%]"
+                        options={["Pan India"]}
+                        getOptionLabel={(option) => option}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="standard"
+                            className="text-xs text-slate-600"
+                            placeholder="Select"
+                            inputProps={{
+                              ...params.inputProps,
+                              style: { fontSize: "0.8rem" },
+                            }}
+                          />
+                        )}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="w-40 text-sm font-medium text-gray-500">
+                        Holiday Date
+                      </label>
+                      <input
+                        type="date"
+                        onChange={updateHolidayListChangeHandler}
+                        className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="w-40 text-sm font-medium text-gray-500">
+                        Holiday Remarks
+                      </label>
+                      <TextField
+                        name="holidayRemarks"
+                        required
+                        fullWidth
+                        value={editHolidayList?.holidayRemarks || ""}
+                        onChange={updateHolidayListChangeHandler}
+                        variant="standard"
+                        sx={{ width: 250 }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setOpenUpdateModal(false)}
+                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                    >
+                      Update
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </>
+        )}
+        {deleteConfirmationModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
+              <h2 className="text-xl font-semibold text-red-600 mb-3">
+                Are you sure?
+              </h2>
+              <p className="text-gray-700 mb-6">
+                This action will permanently delete the department.
+              </p>
+              <form
+                onSubmit={deleteHolidayListHandler}
+                className="flex justify-end gap-3"
+              >
+                <button
+                  type="button"
+                  onClick={() => setDeleteConfirmationModal(false)}
+                  className="shadow-md px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:border-gray-500 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+export default HoliDayList;

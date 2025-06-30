@@ -32,6 +32,14 @@ import PendingReason from "./Incident/PendingReason.jsx";
 import IncidentRules from "./Incident/IncidentRules.jsx";
 import IncidentAutoCloserTime from "./Incident/IncidentAutoCloserTime.jsx";
 import AddRule from "./Incident/AddRule.jsx";
+import SlaCreation from "./SLA/SlaCreation.jsx";
+import NewSlaCreation from "./SLA/NewSlaCreation.jsx";
+import EditSlaCreation from "./SLA/EditSlaCreation.jsx";
+import SlaMapping from "./SLA/SlaMapping.jsx";
+import SlaTimeLines from "./SLA/SlaTimeLines.jsx";
+import PriorityMatrix from "./SLA/PriorityMatrix.jsx";
+import HolidayCalendar from "./SLA/HolidayCalendar.jsx";
+import HoliDayList from "./SLA/HoliDayList.jsx";
 import EditRule from "./Incident/EditRule.jsx";
 function ConfigurationRoute() {
   return (
@@ -81,6 +89,16 @@ function ConfigurationRoute() {
         <Route path="vendor-category" element={<VendorCategory />} />
         <Route path="status" element={<Status />} />
         <Route path="service-category" element={<ServiceCategory />} />
+
+        {/* SLA */}
+        <Route path="sla-creation" element={<SlaCreation />} />
+        <Route path="new-sla-creation" element={<NewSlaCreation />} />
+        <Route path="edit-sla/:id" element={<EditSlaCreation />} />
+        <Route path="sla-mapping" element={<SlaMapping />} />
+        <Route path="sla-time-lines" element={<SlaTimeLines />} />
+        <Route path="priority-matrix" element={<PriorityMatrix />} />
+        <Route path="holiday-calendar" element={<HolidayCalendar />} />
+        <Route path="holiday-list" element={<HoliDayList />} />
       </Routes>
     </>
   );

@@ -18,7 +18,7 @@ const AddFixedAssets = () => {
   const user = useSelector((state) => state.authReducer.authData);
   const [isLoading, setIsLoading] = useState(true);
   const [locationData, setLocationData] = useState([]);
-  const [subLocationData, setSubLocationData] = useState([]);
+  // const [subLocationData, setSubLocationData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
   const [subDepartmentData, setSubDepartmentData] = useState([]);
   const [filteredSubLocations, setFilteredSubLocations] = useState([]);
@@ -82,6 +82,7 @@ const AddFixedAssets = () => {
     );
     setFilteredSubLocations(selectedLocation?.subLocations || []);
   }, [formData.locationInformation.location, locationData]);
+  
 
   useEffect(() => {
     const selectedDepartment = departmentData.find(
@@ -98,8 +99,8 @@ const AddFixedAssets = () => {
 
       setLocationData(responseLocation?.data?.data || []);
 
-      const responseSubLocation = await getAllSubLocation();
-      setSubLocationData(responseSubLocation?.data?.data || []);
+      // const responseSubLocation = await getAllSubLocation();
+      // setSubLocationData(responseSubLocation?.data?.data || []);
 
       const responseDepartment = await getAllDepartment();
       // console.log(responseDepartment?.data?.data);

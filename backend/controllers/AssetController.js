@@ -57,74 +57,57 @@ export const getAssetById = async (req, res) => {
     }
 }
 
+function getChanges(oldObj, newObj, prefix = '') {
+    let changes = {};
+    for (const key in newObj) {
+        const oldVal = oldObj ? oldObj[key] : undefined;
+        const newVal = newObj[key];
+        const path = prefix ? `${prefix}.${key}` : key;
+
+        if (typeof newVal === 'object' && newVal !== null && !Array.isArray(newVal)) {
+            const nestedChanges = getChanges(oldVal || {}, newVal, path);
+            Object.assign(changes, nestedChanges);
+        } else if (oldVal !== newVal) {
+            changes[path] = { from: oldVal, to: newVal };
+        }
+    }
+    return changes;
+}
+
 export const updateAsset = async (req, res) => {
     try {
         const { id } = req.params;
-        let updateData = { ...req.body };
+        const updateData = { ...req.body };
+        const updatedBy = updateData.updatedBy; // Extract before deleting
+        delete updateData.updatedBy;
+        delete updateData.updateHistory;
 
-        // Handle file upload for assetImage
-        if (req.file) {
-            if (!updateData.assetInformation) updateData.assetInformation = {};
-            updateData.assetInformation.assetImage = req.file.path;
+        const asset = await AssetModel.findById(id);
+        if (!asset) {
+            return res.status(404).json({ message: 'Asset not found' });
         }
 
-        // Reconstruct nested fields from FormData (e.g., assetInformation[category])
-        const nestedFields = [
-            "assetInformation",
-            "assetState",
-            "locationInformation",
-            "warrantyInformation",
-            "financeInformation",
-            "preventiveMaintenance"
-        ];
-        nestedFields.forEach(section => {
-            const sectionObj = {};
-            Object.keys(updateData).forEach(key => {
-                if (key.startsWith(section + "[")) {
-                    const subKey = key.substring(section.length + 1, key.length - 1);
-                    sectionObj[subKey] = updateData[key];
-                    delete updateData[key];
-                }
+        // Find changed fields (deep diff)
+        const changes = getChanges(asset.toObject(), updateData);
+
+        // Update asset fields
+        Object.assign(asset, updateData);
+
+        // Push to updateHistory if there are changes
+        if (Object.keys(changes).length > 0) {
+            asset.updateHistory.push({
+                updatedBy,
+                updatedAt: new Date(),
+                changes
             });
-            if (Object.keys(sectionObj).length > 0) {
-                updateData[section] = { ...updateData[section], ...sectionObj };
-            }
-        });
-
-        // Sanitize date fields: convert "null" or "" to null
-        if (
-            updateData.preventiveMaintenance &&
-            (updateData.preventiveMaintenance.istPmDate === "null" ||
-             updateData.preventiveMaintenance.istPmDate === "")
-        ) {
-            updateData.preventiveMaintenance.istPmDate = null;
-        }
-        if (
-            updateData.financeInformation &&
-            (updateData.financeInformation.poDate === "null" ||
-             updateData.financeInformation.poDate === "")
-        ) {
-            updateData.financeInformation.poDate = null;
-        }
-        if (
-            updateData.financeInformation &&
-            (updateData.financeInformation.invoiceDate === "null" ||
-             updateData.financeInformation.invoiceDate === "")
-        ) {
-            updateData.financeInformation.invoiceDate = null;
         }
 
-        const updatedAsset = await AssetModel.findByIdAndUpdate(id, updateData, { new: true });
-
-        if (!updatedAsset) {
-            return res.status(404).json({ success: false, message: "Asset not found" });
-        }
-        res.status(200).json({ success: true, data: updatedAsset, message: 'Asset updated successfully' });
+        await asset.save();
+        res.status(200).json({ success: true, data: asset, message: 'Asset updated and history recorded' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "An error occurred while updating asset", error: error.message });
+        res.status(500).json({ message: 'Error updating asset', error: error.message });
     }
-}
+};
 
 export const deleteAsset = async (req, res) => {
     try {

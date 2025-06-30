@@ -24,6 +24,8 @@ import vendorCategory from './routes/vendorCategoryRoute.js'
 import status from './routes/statusRoute.js'
 import vendorServiceCategory from './routes/vendorServiceCategoryRoute.js'
 import supportDepartment from './routes/supportDepartmentRoute.js'
+import globalIncident from './routes/globalIncidentRoute.js'
+import sla from './routes/slaRoute.js'
 
 const app = express()
 
@@ -49,7 +51,7 @@ app.use('/location', locationRoute)
 app.use('/category', incidentCategoryRoute)
 app.use('/incident', incidentRoute)
 app.use('/gatePass', gatePass)
-app.use('/softwareName', softwareCategory)
+app.use('/software', softwareCategory)
 app.use('/storeLocation', storeLocation)
 app.use('/consumable', consumable)
 app.use('/condition', condition)
@@ -58,3 +60,5 @@ app.use('/vendorCategory', vendorCategory)
 app.use('/status', status)
 app.use('/vendorServiceCategory', vendorServiceCategory)
 app.use('/supportDepartment', supportDepartment)
+app.use('/globalIncident', globalIncident)
+app.use('/sla', sla)

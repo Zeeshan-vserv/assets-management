@@ -33,7 +33,7 @@ const AddUser = () => {
     businessHead: "",
     userRole: "",
     supportDepartmentName: "",
-    supportGroups: [],
+    supportGroups: "",
     password: "",
     confirmPassword: "",
     users: {
@@ -150,7 +150,7 @@ const AddUser = () => {
         isVip: false,
         userRole: "",
         supportDepartmentName: "",
-        supportGroups: [],
+        supportGroups: "",
         password: "",
         confirmPassword: "",
         users: { isView: false, isEdit: false, isDelete: false },
@@ -570,7 +570,7 @@ const AddUser = () => {
                   >
                     Support Group
                   </label>
-                  <Autocomplete
+                  {/* <Autocomplete
                     className="w-[65%]"
                     options={supportGroupData}
                     getOptionLabel={(option) => option.supportGroupName}
@@ -585,6 +585,37 @@ const AddUser = () => {
                       setFormData({
                         ...formData,
                         supportGroups: newValue ? [newValue] : [],
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select Support Group"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  /> */}
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={supportGroupData}
+                    getOptionLabel={(option) => option.supportGroupName}
+                    value={
+                      supportGroupData.find(
+                        (group) =>
+                          group.supportGroupName === formData.supportGroups
+                      ) || null
+                    }
+                    onChange={(event, newValue) => {
+                      setFormData({
+                        ...formData,
+                        supportGroups: newValue
+                          ? newValue.supportGroupName
+                          : "",
                       });
                     }}
                     renderInput={(params) => (
@@ -676,9 +707,9 @@ const AddUser = () => {
         <div className="w-full flex gap-5 max-lg:flex-col">
           <div className="w-1/2 p-4 bg-white rounded-md shadow-md max-lg:w-full">
             <table>
-              <h2 className="text-slate-700 font-semibold mb-3">
-                Page View Permissions
-              </h2>
+            <h2 className="text-slate-700 font-semibold mb-3">
+              Page View Permissions
+            </h2>
               <tr>
                 <th className="w-[85%]">Page Name</th>
                 <th>View</th>
@@ -792,9 +823,9 @@ const AddUser = () => {
           </div>
           <div className="w-1/2 p-4 bg-white rounded-md shadow-md max-lg:w-full">
             <table>
-              <h2 className="text-slate-700 font-semibold mb-3">
-                Data Permissions
-              </h2>
+            <h2 className="text-slate-700 font-semibold mb-3">
+              Data Permissions
+            </h2>
               <tr>
                 <th className="w-[70%]">Data Name</th>
                 <th>View</th>

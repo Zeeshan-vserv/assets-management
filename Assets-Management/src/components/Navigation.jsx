@@ -601,6 +601,74 @@ const Navigation = ({ nav, setNav }) => {
                   }}
                 >
                   <NavLink
+                    to="/main/configuration/AutoCloseTime"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Auto Close Time
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/configuration/CloserCode"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Closer Code
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/configuration/PredefinedReplies"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Predefined Replies
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/configuration/PendingReason"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Pending Reason
+                  </NavLink>
+                </li>
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
                     to="/main/configuration/Category"
                     className={({ isActive }) =>
                       `hover:underline cursor-pointer ${
@@ -636,7 +704,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  rules
+                  <NavLink
+                    to="/main/configuration/IncidentRules"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    rules
+                  </NavLink>
                 </li>
                 <li
                   className="text-[11px] hover:underline"
@@ -1014,14 +1091,7 @@ const Navigation = ({ nav, setNav }) => {
                 </li>
               </ul>
             )}
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => {
-                setNav(false);
-              }}
-            >
-              gate pass
-            </h3>
+            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >gate pass</h3> */}
             {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >vendor</h3> */}
             {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >license</h3> */}
 

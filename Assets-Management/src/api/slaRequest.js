@@ -29,7 +29,7 @@ API.interceptors.response.use(
 );
 
 //SLA Creation
-export const createSLA = (formData) => API.post("/sla/".formData);
+export const createSLA = (formData) => API.post("/sla/",formData);
 export const getAllSLAs = () => API.get("/sla/");
 export const getSLAById = (id) => API.get(`/sla/${id}`);
 export const updateSLA = (id, updatedData) => API.put(`/sla/${id}`,updatedData);

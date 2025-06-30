@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { getAssetById } from "../../../../api/AssetsRequest";
+import { getUserById } from "../../../../api/AuthRequest";
 
 function Dashboard({ id }) {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState(null);
+  const [createdBy, setCreatedBy] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -14,10 +16,29 @@ function Dashboard({ id }) {
   };
 
   useEffect(() => {
-    fetchData();
+    if (id) {
+      fetchData();
+    }
   }, [id]);
 
-  // console.log(data);
+  useEffect(() => {
+    const fetchCreator = async () => {
+      if (data?.userId) {
+        try {
+          const response = await getUserById(data.userId);
+          // console.log(response.data.employeeName);
+          
+          setCreatedBy(response?.data?.employeeName);
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        }
+      }
+    };
+
+    fetchCreator();
+  }, [data]);
+
+  console.log(data);
   return (
     <>
       <div>
@@ -46,19 +67,19 @@ function Dashboard({ id }) {
             <h2 className="font-semibold text-sm text-blue-600 mb-1">
               Allocated To
             </h2>
-            <span className="text-sm">{}</span>
+            <span className="text-sm">{data?.assetState?.user}</span>
           </div>
           <div className="flex flex-col items-center bg-white rounded-lg shadow-sm p-3 border border-gray-200 text-gray-700 transition">
             <h2 className="font-semibold text-sm text-blue-600 mb-1">
               Location
             </h2>
-            <span className="text-sm">{}</span>
+            <span className="text-sm">{data?.locationInformation?.location}</span>
           </div>
           <div className="flex flex-col items-center bg-white rounded-lg shadow-sm p-3 border border-gray-200 text-gray-700 transition">
             <h2 className="font-semibold text-sm text-blue-600 mb-1">
               Asset Status
             </h2>
-            <span className="text-sm">{}</span>
+            <span className="text-sm">{data?.assetState?.assetIsCurrently}</span>
           </div>
           <div className="flex flex-col items-center bg-white rounded-lg shadow-sm p-3 border border-gray-200 text-gray-700 transition">
             <h2 className="font-semibold text-sm text-blue-600 mb-1">Group</h2>
@@ -84,7 +105,7 @@ function Dashboard({ id }) {
           </div>
           <div className="flex flex-col items-center bg-white rounded-lg shadow-sm p-3 border border-gray-200 text-gray-700 transition">
             <h2 className="font-semibold text-sm text-blue-600 mb-1">Vendor</h2>
-            <span className="text-sm">{}</span>
+            <span className="text-sm">{data?.warrantyInformation?.vendor}</span>
           </div>
           <div className="flex flex-col items-center bg-white rounded-lg shadow-sm p-3 border border-gray-200 text-gray-700 transition">
             <h2 className="font-semibold text-sm text-blue-600 mb-1">
@@ -102,7 +123,7 @@ function Dashboard({ id }) {
             <h2 className="font-semibold text-sm text-blue-600 mb-1">
               Created By
             </h2>
-            <span className="text-sm">{}</span>
+            <span className="text-sm">{createdBy}</span>
           </div>
         </div>
       </div>

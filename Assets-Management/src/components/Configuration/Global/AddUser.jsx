@@ -570,36 +570,7 @@ const AddUser = () => {
                   >
                     Support Group
                   </label>
-                  {/* <Autocomplete
-                    className="w-[65%]"
-                    options={supportGroupData}
-                    getOptionLabel={(option) => option.supportGroupName}
-                    value={
-                      supportGroupData.find(
-                        (group) =>
-                          group.supportGroupName ===
-                          formData.supportGroups[0]?.supportGroupName
-                      ) || null
-                    }
-                    onChange={(event, newValue) => {
-                      setFormData({
-                        ...formData,
-                        supportGroups: newValue ? [newValue] : [],
-                      });
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="standard"
-                        className="text-xs text-slate-600"
-                        placeholder="Select Support Group"
-                        inputProps={{
-                          ...params.inputProps,
-                          style: { fontSize: "0.8rem" },
-                        }}
-                      />
-                    )}
-                  /> */}
+      
                   <Autocomplete
                     className="w-[65%]"
                     options={supportGroupData}

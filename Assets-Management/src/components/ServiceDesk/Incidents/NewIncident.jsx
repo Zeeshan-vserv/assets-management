@@ -13,16 +13,27 @@ import { getAllAssets } from "../../../api/AssetsRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import { createIncident } from "../../../api/IncidentRequest";
+import {
+  getAllCategory,
+  getAllSubCategory,
+} from "../../../api/IncidentCategoryRequest";
+import {
+  getAllSupportDepartment,
+  getAllSupportGroup,
+} from "../../../api/SuportDepartmentRequest";
 
 const NewIncident = () => {
   const user = useSelector((state) => state.authReducer.authData);
   const [isLoading, setIsLoading] = useState(true);
   const [filteredSubLocations, setFilteredSubLocations] = useState([]);
   const [locationData, setLocationData] = useState([]);
-  // const [subDepartmentData, setSubDepartmentData] = useState([]);
-  // const [subLocationData, setSubLocationData] = useState([]);
+  const [category, setCategory] = useState([]);
+  const [subCategory, setSubCategory] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
   const [assetData, setAssetData] = useState([]);
+  const [supportDepartmentData, setSupportDepartmentData] = useState([]);
+  const [supportGroupData, setSupportGroupData] = useState([]);
+  const [technician, setTechnician] = useState([]);
   const [users, setUsers] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -86,26 +97,33 @@ const NewIncident = () => {
       const responseLocation = await getAllLocation();
       setLocationData(responseLocation?.data?.data || []);
 
-      // const responseSubLocation = await getAllSubLocation();
-      // setSubLocationData(responseSubLocation?.data?.data || []);
-
       const responseDepartment = await getAllDepartment();
       setDepartmentData(responseDepartment?.data?.data || []);
-
-      // const responseSubDepartment = await getAllSubDepartment();
-      // setSubDepartmentData(responseSubDepartment?.data?.data || []);
 
       const responseAsset = await getAllAssets();
       setAssetData(responseAsset?.data?.data || []);
 
+      const responseCategory = await getAllCategory();
+      setCategory(responseCategory?.data?.data || []);
+
+      const responseSubCategory = await getAllSubCategory();
+      setSubCategory(responseSubCategory?.data?.data || []);
+
       const responseReportingManager = await getAllUsers();
       setUsers(responseReportingManager?.data || []);
+
+      const responseSupportDepartment = await getAllSupportDepartment();
+      setSupportDepartmentData(responseSupportDepartment?.data?.data || []);
+
+      const responseSupportGroup = await getAllSupportGroup();
+      setSupportGroupData(responseSupportGroup?.data?.data || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
       setIsLoading(false);
     }
   };
+  // console.log(subCategory);
 
   useEffect(() => {
     fetchDetails();
@@ -167,11 +185,22 @@ const NewIncident = () => {
     }
   };
 
+  const technicianOptions = users.filter(
+    (u) =>
+      u.userRole === "GoCollect Support Department" ||
+      u.userRole === "Grievance Support Team" ||
+      u.userRole === "L1 Technician" ||
+      u.userRole === "L2 Technician" ||
+      u.userRole === "L3 Technician" ||
+      u.userRole === "Application Support Team"
+  );
+
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
       <h2 className="text-slate-700 font-semibold">ADD INCIDENT</h2>
       <form action="" onSubmit={handleSubmit} className="flex flex-col gap-8">
         <div className="w-full p-8 bg-white rounded-md shadow-md">
+          
           <div className="flex gap-1 justify-end">
             <button
               type="submit"
@@ -208,13 +237,33 @@ const NewIncident = () => {
               >
                 Category
               </label>
-              <input
-                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="category"
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
+              <Autocomplete
+                className="w-[65%]"
+                options={category}
+                getOptionLabel={(option) => option.categoryName}
+                value={
+                  category.find(
+                    (cat) => cat.categoryName === formData.category
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    category: newValue ? newValue.categoryName : "",
+                  }));
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Category"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -224,25 +273,35 @@ const NewIncident = () => {
               >
                 Sub Category
               </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name="subCategory"
-                id="subCategory"
-                value={formData.subCategory}
-                onChange={handleChange}
-              >
-                <option value="">Select</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="5">5</option>
-                <option value="6">6</option>
-                <option value="7">7</option>
-                <option value="8">8</option>
-                <option value="9">9</option>
-                <option value="10">10</option>
-              </select>
+              {/* {console.log(formData)} */}
+              <Autocomplete
+                className="w-[65%]"
+                options={subCategory}
+                getOptionLabel={(option) => option.subCategoryName}
+                value={
+                  subCategory.find(
+                    (sub) => sub.subCategoryName === formData.subCategory
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    subCategory: newValue ? newValue.subCategoryName : "",
+                  }));
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select SubCategory"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -633,14 +692,6 @@ const NewIncident = () => {
                   />
                 )}
               />
-              {/* <input
-                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="location"
-                name="locationDetails.location"
-                value={formData.locationDetails.location}
-                onChange={handleChange}
-              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -682,14 +733,6 @@ const NewIncident = () => {
                   />
                 )}
               />
-              {/* <input
-                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="subLocation"
-                name="locationDetails.subLocation"
-                value={formData.locationDetails.subLocation}
-                onChange={handleChange}
-              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -784,13 +827,37 @@ const NewIncident = () => {
               >
                 Support Department Name
               </label>
-              <input
-                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="supportDepartmentName"
-                name="classificaton.supportDepartmentName"
-                value={formData.classificaton.supportDepartmentName}
-                onChange={handleChange}
+              <Autocomplete
+                className="w-[65%]"
+                options={supportDepartmentData}
+                getOptionLabel={(option) => option.supportDepartmentName}
+                value={
+                  supportDepartmentData.find(
+                    (dept) =>
+                      dept.supportDepartmentName ===
+                      formData.supportDepartmentName
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    supportDepartmentName: newValue
+                      ? newValue.supportDepartmentName
+                      : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Support Department"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="flex items-center w-[46%]">
@@ -800,16 +867,36 @@ const NewIncident = () => {
               >
                 Support Group Name
               </label>
-              <input
-                className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="supportGroupName"
-                name="classificaton.supportGroupName"
-                value={formData.classificaton.supportGroupName}
-                onChange={handleChange}
+              <Autocomplete
+                className="w-[65%]"
+                options={supportGroupData}
+                getOptionLabel={(option) => option.supportGroupName}
+                value={
+                  supportGroupData.find(
+                    (group) => group.supportGroupName === formData.supportGroups
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    supportGroups: newValue ? newValue.supportGroupName : "",
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Support Group"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
-            <div className="flex items-center w-[46%]">
+            {/* <div className="flex items-center w-[46%]">
               <label
                 htmlFor="technician"
                 className="w-[28%] text-xs font-semibold text-slate-600"
@@ -823,6 +910,50 @@ const NewIncident = () => {
                 name="classificaton.technician"
                 value={formData.classificaton.technician}
                 onChange={handleChange}
+              />
+            </div> */}
+            <div className="flex items-center w-[46%]">
+              <label
+                htmlFor="technician"
+                className="w-[28%] text-xs font-semibold text-slate-600"
+              >
+                Technician
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                options={technicianOptions}
+                getOptionLabel={(option) =>
+                  option.employeeName && option.emailAddress
+                    ? `${option.employeeName} - ${option.emailAddress}`
+                    : option.employeeName || ""
+                }
+                value={
+                  technicianOptions.find(
+                    (user) =>
+                      user.employeeName === formData.classificaton.technician
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData((prev) => ({
+                    ...prev,
+                    classificaton: {
+                      ...prev.classificaton,
+                      technician: newValue ? newValue.employeeName : "",
+                    },
+                  }));
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Technician"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
           </div>

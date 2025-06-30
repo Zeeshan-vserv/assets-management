@@ -4,7 +4,7 @@ import { getAssetById } from "../../../../api/AssetsRequest";
 import Dashboard from "./Dashboard";
 import Summary from "./Summary";
 import AssetMapping from "./AssetMapping";
-import Relationship from "./Relationship";
+// import Relationship from "./Relationship";
 import Preventive from "./Preventive";
 import Task from "./Task";
 import Incidents from "./Incidents";
@@ -41,7 +41,7 @@ function AssetDetails() {
       case "dashboard":
         return <Dashboard id={id} />;
       case "summary":
-        return <Summary />;
+        return <Summary id={id} />;
       case "assetMapping":
         return (
           <AssetMapping
@@ -50,8 +50,8 @@ function AssetDetails() {
             id={id}
           />
         );
-      case "relationship":
-        return <Relationship />;
+      // case "relationship":
+      //   return <Relationship />;
       case "preventive":
         return <Preventive id={id} />;
       case "task":
@@ -70,10 +70,10 @@ function AssetDetails() {
         return <Insurances id={id} />;
       case "auditsLogs":
         return <AuditsLogs id={id} />;
-      case "hwChangeLogs":
-        return <HwChangeLogs id={id} />;
-      case "swChangeLogs":
-        return <SwChangeLogs id={id} />;
+      // case "hwChangeLogs":
+      //   return <HwChangeLogs id={id} />;
+      // case "swChangeLogs":
+      //   return <SwChangeLogs id={id} />;
       default:
         return;
     }
@@ -108,7 +108,7 @@ function AssetDetails() {
               >
                 Summary
               </button>
-              <button
+              {/* <button
                 onClick={() => {
                   setActiveTab("assetMapping");
                   setAssetMappingModal(true);
@@ -120,8 +120,8 @@ function AssetDetails() {
                 }`}
               >
                 Asset Mapping
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 onClick={() => setActiveTab("relationship")}
                 className={`px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${
                   activeTab === "relationship"
@@ -130,8 +130,8 @@ function AssetDetails() {
                 }`}
               >
                 Relationship
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 onClick={() => setActiveTab("preventive")}
                 className={`flex items-center justify-between px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${
                   activeTab === "preventive"
@@ -141,8 +141,8 @@ function AssetDetails() {
               >
                 <span>Preventive</span>
                 <span>()</span>
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 onClick={() => setActiveTab("task")}
                 className={`flex items-center justify-between px-2 py-1 border-2  rounded-md border-gray-400 transition-colors w-full text-left ${
                   activeTab === "task"
@@ -152,7 +152,7 @@ function AssetDetails() {
               >
                 <span>Task</span>
                 <span>()</span>
-              </button>
+              </button> */}
               <button
                 onClick={() => setActiveTab("incidents")}
                 className={`flex items-center justify-between px-2 py-1 border-2  rounded-md border-gray-400 transition-colors w-full text-left ${
@@ -164,7 +164,7 @@ function AssetDetails() {
                 <span>Incidents</span>
                 <span>()</span>
               </button>
-              <button
+              {/* <button
                 onClick={() => setActiveTab("documents")}
                 className={`flex items-center justify-between px-2 py-1 border-2  rounded-md border-gray-400 transition-colors w-full text-left ${
                   activeTab === "documents"
@@ -174,8 +174,8 @@ function AssetDetails() {
               >
                 <span>Documents</span>
                 <span>()</span>
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 onClick={() => setActiveTab("finance")}
                 className={`px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${
                   activeTab === "finance"
@@ -184,8 +184,8 @@ function AssetDetails() {
                 }`}
               >
                 Finance
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 onClick={() => setActiveTab("assetComponents")}
                 className={`flex items-center justify-between px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${
                   activeTab === "assetComponents"
@@ -195,8 +195,8 @@ function AssetDetails() {
               >
                 <span>Asset Components</span>
                 <span>()</span>
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 onClick={() => setActiveTab("statusLogs")}
                 className={`flex items-center justify-between px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${
                   activeTab === "statusLogs"
@@ -206,8 +206,8 @@ function AssetDetails() {
               >
                 <span>Status Logs</span>
                 <span>()</span>
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 onClick={() => setActiveTab("insurances")}
                 className={`flex items-center justify-between px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${
                   activeTab === "insurances"
@@ -217,7 +217,7 @@ function AssetDetails() {
               >
                 <span>Insurances</span>
                 <span>()</span>
-              </button>
+              </button> */}
               <button
                 onClick={() => setActiveTab("auditsLogs")}
                 className={`flex items-center justify-between px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${
@@ -229,7 +229,7 @@ function AssetDetails() {
                 <span>Audits Logs</span>
                 <span>()</span>
               </button>
-              <button
+              {/* <button
                 onClick={() => setActiveTab("hwChangeLogs")}
                 className={`flex items-center justify-between px-2 py-1 border-2 border-gray-400 rounded-md  transition-colors w-full text-left ${
                   activeTab === "hwChangeLogs"
@@ -250,7 +250,7 @@ function AssetDetails() {
               >
                 <span>SW Change Logs</span>
                 <span>()</span>
-              </button>
+              </button> */}
             </div>
             <div className="flex-1 ml-4 p-4 min-h-full bg-white overflow-auto">
               {renderTabContent()}

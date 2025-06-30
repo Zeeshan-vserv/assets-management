@@ -146,6 +146,8 @@ const AddFixedAssets = () => {
       }
     });
 
+    
+
     // Append userId if needed
     dataToSend.append("userId", user.userId);
 

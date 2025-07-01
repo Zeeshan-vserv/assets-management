@@ -61,15 +61,13 @@ export const updateIncidentStatus = async (req, res) => {
         const incidentStatusData = await IncidentStatusModel.findByIdAndUpdate(
             id,
             {
-                $push: {
-                        statusName,
-                        description,
-                        clockHold,
-                        reason,
-                        changedAt: new Date(),
-                        changedBy
-                    }
-                },
+                statusName,
+                description,
+                clockHold,
+                reason,
+                changedAt: new Date(),
+                changedBy
+            },
             { new: true }
         );
 

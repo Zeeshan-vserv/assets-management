@@ -3,22 +3,19 @@ import { IncidentStatusModel } from "../models/incidentStatusModel.js";
 // Create a new incident status timeline (for a new incident)
 export const createIncidentStatus = async (req, res) => {
     try {
-        const { incidentId, statusName, description, clockHold, reason, changedBy } = req.body;
+        const {statusName, description, clockHold, reason, changedBy } = req.body;
 
-        if (!incidentId || !statusName) {
-            return res.status(400).json({ message: 'incidentId and statusName are required' });
+        if (!statusName) {
+            return res.status(400).json({ message: 'statusName are required' });
         }
 
         const newIncidentStatus = new IncidentStatusModel({
-            incidentId,
-            statusTimeline: [{
                 statusName,
                 description,
                 clockHold,
                 reason,
                 changedAt: new Date(),
                 changedBy
-            }]
         });
 
         await newIncidentStatus.save();
@@ -65,7 +62,6 @@ export const updateIncidentStatus = async (req, res) => {
             id,
             {
                 $push: {
-                    statusTimeline: {
                         statusName,
                         description,
                         clockHold,
@@ -73,8 +69,7 @@ export const updateIncidentStatus = async (req, res) => {
                         changedAt: new Date(),
                         changedBy
                     }
-                }
-            },
+                },
             { new: true }
         );
 

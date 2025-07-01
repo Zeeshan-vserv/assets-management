@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const statusHistorySchema = new mongoose.Schema({
+const statusSchema = new mongoose.Schema({
     statusName: { type: String, required: true }, 
     description: String,                          
     clockHold: { type: String },                 
@@ -9,10 +9,5 @@ const statusHistorySchema = new mongoose.Schema({
     changedBy: String
 });
 
-const incidentStatusSchema = new mongoose.Schema({
-    incidentId: { type: mongoose.Schema.Types.ObjectId, ref: "Incident", required: true },
-    statusTimeline: [statusHistorySchema]
-}, { timestamps: true });
-
-export const IncidentStatusModel = mongoose.model("IncidentStatus", incidentStatusSchema);
+export const IncidentStatusModel = mongoose.model("IncidentStatus", statusSchema);
 

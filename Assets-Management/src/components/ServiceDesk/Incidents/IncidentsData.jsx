@@ -12,6 +12,8 @@ import { autoTable } from "jspdf-autotable";
 import { Autocomplete, TextField } from "@mui/material";
 import { getAllDepartment } from "../../../api/DepartmentRequest";
 import { getAllIncident } from "../../../api/IncidentRequest";
+import { NavLink } from "react-router-dom";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -42,7 +44,6 @@ const IncidentsData = () => {
   }, []);
 
   console.log(data);
-  
 
   const columns = useMemo(
     () => [
@@ -208,6 +209,22 @@ const IncidentsData = () => {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box className="flex flex-wrap w-full">
+          <NavLink to="/main/ServiceDesk/NewIncident">
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<AddCircleOutlineIcon />}
+              sx={{
+                backgroundColor: "#2563eb",
+                color: "#fff",
+                textTransform: "none",
+                mt: 1,
+                mb: 1,
+              }}
+            >
+              New Asset
+            </Button>
+          </NavLink>
           <Autocomplete
             className="w-[15%]"
             sx={{
@@ -390,13 +407,11 @@ const IncidentsData = () => {
       description: "Total",
     },
   ];
-  
+
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">
-          INCIDENT DATA
-        </h2>
+        <h2 className="text-lg font-semibold mb-6 text-start">INCIDENT DATA</h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
           {cardData.map((item) => {

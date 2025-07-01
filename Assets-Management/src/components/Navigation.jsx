@@ -153,7 +153,7 @@ const Navigation = ({ nav, setNav }) => {
                 vendors
               </NavLink>
             </h3>
-            <h3
+            {/* <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {
                 setNav(false);
@@ -168,7 +168,7 @@ const Navigation = ({ nav, setNav }) => {
               }}
             >
               documents
-            </h3>
+            </h3> */}
           </>
         );
       case "assets":
@@ -244,14 +244,14 @@ const Navigation = ({ nav, setNav }) => {
                 )}
               </ul>
             )}
-            <h3
+            {/* <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {
                 setNav(false);
               }}
             >
               preventive
-            </h3>
+            </h3> */}
             <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {

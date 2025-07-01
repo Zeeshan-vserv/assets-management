@@ -287,46 +287,55 @@ const PriorityMatrix = () => {
                     <label className="w-40 text-sm font-medium text-gray-500">
                       Urgency
                     </label>
-                    <TextField
+                    <select
                       name="urgency"
-                      required
-                      fullWidth
                       value={addNewPriorityMatrix?.urgency || ""}
                       onChange={addNewPriorityMatrixChangeHandler}
                       placeholder="Enter Urgency"
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
+                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                    >
+                      <option value="">Select</option>
+                      <option value="Critical">Critical</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Low">Low</option>
+                    </select>
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
                       Impact
                     </label>
-                    <TextField
+                    <select
                       name="impact"
-                      required
-                      fullWidth
                       value={addNewPriorityMatrix?.impact || ""}
                       onChange={addNewPriorityMatrixChangeHandler}
                       placeholder="Enter Urgency"
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
+                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                    >
+                      <option value="">Select</option>
+                      <option value="Critical">Critical</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Low">Low</option>
+                    </select>
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
                       Priority
                     </label>
-                    <TextField
+                    <select
                       name="priority"
-                      required
-                      fullWidth
                       value={addNewPriorityMatrix?.priority || ""}
                       onChange={addNewPriorityMatrixChangeHandler}
                       placeholder="Enter Urgency"
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
+                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                    >
+                      <option value="">Select</option>
+                      <option value="Severity - 1">Severity - 1</option>
+                      <option value="Severity - 2">Severity - 2</option>
+                      <option value="Severity - 3">Severity - 3</option>
+                      <option value="Severity - 4">Severity - 4</option>
+                    </select>
                   </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
@@ -363,46 +372,55 @@ const PriorityMatrix = () => {
                     <label className="w-40 text-sm font-medium text-gray-500">
                       Urgency
                     </label>
-                    <TextField
+                    <select
                       name="urgency"
-                      required
-                      fullWidth
                       value={editPriorityMatrix?.urgency || ""}
                       onChange={updatePriorityMatrixChangeHandler}
                       placeholder="Enter Urgency"
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
+                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                    >
+                      <option value="">Select</option>
+                      <option value="Critical">Critical</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Low">Low</option>
+                    </select>
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
                       Impact
                     </label>
-                    <TextField
+                    <select
                       name="impact"
-                      required
-                      fullWidth
                       value={editPriorityMatrix?.impact || ""}
                       onChange={updatePriorityMatrixChangeHandler}
                       placeholder="Enter Urgency"
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
+                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                    >
+                      <option value="">Select</option>
+                      <option value="Critical">Critical</option>
+                      <option value="Medium">Medium</option>
+                      <option value="High">High</option>
+                      <option value="Low">Low</option>
+                    </select>
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
                       Priority
                     </label>
-                    <TextField
+                    <select
                       name="priority"
-                      required
-                      fullWidth
                       value={editPriorityMatrix?.priority || ""}
                       onChange={updatePriorityMatrixChangeHandler}
                       placeholder="Enter Urgency"
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
+                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                    >
+                      <option value="">Select</option>
+                      <option value="Severity - 1">Severity - 1</option>
+                      <option value="Severity - 2">Severity - 2</option>
+                      <option value="Severity - 3">Severity - 3</option>
+                      <option value="Severity - 4">Severity - 4</option>
+                    </select>
                   </div>
                 </div>
                 <div className="flex justify-end gap-3 pt-4">

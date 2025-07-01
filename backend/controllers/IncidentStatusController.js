@@ -3,14 +3,13 @@ import { IncidentStatusModel } from "../models/incidentStatusModel.js";
 // Create a new incident status timeline (for a new incident)
 export const createIncidentStatus = async (req, res) => {
     try {
-        const { incidentId, statusName, description, clockHold, reason, changedBy } = req.body;
+        const {  statusName, description, clockHold, reason, changedBy } = req.body;
 
-        if (!incidentId || !statusName) {
-            return res.status(400).json({ message: 'incidentId and statusName are required' });
-        }
+        // if (!incidentId || !statusName) {
+        //     return res.status(400).json({ message: 'incidentId and statusName are required' });
+        // }
 
         const newIncidentStatus = new IncidentStatusModel({
-            incidentId,
             statusTimeline: [{
                 statusName,
                 description,

@@ -10,7 +10,7 @@ const statusHistorySchema = new mongoose.Schema({
 });
 
 const incidentStatusSchema = new mongoose.Schema({
-    incidentId: { type: mongoose.Schema.Types.ObjectId, ref: "Incident", required: true },
+    // incidentId: { type: mongoose.Schema.Types.ObjectId, ref: "Incident", },
     statusTimeline: [statusHistorySchema]
 }, { timestamps: true });
 

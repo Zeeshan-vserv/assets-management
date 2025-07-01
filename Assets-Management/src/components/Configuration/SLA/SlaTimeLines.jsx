@@ -3,7 +3,13 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  IconButton,
+  TextField,
+} from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
@@ -41,7 +47,7 @@ function SlaTimeLines() {
   const fetchSlaTimeLines = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllSLATimelines(); //later change
+      const response = await getAllSLATimelines();
       if (response.status !== 200) {
         throw new Error("Failed to fetch data");
       }
@@ -71,22 +77,10 @@ function SlaTimeLines() {
       {
         accessorKey: "responseSLA",
         header: "Response SLA (in Mins.)",
-        Cell: ({ cell }) => {
-          const date = new Date(cell.getValue());
-          return isNaN(date.getTime())
-            ? "N/A"
-            : `${date.getUTCHours() * 60 + date.getUTCMinutes()}`;
-        },
       },
       {
         accessorKey: "resolutionSLA",
         header: "Resolution SLA (in Mins.)",
-        Cell: ({ cell }) => {
-          const date = new Date(cell.getValue());
-          return isNaN(date.getTime())
-            ? "N/A"
-            : `${date.getUTCHours() * 60 + date.getUTCMinutes()}`;
-        },
       },
 
       {
@@ -317,14 +311,32 @@ function SlaTimeLines() {
                       <label className="w-40 text-sm font-medium text-gray-500">
                         Priority
                       </label>
-                      <TextField
-                        name="priority"
-                        required
-                        fullWidth
+                      <Autocomplete
+                        options={[
+                          "Priority - 1",
+                          "Priority - 2",
+                          "Priority - 3",
+                          "Priority - 4",
+                        ]}
                         value={addNewSlaTimeLines.priority || ""}
-                        onChange={addNewSlaTimeLinesChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
+                        onChange={(event, newValue) =>
+                          setAddNewSlaTimeLines((prev) => ({
+                            ...prev,
+                            priority: newValue,
+                          }))
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="standard"
+                            placeholder="Select Priority"
+                            inputProps={{
+                              ...params.inputProps,
+                              style: { fontSize: "0.8rem" },
+                            }}
+                          />
+                        )}
+                        className="w-full"
                       />
                     </div>
                     <div className="flex items-center gap-2">
@@ -350,7 +362,7 @@ function SlaTimeLines() {
                         value={addNewSlaTimeLines.description || ""}
                         required
                         onChange={addNewSlaTimeLinesChangeHandler}
-                        className="w-full border-b border-gray-300 focus:border-blue-500 outline-none"
+                        className="w-full border border-slate-500 rounded-md focus:border-blue-500 outline-none"
                       ></textarea>
                     </div>
                     <div className="flex items-center gap-2">
@@ -358,11 +370,12 @@ function SlaTimeLines() {
                         Response SLA
                       </label>
                       <input
-                        type="date"
+                        type="text"
                         name="responseSLA"
                         value={addNewSlaTimeLines.responseSLA || ""}
                         onChange={addNewSlaTimeLinesChangeHandler}
-                        className="w-full border-b border-gray-300 focus:border-blue-500 outline-none"
+                        placeholder="HH:MM"
+                        className="w-full border-b border-slate-400 focus:border-blue-500 outline-none"
                       />
                     </div>
                     <div className="flex items-center gap-2">
@@ -370,11 +383,12 @@ function SlaTimeLines() {
                         Resolution SLA
                       </label>
                       <input
-                        type="date"
+                        type="text"
                         name="resolutionSLA"
                         value={addNewSlaTimeLines.resolutionSLA || ""}
+                        placeholder="HH:MM"
                         onChange={addNewSlaTimeLinesChangeHandler}
-                        className="w-full border-b border-gray-300 focus:border-blue-500 outline-none"
+                        className="w-full border-b border-gray-400 focus:border-blue-500 outline-none"
                       />
                     </div>
                     <div className="flex items-center gap-2">
@@ -386,7 +400,7 @@ function SlaTimeLines() {
                         name="penality"
                         value={addNewSlaTimeLines.penality || ""}
                         onChange={addNewSlaTimeLinesChangeHandler}
-                        className="w-full border-b border-gray-300 focus:border-blue-500 outline-none"
+                        className="w-full border-b border-gray-400 focus:border-blue-500 outline-none"
                       />
                     </div>
                     <div className="flex items-center gap-2">
@@ -443,14 +457,32 @@ function SlaTimeLines() {
                       <label className="w-40 text-sm font-medium text-gray-500">
                         Priority
                       </label>
-                      <TextField
-                        name="priority"
-                        required
-                        fullWidth
+                      <Autocomplete
+                        options={[
+                          "Priority - 1",
+                          "Priority - 2",
+                          "Priority - 3",
+                          "Priority - 4",
+                        ]}
                         value={editSlaTimeLines?.priority || ""}
-                        onChange={updateSlaTimeLinesChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
+                        onChange={(event, newValue) =>
+                          setEditSlaTimeLines((prev) => ({
+                            ...prev,
+                            priority: newValue,
+                          }))
+                        }
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            variant="standard"
+                            placeholder="Select Priority"
+                            inputProps={{
+                              ...params.inputProps,
+                              style: { fontSize: "0.8rem" },
+                            }}
+                          />
+                        )}
+                        className="w-full"
                       />
                     </div>
                     <div className="flex items-center gap-2">
@@ -476,7 +508,7 @@ function SlaTimeLines() {
                         value={editSlaTimeLines?.description || ""}
                         required
                         onChange={updateSlaTimeLinesChangeHandler}
-                        className="w-full border-b border-gray-300 focus:border-blue-500 outline-none"
+                        className="w-full border border-slate-500 rounded-md focus:border-blue-500 outline-none"
                       ></textarea>
                     </div>
                     <div className="flex items-center gap-2">

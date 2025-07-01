@@ -31,8 +31,8 @@ const slaTimelineSchema = new mongoose.Schema({
     priority: String,
     displayName: String,
     description: String,
-    responseSLA: Date,
-    resolutionSLA:Date,
+    responseSLA: String,
+    resolutionSLA:String,
     penality: String,
     stattus: Boolean
 }, { timestamps: true});

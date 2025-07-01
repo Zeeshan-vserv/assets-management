@@ -13,8 +13,10 @@ import {
   getAllSLAMappings,
   getAllSLAs,
 } from "../../../api/slaRequest";
+import { getAllSubDepartment } from "../../../api/DepartmentRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { getAllSupportDepartment } from "../../../api/SuportDepartmentRequest";
 
 function SlaMapping() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -27,6 +29,7 @@ function SlaMapping() {
     slaName: "",
   });
   const [getSlaName, setGetSlaName] = useState([]);
+  const [supportDepartment, setSupportDepartment] = useState([]);
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteSlaMappingId, setDeleteSlaMappingId] = useState(null);
@@ -69,7 +72,26 @@ function SlaMapping() {
     fetchSlaName();
   }, []);
 
-  console.log("dd", getSlaName);
+  const fetchSupportDepartment = async () => {
+    try {
+      setIsLoading(true);
+      // const response = await getAllSubDepartment();
+      const response = await getAllSupportDepartment();
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setSupportDepartment(response?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching support department:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSupportDepartment();
+  }, []);
+
   const columns = useMemo(
     () => [
       {
@@ -117,7 +139,6 @@ function SlaMapping() {
         slaName: addNewSlaMapping?.slaName,
       };
       const response = await createSLAMapping(formData);
-      console.log("res", response);
       if (response?.data.success) {
         toast.success("SLA Mapping created successfully");
         await fetchSlaMapping();
@@ -237,12 +258,69 @@ function SlaMapping() {
                     <label className="w-40 text-sm font-medium text-gray-500">
                       Support Orgnization
                     </label>
+                    {console.log(supportDepartment)}
+                    {/* <Autocomplete
+                      className="w-[65%]"
+                      options={supportDepartment}
+                      value={
+                        supportDepartment.find(
+                          (dept) =>
+                            dept.supportDepartmentName ===
+                            addNewSlaMapping.supportDepartment
+                        ) || null
+                      }
+                      onChange={(_, newValue) =>
+                        setAddNewSlaMapping((prev) => ({
+                          ...prev,
+                          supportDepartment: newValue
+                            ? newValue.subdepartmentName
+                            : "",
+                        }))
+                      }
+                      getOptionLabel={(option) =>
+                        option.subdepartmentName || ""
+                      }
+                      isOptionEqualToValue={(option, value) =>
+                        option.subdepartmentName === value.subdepartmentName
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="standard"
+                          className="text-xs text-slate-600"
+                          placeholder="Select Support Department"
+                          inputProps={{
+                            ...params.inputProps,
+                            style: { fontSize: "0.8rem" },
+                          }}
+                        />
+                      )}
+                    /> */}
                     <Autocomplete
                       className="w-[65%]"
-                      options={["IT Support"]}
-                      value={addNewSlaMapping?.supportDepartment}
-                      getOptionLabel={(option) => option}
-                      required
+                      options={supportDepartment}
+                      value={
+                        supportDepartment.find(
+                          (dept) =>
+                            dept.supportDepartmentName ===
+                            addNewSlaMapping.supportDepartment
+                        ) || null
+                      }
+                      onChange={(_, newValue) =>
+                        setAddNewSlaMapping((prev) => ({
+                          ...prev,
+                          supportDepartment: newValue
+                            ? newValue.supportDepartmentName
+                            : "",
+                        }))
+                      }
+                      getOptionLabel={(option) =>
+                        option.supportDepartmentName || ""
+                      }
+                      isOptionEqualToValue={(option, value) =>
+                        option.supportDepartmentName ===
+                        value.supportDepartmentName
+                      }
                       renderInput={(params) => (
                         <TextField
                           {...params}

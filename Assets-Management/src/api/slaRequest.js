@@ -57,7 +57,7 @@ export const updatePriorityMatrix = (id,updatedData)=>API.put(`/sla/priorityMatr
 export const deletePriorityMatrix = (id)=>API.delete(`/sla/priorityMatrix/${id}`)
 
 //Holiday Calenar
-export const createHolidayCalender = (formData)=>API.post("/sla/holidayCalender")
+export const createHolidayCalender = (formData)=>API.post("/sla/holidayCalender",formData)
 export const getAllHolidayCalender = ()=>API.get("/sla/holidayCalender")
 export const getHolidayCalenderById = (id)=>API.get(`sla/holidayCalender/${id}`)
 export const updateHolidayCalender = (id,updatedData)=>API.put(`sla/holidayCalender/${id}`,updatedData)

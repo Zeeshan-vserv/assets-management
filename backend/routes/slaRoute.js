@@ -1,6 +1,6 @@
 import express from 'express';
 import authMiddleware from '../middleware/AuthMiddleware.js';
-import { createHolidayCalender, createPriorityMatrix, createSLA, createSLAMapping, createSLATimeline, deleteHolidayCalender, deletePriorityMatrix, deleteSLA, deleteSLAMapping, deleteSLATimeline, getAllHolidayCalender, getAllPriorityMatrices, getAllSLAMappings, getAllSLAs, getAllSLATimelines, getHolidayCalenderById, getPriorityMatrixById, getSLAById, getSLAMappingById, getSLATimelineById, updateHolidayCalender, updatePriorityMatrix, updateSLA, updateSLAMapping, updateSLATimeline } from '../controllers/SLAController.js';
+import { createHolidayCalender, createHolidayList, createPriorityMatrix, createSLA, createSLAMapping, createSLATimeline, deleteHolidayCalender, deleteHolidayList, deletePriorityMatrix, deleteSLA, deleteSLAMapping, deleteSLATimeline, getAllHolidayCalender, getAllHolidayList, getAllPriorityMatrices, getAllSLAMappings, getAllSLAs, getAllSLATimelines, getHolidayCalenderById, getHolidayListById, getPriorityMatrixById, getSLAById, getSLAMappingById, getSLATimelineById, updateHolidayCalender, updateHolidayList, updatePriorityMatrix, updateSLA, updateSLAMapping, updateSLATimeline } from '../controllers/SLAController.js';
 
 const router = express.Router();
 
@@ -34,11 +34,11 @@ router.put('/holidayCalender/:id', authMiddleware, updateHolidayCalender)
 router.delete('/holidayCalender/:id', authMiddleware, deleteHolidayCalender)
 
 // Routes for Holiday List
-router.post('/holidayList', authMiddleware, createHolidayCalender)
-router.get('/holidayList', authMiddleware, getAllHolidayCalender)
-router.get('/holidayList/:id', authMiddleware, getHolidayCalenderById)
-router.put('/holidayList/:id', authMiddleware, updateHolidayCalender)
-router.delete('/holidayList/:id', authMiddleware, deleteHolidayCalender)
+router.post('/holidayList', authMiddleware, createHolidayList)
+router.get('/holidayList', authMiddleware, getAllHolidayList)
+router.get('/holidayList/:id', authMiddleware, getHolidayListById)
+router.put('/holidayList/:id', authMiddleware, updateHolidayList)
+router.delete('/holidayList/:id', authMiddleware, deleteHolidayList)
 
 // Routes for SLA
 router.post('/', authMiddleware, createSLA)

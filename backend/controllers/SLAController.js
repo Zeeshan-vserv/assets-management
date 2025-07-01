@@ -1,4 +1,4 @@
-import { PriorityMatrixModel, SLACreationModel, SLAMappingModel, SLATimelineModel } from "../models/slaModel.js";
+import { HolidayCalenderModel, HolidayListModel, PriorityMatrixModel, SLACreationModel, SLAMappingModel, SLATimelineModel } from "../models/slaModel.js";
 
 // Controller for SLA Creation
 export const createSLA = async (req, res) => {
@@ -294,5 +294,162 @@ export const deletePriorityMatrix = async (req, res) => {
         res.status(200).json({ success: true, message: 'Priority matrix deleted successfully'})
     } catch (error) {
         res.status(500).json({ message: 'Internal server error while deleting priority matrix'})
+    }
+}
+
+//Holiday Calender Controller
+export const createHolidayCalender = async (req, res) => {
+    try {
+        const { userId, holidayCalenderLocation } = req.body;
+
+        if (!userId) {
+            return res.status(404).json({ message: 'User not found'})
+        }
+
+        if(!holidayCalenderLocation){
+            return res.status(400).json({ message: 'Holiday calender name is required'})
+        }
+
+        // Get next HolidayCalenderId
+                const lastHolidayCalender = await HolidayCalenderModel.findOne().sort({ holidayCalenderId: -1 });
+                const nextHolidayCalenderId = lastHolidayCalender ? lastHolidayCalender.holidayCalenderId + 1 : 1;
+
+        const newHolidayCalender = new HolidayCalenderModel({
+            userId,
+            holidayCalenderId: nextHolidayCalenderId,
+            holidayCalenderLocation
+        })
+
+        await newHolidayCalender.save();
+        res.status(201).json({ success: true, data: newHolidayCalender, message: 'Holiday Calender created successfully'})
+
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error while creating Holiday Calender'})
+    }
+}
+
+export const getAllHolidayCalender = async (req, res) => {
+    try {
+        const holidayCalender = await HolidayCalenderModel.find()
+        res.status(200).json({ success: true, data: holidayCalender})
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error'})
+    }
+}
+
+export const getHolidayCalenderById = async (req, res) => {
+    try {
+        const { id } = req.params
+        const holidayCalender = await HolidayCalenderModel.findById(id);
+        if(!holidayCalender){
+            return res.status(404).json({ success: false, message: 'Holiday Calender not found'})
+        }
+        res.status(200).json({ success:true, data: holidayCalender})
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error while fetching holiday calender'})
+    }
+}
+
+export const updateHolidayCalender = async (req, res) => {
+    try {
+        const { id } = req.params
+        const holidayCalender = await HolidayCalenderModel.findByIdAndUpdate(id, req.body, { new:true})
+
+        if (!holidayCalender) {
+            return res.status(40).json({ success: false, message: 'Holiday calender not found'})
+        }
+        res.status(200).json({ success: true, data: holidayCalender, message: 'Holiday calender updated successfully'})
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error while fetching holiday calender'})
+    }
+}
+
+export const deleteHolidayCalender = async (req, res) => {
+    try {
+        const { id }= req.params
+        const deletedholidayCalender = await HolidayCalenderModel.findByIdAndDelete(id)
+        if (!deletedholidayCalender){
+            return res.status(404).json({ success: false, message: 'Holiday calender not found'})
+        }
+        res.status(200).json({ success: true, message: 'Holiday calender deleted successfully'})
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error while deleting Holiday calender'})
+    }
+}
+
+// Controllers for Holiday List
+export const createHolidayList = async (req, res) => {
+    try {
+        const { userId, calenderName, holidayRemark, holidayDate } = req.body;
+
+        if (!userId) {
+            return res.status(404).json({ message: 'User not found'})
+        }
+
+        if(!calenderName || !holidayRemark || !holidayDate){
+            return res.status(400).json({ message: 'Calender name, holiday remark and holiday date are required fields'})
+        }
+
+        const newHolidayList = new HolidayListModel({
+            userId,
+            calenderName,
+            holidayRemark,
+            holidayDate
+        })
+
+        await newHolidayList.save();
+        res.status(201).json({ success: true, data: newHolidayList, message: 'Holiday list created successfully'})
+
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error while creating Holiday list'})
+    }
+}
+
+export const getAllHolidayList = async (req, res) => {
+    try {
+        const holidayList = await HolidayListModel.find()
+        res.status(200).json({ success: true, data: holidayList})
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error'})
+    }
+}
+
+export const getHolidayListById = async (req, res) => {
+    try {
+        const { id } = req.params
+        const holidayList = await HolidayListModel.findById(id);
+        if(!holidayList){
+            return res.status(404).json({ success: false, message: 'Holiday list not found'})
+        }
+        res.status(200).json({ success:true, data: holidayList})
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error while fetching holiday list'})
+    }
+}
+
+export const updateHolidayList = async (req, res) => {
+    try {
+        const { id } = req.params
+        const holidayList = await HolidayListModel.findByIdAndUpdate(id, req.body, { new:true})
+
+        if (!holidayList) {
+            return res.status(40).json({ success: false, message: 'Holiday list not found'})
+        }
+        res.status(200).json({ success: true, data: holidayList, message: 'Holiday list updated successfully'})
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error while fetching holiday list'})
+    }
+}
+
+export const deleteHolidayList = async (req, res) => {
+    try {
+        const { id }= req.params
+        const deletedholidayList = await HolidayListModel.findByIdAndDelete(id)
+        if (!deletedholidayList){
+            return res.status(404).json({ success: false, message: 'Holiday list not found'})
+        }
+        res.status(200).json({ success: true, message: 'Holiday list deleted successfully'})
+    } catch (error) {
+        res.status(500).json({ message: 'Internal server error while deleting Holiday list'})
     }
 }

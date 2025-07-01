@@ -18,6 +18,7 @@ const assetSchema = mongoose.Schema(
             hardDisk: String,
             ram: String,
             assetImage: String,
+            loggedTime: { type: Date, default: Date.now },
         },
         assetState: {
             assetIsCurrently: String,

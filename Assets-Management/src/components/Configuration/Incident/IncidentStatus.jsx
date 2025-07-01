@@ -21,8 +21,7 @@ import {
   getAllPredefinedResponses,
   updatePredefinedResponse,
 } from "../../../api/ConfigurationIncidentRequest";
-
-const PredefinedReplies = () => {
+const IncidentStatus = () => {
   const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,8 +29,11 @@ const PredefinedReplies = () => {
   // Add Modal State
   const [openAddModal, setOpenAddModal] = useState(false);
   const [addForm, setAddForm] = useState({
-    predefinedTitle: "",
-    predefinedContent: "",
+    statusName: "",
+    description: "",
+    description: "",
+    clockHold: "",
+    reason: "",
   });
 
   // Edit Modal State
@@ -62,24 +64,30 @@ const PredefinedReplies = () => {
   // Table columns
   const columns = useMemo(
     () => [
-      { accessorKey: "predefinedResponseId", header: "Id" },
-      { accessorKey: "predefinedTitle", header: "Title" },
-      { accessorKey: "predefinedContent", header: "Content" },
+      {
+        accessorKey: "statusName",
+        header: "Status Name",
+      },
+      {
+        accessorKey: "description",
+        header: "Description",
+      },
+      {
+        accessorKey: "clockHold",
+        header: "Clock Hold",
+      },
+      {
+        accessorKey: "reason",
+        header: "Reason",
+      },
       {
         id: "edit",
         header: "Edit",
-        size: 60,
+        size: 80,
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => {
-              setEditForm({
-                _id: row.original._id,
-                predefinedTitle: row.original.predefinedTitle,
-                predefinedContent: row.original.predefinedContent,
-              });
-              setOpenEditModal(true);
-            }}
+            onClick={() => handleEditComponents(row.original.id)}
             color="primary"
             aria-label="edit"
           >
@@ -90,14 +98,11 @@ const PredefinedReplies = () => {
       {
         id: "delete",
         header: "Delete",
-        size: 60,
+        size: 80,
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => {
-              setDeleteId(row.original._id);
-              setDeleteModal(true);
-            }}
+            onClick={() => handleDeleteComponents(row.original.id)}
             color="error"
             aria-label="delete"
           >
@@ -106,7 +111,7 @@ const PredefinedReplies = () => {
         ),
       },
     ],
-    []
+    [isLoading]
   );
 
   const table = useMaterialReactTable({
@@ -237,46 +242,78 @@ const PredefinedReplies = () => {
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Title*
+                  Status Name*
                 </label>
                 <TextField
-                  name="predefinedTitle"
+                  name="statusName"
                   required
                   fullWidth
-                  value={addForm.predefinedTitle}
+                  value={addForm.statusName}
                   onChange={(e) =>
                     setAddForm((prev) => ({
                       ...prev,
-                      predefinedTitle: e.target.value,
+                      statusName: e.target.value,
                     }))
                   }
-                  placeholder="Enter Title"
+                  placeholder="Enter Status"
                   variant="standard"
                   sx={{ width: 250 }}
                 />
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Content
+                  Description*
                 </label>
-                <TextareaAutosize
-                  name="predefinedContent"
-                  className="border-[1px] border-black rounded-md p-1"
-                  // required
-                  minRows={3}
-                  style={{
-                    width: 250,
-                    fontFamily: "inherit",
-                    fontSize: "1rem",
-                  }}
-                  value={addForm.predefinedContent}
+                <TextField
+                  name="description"
+                  required
+                  fullWidth
+                  value={addForm.description}
                   onChange={(e) =>
                     setAddForm((prev) => ({
                       ...prev,
-                      predefinedContent: e.target.value,
+                      description: e.target.value,
                     }))
                   }
-                  placeholder="Enter Content"
+                  placeholder="Enter Status"
+                  variant="standard"
+                  sx={{ width: 250 }}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Reason*
+                </label>
+                <TextField
+                  name="reason"
+                  required
+                  fullWidth
+                  value={addForm.reason}
+                  onChange={(e) =>
+                    setAddForm((prev) => ({
+                      ...prev,
+                      reason: e.target.value,
+                    }))
+                  }
+                  placeholder="Enter Status"
+                  variant="standard"
+                  sx={{ width: 250 }}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Description*
+                </label>
+                <input
+                  type="checkbox"
+                  name="description"
+                  value={addForm.description}
+                  onChange={(e) =>
+                    setAddForm((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4">
@@ -309,46 +346,78 @@ const PredefinedReplies = () => {
             <form onSubmit={handleEditCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Title*
+                  Status Name*
                 </label>
                 <TextField
-                  name="predefinedTitle"
+                  name="statusName"
                   required
                   fullWidth
-                  value={editForm.predefinedTitle}
+                  value={addForm.statusName}
                   onChange={(e) =>
-                    setEditForm((prev) => ({
+                    setAddForm((prev) => ({
                       ...prev,
-                      predefinedTitle: e.target.value,
+                      statusName: e.target.value,
                     }))
                   }
-                  placeholder="Enter Title"
+                  placeholder="Enter Status"
                   variant="standard"
                   sx={{ width: 250 }}
                 />
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Content
+                  Description*
                 </label>
-                <TextareaAutosize
-                  name="predefinedContent"
-                  // required
-                  className="border-[1px] border-black rounded-md p-1"
-                  minRows={3}
-                  style={{
-                    width: 250,
-                    fontFamily: "inherit",
-                    fontSize: "1rem",
-                  }}
-                  value={editForm.predefinedContent}
+                <TextField
+                  name="description"
+                  required
+                  fullWidth
+                  value={addForm.description}
                   onChange={(e) =>
-                    setEditForm((prev) => ({
+                    setAddForm((prev) => ({
                       ...prev,
-                      predefinedContent: e.target.value,
+                      description: e.target.value,
                     }))
                   }
-                  placeholder="Enter Content"
+                  placeholder="Enter Status"
+                  variant="standard"
+                  sx={{ width: 250 }}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Reason*
+                </label>
+                <TextField
+                  name="reason"
+                  required
+                  fullWidth
+                  value={addForm.reason}
+                  onChange={(e) =>
+                    setAddForm((prev) => ({
+                      ...prev,
+                      reason: e.target.value,
+                    }))
+                  }
+                  placeholder="Enter Status"
+                  variant="standard"
+                  sx={{ width: 250 }}
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Description*
+                </label>
+                <input
+                  type="checkbox"
+                  name="description"
+                  value={addForm.description}
+                  onChange={(e) =>
+                    setAddForm((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4">
@@ -403,5 +472,4 @@ const PredefinedReplies = () => {
     </>
   );
 };
-
-export default PredefinedReplies;
+export default IncidentStatus;

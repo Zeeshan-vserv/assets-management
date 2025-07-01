@@ -41,6 +41,7 @@ import PriorityMatrix from "./SLA/PriorityMatrix.jsx";
 import HolidayCalendar from "./SLA/HolidayCalendar.jsx";
 import HoliDayList from "./SLA/HoliDayList.jsx";
 import EditRule from "./Incident/EditRule.jsx";
+import IncidentStatus from "./Incident/IncidentStatus.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -67,6 +68,7 @@ function ConfigurationRoute() {
         <Route path="PendingReason" element={<PendingReason />} />
         <Route path="IncidentRules" element={<IncidentRules />} />
         <Route path="AddRule" element={<AddRule />} />
+        <Route path="IncidentStatus" element={<IncidentStatus />} />
         <Route path="EditRule/:id" element={<EditRule />} />
 
         {/* GatePass Routes */}

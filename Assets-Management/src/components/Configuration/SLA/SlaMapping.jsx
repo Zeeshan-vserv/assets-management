@@ -7,9 +7,17 @@ import { Autocomplete, Box, Button, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { TextField } from "@mui/material";
-import { getAllAssets } from "../../../api/AssetsRequest"; //later change
+import {
+  createSLAMapping,
+  deleteSLAMapping,
+  getAllSLAMappings,
+  getAllSLAs,
+} from "../../../api/slaRequest";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 function SlaMapping() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -18,6 +26,7 @@ function SlaMapping() {
     supportDepartment: "",
     slaName: "",
   });
+  const [getSlaName, setGetSlaName] = useState([]);
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteSlaMappingId, setDeleteSlaMappingId] = useState(null);
@@ -25,11 +34,11 @@ function SlaMapping() {
   const fetchSlaMapping = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllAssets(); //later change
+      const response = await getAllSLAMappings();
       if (response.status !== 200) {
         throw new Error("Failed to fetch data");
       }
-      setData(response?.data.data || []);
+      setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching Sla Mapping:", error);
     } finally {
@@ -41,14 +50,34 @@ function SlaMapping() {
     fetchSlaMapping();
   }, []);
 
+  const fetchSlaName = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllSLAs();
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setGetSlaName(response?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching Sla Mapping:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSlaName();
+  }, []);
+
+  console.log("dd", getSlaName);
   const columns = useMemo(
     () => [
       {
-        accessorKey: "assetInformation.assetTag",
+        accessorKey: "supportDepartment",
         header: "Support Department",
       },
       {
-        accessorKey: "assetState.user",
+        accessorKey: "slaName",
         header: "SLA Name",
       },
       {
@@ -81,9 +110,26 @@ function SlaMapping() {
 
   const addNewSlaMappingHandler = async (e) => {
     e.preventDefault();
-    console.log("addNewSlaMapping", addNewSlaMapping);
-    //call api
-    setAddSlaMappingModal(false);
+    try {
+      const formData = {
+        userId: user.userId,
+        supportDepartment: addNewSlaMapping?.supportDepartment,
+        slaName: addNewSlaMapping?.slaName,
+      };
+      const response = await createSLAMapping(formData);
+      console.log("res", response);
+      if (response?.data.success) {
+        toast.success("SLA Mapping created successfully");
+        await fetchSlaMapping();
+      }
+      setAddSlaMappingModal(false);
+      setAddNewSlaMapping({
+        supportDepartment: "",
+        slaName: "",
+      });
+    } catch (error) {
+      console.log("Error creating sla mapping ", error);
+    }
   };
 
   //delete
@@ -95,8 +141,11 @@ function SlaMapping() {
   const deleteSlaMappingHandler = async (e) => {
     e.preventDefault();
     try {
-      console.log("deleteSlaMappingId", deleteSlaMappingId);
-      //call api
+      const response = await deleteSLAMapping(deleteSlaMappingId);
+      if (response?.data.success) {
+        toast.success("SLA Mapping deleted successfully");
+        await fetchSlaMapping();
+      }
     } catch (error) {
       console.error("Error deleting condition:", error);
     }
@@ -190,7 +239,8 @@ function SlaMapping() {
                     </label>
                     <Autocomplete
                       className="w-[65%]"
-                      options={[]}
+                      options={["IT Support"]}
+                      value={addNewSlaMapping?.supportDepartment}
                       getOptionLabel={(option) => option}
                       required
                       renderInput={(params) => (
@@ -213,8 +263,19 @@ function SlaMapping() {
                     </label>
                     <Autocomplete
                       className="w-[65%]"
-                      options={[]}
-                      getOptionLabel={(option) => option}
+                      options={getSlaName}
+                      value={
+                        getSlaName.find(
+                          (sla) => sla.slaName === addNewSlaMapping?.slaName
+                        ) || null
+                      }
+                      getOptionLabel={(option) => option.slaName || ""}
+                      onChange={(_, newValue) =>
+                        setAddNewSlaMapping((prev) => ({
+                          ...prev,
+                          slaName: newValue ? newValue.slaName : "",
+                        }))
+                      }
                       required
                       renderInput={(params) => (
                         <TextField

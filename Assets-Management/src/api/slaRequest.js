@@ -55,3 +55,17 @@ export const getAllPriorityMatrices = ()=>API.get("/sla/priorityMatrix")
 export const getPriorityMatrixById = (id)=>API.get(`/sla/priorityMatrix/${id}`)
 export const updatePriorityMatrix = (id,updatedData)=>API.put(`/sla/priorityMatrix/${id}`,updatedData)
 export const deletePriorityMatrix = (id)=>API.delete(`/sla/priorityMatrix/${id}`)
+
+//Holiday Calenar
+export const createHolidayCalender = (formData)=>API.post("/sla/holidayCalender")
+export const getAllHolidayCalender = ()=>API.get("/sla/holidayCalender")
+export const getHolidayCalenderById = (id)=>API.get(`sla/holidayCalender/${id}`)
+export const updateHolidayCalender = (id,updatedData)=>API.put(`sla/holidayCalender/${id}`,updatedData)
+export const deleteHolidayCalender = (id)=>API.delete(`sla/holidayCalender/${id}`)
+
+//Holiday List
+export const createHolidayList = (formData)=>API.post("/sla/holidayList",formData)
+export const getAllHolidayList = ()=>API.get("/sla/holidayList")
+export const getHolidayListById = (id)=>API.get(`/sla/holidayList/${id}`)
+export const updateHolidayList = (id,updatedData)=>API.put(`sla/holidayList/${id}`,updatedData)
+export const deleteHolidayList = (id)=>API.delete(`sla/holidayList/${id}`)

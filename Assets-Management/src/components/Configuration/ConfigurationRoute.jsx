@@ -26,21 +26,22 @@ import ServiceCategory from "./Vendor/ServiceCategory.jsx";
 import GatePassAddress from "./GatePass/GatePassAddress.jsx";
 import SupportDepartment from "./Global/SupportDepartment.jsx";
 import SupportGroup from "./Global/SupportGroup.jsx";
+import CloserCode from "./Incident/CloserCode.jsx";
+import PredefinedReplies from "./Incident/PredefinedReplies.jsx";
+import PendingReason from "./Incident/PendingReason.jsx";
+import IncidentRules from "./Incident/IncidentRules.jsx";
+import IncidentAutoCloserTime from "./Incident/IncidentAutoCloserTime.jsx";
+import AddRule from "./Incident/AddRule.jsx";
 import SlaCreation from "./SLA/SlaCreation.jsx";
+import NewSlaCreation from "./SLA/NewSlaCreation.jsx";
+import EditSlaCreation from "./SLA/EditSlaCreation.jsx";
 import SlaMapping from "./SLA/SlaMapping.jsx";
 import SlaTimeLines from "./SLA/SlaTimeLines.jsx";
 import PriorityMatrix from "./SLA/PriorityMatrix.jsx";
 import HolidayCalendar from "./SLA/HolidayCalendar.jsx";
 import HoliDayList from "./SLA/HoliDayList.jsx";
-import NewSlaCreation from "./SLA/NewSlaCreation.jsx";
-import EditSlaCreation from "./SLA/EditSlaCreation.jsx";
-import IncidentAutoCloserTime from "./Incident/IncidentAutoCloserTime.jsx";
-import CloserCode from "./Incident/CloserCode.jsx";
-import PredefinedReplies from "./Incident/PredefinedReplies.jsx";
-import PendingReason from "./Incident/PendingReason.jsx";
-import IncidentRules from "./Incident/IncidentRules.jsx";
-import AddRule from "./Incident/AddRule.jsx";
-
+import EditRule from "./Incident/EditRule.jsx";
+import IncidentStatus from "./Incident/IncidentStatus.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -67,6 +68,8 @@ function ConfigurationRoute() {
         <Route path="PendingReason" element={<PendingReason />} />
         <Route path="IncidentRules" element={<IncidentRules />} />
         <Route path="AddRule" element={<AddRule />} />
+        <Route path="IncidentStatus" element={<IncidentStatus />} />
+        <Route path="EditRule/:id" element={<EditRule />} />
 
         {/* GatePass Routes */}
         <Route path="GatePassAddress" element={<GatePassAddress />} />

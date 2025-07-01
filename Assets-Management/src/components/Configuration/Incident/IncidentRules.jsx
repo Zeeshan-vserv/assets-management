@@ -16,6 +16,7 @@ import {
   updateCategory,
 } from "../../../api/IncidentCategoryRequest";
 import { NavLink } from "react-router-dom";
+import { deleteRule, getAllRules } from "../../../api/ConfigurationIncidentRequest";
 
 const IncidentRules = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -38,7 +39,7 @@ const IncidentRules = () => {
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const res = await getAllCategory();
+      const res = await getAllRules();
       setData(res?.data?.data || []);
     } catch (err) {
       toast.error("Failed to fetch categories");
@@ -47,6 +48,9 @@ const IncidentRules = () => {
     }
   };
 
+  console.log("Data fetched:", data);
+  
+
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -54,28 +58,24 @@ const IncidentRules = () => {
   // Table columns
   const columns = useMemo(
     () => [
-      { accessorKey: "categoryId", header: "Rules Name" },
-      { accessorKey: "categoryName", header: "Priority" },
-      { accessorKey: "Technician", header: "Technician" },
+      { accessorKey: "ruleName", header: "Rules Name" },
+      { accessorKey: "priority", header: "Priority" },
+      { accessorKey: "assignTo.technician", header: "Technician" },
       {
         id: "edit",
         header: "Edit",
         size: 60,
         enableSorting: false,
         Cell: ({ row }) => (
+          <NavLink to={`/main/configuration/EditRule/${row.original._id}`}>
+            {console.log(row.original)}
           <IconButton
-            onClick={() => {
-              setEditForm({
-                _id: row.original._id,
-                categoryName: row.original.categoryName,
-              });
-              setOpenEditModal(true);
-            }}
             color="primary"
             aria-label="edit"
           >
             <MdModeEdit />
           </IconButton>
+          </NavLink>
         ),
       },
       {
@@ -157,56 +157,19 @@ const IncidentRules = () => {
     }),
   });
 
-  // const handleAddCategory = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const formData = {
-  //       userId: user?.userId,
-  //       categoryName: addForm.categoryName,
-  //     };
-  //     const res = await createIncidentCategory(formData);
-  //     if (res?.data?.success) {
-  //       toast.success("Category created successfully");
-  //       setOpenAddModal(false);
-  //       setAddForm({ categoryName: "" });
-  //       fetchCategories();
-  //     }
-  //   } catch (err) {
-  //     toast.error("Failed to create category");
-  //   }
-  // };
+   // Delete Handler
+    const handleDeleteCategory = async () => {
+      try {
+        await deleteRule(deleteId);
+        toast.success("Predefined reply deleted successfully");
+        setDeleteModal(false);
+        setDeleteId(null);
+        fetchCategories();
+      } catch (err) {
+        toast.error("Failed to delete predefined reply");
+      }
+    };
 
-  // Edit Category Handler
-  // const handleEditCategory = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     const updateData = {
-  //       categoryName: editForm.categoryName,
-  //     };
-  //     const res = await updateCategory(editForm._id, updateData);
-  //     if (res?.data?.success) {
-  //       toast.success("Category updated successfully");
-  //       setOpenEditModal(false);
-  //       setEditForm(null);
-  //       fetchCategories();
-  //     }
-  //   } catch (err) {
-  //     toast.error("Failed to update category");
-  //   }
-  // };
-
-  // Delete Category Handler
-  // const handleDeleteCategory = async () => {
-  //   try {
-  //     await deleteCategory(deleteId);
-  //     toast.success("Category deleted successfully");
-  //     setDeleteModal(false);
-  //     setDeleteId(null);
-  //     fetchCategories();
-  //   } catch (err) {
-  //     toast.error("Failed to delete category");
-  //   }
-  // };
 
   return (
     <>
@@ -216,107 +179,14 @@ const IncidentRules = () => {
         </h2>
         <MaterialReactTable table={table} />
       </div>
-
-      {/* Add Modal */}
-      {/* {openAddModal && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
-              INCIDENT RULE DETAILS
-            </h2>
-            <form onSubmit={handleAddCategory} className="space-y-4">
-              <div className="flex items-center gap-2">
-                <label className="w-40 text-sm font-medium text-gray-500">
-                  Closure code*
-                </label>
-                <TextField
-                  name="categoryName"
-                  required
-                  fullWidth
-                  value={addForm.categoryName}
-                  onChange={(e) => setAddForm({ categoryName: e.target.value })}
-                  placeholder="Enter Closure Code"
-                  variant="standard"
-                  sx={{ width: 250 }}
-                />
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setOpenAddModal(false)}
-                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Add
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )} */}
-
-      {/* Edit Modal */}
-      {/* {openEditModal && editForm && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
-              Edit Closure Code
-            </h2>
-            <form onSubmit={handleEditCategory} className="space-y-4">
-              <div className="flex items-center gap-2">
-                <label className="w-40 text-sm font-medium text-gray-500">
-                  Closure code*
-                </label>
-                <TextField
-                  name="categoryName"
-                  required
-                  fullWidth
-                  value={editForm.categoryName}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      categoryName: e.target.value,
-                    }))
-                  }
-                  placeholder="Enter Closure Code"
-                  variant="standard"
-                  sx={{ width: 250 }}
-                />
-              </div>
-              <div className="flex justify-end gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setOpenEditModal(false)}
-                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Update
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )} */}
-
-      {/* Delete Modal */}
-      {/* {deleteModal && (
+       {deleteModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
             <h2 className="text-xl font-semibold text-red-600 mb-3">
               Are you sure?
             </h2>
             <p className="text-gray-700 mb-6">
-              This action will permanently delete the category.
+              This action will permanently delete the predefined reply.
             </p>
             <div className="flex justify-end gap-3">
               <button
@@ -336,7 +206,7 @@ const IncidentRules = () => {
             </div>
           </div>
         </div>
-      )} */}
+      )}
     </>
   );
 };

@@ -1,16 +1,14 @@
-import React, { useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
-import { useParams, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { createSLA, getSLAById, updateSLA } from "../../../api/slaRequest";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+
 function EditSlaCreation() {
   const { id } = useParams();
+  const user = useSelector((state) => state.authReducer.authData);
   const navigate = useNavigate();
-
-  // console.log("id", id);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-  };
-
   const weekdays = [
     "Monday",
     "Tuesday",
@@ -20,6 +18,151 @@ function EditSlaCreation() {
     "Saturday",
     "Sunday",
   ];
+
+  const [isLoading, setIsLoading] = useState(true);
+  // Controlled state for all fields
+  const [formData, setFormData] = useState({
+    slaName: "",
+    holidayCalender: "",
+    default: null,
+    status: null,
+    serviceWindow: null,
+    slaTimeline: weekdays.map((day) => ({
+      weekDay: day,
+      // selected: false,
+      startTime: "",
+      endTime: "",
+    })),
+  });
+
+  // const fetchData = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await getSLAById(id);
+  //     if (response.status !== 200) {
+  //       throw new Error("Failed to fetch data");
+  //     }
+  //     setFormData(response?.data || []);
+  //     // setData(response);
+  //   } catch (error) {
+  //     console.error("Error fetching users:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+const fetchData = async () => {
+  try {
+    setIsLoading(true);
+    const response = await getSLAById(id);
+    if (response.status !== 200) {
+      throw new Error("Failed to fetch data");
+    }
+    const data = response?.data?.data || {};
+
+    // Map fetched timeline to weekdays, fill blanks for missing days
+    const timelineMap = {};
+    if (Array.isArray(data.slaTimeline)) {
+      data.slaTimeline.forEach((item) => {
+        timelineMap[item.weekDay] = {
+          weekDay: item.weekDay,
+          selected: item.selected ?? true,
+          startTime: item.startTime
+            ? new Date(item.startTime).toISOString().substr(11, 5)
+            : "",
+          endTime: item.endTime
+            ? new Date(item.endTime).toISOString().substr(11, 5)
+            : "",
+        };
+      });
+    }
+    const mergedTimeline = weekdays.map((day) =>
+      timelineMap[day] || {
+        weekDay: day,
+        selected: false,
+        startTime: "",
+        endTime: "",
+      }
+    );
+
+    setFormData({
+      slaName: data.slaName || "",
+      holidayCalender: data.holidayCalender || "",
+      default: data.default === true ? "Yes" : data.default === false ? "No" : null,
+      status: data.status === true ? "Yes" : data.status === false ? "No" : null,
+      serviceWindow: data.serviceWindow === true ? "Yes" : data.serviceWindow === false ? "No" : null,
+      slaTimeline: mergedTimeline,
+    });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+  } finally {
+    setIsLoading(false);
+  }
+};
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // console.log(formData);
+  
+
+  // For text input
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // For Autocomplete fields
+  const handleAutoChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // For SLA Timeline table
+  const handleTimelineChange = (idx, field, value) => {
+    setFormData((prev) => {
+      const updatedTimeline = prev.slaTimeline.map((item, i) =>
+        i === idx ? { ...item, [field]: value } : item
+      );
+      return { ...prev, slaTimeline: updatedTimeline };
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+      ...formData,
+      userId: user.userId,
+      default:
+        formData.default === "Yes"
+          ? true
+          : formData.default === "No"
+          ? false
+          : null,
+      status:
+        formData.status === "Yes"
+          ? true
+          : formData.status === "No"
+          ? false
+          : null,
+      serviceWindow:
+        formData.serviceWindow === "Yes"
+          ? true
+          : formData.serviceWindow === "No"
+          ? false
+          : null,
+      slaTimeline: formData.slaTimeline
+        .filter((item) => item.startTime && item.endTime)
+        .map(({ weekDay, startTime, endTime }) => ({
+          weekDay,
+          startTime: new Date(`1970-01-01T${startTime}:00Z`),
+          endTime: new Date(`1970-01-01T${endTime}:00Z`),
+        })),
+    };
+    const response = await updateSLA(id,payload);
+    if (response?.data.success) {
+      toast.success("SLA Updated successfully");
+    }
+    // console.log(response);
+  };
 
   return (
     <>
@@ -32,26 +175,31 @@ function EditSlaCreation() {
                 type="submit"
                 className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
               >
-                Update
+                Submit
               </button>
               <button
+                type="button"
                 onClick={() => navigate("/main/configuration/sla-creation")}
                 className="bg-[#df656b] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
               >
                 Cancel
               </button>
             </div>
-            <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
+            <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-8">
               <div className="flex items-center w-[46%] max-lg:w-[100%]">
-                <label className="w-[25%] text-xs font-semibold text-slate-600">
+                <label
+                  htmlFor="slaName"
+                  className="w-[25%] text-xs font-semibold text-slate-600"
+                >
                   SLA Name<span className="text-red-500 text-base">*</span>
                 </label>
                 <input
                   className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                   type="text"
-                  id=""
-                  name=""
-                  value=""
+                  id="slaName"
+                  name="slaName"
+                  value={formData.slaName}
+                  onChange={handleChange}
                   required
                 />
               </div>
@@ -63,6 +211,10 @@ function EditSlaCreation() {
                 <Autocomplete
                   className="w-[65%]"
                   options={["Pan India"]}
+                  value={formData.holidayCalender}
+                  onChange={(_, value) =>
+                    handleAutoChange("holidayCalender", value || "")
+                  }
                   getOptionLabel={(option) => option}
                   renderInput={(params) => (
                     <TextField
@@ -86,6 +238,8 @@ function EditSlaCreation() {
                 <Autocomplete
                   className="w-[65%]"
                   options={["Yes", "No"]}
+                  value={formData.default}
+                  onChange={(_, value) => handleAutoChange("default", value)}
                   getOptionLabel={(option) => option}
                   renderInput={(params) => (
                     <TextField
@@ -109,6 +263,10 @@ function EditSlaCreation() {
                 <Autocomplete
                   className="w-[65%]"
                   options={["Yes", "No"]}
+                  value={formData.status}
+                  onChange={(_, value) =>
+                    handleAutoChange("status", value || "")
+                  }
                   getOptionLabel={(option) => option}
                   renderInput={(params) => (
                     <TextField
@@ -132,6 +290,10 @@ function EditSlaCreation() {
                 <Autocomplete
                   className="w-[65%]"
                   options={["Yes", "No"]}
+                  value={formData.serviceWindow}
+                  onChange={(_, value) =>
+                    handleAutoChange("serviceWindow", value || "")
+                  }
                   getOptionLabel={(option) => option}
                   renderInput={(params) => (
                     <TextField
@@ -152,25 +314,47 @@ function EditSlaCreation() {
               <table className="min-w-full border-collapse border border-gray-200 shadow-sm text-xs">
                 <thead className="bg-blue-100 text-gray-700">
                   <tr>
-                    <th className="p-2 border text-left text-sm">Select</th>
+                    <th className="p-2 border text-left  text-sm">Select</th>
                     <th className="p-2 border text-left text-sm">Weekday</th>
                     <th className="p-2 border text-left text-sm">From Time</th>
                     <th className="p-2 border text-left text-sm">To Time</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {weekdays.map((day, idx) => (
+                  {formData.slaTimeline.map((item, idx) => (
                     <tr key={idx} className="even:bg-gray-50">
                       <td className="p-2 border text-start">
-                        <input type="checkbox" className="w-4 h-4" />
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4"
+                          checked={item.selected}
+                          onChange={(e) =>
+                            handleTimelineChange(
+                              idx,
+                              "selected",
+                              e.target.checked
+                            )
+                          }
+                        />
                       </td>
-                      <td className="p-2 border font-medium text-sm">{day}</td>
+                      <td className="p-2 border font-medium text-sm">
+                        {item.weekDay}
+                      </td>
                       <td className="p-2 border">
                         <div className="flex flex-row justify-between items-center gap-1">
                           <span>Select Time</span>
                           <input
                             type="time"
                             className="max:w-full w-[60%] shadow-sm border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            value={item.startTime}
+                            onChange={(e) =>
+                              handleTimelineChange(
+                                idx,
+                                "startTime",
+                                e.target.value
+                              )
+                            }
+                            disabled={!item.selected}
                           />
                         </div>
                       </td>
@@ -180,6 +364,15 @@ function EditSlaCreation() {
                           <input
                             type="time"
                             className="max:w-full w-[60%] shadow-sm border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            value={item.endTime}
+                            onChange={(e) =>
+                              handleTimelineChange(
+                                idx,
+                                "endTime",
+                                e.target.value
+                              )
+                            }
+                            disabled={!item.selected}
                           />
                         </div>
                       </td>

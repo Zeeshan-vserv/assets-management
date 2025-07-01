@@ -704,7 +704,7 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                       <NavLink
+                  <NavLink
                     to="/main/configuration/IncidentRules"
                     className={({ isActive }) =>
                       `hover:underline cursor-pointer ${
@@ -712,7 +712,7 @@ const Navigation = ({ nav, setNav }) => {
                       }`
                     }
                   >
-                  rules
+                    rules
                   </NavLink>
                 </li>
                 <li
@@ -1091,14 +1091,14 @@ const Navigation = ({ nav, setNav }) => {
                 </li>
               </ul>
             )}
-            <h3
+            {/* <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {
                 setNav(false);
               }}
             >
               gate pass
-            </h3>
+            </h3> */}
             {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >vendor</h3> */}
             {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >license</h3> */}
 

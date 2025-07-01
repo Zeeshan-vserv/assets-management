@@ -7,8 +7,9 @@ import { Box, Button, IconButton, Menu, MenuItem } from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { getAllAssets } from "../../../api/AssetsRequest"; //later chnage it
 import { useNavigate } from "react-router-dom";
+import { deleteSLA, getAllSLAs } from "../../../api/slaRequest";
+import { toast } from "react-toastify";
 
 function SlaCreation() {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ function SlaCreation() {
   const fetchSlaCreation = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllAssets(); //later chnage it
+      const response = await getAllSLAs();
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching holiday calendar:", error);
@@ -34,20 +35,21 @@ function SlaCreation() {
   useEffect(() => {
     fetchSlaCreation();
   }, []);
-
+  // console.log("data", data);
   const columns = useMemo(
     () => [
       {
-        accessorKey: "assetInformation.serialNumber",
+        accessorKey: "slaName",
         header: "SLA Name",
       },
       {
-        accessorKey: "assetState.user",
+        accessorKey: "holidayCalender",
         header: "Holiday Calendar",
       },
       {
-        accessorKey: "assetInformation.model",
+        accessorKey: "status",
         header: "Status",
+        Cell: ({ cell }) => cell.getValue().toString(),
       },
       {
         id: "edit",
@@ -115,8 +117,11 @@ function SlaCreation() {
   const deleteSlaCreationHandler = async (e) => {
     e.preventDefault();
     try {
-      console.log("deleteSlaCreationId", deleteSlaCreationId);
-      //call api
+      const response = await deleteSLA(deleteSlaCreationId);
+      if (response?.data.success) {
+        toast.success("SLA deleted successfully");
+        fetchSlaCreation();
+      }
     } catch (error) {
       console.error("Error deleting sla creation:", error);
     }

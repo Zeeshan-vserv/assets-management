@@ -474,7 +474,6 @@
 // };
 // export default IncidentStatus;
 
-
 import React, { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
@@ -530,7 +529,9 @@ const IncidentStatus = () => {
       // Flatten the statusTimeline for table display
       const flatData = (res?.data?.data || []).map((item) => ({
         ...item,
-        ...((item.statusTimeline && item.statusTimeline.length > 0) ? item.statusTimeline[item.statusTimeline.length - 1] : {}),
+        ...(item.statusTimeline && item.statusTimeline.length > 0
+          ? item.statusTimeline[item.statusTimeline.length - 1]
+          : {}),
       }));
       setData(flatData);
     } catch (err) {
@@ -658,13 +659,8 @@ const IncidentStatus = () => {
     e.preventDefault();
     try {
       const formData = {
-        // incidentId: "dummyIncidentId", // Replace with actual incidentId if needed
-        statusTimeline: [
-          {
-            ...addForm,
-            changedBy: user?.userId || "admin",
-          },
-        ],
+        ...addForm,
+        changedBy: user?.userId || "admin",
       };
       const res = await createIncidentStatus(formData);
       if (res?.data?.success) {

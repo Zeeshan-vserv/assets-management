@@ -47,3 +47,20 @@ const priorityMatrixSchema = new mongoose.Schema({
 }, { timestamps: true});
 
 export const PriorityMatrixModel = mongoose.model('PriorityMatrix', priorityMatrixSchema)
+
+const holidayCalenderSchema = new mongoose.Schema({
+    userId: String,
+    holidayCalenderId: Number,
+    holidayCalenderLocation: String
+})
+
+export const HolidayCalenderModel = mongoose.model('HolidayCalender', holidayCalenderSchema)
+
+const holidayListSchema = new mongoose.Schema({
+    userId: String,
+    calenderName: String,
+    holidayRemark: String,
+    holidayDate: Date,
+})
+
+export const HolidayListModel = mongoose.model('HolidayList', holidayListSchema)

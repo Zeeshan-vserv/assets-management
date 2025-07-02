@@ -589,11 +589,23 @@ const Navigation = ({ nav, setNav }) => {
             </h3>
             {expandedSubMenus.incidents && (
               <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >add prefix</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >auto closed time</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >closer code</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >predefined replies</li>
-                <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >pending reason</li> */}
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/configuration/IncidentStatus"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    Incident Status
+                  </NavLink>
+                </li>
                 <li
                   className="text-[11px] hover:underline"
                   onClick={() => {

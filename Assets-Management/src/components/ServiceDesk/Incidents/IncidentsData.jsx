@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
 import { AiOutlineFileExcel } from "react-icons/ai";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
@@ -14,6 +14,7 @@ import { getAllDepartment } from "../../../api/DepartmentRequest";
 import { getAllIncident } from "../../../api/IncidentRequest";
 import { NavLink } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { MdModeEdit } from "react-icons/md";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -114,6 +115,19 @@ const IncidentsData = () => {
       {
         accessorKey: "departmentName",
         header: "Feedback Available",
+      },
+      {
+        id: "edit",
+        header: "Edit",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton color="primary" aria-label="edit">
+            <NavLink to={`/main/ServiceDesk/EditIncident/${row.original._id}`}>
+              <MdModeEdit />
+            </NavLink>
+          </IconButton>
+        ),
       },
     ],
     [isLoading]

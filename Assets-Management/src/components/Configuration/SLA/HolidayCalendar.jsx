@@ -8,15 +8,23 @@ import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { TextField } from "@mui/material";
-import { getAllAssets } from "../../../api/AssetsRequest"; //later chnage it
+import {
+  createHolidayCalender,
+  deleteHolidayCalender,
+  getAllHolidayCalender,
+  updateHolidayCalender,
+} from "../../../api/slaRequest";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 function HolidayCalendar() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [addCalendarLocModal, setAddCalendarLocModal] = useState(false);
   const [addCalendarLocation, setAddCalendarLocation] = useState({
-    calendarLocation: "",
+    holidayCalenderLocation: "",
   });
 
   const [editCalendarLocation, setEditCalendarLocation] = useState(null);
@@ -29,7 +37,7 @@ function HolidayCalendar() {
   const fetchHolidayCalendar = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllAssets(); //later chnage it
+      const response = await getAllHolidayCalender();
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching holiday calendar:", error);
@@ -45,11 +53,11 @@ function HolidayCalendar() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "assetState.user",
+        accessorKey: "holidayCalenderId",
         header: "Holiday Calendar",
       },
       {
-        accessorKey: "assetInformation.model",
+        accessorKey: "holidayCalenderLocation",
         header: "Holiday Calendar Location",
       },
       {
@@ -97,9 +105,20 @@ function HolidayCalendar() {
 
   const addNewCalendarLocationHandler = async (e) => {
     e.preventDefault();
-    console.log("addCalendarLocation", addCalendarLocation);
-    //call api
-    setAddCalendarLocModal(false);
+    try {
+      const formData = {
+        userId: user.userId,
+        holidayCalenderLocation: addCalendarLocation.holidayCalenderLocation,
+      };
+      const response = await createHolidayCalender(formData);
+      if (response?.data.success) {
+        toast.success("Holiday Calender created successfully");
+        await fetchHolidayCalendar();
+        setAddCalendarLocModal(false);
+      }
+    } catch (error) {
+      console.log("Error creating holiday calendar");
+    }
   };
 
   //update
@@ -107,7 +126,8 @@ function HolidayCalendar() {
     const calendarLocationToEdit = data?.find((d) => d._id === id);
     if (calendarLocationToEdit) {
       setEditCalendarLocation({
-        calendarLocation: calendarLocationToEdit.calendarLocation,
+        _id: calendarLocationToEdit._id,
+        holidayCalenderLocation: calendarLocationToEdit.holidayCalenderLocation,
       });
       setOpenUpdateModal(true);
     }
@@ -125,9 +145,19 @@ function HolidayCalendar() {
     e.preventDefault();
     if (!editCalendarLocation?._id) return;
     try {
-      // console.log("editCalendarLocation", editCalendarLocation);
-      //call api
-      setEditCalendarLocation(null);
+      const updatedData = {
+        holidayCalenderLocation: editCalendarLocation.holidayCalenderLocation,
+      };
+      const response = await updateHolidayCalender(
+        editCalendarLocation?._id,
+        updatedData
+      );
+      if (response?.data.success) {
+        toast.success("Holiday calender updated successfully");
+        await fetchHolidayCalendar();
+        setOpenUpdateModal(false);
+        setEditCalendarLocation(null);
+      }
     } catch (error) {
       console.error("Error updating calendar location:", error);
     }
@@ -141,13 +171,16 @@ function HolidayCalendar() {
   const deleteCalendarLocationHandler = async (e) => {
     e.preventDefault();
     try {
-      console.log("deleteCalendarLocationId", deleteCalendarLocationId);
-      //call api
+      const response = await deleteHolidayCalender(deleteCalendarLocationId);
+      if (response?.data.success) {
+        toast.success("Holiday calender deleted successfully");
+        await fetchHolidayCalendar();
+        setDeleteConfirmationModal(false);
+        setDeleteCalendarLocationId(null);
+      }
     } catch (error) {
       console.error("Error deleting calendar location:", error);
     }
-    setDeleteConfirmationModal(false);
-    setDeleteCalendarLocationId(null);
   };
 
   const table = useMaterialReactTable({
@@ -238,10 +271,10 @@ function HolidayCalendar() {
                       Holiday Calendar Location
                     </label>
                     <TextField
-                      name="calendarLocation"
+                      name="holidayCalenderLocation"
                       required
                       fullWidth
-                      value={addCalendarLocation?.calendarLocation || ""}
+                      value={addCalendarLocation?.holidayCalenderLocation || ""}
                       onChange={addNewCalendarLocationChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
@@ -284,10 +317,12 @@ function HolidayCalendar() {
                         Holiday Calendar Location
                       </label>
                       <TextField
-                        name="calendarLocation"
+                        name="holidayCalenderLocation"
                         required
                         fullWidth
-                        value={editCalendarLocation?.calendarLocation || ""}
+                        value={
+                          editCalendarLocation?.holidayCalenderLocation || ""
+                        }
                         onChange={updateCalendarLocationChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}

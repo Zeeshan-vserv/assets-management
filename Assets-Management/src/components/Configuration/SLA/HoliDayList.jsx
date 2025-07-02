@@ -8,17 +8,32 @@ import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { TextField } from "@mui/material";
-import { getAllAssets } from "../../../api/AssetsRequest"; //later chnage it
+import {
+  createHolidayList,
+  deleteHolidayList,
+  getAllHolidayCalender,
+  getAllHolidayList,
+  updateHolidayList,
+} from "../../../api/slaRequest";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+
+// const calendarOptions = [
+//   { calenderName: "Pan India" },
+//   { calenderName: "India - 2025" },
+// ];
 
 function HoliDayList() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
+  const [holidayCalendar, setHolidayCalendar] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [calendarOptions, setCalendarOptions] = useState([]);
   const [addHolidayListModal, setAddHolidatListModal] = useState(false);
   const [addHolidayList, setAddHolidayList] = useState({
-    holidayCalendar: "",
-    holidayDate: "",
-    holidayRemarks: "",
+    calenderName: "",
+    holidayRemark: "",
+    holidayDate: Date,
   });
 
   const [editHolidayList, setEditHolidayList] = useState(null);
@@ -26,12 +41,26 @@ function HoliDayList() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteHolidayListId, setDeleteHolidayListId] = useState(null);
-
-  const fetchHolidayListId = async () => {
+  const fetchHolidayList = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllAssets(); //later chnage it
+      const response = await getAllHolidayList();
       setData(response?.data?.data || []);
+      const response2 = await getAllHolidayCalender();
+      const calendars = response2?.data?.data || [];
+      setHolidayCalendar(calendars);
+
+      // Gather all unique locations from all calendars
+      const allLocations = calendars
+        .flatMap((cal) => cal.holidayCalenderLocation || [])
+        .filter(Boolean);
+
+      // Remove duplicates and map to { calenderName }
+      const uniqueOptions = Array.from(new Set(allLocations)).map((loc) => ({
+        calenderName: loc,
+      }));
+
+      setCalendarOptions(uniqueOptions);
     } catch (error) {
       console.error("Error fetching holiday calendar:", error);
     } finally {
@@ -39,19 +68,17 @@ function HoliDayList() {
     }
   };
 
+  // console.log("Holiday List Data:", holidayCalendar.holidayCalenderLocation);
+
   useEffect(() => {
-    fetchHolidayListId();
+    fetchHolidayList();
   }, []);
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: "assetState.user",
+        accessorKey: "calenderName",
         header: "Calendar Name",
-      },
-      {
-        accessorKey: "assetInformation.model",
-        header: "Holiday Remarks",
       },
       {
         accessorFn: (row) => new Date(row.holidayDate),
@@ -67,6 +94,11 @@ function HoliDayList() {
             minWidth: "250px",
           },
         },
+      },
+
+      {
+        accessorKey: "holidayRemark",
+        header: "Holiday Remarks",
       },
       {
         id: "edit",
@@ -113,9 +145,22 @@ function HoliDayList() {
 
   const addNewHolidatListHandler = async (e) => {
     e.preventDefault();
-    console.log("addHolidayList", addHolidayList);
-    //call api
-    setAddHolidatListModal(false);
+    try {
+      const formData = {
+        userId: user.userId,
+        calenderName: addHolidayList.calenderName,
+        holidayRemark: addHolidayList.holidayRemark,
+        holidayDate: addHolidayList.holidayDate,
+      };
+      const response = await createHolidayList(formData);
+      if (response?.data.success) {
+        toast.success("Holiday list created successfully");
+        await fetchHolidayList();
+        setAddHolidatListModal(false);
+      }
+    } catch (error) {
+      console.log("Error creating holiday list");
+    }
   };
 
   //update
@@ -123,9 +168,13 @@ function HoliDayList() {
     const holidayListToEdit = data?.find((d) => d._id === id);
     if (holidayListToEdit) {
       setEditHolidayList({
-        holidayCalendar: holidayListToEdit.holidayCalendar,
-        holidayDate: holidayListToEdit.holidayDate,
-        holidayRemarks: holidayListToEdit.holidayRemarks,
+        _id: holidayListToEdit._id,
+        calenderName: holidayListToEdit.calenderName,
+        holidayDate: new Date(holidayListToEdit.holidayDate)
+          .toISOString()
+          .split("T")[0],
+
+        holidayRemark: holidayListToEdit.holidayRemark,
       });
       setOpenUpdateModal(true);
     }
@@ -143,9 +192,21 @@ function HoliDayList() {
     e.preventDefault();
     if (!editHolidayList?._id) return;
     try {
-      console.log("editHolidayList", editHolidayList);
-      //call api
-      setEditHolidayList(null);
+      const updatedData = {
+        calenderName: editHolidayList.calenderName,
+        holidayDate: editHolidayList.holidayDate,
+        holidayRemark: editHolidayList.holidayRemark,
+      };
+      const response = await updateHolidayList(
+        editHolidayList?._id,
+        updatedData
+      );
+      if (response?.data.success) {
+        toast.success("Holiday list updated successfully");
+        await fetchHolidayList();
+        setEditHolidayList(null);
+        setOpenUpdateModal(false);
+      }
     } catch (error) {
       console.error("Error updating holiday list:", error);
     }
@@ -159,13 +220,16 @@ function HoliDayList() {
   const deleteHolidayListHandler = async (e) => {
     e.preventDefault();
     try {
-      console.log("deleteHolidayListId", deleteHolidayListId);
-      //call api
+      const response = await deleteHolidayList(deleteHolidayListId);
+      if (response?.data.success) {
+        toast.success("Holiday list deleted successfully");
+        await fetchHolidayList();
+        setDeleteConfirmationModal(false);
+        setDeleteHolidayListId(null);
+      }
     } catch (error) {
       console.error("Error deleting holiday list:", error);
     }
-    setDeleteConfirmationModal(false);
-    setDeleteHolidayListId(null);
   };
 
   const table = useMaterialReactTable({
@@ -254,8 +318,23 @@ function HoliDayList() {
                     </label>
                     <Autocomplete
                       className="w-[65%]"
-                      options={["Pan India"]}
-                      getOptionLabel={(option) => option}
+                      options={calendarOptions}
+                      value={
+                        calendarOptions.find(
+                          (opt) =>
+                            opt.calenderName === addHolidayList.calenderName
+                        ) || null
+                      }
+                      onChange={(_, newValue) =>
+                        setAddHolidayList((prev) => ({
+                          ...prev,
+                          calenderName: newValue ? newValue.calenderName : "",
+                        }))
+                      }
+                      getOptionLabel={(option) => option.calenderName || ""}
+                      isOptionEqualToValue={(option, value) =>
+                        option.calenderName === value.calenderName
+                      }
                       renderInput={(params) => (
                         <TextField
                           {...params}
@@ -272,25 +351,28 @@ function HoliDayList() {
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Holiday Date
+                      Holiday Remarks
                     </label>
-                    <input
-                      type="date"
-                      className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                    <TextField
+                      name="holidayRemark"
+                      required
+                      fullWidth
+                      value={addHolidayList?.holidayRemark || ""}
+                      onChange={addNewHolidayListChangeHandler}
+                      variant="standard"
+                      sx={{ width: 250 }}
                     />
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Holiday Remarks
+                      Holiday Date
                     </label>
-                    <TextField
-                      name="holidayRemarks"
-                      required
-                      fullWidth
-                      value={addHolidayList?.holidayRemarks || ""}
+                    <input
+                      type="date"
+                      name="holidayDate"
+                      value={addHolidayList?.holidayDate || ""}
                       onChange={addNewHolidayListChangeHandler}
-                      variant="standard"
-                      sx={{ width: 250 }}
+                      className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                     />
                   </div>
                 </div>
@@ -328,8 +410,23 @@ function HoliDayList() {
                       </label>
                       <Autocomplete
                         className="w-[65%]"
-                        options={["Pan India"]}
-                        getOptionLabel={(option) => option}
+                        options={calendarOptions}
+                        value={
+                          calendarOptions.find(
+                            (opt) =>
+                              opt.calenderName === editHolidayList?.calenderName
+                          ) || null
+                        }
+                        onChange={(_, newValue) =>
+                          setEditHolidayList((prev) => ({
+                            ...prev,
+                            calenderName: newValue ? newValue.calenderName : "",
+                          }))
+                        }
+                        getOptionLabel={(option) => option.calenderName || ""}
+                        isOptionEqualToValue={(option, value) =>
+                          option.calenderName === value.calenderName
+                        }
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -350,6 +447,8 @@ function HoliDayList() {
                       </label>
                       <input
                         type="date"
+                        name="holidayDate"
+                        value={editHolidayList?.holidayDate || ""}
                         onChange={updateHolidayListChangeHandler}
                         className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                       />
@@ -359,10 +458,10 @@ function HoliDayList() {
                         Holiday Remarks
                       </label>
                       <TextField
-                        name="holidayRemarks"
+                        name="holidayRemark"
                         required
                         fullWidth
-                        value={editHolidayList?.holidayRemarks || ""}
+                        value={editHolidayList?.holidayRemark || ""}
                         onChange={updateHolidayListChangeHandler}
                         variant="standard"
                         sx={{ width: 250 }}

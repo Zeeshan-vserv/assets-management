@@ -152,21 +152,34 @@ function NewIncidents() {
     //     })
     //   });
     try {
-      await createIncident({
-        ...formData,
-        userId: user?.userId,
-        ...(selectUser === false && {
-          submitter: {
-            user: userData.employeeName,
-            userContactNumber: "",
-            userEmail: "",
-            userDepartment: "",
-            loggedBy: "",
-            loggedInTime: "",
-          },
-        }),
-      });
-      toast.success("Incident Added Successfully");
+    const form = new FormData();
+
+    // Append all fields to form data
+    form.append("userId", user?.userId);
+    form.append("subject", formData.subject);
+    form.append("category", formData.category);
+    form.append("subCategory", formData.subCategory);
+    form.append("loggedVia", formData.loggedVia);
+    form.append("description", formData.description);
+    form.append("status", formData.status);
+    form.append("sla", formData.sla);
+    form.append("tat", formData.tat);
+    form.append("feedback", formData.feedback);
+
+    // Nested objects must be stringified
+    form.append("submitter", JSON.stringify(formData.submitter));
+    form.append("assetDetails", JSON.stringify(formData.assetDetails));
+    form.append("locationDetails", JSON.stringify(formData.locationDetails));
+    form.append("classificaton", JSON.stringify(formData.classificaton));
+
+    // Attachment (file)
+    if (formData.attachment) {
+      form.append("attachment", formData.attachment);
+    }
+
+    await createIncident(form); // Make sure createIncident uses FormData
+
+    toast.success("Incident Added Successfully");
       setFormData({
         userId: "",
         incidentId: "",
@@ -208,18 +221,10 @@ function NewIncidents() {
           technician: "",
         },
       });
-    } catch (error) {
-      toast.error("Failed to add Incident");
-    }
+  } catch (error) {
+    toast.error("Failed to add Incident");
+  }
   };
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   try {
-  //     console.log("formData", formData);
-  //   } catch (error) {
-  //     console.log("Failed to create incident", error);
-  //   }
-  // };
   return (
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">

@@ -35,7 +35,7 @@ export const createIncident = async (req, res) => {
             userId,
             incidentId: newIncidentId,
             ...incidentData,
-            attechment: attachmentPath,
+            attachment: attachmentPath,
             statusTimeline: [{
                 status: "New",
                 changedAt: new Date(),

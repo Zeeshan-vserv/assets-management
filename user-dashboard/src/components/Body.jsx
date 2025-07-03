@@ -6,6 +6,7 @@ import Incident from "../pages/Incidents/Incident.jsx";
 import ServiceRequest from "../pages/Service-Request/ServiceRequest.jsx";
 import MyAssets from "../pages/My-Assests/MyAssets.jsx";
 import MyApproval from "../pages/My-Approval/MyApproval.jsx";
+import Login from "./Login.jsx";
 const Body = ({ nav, setNav }) => {
   return (
     <div className="flex mt-14">
@@ -19,6 +20,7 @@ const Body = ({ nav, setNav }) => {
           <Route path="service-request" element={<ServiceRequest />} />
           <Route path="my-assets" element={<MyAssets />} />
           <Route path="my-approval" element={<MyApproval />} />
+          <Route path="auth" element={<Login />} />
         </Routes>
       </div>
     </div>

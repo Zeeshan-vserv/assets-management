@@ -40,8 +40,8 @@ function NewIncidents() {
       userContactNumber: "",
       userEmail: "",
       userDepartment: "",
-      loggedBy: "",
-      loggedInTime: "",
+      // loggedBy: "",
+      // loggedInTime: "",
     },
     assetDetails: {
       asset: "",
@@ -158,12 +158,16 @@ function NewIncidents() {
         ...(selectUser === false && {
           submitter: {
             user: userData.employeeName,
-            userContactNumber: "",
-            userEmail: "",
-            userDepartment: "",
-            loggedBy: "",
-            loggedInTime: "",
+            userContactNumber: userData.mobileNumber,
+            userEmail: userData.emailAddress,
+            userDepartment: userData.department,
           },
+          // assetDetails: {
+          //   asset: userData.employeeName,
+          //   make: userData.employeeName,
+          //   model: userData.employeeName,
+          //   serialNo: userData.employeeName,
+          // },
         }),
       });
       toast.success("Incident Added Successfully");
@@ -185,8 +189,6 @@ function NewIncidents() {
           userContactNumber: "",
           userEmail: "",
           userDepartment: "",
-          loggedBy: "",
-          loggedInTime: "",
         },
         assetDetails: {
           asset: "",

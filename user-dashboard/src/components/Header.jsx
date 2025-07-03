@@ -1,44 +1,29 @@
-import React from "react";
-import userImg from "../assets/user.jpg";
+import React, { useState } from "react";
 import { IoMdMenu } from "react-icons/io";
-import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../action/AuthAction";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 const Header = ({ toggleNav }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const user = useSelector((state) => state.authReducer.authData);
-
-  // console.log(user.user.isActive);
-
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const handleLogout = () => {
-    dispatch(logout());
-    navigate("/auth");
+    console.log("gddg");
   };
-
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
     setTimeout(() => {
       setDropdownVisible(false);
     }, 3000);
   };
-  
   return (
     <div className="w-full flex items-center justify-between p-3 pl-4 pr-10 bg-gray-900 text-white">
       <div className="flex gap-5 items-center text-2xl">
         <IoMdMenu onClick={() => toggleNav()} />
-        <h2 className="uppercase">Asset Management</h2>
+        <h2 className="uppercase text-[1.2rem]">End User Service Management</h2>
       </div>
       <div className="flex gap-2 items-center relative">
         <div
           className="flex items-center gap-2 cursor-pointer"
           onClick={toggleDropdown}
         >
-          <img className="w-8 h-8 rounded-full" src={userImg} alt="" />
+          <img className="w-8 h-8 rounded-full" src="" alt="" />
           <h3 className="text-xs">VservInfosystems</h3>
         </div>
         {dropdownVisible && (

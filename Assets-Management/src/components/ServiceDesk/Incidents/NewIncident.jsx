@@ -21,6 +21,7 @@ import {
   getAllSupportDepartment,
   getAllSupportGroup,
 } from "../../../api/SuportDepartmentRequest";
+import { NavLink } from "react-router-dom";
 
 const NewIncident = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -200,7 +201,6 @@ const NewIncident = () => {
       <h2 className="text-slate-700 font-semibold">ADD INCIDENT</h2>
       <form action="" onSubmit={handleSubmit} className="flex flex-col gap-8">
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          
           <div className="flex gap-1 justify-end">
             <button
               type="submit"
@@ -208,9 +208,11 @@ const NewIncident = () => {
             >
               Submit
             </button>
-            <button className="bg-[#F26E75] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
-              Cancel
-            </button>
+            <NavLink to="/main/ServiceDesk/IndicentData">
+              <button className="bg-[#F26E75] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
+                Cancel
+              </button>
+            </NavLink>
           </div>
 
           <div className="flex flex-wrap gap-6 justify-between mt-3">

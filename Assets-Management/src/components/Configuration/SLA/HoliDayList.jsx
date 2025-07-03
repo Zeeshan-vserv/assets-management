@@ -11,22 +11,24 @@ import { TextField } from "@mui/material";
 import {
   createHolidayList,
   deleteHolidayList,
+  getAllHolidayCalender,
   getAllHolidayList,
   updateHolidayList,
 } from "../../../api/slaRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
-const calendarOptions = [
-  { calenderName: "Pan India" },
-  { calenderName: "India - 2025" },
-];
+// const calendarOptions = [
+//   { calenderName: "Pan India" },
+//   { calenderName: "India - 2025" },
+// ];
 
 function HoliDayList() {
   const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
+  const [holidayCalendar, setHolidayCalendar] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [calendarOptions, setCalendarOptions] = useState([]);
   const [addHolidayListModal, setAddHolidatListModal] = useState(false);
   const [addHolidayList, setAddHolidayList] = useState({
     calenderName: "",
@@ -39,18 +41,34 @@ function HoliDayList() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteHolidayListId, setDeleteHolidayListId] = useState(null);
-
   const fetchHolidayList = async () => {
     try {
       setIsLoading(true);
       const response = await getAllHolidayList();
       setData(response?.data?.data || []);
+      const response2 = await getAllHolidayCalender();
+      const calendars = response2?.data?.data || [];
+      setHolidayCalendar(calendars);
+
+      // Gather all unique locations from all calendars
+      const allLocations = calendars
+        .flatMap((cal) => cal.holidayCalenderLocation || [])
+        .filter(Boolean);
+
+      // Remove duplicates and map to { calenderName }
+      const uniqueOptions = Array.from(new Set(allLocations)).map((loc) => ({
+        calenderName: loc,
+      }));
+
+      setCalendarOptions(uniqueOptions);
     } catch (error) {
       console.error("Error fetching holiday calendar:", error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // console.log("Holiday List Data:", holidayCalendar.holidayCalenderLocation);
 
   useEffect(() => {
     fetchHolidayList();

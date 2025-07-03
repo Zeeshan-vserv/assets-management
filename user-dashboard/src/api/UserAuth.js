@@ -1,8 +1,6 @@
 import axios from 'axios'
-
-// import { logout } from '../action/AuthAction'
-import store from '../../../Assets-Management/src/store/ReduxStore'
-import { logout } from '../../../Assets-Management/src/action/AuthAction'
+import { UserLogout } from '../action2/AuthAction2'
+import store from '../store2/ReduxStore2'
 
 const API = axios.create({ baseURL: 'http://localhost:5001' })
 
@@ -20,25 +18,25 @@ API.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-            store.dispatch(logout())
+            store.dispatch(UserLogout())
             window.location.href = '/auth' 
         }
         return Promise.reject(error)
     }
 )
 
-export const signup = (formData) => API.post('auth/signup', formData)
+// export const signup = (formData) => API.post('auth/signup', formData)
 
-export const login = (formData) => API.post('auth/user/login', formData)
+export const login = (formData) => API.post('auth/login', formData)
 
-export const getUser = (id) => API.get(`auth/${id}`)
+// export const getUser = (id) => API.get(`auth/${id}`)
 
-export const getUserById = (id) => API.get(`auth/${id}`)
+// export const getUserById = (id) => API.get(`auth/${id}`)
 
-export const updateUser = (id, formData) => API.put(`auth/${id}`, formData)
+// export const updateUser = (id, formData) => API.put(`auth/${id}`, formData)
 
-export const deleteUser = (id) => API.delete(`auth/${id}`)
+// export const deleteUser = (id) => API.delete(`auth/${id}`)
 
-export const getAllUsers = () => API.get('auth/')
+// export const getAllUsers = () => API.get('auth/')
 
-export const uploadUsersFromExcel = (formData)=>API.post('/auth/upload-excel',formData)
+// export const uploadUsersFromExcel = (formData)=>API.post('/auth/upload-excel',formData)

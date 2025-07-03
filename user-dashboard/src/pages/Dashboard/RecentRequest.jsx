@@ -50,7 +50,7 @@ function RecentRequest() {
     enableHiding: false,
     initialState: {
       density: "compact",
-      pagination: { pageSize: 5 },
+      pagination: { pageSize: 3 },
     },
 
     muiTableProps: {
@@ -66,7 +66,7 @@ function RecentRequest() {
     positionToolbarAlertBanner: "bottom",
     muiPaginationProps: {
       color: "secondary",
-      rowsPerPageOptions: [10, 15, 20],
+      rowsPerPageOptions: [3, 5],
       shape: "rounded",
       variant: "outlined",
     },
@@ -89,7 +89,7 @@ function RecentRequest() {
 
   return (
     <>
-      <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
+      <div className="flex flex-col w-[100%] min-h-full p-4 bg-white rounded-md">
         <MaterialReactTable table={table} />
       </div>
     </>

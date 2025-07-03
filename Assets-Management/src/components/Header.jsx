@@ -31,7 +31,7 @@ const Header = ({ toggleNav }) => {
     <div className="w-full flex items-center justify-between p-3 pl-4 pr-10 bg-gray-900 text-white">
       <div className="flex gap-5 items-center text-2xl">
         <IoMdMenu onClick={() => toggleNav()} />
-        <h2 className="uppercase">Dashboard</h2>
+        <h2 className="uppercase">Asset Management</h2>
       </div>
       <div className="flex gap-2 items-center relative">
         <div

@@ -12,7 +12,7 @@ function MyServiceRequestChart() {
 
   return (
     <>
-      <div className="bg-white rounded-md p-4 w-full min-w-60 h-full">
+      <div className="bg-white rounded-md p-4 w-[30%] min-w-60 h-full">
         <h3 className="text-sm font-semibold text-gray-700 mb-2">
           MY SERVICE REQUESTS
         </h3>

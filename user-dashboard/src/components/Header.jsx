@@ -23,7 +23,7 @@ const Header = ({ toggleNav }) => {
           className="flex items-center gap-2 cursor-pointer"
           onClick={toggleDropdown}
         >
-          <img className="w-8 h-8 rounded-full" src="" alt="" />
+          <img className="w-8 h-8 rounded-full" src="https://imgs.search.brave.com/YGdDkgr_LaGQTa619YI6vcuw_bxE0ruRdhvIFnL9D0o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4x/Lmljb25maW5kZXIu/Y29tL2RhdGEvaWNv/bnMvYmFzaWMtMjIv/NTEyLzEwNDFfYm95/X2MtMTI4LnBuZw" alt="" />
           <h3 className="text-xs">VservInfosystems</h3>
         </div>
         {dropdownVisible && (

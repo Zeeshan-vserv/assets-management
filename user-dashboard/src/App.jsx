@@ -8,7 +8,6 @@ import Body from "./components/Body.jsx";
 // import DashboardAsset from "./components/Dashboard/DashboardAsset.jsx";
 function App() {
   const user = useSelector((state) => state.authReducer.authData);
-  const [count, setCount] = useState(0);
   return (
     <>
       <Routes>

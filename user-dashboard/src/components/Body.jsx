@@ -8,6 +8,7 @@ import MyAssets from "../pages/My-Assests/MyAssets.jsx";
 import MyApproval from "../pages/My-Approval/MyApproval.jsx";
 import NewIncidents from "../pages/Incidents/NewIncidents.jsx";
 import IncidentDetails from "../pages/Incidents/IncidentDetails.jsx";
+import NewServiceReqest from "../pages/Service-Request/NewServiceReqest.jsx";
 const Body = ({ nav, setNav }) => {
   return (
     <div className="flex mt-14">
@@ -21,6 +22,7 @@ const Body = ({ nav, setNav }) => {
           <Route path="incidents/:id" element={<IncidentDetails />} />
           <Route path="new-incident" element={<NewIncidents />} />
           <Route path="service-request" element={<ServiceRequest />} />
+          <Route path="new-service-request" element={<NewServiceReqest />} />
           <Route path="my-assets" element={<MyAssets />} />
           <Route path="my-approval" element={<MyApproval />} />
         </Routes>

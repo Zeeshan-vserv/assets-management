@@ -1,11 +1,13 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navigation from "./Navigation.jsx";
-import Dashboard from "../pages/Dashboard/Dashboard.jsx";
-import Incident from "../pages/Incidents/Incident.jsx";
-import ServiceRequest from "../pages/Service-Request/ServiceRequest.jsx";
-import MyAssets from "../pages/My-Assests/MyAssets.jsx";
-import MyApproval from "../pages/My-Approval/MyApproval.jsx";
+
+const Dashboard = lazy(() => import("../pages/Dashboard/Dashboard.jsx"));
+const Incident = lazy(() => import("../pages/Incidents/Incident.jsx"));
+const ServiceRequest = lazy(() => import("../pages/Service-Request/ServiceRequest.jsx"));
+const MyAssets = lazy(() => import("../pages/My-Assests/MyAssets.jsx"));
+const MyApproval = lazy(() => import("../pages/My-Approval/MyApproval.jsx"));
+
 const Body = ({ nav, setNav }) => {
   return (
     <div className="flex mt-14">
@@ -13,13 +15,15 @@ const Body = ({ nav, setNav }) => {
         <Navigation nav={nav} setNav={setNav} />
       </div>
       <div className="max-h-[calc(100vh-3.5rem)] w-[100%] overflow-y-auto ">
-        <Routes>
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="incidents" element={<Incident />} />
-          <Route path="service-request" element={<ServiceRequest />} />
-          <Route path="my-assets" element={<MyAssets />} />
-          <Route path="my-approval" element={<MyApproval />} />
-        </Routes>
+        <Suspense fallback={<div>Loading...</div>}>
+          <Routes>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="incidents" element={<Incident />} />
+            <Route path="service-request" element={<ServiceRequest />} />
+            <Route path="my-assets" element={<MyAssets />} />
+            <Route path="my-approval" element={<MyApproval />} />
+          </Routes>
+        </Suspense>
       </div>
     </div>
   );

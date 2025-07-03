@@ -25,7 +25,7 @@ function AllocatedComponent() {
   const fetchAllocatedComponent = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("https://dummyjson.com/recipes");
+      // const response = await axios.get("https://dummyjson.com/recipes");
       setData(response?.data?.recipes || []);
     } catch (error) {
       console.error("Error fetching allocated component:", error);

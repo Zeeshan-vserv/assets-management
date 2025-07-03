@@ -15,21 +15,19 @@ const Login = () => {
     setFormData({...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    try{
-      const response =  dispatch(login(formData))
-      if(response.success){
-        navigate('/main')
-      }
-      else{
-        // console.log(response.message)
-      }
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await dispatch(login(formData));
+    if (response.success) {
+      navigate('/main');
+    } else {
+      // handle error
     }
-    catch(err){
-      console.log(err)
-    }
+  } catch (err) {
+    console.log(err);
   }
+};
   return (
     <div className="max-w-[100vw] h-[100vh] bg-slate-800 flex items-center justify-center">
     <div className="w-[100%] p-24 flex items-center justify-between">

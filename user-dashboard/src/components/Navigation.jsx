@@ -21,7 +21,7 @@ const Navigation = ({ nav, setNav }) => {
             <ul className="flex flex-col gap-3 list-disc pl-5">
               <li className="list-none">
                 <NavLink
-                  to="/dashboard"
+                  to="/main/dashboard"
                   className={({ isActive }) =>
                     `hover:underline cursor-pointer ${
                       isActive ? "text-blue-400" : ""
@@ -33,7 +33,7 @@ const Navigation = ({ nav, setNav }) => {
               </li>
               <li className="list-none">
                 <NavLink
-                  to="/incidents"
+                  to="/main/incidents"
                   className={({ isActive }) =>
                     `hover:underline cursor-pointer ${
                       isActive ? "text-blue-400" : ""
@@ -45,7 +45,7 @@ const Navigation = ({ nav, setNav }) => {
               </li>
               <li className="list-none">
                 <NavLink
-                  to="//service-request"
+                  to="/main/service-request"
                   className={({ isActive }) =>
                     `hover:underline cursor-pointer ${
                       isActive ? "text-blue-400" : ""
@@ -57,7 +57,7 @@ const Navigation = ({ nav, setNav }) => {
               </li>
               <li className="list-none">
                 <NavLink
-                  to="/my-assets"
+                  to="/main/my-assets"
                   className={({ isActive }) =>
                     `hover:underline cursor-pointer ${
                       isActive ? "text-blue-400" : ""
@@ -69,7 +69,7 @@ const Navigation = ({ nav, setNav }) => {
               </li>
               <li className="list-none">
                 <NavLink
-                  to="/my-approval"
+                  to="/main/my-approval"
                   className={({ isActive }) =>
                     `hover:underline cursor-pointer ${
                       isActive ? "text-blue-400" : ""

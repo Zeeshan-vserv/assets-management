@@ -11,11 +11,14 @@ function App() {
   return (
     <>
       <Routes>
-        <Route
-          path="/*"
-          element={user ? <Main /> : <Navigate to="/auth" />}
-        />
-      </Routes>
+      {/* Redirect root to login or main */}
+      <Route path="/" element={<Navigate to={user ? "/main" : "/auth"} />} />
+      <Route
+        path="/main/*"
+        element={user ? <Main /> : <Navigate to="/auth" />}
+      />
+      <Route path="/auth" element={<Login />} />
+    </Routes>
     </>
   );
 }

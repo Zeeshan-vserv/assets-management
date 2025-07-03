@@ -29,7 +29,7 @@ function Incident() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
-  const [assignedToModal, setAssignedToModal] = useState(false);
+  const [assignedToViewModal, setAssignedToViewModal] = useState(false);
 
   const fetchIncident = async () => {
     try {
@@ -81,7 +81,7 @@ function Incident() {
         Cell: ({ row }) => (
           <div className="flex items-center gap-1">
             <ImEye
-              onClick={() => setAssignedToModal(true)}
+              onClick={() => setAssignedToViewModal(true)}
               className="ml-1 text-slate-500 hover:text-slate-700 cursor-pointer"
               size={14}
             />
@@ -328,7 +328,7 @@ function Incident() {
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
         <h2 className="text-md font-semibold text-start">MY INCIDENTS</h2>
         <MaterialReactTable table={table} />
-        {assignedToModal && (
+        {assignedToViewModal && (
           <>
             <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
               <div className="bg-white rounded-md shadow-2xl w-[90%] max-w-3xl p-5 animate-fade-in">
@@ -337,7 +337,7 @@ function Incident() {
                     Technician Details
                   </h2>
                   <RxCrossCircled
-                    onClick={() => setAssignedToModal(false)}
+                    onClick={() => setAssignedToViewModal(false)}
                     size={24}
                     className="text-blue-700 flex items-center justify-center cursor-pointer"
                   />

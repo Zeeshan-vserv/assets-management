@@ -25,7 +25,7 @@ function AllocatedConsumables() {
   const fetchAllocatedConsumables = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("https://dummyjson.com/recipes");
+      // const response = await axios.get("https://dummyjson.com/recipes");
       setData(response?.data?.recipes || []);
     } catch (error) {
       console.error("Error fetching allocated consumables:", error);
@@ -226,7 +226,7 @@ function AllocatedConsumables() {
     positionToolbarAlertBanner: "bottom",
     muiPaginationProps: {
       color: "secondary",
-      rowsPerPageOptions: [10, 15, 20],
+      rowsPerPageOptions: [5, 10, 15],
       shape: "rounded",
       variant: "outlined",
     },

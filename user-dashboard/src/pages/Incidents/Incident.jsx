@@ -291,7 +291,7 @@ function Incident() {
     positionToolbarAlertBanner: "bottom",
     muiPaginationProps: {
       color: "secondary",
-      rowsPerPageOptions: [10, 15, 20],
+      rowsPerPageOptions: [5, 10, 15],
       shape: "rounded",
       variant: "outlined",
     },

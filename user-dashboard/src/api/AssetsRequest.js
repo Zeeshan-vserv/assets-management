@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { UserLogout } from '../action2/AuthAction2'
 import store from '../store2/ReduxStore2'
+import { UserLogout } from '../action2/AuthAction2'
 
 const API = axios.create({ baseURL: 'http://localhost:5001' })
 
@@ -25,18 +25,17 @@ API.interceptors.response.use(
     }
 )
 
-// export const signup = (formData) => API.post('auth/signup', formData)
+export const createAsset = (formData) =>
+  API.post('asset/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
 
-export const login = (formData) => API.post('auth/login', formData)
+export const getAllAssets = () => API.get('asset/');
 
-export const getUser = (id) => API.get(`auth/${id}`)
+export const getAssetById = (id) => API.get(`asset/${id}`);
 
-export const getUserById = (id) => API.get(`auth/${id}`)
+export const updateAsset = (id, formData) => API.put(`asset/${id}`, formData);
 
-// export const updateUser = (id, formData) => API.put(`auth/${id}`, formData)
+export const deleteAsset = (id) => API.delete(`asset/${id}`)
 
-// export const deleteUser = (id) => API.delete(`auth/${id}`)
-
-// export const getAllUsers = () => API.get('auth/')
-
-// export const uploadUsersFromExcel = (formData)=>API.post('/auth/upload-excel',formData)
+export const uploadAssetFromExcel = (formData)=>API.post('asset/upload-excel',formData)

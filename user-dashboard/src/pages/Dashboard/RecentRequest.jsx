@@ -89,7 +89,7 @@ function RecentRequest() {
 
   return (
     <>
-      <div className="flex flex-col w-[100%] min-h-full p-4 bg-white rounded-md">
+      <div className="flex flex-col w-[70%] min-h-full p-4 bg-white rounded-md">
         <MaterialReactTable table={table} />
       </div>
     </>

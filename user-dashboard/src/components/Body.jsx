@@ -23,7 +23,7 @@ const Body = ({ nav, setNav }) => {
           <Route path="service-request" element={<ServiceRequest />} />
           <Route path="my-assets" element={<MyAssets />} />
           <Route path="my-approval" element={<MyApproval />} />
-          <Route path="auth" element={<Login />} />
+          {/* <Route path="auth" element={<Login />} /> */}
         </Routes>
       </div>
     </div>

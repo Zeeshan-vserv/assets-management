@@ -28,7 +28,7 @@ function AllocatedAsset() {
   const fetchAllocatedAsset = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("https://dummyjson.com/recipes");
+      // const response = await axios.get("https://dummyjson.com/recipes");
       setData(response?.data?.recipes || []);
     } catch (error) {
       console.error("Error fetching allocated asset:", error);
@@ -281,7 +281,7 @@ function AllocatedAsset() {
     positionToolbarAlertBanner: "bottom",
     muiPaginationProps: {
       color: "secondary",
-      rowsPerPageOptions: [10, 15, 20],
+      rowsPerPageOptions: [5, 10, 15],
       shape: "rounded",
       variant: "outlined",
     },

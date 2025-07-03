@@ -57,14 +57,14 @@ function Dashboard() {
             </button>
           </NavLink>
         </div>
-        <div className="flex gap-5 items-start mt-8 max-lg:flex-col">
-          <div className="flex flex-col flex-wrap justify-start items-start gap-5 w-[35%] max-lg:w-full">
+        <div className="flex flex-col gap-5 mt-8">
+          <div className="flex justify-center items-center gap-8 w-[100%] max-lg:w-full">
             <IncidentChart />
-            <MyServiceRequestChart />
+            <RecentIncidents />
           </div>
 
-          <div className="flex flex-col justify-center items-center gap-8 w-[65%] max-lg:w-full">
-            <RecentIncidents />
+          <div className="flex justify-center items-center gap-8 w-[100%] max-lg:w-full">
+            <MyServiceRequestChart />
             <RecentRequest />
           </div>
         </div>

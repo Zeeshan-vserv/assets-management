@@ -12,14 +12,9 @@ function App() {
   return (
     <>
       <Routes>
-      {/* Redirect root to login or main */}
-      <Route path="/" element={<Navigate to={user ? "/main" : "/auth"} />} />
-      <Route
-        path="/main/*"
-        element={user ? <Main /> : <Navigate to="/auth" />}
-      />
-      <Route path="/auth" element={<Login />} />
-    </Routes>
+        <Route path="/auth" element={!user ? <Login /> : <Navigate to="/" />} />
+        <Route path="/*" element={user ? <Main /> : <Navigate to="/auth" />} />
+      </Routes>
     </>
   );
 }

@@ -15,6 +15,7 @@ import { useNavigate } from "react-router";
 import { ImEye } from "react-icons/im";
 import axios from "axios";
 import { NavLink } from "react-router-dom";
+import { RxCrossCircled } from "react-icons/rx";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -28,6 +29,7 @@ function Incident() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [assignedToModal, setAssignedToModal] = useState(false);
 
   const fetchIncident = async () => {
     try {
@@ -76,6 +78,16 @@ function Incident() {
       {
         accessorKey: "caloriesPerServing",
         header: "Assigned To",
+        Cell: ({ row }) => (
+          <div className="flex items-center gap-1">
+            <ImEye
+              onClick={() => setAssignedToModal(true)}
+              className="ml-1 text-slate-500 hover:text-slate-700 cursor-pointer"
+              size={14}
+            />
+            {row.original.id || ""}
+          </div>
+        ),
       },
       {
         accessorKey: "cookTimeMinutes",
@@ -178,7 +190,6 @@ function Incident() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          
           <Button
             onClick={() => navigate("/new-incident")}
             variant="contained"
@@ -317,6 +328,58 @@ function Incident() {
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
         <h2 className="text-md font-semibold text-start">MY INCIDENTS</h2>
         <MaterialReactTable table={table} />
+        {assignedToModal && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+              <div className="bg-white rounded-md shadow-2xl w-[90%] max-w-3xl p-5 animate-fade-in">
+                <div className="flex justify-between items-center bg-blue-100 px-4 py-2 rounded-md">
+                  <h2 className="text-sm font-semibold text-blue-900">
+                    Technician Details
+                  </h2>
+                  <RxCrossCircled
+                    onClick={() => setAssignedToModal(false)}
+                    size={24}
+                    className="text-blue-700 flex items-center justify-center cursor-pointer"
+                  />
+                </div>
+                <div className="overflow-x-auto px-6 py-4">
+                  <table className="w-full border border-collapse">
+                    <thead>
+                      <tr className="bg-blue-50 text-gray-700 text-left">
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Emp Id
+                        </th>
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Email Id
+                        </th>
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Name
+                        </th>
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Mobile No
+                        </th>
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Designation
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="bg-white text-sm text-gray-900">
+                        <td className="border px-4 py-2">133</td>
+                        <td className="border px-4 py-2">
+                          deydebabratahooghly@gmail.com
+                        </td>
+                        <td className="border px-4 py-2">Debabrata Dey</td>
+                        <td className="border px-4 py-2">6291167601</td>
+                        <td className="border px-4 py-2"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

@@ -7,7 +7,10 @@ import {
   getAllCategory,
   getAllSubCategory,
 } from "../../api/IncidentCategoryRequest";
+import { toast } from "react-toastify";
 import { getAllAssets } from "../../api/AssetsRequest";
+import { getAllUsers } from "../../api/UserAuth";
+import { createIncident } from "../../api/IncidentRequest copy";
 
 function NewIncidents() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -16,19 +19,29 @@ function NewIncidents() {
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
   const [assetData, setAssetData] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [userData, setUserData] = useState([]);
 
   const [formData, setFormData] = useState({
+    userId: "",
+    incidentId: "",
     subject: "",
     category: "",
     subCategory: "",
     loggedVia: "",
     description: "",
+    status: "",
+    sla: "",
+    tat: "",
+    feedback: "",
+    attachment: "",
     submitter: {
       user: "",
       userContactNumber: "",
       userEmail: "",
       userDepartment: "",
       loggedBy: "",
+      loggedInTime: "",
     },
     assetDetails: {
       asset: "",
@@ -62,6 +75,9 @@ function NewIncidents() {
 
       const responseSubCategory = await getAllSubCategory();
       setSubCategory(responseSubCategory?.data?.data || []);
+
+      const responseReportingManager = await getAllUsers();
+      setUsers(responseReportingManager?.data || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
@@ -76,10 +92,6 @@ function NewIncidents() {
     try {
       setIsLoading(true);
       const response = await getUserById(user.userId);
-      if (response.status !== 200) {
-        throw new Error("Failed to fetch data");
-      }
-
       setUserData(response?.data || []);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -95,10 +107,14 @@ function NewIncidents() {
   // console.log(userData);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, files } = e.target;
 
-    // Handle nested properties
-    if (name.includes(".")) {
+    if (name === "attachment") {
+      setFormData((prev) => ({
+        ...prev,
+        attachment: files[0], // store the File object
+      }));
+    } else if (name.includes(".")) {
       const [section, key] = name.split(".");
       setFormData((prev) => ({
         ...prev,
@@ -114,14 +130,96 @@ function NewIncidents() {
       }));
     }
   };
+
+  console.log(userData);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // try {
+    //   await createIncident({
+    //     ...formData,
+    //     userId: user?.userId,
+    //     (if (selectUser === false) {
+    //           submitter: {
+    //       user: userData.employeeName,
+    //       userContactNumber: "",
+    //       userEmail: "",
+    //       userDepartment: "",
+    //       loggedBy: "",
+    //       loggedInTime: "",
+    //     },
+    //     })
+    //   });
     try {
-      console.log("formData", formData);
+      await createIncident({
+        ...formData,
+        userId: user?.userId,
+        ...(selectUser === false && {
+          submitter: {
+            user: userData.employeeName,
+            userContactNumber: "",
+            userEmail: "",
+            userDepartment: "",
+            loggedBy: "",
+            loggedInTime: "",
+          },
+        }),
+      });
+      toast.success("Incident Added Successfully");
+      setFormData({
+        userId: "",
+        incidentId: "",
+        subject: "",
+        category: "",
+        subCategory: "",
+        loggedVia: "",
+        description: "",
+        status: "",
+        sla: "",
+        tat: "",
+        feedback: "",
+        attachment: "",
+        submitter: {
+          user: "",
+          userContactNumber: "",
+          userEmail: "",
+          userDepartment: "",
+          loggedBy: "",
+          loggedInTime: "",
+        },
+        assetDetails: {
+          asset: "",
+          make: "",
+          model: "",
+          serialNo: "",
+        },
+        locationDetails: {
+          location: "",
+          subLocation: "",
+          floor: "",
+          roomNo: "",
+        },
+        classificaton: {
+          excludeSLA: false,
+          severityLevel: "",
+          supportDepartmentName: "",
+          supportGroupName: "",
+          technician: "",
+        },
+      });
     } catch (error) {
-      console.log("Failed to create incident", error);
+      toast.error("Failed to add Incident");
     }
   };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   try {
+  //     console.log("formData", formData);
+  //   } catch (error) {
+  //     console.log("Failed to create incident", error);
+  //   }
+  // };
   return (
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
@@ -160,6 +258,7 @@ function NewIncidents() {
                 </NavLink>
               </div>
             </div>
+
             <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
               <div className="flex items-center w-[46%]">
                 <label
@@ -334,12 +433,12 @@ function NewIncidents() {
               <div className="flex items-center w-[46%] max-lg:w-[100%]">
                 <label
                   htmlFor=""
-                  className="w-[25%] text-xs font-semibold text-slate-600"
+                  className="w-[28%] text-xs font-semibold text-slate-600"
                 >
                   User Name <span className="text-red-500 text-base">*</span>
                 </label>
                 <input
-                  className="w-[65%] text-xs text-slate-600 border-b border-slate-400 p-2 outline-none focus:border-blue-500 focus:border-b-2"
+                  className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                   type="text"
                   id=""
                   name=""
@@ -350,23 +449,47 @@ function NewIncidents() {
               </div>
               {selectUser && (
                 <>
-                  <div className="flex items-center w-[46%] max-lg:w-[100%]">
+                  <div className="flex items-center w-[46%]">
                     <label
-                      htmlFor=""
-                      className="w-[25%] text-xs font-semibold text-slate-600"
+                      htmlFor="user"
+                      className="w-[28%] text-xs font-semibold text-slate-600"
                     >
-                      User<span className="text-red-500 text-base">*</span>
+                      User
                     </label>
                     <Autocomplete
                       className="w-[65%]"
-                      options={["Shreya Bajpai"]}
-                      getOptionLabel={(option) => option}
+                      options={users}
+                      getOptionLabel={(option) =>
+                        option.employeeName && option.emailAddress
+                          ? `${option.employeeName} - ${option.emailAddress}`
+                          : option.emailAddress || ""
+                      }
+                      value={
+                        users.find(
+                          (user) =>
+                            user.employeeName === formData.submitter.user
+                        ) || null
+                      }
+                      onChange={(event, newValue) => {
+                        setFormData({
+                          ...formData,
+                          submitter: {
+                            ...formData.submitter,
+                            user: newValue ? newValue.employeeName : "",
+                            userContactNumber: newValue
+                              ? newValue.mobileNumber
+                              : "",
+                            userEmail: newValue ? newValue.emailAddress : "",
+                            userDepartment: newValue ? newValue.department : "",
+                          },
+                        });
+                      }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
                           variant="standard"
-                          className="text-xs text-slate-600"
-                          placeholder="Select User"
+                          className="text-sm text-slate-800"
+                          placeholder="Select Users"
                           inputProps={{
                             ...params.inputProps,
                             style: { fontSize: "0.8rem" },
@@ -378,23 +501,63 @@ function NewIncidents() {
                 </>
               )}
 
-                 <div className="flex flex-wrap gap-3 items-center w-[100%]">
-              <label
-                htmlFor="description"
-                className="w-[28%] text-xs font-semibold text-slate-600"
-              >
-                Description
-              </label>
-              <textarea
-                className="w-[96.8%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="description"
-                name="description"
-                rows="6"
-                value={formData.description}
-                onChange={handleChange}
-              />
-            </div>
+              <div className="flex flex-wrap gap-3 items-center w-[100%]">
+                <label
+                  htmlFor="description"
+                  className="w-[28%] text-xs font-semibold text-slate-600"
+                >
+                  Description
+                </label>
+                <textarea
+                  className="w-[96.8%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                  type="text"
+                  id="description"
+                  name="description"
+                  rows="6"
+                  value={formData.description}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* <div className="flex items-center w-[46%] max-lg:w-[100%]">
+                <label
+                  htmlFor="attachment"
+                  className="w-[25%] text-xs font-semibold text-slate-600"
+                >
+                  Attachment
+                </label>
+                <input
+                  className="w-[65%] text-xs text-slate-600 border-b border-slate-400 p-2 outline-none focus:border-blue-500 focus:border-b-2"
+                  type="file"
+                  id="attachment"
+                  name="attachment"
+                  onChange={handleChange}
+                  required
+                />
+              </div> */}
+              <div className="flex items-center gap-5 w-[46%] max-lg:w-full">
+                <label
+                  htmlFor="attachment"
+                  className="w-[28%] text-xs font-semibold text-slate-600"
+                >
+                  Attachment
+                </label>
+                <input
+                  type="file"
+                  id="attachment"
+                  name="attachment"
+                  onChange={handleChange}
+                  // required
+                  className="file:mr-4 file:py-2 file:px-4
+               file:rounded-md file:border-0
+               file:text-sm file:font-semibold
+               file:bg-blue-50 file:text-blue-700
+               hover:file:bg-blue-100
+               transition-all duration-200
+               w-[65%] text-sm text-slate-600 border border-slate-300 rounded-md p-1.5
+               focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
+                />
+              </div>
             </div>
           </div>
         </form>

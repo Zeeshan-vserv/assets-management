@@ -24,7 +24,7 @@ const incidentSchema = mongoose.Schema({
     sla: String,
     tat: String,
     feedback: String,
-    attechment: String,
+    attachment: String,
     submitter:{
         user: String,
         userContactNumber: Number,

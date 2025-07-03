@@ -12,7 +12,7 @@ const Body = ({ nav, setNav }) => {
       <div>
         <Navigation nav={nav} setNav={setNav} />
       </div>
-      <div className="max-h-[calc(100vh-3.5rem)] w-[100%] overflow-scroll">
+      <div className="max-h-[calc(100vh-3.5rem)] w-[100%] overflow-y-auto ">
         <Routes>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="incidents" element={<Incident />} />

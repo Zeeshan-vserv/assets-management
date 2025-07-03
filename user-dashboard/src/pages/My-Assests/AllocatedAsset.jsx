@@ -9,6 +9,7 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
+import { RxCrossCircled } from "react-icons/rx";
 import axios from "axios";
 
 const csvConfig = mkConfig({
@@ -21,6 +22,8 @@ const csvConfig = mkConfig({
 function AllocatedAsset() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [viewImage, setViewImage] = useState(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState(null);
 
   const fetchAllocatedAsset = async () => {
     try {
@@ -97,6 +100,10 @@ function AllocatedAsset() {
           <Box
             sx={{
               display: "flex",
+            }}
+            onClick={() => {
+              setSelectedImageUrl(row.original.image);
+              setViewImage(true);
             }}
           >
             <img
@@ -302,6 +309,25 @@ function AllocatedAsset() {
           ALLOCATED ASSET
         </h2>
         <MaterialReactTable table={table} />
+        {viewImage && selectedImageUrl && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-xs sm:max-w-sm p-4 flex flex-col items-center justify-center">
+              <RxCrossCircled
+                size={28}
+                onClick={() => {
+                  setViewImage(false);
+                  setSelectedImageUrl(null);
+                }}
+                className="absolute top-3 right-3 cursor-pointer text-gray-600 hover:text-red-500 transition-all"
+              />
+              <img
+                src={selectedImageUrl}
+                alt="Selected"
+                className="w-64 h-auto rounded-xl object-cover shadow-lg mt-4"
+              />
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

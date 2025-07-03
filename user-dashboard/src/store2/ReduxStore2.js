@@ -3,7 +3,7 @@ import {
     applyMiddleware, compose
 } from 'redux'
 import { thunk } from 'redux-thunk'
-import { reducers } from '../reducers'
+import { reducers } from '../reducers2/index2'
 
 // Save token and userId to localStorage
 function saveAuthToLocalStorage(token, userId) {

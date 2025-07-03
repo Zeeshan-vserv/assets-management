@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import loginImg from "../assets/loginImg.png"
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { login } from "../action/AuthAction";
+import { login } from "../action2/AuthAction2";
 
 const Login = () => {
 
@@ -20,7 +20,7 @@ const Login = () => {
     try{
       const response =  dispatch(login(formData))
       if(response.success){
-        navigate('/dashboardAsset')
+        navigate('/main')
       }
       else{
         // console.log(response.message)

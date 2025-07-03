@@ -36,10 +36,10 @@ const Login = () => {
       {/* Image Section */}
       <div>
         <img
-          src={loginImg}
-          className="loginImg w-[35vw] object-cover animate-pop-up-top max-lg:hidden"
-          alt="Login"
-        />
+  src={loginImg || undefined}
+  className="loginImg w-[35vw] object-cover animate-pop-up-top max-lg:hidden"
+  alt="Login"
+/>
       </div>
 
       {/* Form Section */}

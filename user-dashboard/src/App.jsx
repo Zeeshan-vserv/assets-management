@@ -13,9 +13,9 @@ function App() {
     <>
       <Routes>
         <Route
-          path="/main"
-          element={user ? <Main /> : <Navigate to="/auth" />}
-        />
+  path="/main/*"
+  element={user ? <Main /> : <Navigate to="/auth" />}
+/>
       </Routes>
     </>
   );

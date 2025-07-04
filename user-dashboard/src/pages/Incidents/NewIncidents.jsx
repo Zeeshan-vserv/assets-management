@@ -131,290 +131,167 @@ function NewIncidents() {
     }
   };
 
-  // console.log(userData);
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
 
-  const handleSubmit = async (e) => {
+  //   try {
+  //     await createIncident({
+  //       ...formData,
+  //       userId: user?.userId,
+  //       ...(selectUser === false && {
+  //         submitter: {
+  //           user: userData.employeeName,
+  //           userContactNumber: "",
+  //           userEmail: "",
+  //           userDepartment: "",
+  //           loggedBy: "",
+  //           loggedInTime: "",
+  //         },
+  //       }),
+  //     });
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
+
+//   const handleSubmit = async (e) => {
+//   e.preventDefault();
+
+//   try {
+//     const form = new FormData();
+
+//     // Append all primitive fields
+//     form.append("userId", user?.userId || "");
+//     form.append("incidentId", formData.incidentId || "");
+//     form.append("subject", formData.subject || "");
+//     form.append("category", formData.category || "");
+//     form.append("subCategory", formData.subCategory || "");
+//     form.append("loggedVia", formData.loggedVia || "");
+//     form.append("description", formData.description || "");
+//     form.append("status", formData.status || "");
+//     form.append("sla", formData.sla || "");
+//     form.append("tat", formData.tat || "");
+//     form.append("feedback", formData.feedback || "");
+
+//     // Append file if present
+//     if (formData.attachment) {
+//       form.append("attachment", formData.attachment);
+//     }
+
+//     // Handle submitter object
+//     let submitterObj = {};
+//     if (!selectUser) {
+//       submitterObj = {
+//         user: userData.employeeName || "",
+//         userContactNumber: userData.mobileNumber || "",
+//         userEmail: userData.emailAddress || "",
+//         userDepartment: userData.department || "",
+//         loggedBy: "",
+//         loggedInTime: "",
+//       };
+//     } else {
+//       submitterObj = {
+//         ...formData.submitter,
+//         loggedBy: "",
+//         loggedInTime: "",
+//       };
+//     }
+//     form.append("submitter", JSON.stringify(submitterObj));
+
+//     // Append nested objects as JSON strings
+//     form.append("assetDetails", JSON.stringify(formData.assetDetails));
+//     form.append("locationDetails", JSON.stringify(formData.locationDetails));
+//     form.append("classificaton", JSON.stringify(formData.classificaton));
+
+//     await createIncident(form);
+//     toast.success("Incident Added Successfully");
+//     // Optionally reset formData here
+//   } catch (err) {
+//     console.error(err);
+//     toast.error("Failed to add Incident");
+//   }
+// };
+
+const handleSubmit = async (e) => {
   e.preventDefault();
 
   try {
     const form = new FormData();
 
-    // Always send userId
-    form.append("userId", user?.userId);
-
-    // Append all primitive fields
+    // Primitive fields
+    form.append("userId", user?.userId || "");
     form.append("incidentId", formData.incidentId || "");
     form.append("subject", formData.subject || "");
     form.append("category", formData.category || "");
     form.append("subCategory", formData.subCategory || "");
     form.append("loggedVia", formData.loggedVia || "");
     form.append("description", formData.description || "");
-    form.append("status", formData.status || "");
+    form.append("status", formData.status || "New"); // default fallback
     form.append("sla", formData.sla || "");
     form.append("tat", formData.tat || "");
     form.append("feedback", formData.feedback || "");
 
-    // Attachment (file)
+    // File upload
     if (formData.attachment) {
       form.append("attachment", formData.attachment);
     }
 
-    // Conditionally set submitter
+    // Submitter details
     let submitterObj = {};
     if (!selectUser) {
       submitterObj = {
         user: userData.employeeName || "",
-        userContactNumber: userData.mobileNumber || "",
+        userContactNumber: Number(userData.mobileNumber) || 0,
         userEmail: userData.emailAddress || "",
         userDepartment: userData.department || "",
-        loggedBy: "",
-        loggedInTime: "",
+        // loggedBy: "", // You may populate this if needed
+        // loggedInTime: new Date().toISOString(), // Match Date schema
       };
     } else {
       submitterObj = {
         ...formData.submitter,
-        loggedBy: "",
-        loggedInTime: "",
+        loggedBy: formData.submitter?.loggedBy || "",
+        // loggedInTime: new Date().toISOString(),
       };
     }
     form.append("submitter", JSON.stringify(submitterObj));
 
-    // Serialize nested objects
-    form.append("assetDetails", JSON.stringify(formData.assetDetails));
-    form.append("locationDetails", JSON.stringify(formData.locationDetails));
-    form.append("classificaton", JSON.stringify(formData.classificaton));
+    // Asset details
+    form.append("assetDetails", JSON.stringify({
+      asset: formData.assetDetails.asset || "",
+      make: formData.assetDetails.make || "",
+      model: formData.assetDetails.model || "",
+      serialNo: formData.assetDetails.serialNo || ""
+    }));
 
-    // await createIncident(form);
-    console.log(form);
-    
+    // Location details
+    form.append("locationDetails", JSON.stringify({
+      location: formData.locationDetails.location || "",
+      subLocation: formData.locationDetails.subLocation || "",
+      floor: formData.locationDetails.floor || "",
+      roomNo: formData.locationDetails.roomNo || ""
+    }));
+
+    // Classification (boolean and string values)
+    form.append("classificaton", JSON.stringify({
+      excludeSLA: !!formData.classificaton?.excludeSLA, // Ensure boolean
+      severityLevel: formData.classificaton?.severityLevel || "",
+      supportDepartmentName: formData.classificaton?.supportDepartmentName || "",
+      supportGroupName: formData.classificaton?.supportGroupName || "",
+      technician: formData.classificaton?.technician || ""
+    }));
+
+    // Send to backend
+    await createIncident(form);
 
     toast.success("Incident Added Successfully");
-    // Reset formData
-    setFormData({
-      userId: "",
-      incidentId: "",
-      subject: "",
-      category: "",
-      subCategory: "",
-      loggedVia: "",
-      description: "",
-      status: "",
-      sla: "",
-      tat: "",
-      feedback: "",
-      attachment: "",
-      submitter: {
-        user: "",
-        userContactNumber: "",
-        userEmail: "",
-        userDepartment: "",
-      },
-      assetDetails: {
-        asset: "",
-        make: "",
-        model: "",
-        serialNo: "",
-      },
-      locationDetails: {
-        location: "",
-        subLocation: "",
-        floor: "",
-        roomNo: "",
-      },
-      classificaton: {
-        excludeSLA: false,
-        severityLevel: "",
-        supportDepartmentName: "",
-        supportGroupName: "",
-        technician: "",
-      },
-    });
-
-  } catch (error) {
+    // Optionally reset form here
+  } catch (err) {
+    console.error(err);
     toast.error("Failed to add Incident");
   }
 };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     const form = new FormData();
-
-  //     // Always send userId
-  //     form.append("userId", user?.userId);
-
-  //     // Append all primitive fields
-  //     form.append("incidentId", formData.incidentId);
-  //     form.append("subject", formData.subject);
-  //     form.append("category", formData.category);
-  //     form.append("subCategory", formData.subCategory);
-  //     form.append("loggedVia", formData.loggedVia);
-  //     form.append("description", formData.description);
-  //     form.append("status", formData.status);
-  //     form.append("sla", formData.sla);
-  //     form.append("tat", formData.tat);
-  //     form.append("feedback", formData.feedback);
-
-  //     // Attachment (file)
-  //     if (formData.attachment) {
-  //       form.append("attachment", formData.attachment);
-  //     }
-
-  //     // Conditionally set submitter
-  //     let submitterObj = {};
-  //     if (!selectUser) {
-  //       submitterObj = {
-  //         user: userData.employeeName || "",
-  //         userContactNumber: "",
-  //         userEmail: "",
-  //         userDepartment: "",
-  //         loggedBy: "",
-  //         loggedInTime: "",
-  //       };
-  //     } else {
-  //       submitterObj = {
-  //         ...formData.submitter,
-  //         loggedBy: "",
-  //         loggedInTime: "",
-  //       };
-  //     }
-  //     form.append("submitter", JSON.stringify(submitterObj));
-
-  //     // Serialize nested objects
-  //     form.append("assetDetails", JSON.stringify(formData.assetDetails));
-  //     form.append("locationDetails", JSON.stringify(formData.locationDetails));
-  //     form.append("classificaton", JSON.stringify(formData.classificaton));
-
-  //     await createIncident(form);
-
-  //     toast.success("Incident Added Successfully");
-  //     // Reset formData as before...
-  //     setFormData({
-  //       userId: "",
-  //       incidentId: "",
-  //       subject: "",
-  //       category: "",
-  //       subCategory: "",
-  //       loggedVia: "",
-  //       description: "",
-  //       status: "",
-  //       sla: "",
-  //       tat: "",
-  //       feedback: "",
-  //       attachment: "",
-  //       submitter: {
-  //         user: "",
-  //         userContactNumber: "",
-  //         userEmail: "",
-  //         userDepartment: "",
-  //       },
-  //       assetDetails: {
-  //         asset: "",
-  //         make: "",
-  //         model: "",
-  //         serialNo: "",
-  //       },
-  //       locationDetails: {
-  //         location: "",
-  //         subLocation: "",
-  //         floor: "",
-  //         roomNo: "",
-  //       },
-  //       classificaton: {
-  //         excludeSLA: false,
-  //         severityLevel: "",
-  //         supportDepartmentName: "",
-  //         supportGroupName: "",
-  //         technician: "",
-  //       },
-  //     });
-  //   } catch (error) {
-  //     toast.error("Failed to add Incident");
-  //   }
-  // };
-
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   // try {
-  //   //   await createIncident({
-  //   //     ...formData,
-  //   //     userId: user?.userId,
-  //   //     (if (selectUser === false) {
-  //   //           submitter: {
-  //   //       user: userData.employeeName,
-  //   //       userContactNumber: "",
-  //   //       userEmail: "",
-  //   //       userDepartment: "",
-  //   //       loggedBy: "",
-  //   //       loggedInTime: "",
-  //   //     },
-  //   //     })
-  //   //   });
-  //   try {
-  //   const form = new FormData();
-
-  //   // Append all fields to form data
-  //   form.append("userId", user?.userId);
-  //   form.append("subject", formData.subject);
-  //   form.append("category", formData.category);
-  //   form.append("subCategory", formData.subCategory);
-  //   form.append("description", formData.description);
-
-  //   // Nested objects must be stringified
-
-  //   // Attachment (file)
-  //   if (formData.attachment) {
-  //     form.append("attachment", formData.attachment);
-  //   }
-
-  //   await createIncident(form); // Make sure createIncident uses FormData
-
-  //   toast.success("Incident Added Successfully");
-  //     setFormData({
-  //       userId: "",
-  //       incidentId: "",
-  //       subject: "",
-  //       category: "",
-  //       subCategory: "",
-  //       loggedVia: "",
-  //       description: "",
-  //       status: "",
-  //       sla: "",
-  //       tat: "",
-  //       feedback: "",
-  //       attachment: "",
-  //       submitter: {
-  //         user: "",
-  //         userContactNumber: "",
-  //         userEmail: "",
-  //         userDepartment: "",
-  //       },
-  //       assetDetails: {
-  //         asset: "",
-  //         make: "",
-  //         model: "",
-  //         serialNo: "",
-  //       },
-  //       locationDetails: {
-  //         location: "",
-  //         subLocation: "",
-  //         floor: "",
-  //         roomNo: "",
-  //       },
-  //       classificaton: {
-  //         excludeSLA: false,
-  //         severityLevel: "",
-  //         supportDepartmentName: "",
-  //         supportGroupName: "",
-  //         technician: "",
-  //       },
-  //     });
-  // } catch (error) {
-  //   toast.error("Failed to add Incident");
-  // }
-  // };
   return (
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
@@ -625,7 +502,7 @@ function NewIncidents() {
                 />
               </div>
 
-              <div className="flex items-center w-[46%] max-lg:w-[100%] max-lg:w-[100%]">
+              <div className="flex items-center w-[46%] max-lg:w-[100%]">
                 <label
                   htmlFor=""
                   className="w-[28%] text-xs font-semibold text-slate-600"

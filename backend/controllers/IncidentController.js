@@ -1,3 +1,4 @@
+import AuthModel from "../models/authModel.js";
 import IncidentCounterModel from "../models/incidentCounterModel.js";
 import IncidentModel from "../models/incidentModel.js";
 
@@ -8,6 +9,9 @@ export const createIncident = async (req, res) => {
         if (!userId) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        // Fetch user details for defaults
+        const user = await AuthModel.findById(userId);
 
         // Handle attachment
         let attachmentPath = "";
@@ -31,11 +35,59 @@ export const createIncident = async (req, res) => {
 
         const newIncidentId = `INC${dateStr}${counter.seq}`;
 
+        // Parse nested fields if they are strings (from FormData)
+        let submitter = incidentData.submitter;
+        if (typeof submitter === "string") {
+            submitter = JSON.parse(submitter);
+        }
+        let assetDetails = incidentData.assetDetails;
+        if (typeof assetDetails === "string") {
+            assetDetails = JSON.parse(assetDetails);
+        }
+        let locationDetails = incidentData.locationDetails;
+        if (typeof locationDetails === "string") {
+            locationDetails = JSON.parse(locationDetails);
+        }
+        let classificaton = incidentData.classificaton;
+        if (typeof classificaton === "string") {
+            classificaton = JSON.parse(classificaton);
+        }
+
+        // Set default values for submitter if missing, using user details
+        submitter = {
+            user: submitter?.user || user?.employeeName || "",
+            userContactNumber: submitter?.userContactNumber || user?.mobileNumber || "",
+            userEmail: submitter?.userEmail || user?.emailAddress || "",
+            userDepartment: submitter?.userDepartment || user?.department || "",
+            loggedBy: submitter?.loggedBy || user?.employeeName || "",
+            loggedInTime: submitter?.loggedInTime || new Date()
+        };
+
+        // Set default values for locationDetails if missing, using user details
+        locationDetails = {
+            location: locationDetails?.location || user?.location || "",
+            subLocation: locationDetails?.subLocation || user?.subLocation || "",
+            floor: locationDetails?.floor || user?.floor || "",
+            roomNo: locationDetails?.roomNo || user?.roomNo || ""
+        };
+
         const newIncident = new IncidentModel({
             userId,
             incidentId: newIncidentId,
-            ...incidentData,
+            subject: incidentData.subject,
+            category: incidentData.category,
+            subCategory: incidentData.subCategory,
+            loggedVia: incidentData.loggedVia,
+            description: incidentData.description,
+            status: incidentData.status,
+            sla: incidentData.sla,
+            tat: incidentData.tat,
+            feedback: incidentData.feedback,
             attachment: attachmentPath,
+            submitter,
+            assetDetails,
+            locationDetails,
+            classificaton,
             statusTimeline: [{
                 status: "New",
                 changedAt: new Date(),
@@ -49,7 +101,7 @@ export const createIncident = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: 'An error has been occured while creating incident', error: error.message });
     }
-}
+};
 
 export const getAllIncident = async (req, res) => {
     try {

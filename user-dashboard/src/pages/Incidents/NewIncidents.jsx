@@ -215,73 +215,53 @@ function NewIncidents() {
 const handleSubmit = async (e) => {
   e.preventDefault();
 
-  try {
+    try {
+    // If not raising for another user, fill submitter and locationDetails from logged-in user
+    let submitterData = { ...formData.submitter };
+    let locationDetailsData = { ...formData.locationDetails };
+
+    if (!selectUser && userData) {
+      submitterData = {
+        user: userData.employeeName || "",
+        userContactNumber: userData.mobileNumber || "",
+        userEmail: userData.emailAddress || "",
+        userDepartment: userData.department || "",
+        loggedBy: userData.employeeName || "",
+        loggedInTime: new Date().toISOString(),
+      };
+      locationDetailsData = {
+        location: userData.location || "",
+        subLocation: userData.subLocation || "",
+        floor: userData.floor || "",
+        roomNo: userData.roomNo || "",
+      };
+    }
+
     const form = new FormData();
 
-    // Primitive fields
-    form.append("userId", user?.userId || "");
-    form.append("incidentId", formData.incidentId || "");
-    form.append("subject", formData.subject || "");
-    form.append("category", formData.category || "");
-    form.append("subCategory", formData.subCategory || "");
-    form.append("loggedVia", formData.loggedVia || "");
-    form.append("description", formData.description || "");
-    form.append("status", formData.status || "New"); // default fallback
-    form.append("sla", formData.sla || "");
-    form.append("tat", formData.tat || "");
-    form.append("feedback", formData.feedback || "");
+    // Append all fields to form data
+    form.append("userId", user?.userId);
+    form.append("subject", formData.subject);
+    form.append("category", formData.category);
+    form.append("subCategory", formData.subCategory);
+    form.append("loggedVia", formData.loggedVia);
+    form.append("description", formData.description);
+    form.append("status", formData.status);
+    form.append("sla", formData.sla);
+    form.append("tat", formData.tat);
+    form.append("feedback", formData.feedback);
 
-    // File upload
+    // Nested objects must be stringified
+    form.append("submitter", JSON.stringify(submitterData));
+    form.append("assetDetails", JSON.stringify(formData.assetDetails));
+    form.append("locationDetails", JSON.stringify(locationDetailsData));
+    form.append("classificaton", JSON.stringify(formData.classificaton));
+
+    // Attachment (file)
     if (formData.attachment) {
       form.append("attachment", formData.attachment);
     }
 
-    // Submitter details
-    let submitterObj = {};
-    if (!selectUser) {
-      submitterObj = {
-        user: userData.employeeName || "",
-        userContactNumber: Number(userData.mobileNumber) || 0,
-        userEmail: userData.emailAddress || "",
-        userDepartment: userData.department || "",
-        // loggedBy: "", // You may populate this if needed
-        // loggedInTime: new Date().toISOString(), // Match Date schema
-      };
-    } else {
-      submitterObj = {
-        ...formData.submitter,
-        loggedBy: formData.submitter?.loggedBy || "",
-        // loggedInTime: new Date().toISOString(),
-      };
-    }
-    form.append("submitter", JSON.stringify(submitterObj));
-
-    // Asset details
-    form.append("assetDetails", JSON.stringify({
-      asset: formData.assetDetails.asset || "",
-      make: formData.assetDetails.make || "",
-      model: formData.assetDetails.model || "",
-      serialNo: formData.assetDetails.serialNo || ""
-    }));
-
-    // Location details
-    form.append("locationDetails", JSON.stringify({
-      location: formData.locationDetails.location || "",
-      subLocation: formData.locationDetails.subLocation || "",
-      floor: formData.locationDetails.floor || "",
-      roomNo: formData.locationDetails.roomNo || ""
-    }));
-
-    // Classification (boolean and string values)
-    form.append("classificaton", JSON.stringify({
-      excludeSLA: !!formData.classificaton?.excludeSLA, // Ensure boolean
-      severityLevel: formData.classificaton?.severityLevel || "",
-      supportDepartmentName: formData.classificaton?.supportDepartmentName || "",
-      supportGroupName: formData.classificaton?.supportGroupName || "",
-      technician: formData.classificaton?.technician || ""
-    }));
-
-    // Send to backend
     await createIncident(form);
 
     toast.success("Incident Added Successfully");

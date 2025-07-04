@@ -136,22 +136,28 @@ function NewIncidents() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // try {
-    //   await createIncident({
-    //     ...formData,
-    //     userId: user?.userId,
-    //     (if (selectUser === false) {
-    //           submitter: {
-    //       user: userData.employeeName,
-    //       userContactNumber: "",
-    //       userEmail: "",
-    //       userDepartment: "",
-    //       loggedBy: "",
-    //       loggedInTime: "",
-    //     },
-    //     })
-    //   });
     try {
+    // If not raising for another user, fill submitter and locationDetails from logged-in user
+    let submitterData = { ...formData.submitter };
+    let locationDetailsData = { ...formData.locationDetails };
+
+    if (!selectUser && userData) {
+      submitterData = {
+        user: userData.employeeName || "",
+        userContactNumber: userData.mobileNumber || "",
+        userEmail: userData.emailAddress || "",
+        userDepartment: userData.department || "",
+        loggedBy: userData.employeeName || "",
+        loggedInTime: new Date().toISOString(),
+      };
+      locationDetailsData = {
+        location: userData.location || "",
+        subLocation: userData.subLocation || "",
+        floor: userData.floor || "",
+        roomNo: userData.roomNo || "",
+      };
+    }
+
     const form = new FormData();
 
     // Append all fields to form data
@@ -167,9 +173,9 @@ function NewIncidents() {
     form.append("feedback", formData.feedback);
 
     // Nested objects must be stringified
-    form.append("submitter", JSON.stringify(formData.submitter));
+    form.append("submitter", JSON.stringify(submitterData));
     form.append("assetDetails", JSON.stringify(formData.assetDetails));
-    form.append("locationDetails", JSON.stringify(formData.locationDetails));
+    form.append("locationDetails", JSON.stringify(locationDetailsData));
     form.append("classificaton", JSON.stringify(formData.classificaton));
 
     // Attachment (file)
@@ -177,7 +183,7 @@ function NewIncidents() {
       form.append("attachment", formData.attachment);
     }
 
-    await createIncident(form); // Make sure createIncident uses FormData
+    await createIncident(form);
 
     toast.success("Incident Added Successfully");
       setFormData({

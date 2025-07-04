@@ -8,6 +8,7 @@ import {
   getAllSubCategory,
 } from "../../api/IncidentCategoryRequest";
 import { getAllAssets } from "../../api/AssetsRequest";
+import { createIncident } from "../../api/IncidentRequest";
 
 function NewIncidents() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -114,14 +115,95 @@ function NewIncidents() {
       }));
     }
   };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const submitData = {
+  //     subject: formData.subject,
+  //     category: formData.category,
+  //     subCategory: formData.subCategory,
+  //     loggedVia: "",
+  //     description: formData.description,
+  //     submitter: {
+  //       user: "",
+  //       userContactNumber: "",
+  //       userEmail: "",
+  //       userDepartment: "",
+  //       loggedBy: "",
+  //     },
+  //     assetDetails: {
+  //       asset: formData.assetDetails.asset,
+  //       make: formData.assetDetails.make,
+  //       model: formData.assetDetails.model,
+  //       serialNo: formData.assetDetails.serialNo,
+  //     },
+  //     locationDetails: {
+  //       location: "",
+  //       subLocation: "",
+  //       floor: "",
+  //       roomNo: "",
+  //     },
+  //     classificaton: {
+  //       excludeSLA: false,
+  //       severityLevel: "",
+  //       supportDepartmentName: "",
+  //       supportGroupName: "",
+  //       technician: "",
+  //     },
+  //   };
+
+  //   console.log(formData);
+  //   try {
+  //     // const response = await createIncident(submitData);
+  //     // console.log("res", response);
+  //   } catch (error) {
+  //     console.log("Failed to create incident", error);
+  //   }
+  // };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   const payload = {
+  //     userId: user.userId,
+  //     ...formData,
+  //   };
+
+  //   console.log("Submitting payload:", payload); // ✅ debug check
+
+  //   try {
+  //     const response = await createIncident(payload);
+  //     console.log("Incident created:", response.data);
+  //   } catch (error) {
+  //     console.error("Failed to create incident", error);
+  //   }
+  // };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const form = new FormData();
+
+    // Append file if user selected it
+    if (formData.attachmentFile) {
+      form.append("file", formData.attachmentFile);
+    }
+
+    // Append all other fields as one JSON string
+    const payload = {
+      userId: user.userId,
+      ...formData,
+    };
+
+    form.append("data", JSON.stringify(payload)); 
+
     try {
-      console.log("formData", formData);
+      const response = await createIncident(form); 
+      console.log("Incident created:", response.data);
     } catch (error) {
-      console.log("Failed to create incident", error);
+      console.error("Failed to create incident", error);
     }
   };
+
   return (
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
@@ -378,23 +460,23 @@ function NewIncidents() {
                 </>
               )}
 
-                 <div className="flex flex-wrap gap-3 items-center w-[100%]">
-              <label
-                htmlFor="description"
-                className="w-[28%] text-xs font-semibold text-slate-600"
-              >
-                Description
-              </label>
-              <textarea
-                className="w-[96.8%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="description"
-                name="description"
-                rows="6"
-                value={formData.description}
-                onChange={handleChange}
-              />
-            </div>
+              <div className="flex flex-wrap gap-3 items-center w-[100%]">
+                <label
+                  htmlFor="description"
+                  className="w-[28%] text-xs font-semibold text-slate-600"
+                >
+                  Description
+                </label>
+                <textarea
+                  className="w-[96.8%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                  type="text"
+                  id="description"
+                  name="description"
+                  rows="6"
+                  value={formData.description}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
           </div>
         </form>

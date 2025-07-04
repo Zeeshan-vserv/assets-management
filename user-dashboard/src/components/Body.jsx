@@ -1,4 +1,4 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import Navigation from "./Navigation.jsx";
 import Dashboard from "../pages/Dashboard/Dashboard.jsx";

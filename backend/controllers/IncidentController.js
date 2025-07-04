@@ -1,12 +1,18 @@
 import IncidentCounterModel from "../models/incidentCounterModel.js";
 import IncidentModel from "../models/incidentModel.js";
 
-export const createIncident = async(req, res) => {
+export const createIncident = async (req, res) => {
     try {
         const { userId, ...incidentData } = req.body;
 
-        if(!userId){
-            return res.status(404).json({message:'User not found'});
+        if (!userId) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Handle attachment
+        let attachmentPath = "";
+        if (req.file) {
+            attachmentPath = req.file.path;
         }
 
         // Atomically increment the incident counter
@@ -16,12 +22,20 @@ export const createIncident = async(req, res) => {
             { new: true, upsert: true }
         );
 
-        const newIncidentId = `INC${counter.seq}`;
+        // Get current date in DDMMYYYY format
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const dateStr = `${day}${month}${year}`;
+
+        const newIncidentId = `INC${dateStr}${counter.seq}`;
 
         const newIncident = new IncidentModel({
             userId,
             incidentId: newIncidentId,
             ...incidentData,
+            attachment: attachmentPath,
             statusTimeline: [{
                 status: "New",
                 changedAt: new Date(),
@@ -33,14 +47,14 @@ export const createIncident = async(req, res) => {
 
         res.status(201).json({ success: true, data: newIncident, message: 'Incident created successfully' });
     } catch (error) {
-        res.status(400).json({message:'An error has been occured while creating incident', error: error.message});
+        res.status(400).json({ message: 'An error has been occured while creating incident', error: error.message });
     }
 }
 
-export const getAllIncident = async(req, res) => {
+export const getAllIncident = async (req, res) => {
     try {
         const incident = await IncidentModel.find()
-        res.status(200).json({ success: true, data: incident})
+        res.status(200).json({ success: true, data: incident })
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while fetching incidents' });
     }
@@ -51,10 +65,10 @@ export const getIncidentById = async (req, res) => {
         const { id } = req.params
         const incident = await IncidentModel.findById(id)
 
-        if(!incident){
-            return res.status(404).json({success:false, message:'Incident Id not found'})
+        if (!incident) {
+            return res.status(404).json({ success: false, message: 'Incident Id not found' })
         }
-        res.status(200).json({success:true, data: incident})
+        res.status(200).json({ success: true, data: incident })
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while fetching incident' });
     }
@@ -121,11 +135,11 @@ export const deleteIncident = async (req, res) => {
         const { id } = req.params
         const deletedIncident = await IncidentModel.findByIdAndDelete(id)
 
-        if(!deletedIncident){
-            return res.status(404).json({success: false, message:'Incident Id not found'})
+        if (!deletedIncident) {
+            return res.status(404).json({ success: false, message: 'Incident Id not found' })
         }
-        res.status(200).json({success: true, message:'Incident deleted successfullly'})
+        res.status(200).json({ success: true, message: 'Incident deleted successfullly' })
     } catch (error) {
-        res.status(500).json({message:'An error occurred while deleting incident'})
+        res.status(500).json({ message: 'An error occurred while deleting incident' })
     }
 }

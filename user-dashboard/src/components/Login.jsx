@@ -19,7 +19,6 @@ const Login = () => {
     try {
       const response = dispatch(login(formData));
       if (response.success) {
-        // navigate('/main')
         navigate("/");
       } else {
         // console.log(response.message)

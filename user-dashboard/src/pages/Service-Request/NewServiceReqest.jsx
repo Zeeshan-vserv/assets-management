@@ -4,6 +4,32 @@ import DropdownButton from "./DropdownButton";
 import { Autocomplete, TextField } from "@mui/material";
 
 function NewServiceReqest() {
+  const dropdownData = [
+    {
+      label: "Application",
+      children: [
+        {
+          label: "Provisioning",
+          children: [{ label: "User ID request", path: "" }],
+        },
+      ],
+    },
+    {
+      label: "Asset Maintenance",
+      children: [
+        {
+          label: "New Asset Request",
+          children: [
+            {
+              label: "Test Maintenance Template",
+              path: "",
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("hdhhd");
@@ -18,7 +44,13 @@ function NewServiceReqest() {
           <div className="w-full p-8 bg-white rounded-md shadow-md">
             <div className="flex flex-row gap-4 mb-4">
               <div className="w-full max-w-72 h-full bg-white">
-                <DropdownButton label="Application" />
+                {dropdownData.map((item, index) => (
+                  <DropdownButton
+                    key={index}
+                    label={item.label}
+                    children={item.children}
+                  />
+                ))}
               </div>
               <div className="w-full">
                 <div className="flex flex-wrap gap-4 w-full max-w-4xl h-full bg-white p-4 rounded-md">

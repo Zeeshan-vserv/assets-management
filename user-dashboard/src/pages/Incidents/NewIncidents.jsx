@@ -131,7 +131,7 @@ function NewIncidents() {
     }
   };
 
-  console.log(userData);
+  // console.log(userData);
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -184,7 +184,9 @@ function NewIncidents() {
     form.append("locationDetails", JSON.stringify(formData.locationDetails));
     form.append("classificaton", JSON.stringify(formData.classificaton));
 
-    await createIncident(form);
+    // await createIncident(form);
+    console.log(form);
+    
 
     toast.success("Incident Added Successfully");
     // Reset formData
@@ -227,6 +229,7 @@ function NewIncidents() {
         technician: "",
       },
     });
+
   } catch (error) {
     toast.error("Failed to add Incident");
   }

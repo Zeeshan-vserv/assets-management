@@ -24,6 +24,7 @@ function NewIncidents() {
     subCategory: "",
     loggedVia: "",
     description: "",
+    attachment: "",
     submitter: {
       user: "",
       userContactNumber: "",
@@ -115,6 +116,110 @@ function NewIncidents() {
       }));
     }
   };
+
+  // console.log(userData);
+
+  //   const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   try {
+  //     const form = new FormData();
+
+  //     // Always send userId
+  //     form.append("userId", user?.userId);
+
+  //     // Append all primitive fields
+  //     form.append("incidentId", formData.incidentId || "");
+  //     form.append("subject", formData.subject || "");
+  //     form.append("category", formData.category || "");
+  //     form.append("subCategory", formData.subCategory || "");
+  //     form.append("loggedVia", formData.loggedVia || "");
+  //     form.append("description", formData.description || "");
+  //     form.append("status", formData.status || "");
+  //     form.append("sla", formData.sla || "");
+  //     form.append("tat", formData.tat || "");
+  //     form.append("feedback", formData.feedback || "");
+
+  //     // Attachment (file)
+  //     if (formData.attachment) {
+  //       form.append("attachment", formData.attachment);
+  //     }
+
+  //     // Conditionally set submitter
+  //     let submitterObj = {};
+  //     if (!selectUser) {
+  //       submitterObj = {
+  //         user: userData.employeeName || "",
+  //         userContactNumber: userData.mobileNumber || "",
+  //         userEmail: userData.emailAddress || "",
+  //         userDepartment: userData.department || "",
+  //         loggedBy: "",
+  //         loggedInTime: "",
+  //       };
+  //     } else {
+  //       submitterObj = {
+  //         ...formData.submitter,
+  //         loggedBy: "",
+  //         loggedInTime: "",
+  //       };
+  //     }
+  //     form.append("submitter", JSON.stringify(submitterObj));
+
+  //     // Serialize nested objects
+  //     form.append("assetDetails", JSON.stringify(formData.assetDetails));
+  //     form.append("locationDetails", JSON.stringify(formData.locationDetails));
+  //     form.append("classificaton", JSON.stringify(formData.classificaton));
+
+  //     // await createIncident(form);
+  //     console.log(form);
+
+  //     toast.success("Incident Added Successfully");
+  //     // Reset formData
+  //     setFormData({
+  //       userId: "",
+  //       incidentId: "",
+  //       subject: "",
+  //       category: "",
+  //       subCategory: "",
+  //       loggedVia: "",
+  //       description: "",
+  //       status: "",
+  //       sla: "",
+  //       tat: "",
+  //       feedback: "",
+  //       attachment: "",
+  //       submitter: {
+  //         user: "",
+  //         userContactNumber: "",
+  //         userEmail: "",
+  //         userDepartment: "",
+  //       },
+  //       assetDetails: {
+  //         asset: "",
+  //         make: "",
+  //         model: "",
+  //         serialNo: "",
+  //       },
+  //       locationDetails: {
+  //         location: "",
+  //         subLocation: "",
+  //         floor: "",
+  //         roomNo: "",
+  //       },
+  //       classificaton: {
+  //         excludeSLA: false,
+  //         severityLevel: "",
+  //         supportDepartmentName: "",
+  //         supportGroupName: "",
+  //         technician: "",
+  //       },
+  //     });
+
+  //   } catch (error) {
+  //     toast.error("Failed to add Incident");
+  //   }
+  // };
+
   // const handleSubmit = async (e) => {
   //   e.preventDefault();
   //   const submitData = {
@@ -160,24 +265,6 @@ function NewIncidents() {
   //   }
   // };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   const payload = {
-  //     userId: user.userId,
-  //     ...formData,
-  //   };
-
-  //   console.log("Submitting payload:", payload); // ✅ debug check
-
-  //   try {
-  //     const response = await createIncident(payload);
-  //     console.log("Incident created:", response.data);
-  //   } catch (error) {
-  //     console.error("Failed to create incident", error);
-  //   }
-  // };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -194,10 +281,10 @@ function NewIncidents() {
       ...formData,
     };
 
-    form.append("data", JSON.stringify(payload)); 
+    form.append("data", JSON.stringify(payload));
 
     try {
-      const response = await createIncident(form); 
+      const response = await createIncident(form);
       console.log("Incident created:", response.data);
     } catch (error) {
       console.error("Failed to create incident", error);
@@ -475,6 +562,29 @@ function NewIncidents() {
                   rows="6"
                   value={formData.description}
                   onChange={handleChange}
+                />
+              </div>
+              <div className="flex items-center gap-5 w-[46%] max-lg:w-full">
+                <label
+                  htmlFor="attachment"
+                  className="w-[28%] text-xs font-semibold text-slate-600"
+                >
+                  Attachment
+                </label>
+                <input
+                  type="file"
+                  id="attachment"
+                  name="attachment"
+                  onChange={handleChange}
+                  // required
+                  className="file:mr-4 file:py-2 file:px-4
+               file:rounded-md file:border-0
+               file:text-sm file:font-semibold
+               file:bg-blue-50 file:text-blue-700
+               hover:file:bg-blue-100
+               transition-all duration-200
+               w-[65%] text-sm text-slate-600 border border-slate-300 rounded-md p-1.5
+               focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                 />
               </div>
             </div>

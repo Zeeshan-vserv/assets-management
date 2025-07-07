@@ -19,7 +19,7 @@ function App() {
           element={user ? <Main /> : <Navigate to="/auth" />}
         />
         <Route path="/" element={<Navigate to="/auth" />} />
-        <Route path="/assetDashboard" element={<DashboardAsset />} />
+        {/* <Route path="/assetDashboard" element={<DashboardAsset />} /> */}
       </Routes>
     </>
   );

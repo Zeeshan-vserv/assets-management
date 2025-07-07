@@ -55,7 +55,16 @@ const Navigation = ({ nav, setNav }) => {
                 setNav(false);
               }}
             >
-              incident
+              <NavLink
+                to="/main/dashboard/incident"
+                className={({ isActive }) =>
+                  `hover:underline cursor-pointer ${
+                    isActive ? "text-blue-400" : ""
+                  }`
+                }
+              >
+                incident
+              </NavLink>
             </h3>
             <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
@@ -63,7 +72,16 @@ const Navigation = ({ nav, setNav }) => {
                 setNav(false);
               }}
             >
-              request
+              <NavLink
+                to="/main/dashboard/request"
+                className={({ isActive }) =>
+                  `hover:underline cursor-pointer ${
+                    isActive ? "text-blue-400" : ""
+                  }`
+                }
+              >
+                request
+              </NavLink>
             </h3>
             <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
@@ -71,7 +89,16 @@ const Navigation = ({ nav, setNav }) => {
                 setNav(false);
               }}
             >
-              software
+              <NavLink
+                to="/main/dashboard/software"
+                className={({ isActive }) =>
+                  `hover:underline cursor-pointer ${
+                    isActive ? "text-blue-400" : ""
+                  }`
+                }
+              >
+                software
+              </NavLink>
             </h3>
             <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
@@ -79,7 +106,16 @@ const Navigation = ({ nav, setNav }) => {
                 setNav(false);
               }}
             >
-              task
+              <NavLink
+                to="/main/dashboard/task"
+                className={({ isActive }) =>
+                  `hover:underline cursor-pointer ${
+                    isActive ? "text-blue-400" : ""
+                  }`
+                }
+              >
+                task
+              </NavLink>
             </h3>
             <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
@@ -87,7 +123,16 @@ const Navigation = ({ nav, setNav }) => {
                 setNav(false);
               }}
             >
-              assets
+              <NavLink
+                to="/main/dashboard/asset"
+                className={({ isActive }) =>
+                  `hover:underline cursor-pointer ${
+                    isActive ? "text-blue-400" : ""
+                  }`
+                }
+              >
+                assets
+              </NavLink>
             </h3>
             <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
@@ -95,7 +140,16 @@ const Navigation = ({ nav, setNav }) => {
                 setNav(false);
               }}
             >
-              vendor
+              <NavLink
+                to="/main/dashboard/vendor"
+                className={({ isActive }) =>
+                  `hover:underline cursor-pointer ${
+                    isActive ? "text-blue-400" : ""
+                  }`
+                }
+              >
+                vendor
+              </NavLink>
             </h3>
           </>
         );

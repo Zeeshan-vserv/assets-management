@@ -37,6 +37,7 @@ function NewIncidents() {
     attachment: "",
     submitter: {
       user: "",
+      userId: "",
       userContactNumber: "",
       userEmail: "",
       userDepartment: "",
@@ -104,7 +105,7 @@ function NewIncidents() {
     fetchUser();
   }, []);
 
-  // console.log(userData);
+  console.log(userData._id);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -131,146 +132,119 @@ function NewIncidents() {
     }
   };
 
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-
-  //   try {
-  //     await createIncident({
-  //       ...formData,
-  //       userId: user?.userId,
-  //       ...(selectUser === false && {
-  //         submitter: {
-  //           user: userData.employeeName,
-  //           userContactNumber: "",
-  //           userEmail: "",
-  //           userDepartment: "",
-  //           loggedBy: "",
-  //           loggedInTime: "",
-  //         },
-  //       }),
-  //     });
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
-
-//   const handleSubmit = async (e) => {
-//   e.preventDefault();
-
-//   try {
-//     const form = new FormData();
-
-//     // Append all primitive fields
-//     form.append("userId", user?.userId || "");
-//     form.append("incidentId", formData.incidentId || "");
-//     form.append("subject", formData.subject || "");
-//     form.append("category", formData.category || "");
-//     form.append("subCategory", formData.subCategory || "");
-//     form.append("loggedVia", formData.loggedVia || "");
-//     form.append("description", formData.description || "");
-//     form.append("status", formData.status || "");
-//     form.append("sla", formData.sla || "");
-//     form.append("tat", formData.tat || "");
-//     form.append("feedback", formData.feedback || "");
-
-//     // Append file if present
-//     if (formData.attachment) {
-//       form.append("attachment", formData.attachment);
-//     }
-
-//     // Handle submitter object
-//     let submitterObj = {};
-//     if (!selectUser) {
-//       submitterObj = {
-//         user: userData.employeeName || "",
-//         userContactNumber: userData.mobileNumber || "",
-//         userEmail: userData.emailAddress || "",
-//         userDepartment: userData.department || "",
-//         loggedBy: "",
-//         loggedInTime: "",
-//       };
-//     } else {
-//       submitterObj = {
-//         ...formData.submitter,
-//         loggedBy: "",
-//         loggedInTime: "",
-//       };
-//     }
-//     form.append("submitter", JSON.stringify(submitterObj));
-
-//     // Append nested objects as JSON strings
-//     form.append("assetDetails", JSON.stringify(formData.assetDetails));
-//     form.append("locationDetails", JSON.stringify(formData.locationDetails));
-//     form.append("classificaton", JSON.stringify(formData.classificaton));
-
-//     await createIncident(form);
-//     toast.success("Incident Added Successfully");
-//     // Optionally reset formData here
-//   } catch (err) {
-//     console.error(err);
-//     toast.error("Failed to add Incident");
-//   }
-// };
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-    // If not raising for another user, fill submitter and locationDetails from logged-in user
-    let submitterData = { ...formData.submitter };
-    let locationDetailsData = { ...formData.locationDetails };
+      // If not raising for another user, fill submitter and locationDetails from logged-in user
+      let submitterData = { ...formData.submitter };
+      let locationDetailsData = { ...formData.locationDetails };
+      let classificaton = { ...formData.classificaton };
 
-    if (!selectUser && userData) {
-      submitterData = {
-        user: userData.employeeName || "",
-        userContactNumber: userData.mobileNumber || "",
-        userEmail: userData.emailAddress || "",
-        userDepartment: userData.department || "",
-        loggedBy: userData.employeeName || "",
-        loggedInTime: new Date().toISOString(),
-      };
-      locationDetailsData = {
-        location: userData.location || "",
-        subLocation: userData.subLocation || "",
-        floor: userData.floor || "",
-        roomNo: userData.roomNo || "",
-      };
+      if (!selectUser && userData) {
+        submitterData = {
+          user: userData.employeeName || "",
+          userId: userData._id || "",
+          userContactNumber: userData.mobileNumber || "",
+          userEmail: userData.emailAddress || "",
+          userDepartment: userData.department || "",
+          loggedBy: userData.employeeName || "",
+          loggedInTime: new Date().toISOString(),
+        };
+        locationDetailsData = {
+          location: userData.location || "",
+          subLocation: userData.subLocation || "",
+          floor: userData.floor || "",
+          roomNo: userData.roomNo || "",
+        };
+      }
+
+      if (userData.userRole === "Employee") {
+        classificaton = {
+          excludeSLA: false,
+          severityLevel: "Severity-1",
+          priorityLevel: "Priority-1",
+          supportDepartmentName: "",
+          supportGroupName: "",
+          technician: "",
+        };
+      }
+      const form = new FormData();
+
+
+      // Append all fields to form data
+      form.append("userId", user?.userId);
+      form.append("subject", formData.subject);
+      form.append("category", formData.category);
+      form.append("subCategory", formData.subCategory);
+      form.append("loggedVia", formData.loggedVia);
+      form.append("description", formData.description);
+      form.append("status", formData.status);
+      form.append("sla", formData.sla);
+      form.append("tat", formData.tat);
+      form.append("feedback", formData.feedback);
+
+      // Nested objects must be stringified
+      form.append("submitter", JSON.stringify(submitterData));
+      form.append("assetDetails", JSON.stringify(formData.assetDetails));
+      form.append("locationDetails", JSON.stringify(locationDetailsData));
+      form.append("classificaton", JSON.stringify(classificaton));
+
+      // Attachment (file)
+      if (formData.attachment) {
+        form.append("attachment", formData.attachment);
+      }
+
+      // console.log(JSON.stringify(submitterData));
+      
+
+      await createIncident(form);
+
+      toast.success("Incident Added Successfully");
+      // Optionally reset form here
+      setFormData({
+        userId: "",
+        incidentId: "",
+        subject: "",
+        category: "",
+        subCategory: "",
+        loggedVia: "",
+        description: "",
+        status: "",
+        sla: "",
+        tat: "",
+        feedback: "",
+        attachment: "",
+        submitter: {
+          user: "",
+          userContactNumber: "",
+          userEmail: "",
+          userDepartment: "",
+        },
+        assetDetails: {
+          asset: "",
+          make: "",
+          model: "",
+          serialNo: "",
+        },
+        locationDetails: {
+          location: "",
+          subLocation: "",
+          floor: "",
+          roomNo: "",
+        },
+        classificaton: {
+          excludeSLA: false,
+          severityLevel: "",
+          supportDepartmentName: "",
+          supportGroupName: "",
+          technician: "",
+        },
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add Incident");
     }
-
-    const form = new FormData();
-
-    // Append all fields to form data
-    form.append("userId", user?.userId);
-    form.append("subject", formData.subject);
-    form.append("category", formData.category);
-    form.append("subCategory", formData.subCategory);
-    form.append("loggedVia", formData.loggedVia);
-    form.append("description", formData.description);
-    form.append("status", formData.status);
-    form.append("sla", formData.sla);
-    form.append("tat", formData.tat);
-    form.append("feedback", formData.feedback);
-
-    // Nested objects must be stringified
-    form.append("submitter", JSON.stringify(submitterData));
-    form.append("assetDetails", JSON.stringify(formData.assetDetails));
-    form.append("locationDetails", JSON.stringify(locationDetailsData));
-    form.append("classificaton", JSON.stringify(formData.classificaton));
-
-    // Attachment (file)
-    if (formData.attachment) {
-      form.append("attachment", formData.attachment);
-    }
-
-    await createIncident(form);
-
-    toast.success("Incident Added Successfully");
-    // Optionally reset form here
-  } catch (err) {
-    console.error(err);
-    toast.error("Failed to add Incident");
-  }
-};
+  };
 
   return (
     <>
@@ -402,31 +376,6 @@ const handleSubmit = async (e) => {
                 />
               </div>
 
-              {/* <div className="flex items-center w-[46%] max-lg:w-[100%] max-lg:w-[100%]">
-                <label
-                  htmlFor=""
-                  className="w-[25%] text-xs font-semibold text-slate-600"
-                >
-                  Asset<span className="text-red-500 text-base">*</span>
-                </label>
-                <Autocomplete
-                  className="w-[65%]"
-                  options={["GUWEBRL007"]}
-                  getOptionLabel={(option) => option}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      variant="standard"
-                      className="text-xs text-slate-600"
-                      placeholder="Select Asset"
-                      inputProps={{
-                        ...params.inputProps,
-                        style: { fontSize: "0.8rem" },
-                      }}
-                    />
-                  )}
-                />
-              </div> */}
               <div className="flex items-center w-[46%] max-lg:w-[100%]">
                 <label
                   htmlFor="asset"
@@ -482,21 +431,27 @@ const handleSubmit = async (e) => {
                 />
               </div>
 
-              <div className="flex items-center w-[46%] max-lg:w-[100%]">
+              <div className="flex items-center w-[46%] max-lg:w-full">
                 <label
-                  htmlFor=""
+                  htmlFor="attachment"
                   className="w-[28%] text-xs font-semibold text-slate-600"
                 >
-                  User Name <span className="text-red-500 text-base">*</span>
+                  Attachment
                 </label>
                 <input
-                  className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                  type="text"
-                  id=""
-                  name=""
-                  // value={formData}
-                  // onChange={handleChange}
-                  required
+                  type="file"
+                  id="attachment"
+                  name="attachment"
+                  onChange={handleChange}
+                  // required
+                  className="file:mr-4 file:py-2 file:px-4
+               file:rounded-md file:border-0
+               file:text-sm file:font-semibold
+               file:bg-blue-50 file:text-blue-700
+               hover:file:bg-blue-100
+               transition-all duration-200
+               w-[65%] text-sm text-slate-600 border border-slate-300 rounded-md p-1.5
+               focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                 />
               </div>
               {selectUser && (
@@ -522,12 +477,13 @@ const handleSubmit = async (e) => {
                             user.employeeName === formData.submitter.user
                         ) || null
                       }
-                      onChange={(event, newValue) => {
+                      onChange={(event, newValue) => {                                                
                         setFormData({
                           ...formData,
                           submitter: {
                             ...formData.submitter,
                             user: newValue ? newValue.employeeName : "",
+                            userId: newValue ? newValue._id : "",
                             userContactNumber: newValue
                               ? newValue.mobileNumber
                               : "",
@@ -549,6 +505,7 @@ const handleSubmit = async (e) => {
                         />
                       )}
                     />
+                    {console.log(formData.submitter)}
                   </div>
                 </>
               )}
@@ -568,46 +525,6 @@ const handleSubmit = async (e) => {
                   rows="6"
                   value={formData.description}
                   onChange={handleChange}
-                />
-              </div>
-
-              {/* <div className="flex items-center w-[46%] max-lg:w-[100%] max-lg:w-[100%]">
-                <label
-                  htmlFor="attachment"
-                  className="w-[25%] text-xs font-semibold text-slate-600"
-                >
-                  Attachment
-                </label>
-                <input
-                  className="w-[65%] text-xs text-slate-600 border-b border-slate-400 p-2 outline-none focus:border-blue-500 focus:border-b-2"
-                  type="file"
-                  id="attachment"
-                  name="attachment"
-                  onChange={handleChange}
-                  required
-                />
-              </div> */}
-              <div className="flex items-center gap-5 w-[46%] max-lg:w-full">
-                <label
-                  htmlFor="attachment"
-                  className="w-[28%] text-xs font-semibold text-slate-600"
-                >
-                  Attachment
-                </label>
-                <input
-                  type="file"
-                  id="attachment"
-                  name="attachment"
-                  onChange={handleChange}
-                  // required
-                  className="file:mr-4 file:py-2 file:px-4
-               file:rounded-md file:border-0
-               file:text-sm file:font-semibold
-               file:bg-blue-50 file:text-blue-700
-               hover:file:bg-blue-100
-               transition-all duration-200
-               w-[65%] text-sm text-slate-600 border border-slate-300 rounded-md p-1.5
-               focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                 />
               </div>
             </div>

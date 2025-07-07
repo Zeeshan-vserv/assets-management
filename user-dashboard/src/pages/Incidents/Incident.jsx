@@ -3,24 +3,31 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, Menu, MenuItem } from "@mui/material";
-import { AiOutlineFileExcel } from "react-icons/ai";
-import { AiOutlineFilePdf } from "react-icons/ai";
+import {
+  Box,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Tooltip,
+} from "@mui/material";
+import { AiOutlineFileExcel, AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
-import { autoTable } from "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdDashboard } from "react-icons/md";
 import { useNavigate } from "react-router";
 import { ImEye } from "react-icons/im";
-import axios from "axios";
+import { getAllIncident } from "../../api/IncidentRequest";
 import { NavLink } from "react-router-dom";
+import dayjs from "dayjs";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Department.csv",
+  filename: "Incident-Report",
 });
 
 function Incident() {
@@ -32,10 +39,10 @@ function Incident() {
   const fetchIncident = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("https://dummyjson.com/recipes"); //later chnages it
-      setData(response?.data?.recipes || []);
+      const response = await getAllIncident();
+      setData(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching incident:", error);
+      console.error("Error fetching incidents:", error);
     } finally {
       setIsLoading(false);
     }
@@ -45,44 +52,52 @@ function Incident() {
     fetchIncident();
   }, []);
 
+  console.log(data);
+
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
+        accessorKey: "incidentId",
         header: "Incident Id",
         Cell: ({ row }) => (
           <div className="flex items-center gap-1">
             <NavLink
-              to={`/incidents/${row.original.id}`}
+              to={`/incidents/${row.original._id}`}
               className="flex items-center gap-2"
             >
               <ImEye
                 className="ml-1 text-slate-500 hover:text-slate-700"
                 size={14}
               />
-              {row.original.id || ""}
+              {row.original.incidentId || ""}
             </NavLink>
           </div>
         ),
       },
       {
-        accessorKey: "cuisine",
+        accessorKey: "subject",
         header: "Subject",
       },
       {
-        accessorKey: "difficulty",
+        accessorKey: "submitter.user",
         header: "User Name",
       },
       {
-        accessorKey: "caloriesPerServing",
+        accessorKey: "classificaton.technician",
         header: "Assigned To",
       },
+      // {
+      //   accessorKey: "createdAt",
+      //   header: "Logged Time",
+      // },
       {
-        accessorKey: "cookTimeMinutes",
+        accessorKey: "createdAt",
         header: "Logged Time",
+        Cell: ({ cell }) =>
+          dayjs(cell.getValue()).format("DD MMM YYYY, hh:mm A"),
       },
       {
-        accessorKey: "name",
+        accessorKey: "status",
         header: "Status",
       },
     ],
@@ -178,7 +193,6 @@ function Incident() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          
           <Button
             onClick={() => navigate("/new-incident")}
             variant="contained"

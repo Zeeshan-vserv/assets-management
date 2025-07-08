@@ -3,12 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import {
-  Box,
-  Button,
-  Menu,
-  MenuItem,
-} from "@mui/material";
+import { Box, Button, Menu, MenuItem } from "@mui/material";
 import { useSelector } from "react-redux";
 import { Autocomplete, TextField } from "@mui/material";
 import { AiOutlineFileExcel, AiOutlineFilePdf } from "react-icons/ai";
@@ -30,7 +25,7 @@ const csvConfig = mkConfig({
   filename: "Incident-Report",
 });
 
-const ticketOptions = ["My Tickets", "Other User Tickets"];
+const ticketOptions = ["All Ticket", "My Tickets", "Other User Tickets"];
 
 function Incident() {
   const navigate = useNavigate();
@@ -59,16 +54,27 @@ function Incident() {
 
   // Filter data based on ticketType
   const filteredData = useMemo(() => {
-    if (ticketType === "My Tickets") {
+    if (ticketType === "All Ticket") {
       return data.filter(
         (item) => item.userId === user?.userId
+      );
+    } else if (ticketType === "My Tickets") {
+      return data.filter(
+        (item) =>
+          item.userId === user?.userId && user?.userId === item.submitter.userId
+        // (item) =>
+        //   console.log(
+        //     item,
+        //     item.userId === user?.userId &&
+        //       user?.userId === item.submitter.userId
+        //   )
       );
     } else if (ticketType === "Other User Tickets") {
       return data.filter(
         (item) =>
-          item.userId !== user?.userId &&
+          item.userId === user?.userId &&
           item.submitter &&
-          item.submitter.userId === user?.userId
+          item.submitter.userId !== user?.userId
       );
     }
     return data;
@@ -247,7 +253,9 @@ function Incident() {
             }}
             options={ticketOptions}
             value={ticketType}
-            onChange={(_, newValue) => setTicketType(newValue || ticketOptions[0])}
+            onChange={(_, newValue) =>
+              setTicketType(newValue || ticketOptions[0])
+            }
             renderInput={(params) => (
               <TextField
                 {...params}

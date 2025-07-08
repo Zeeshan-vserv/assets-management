@@ -102,7 +102,7 @@ function NewIncidents() {
     fetchUser();
   }, []);
 
-  console.log(userData._id);
+  // console.log(userData._id);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -171,18 +171,7 @@ function NewIncidents() {
       form.append("subCategory", formData.subCategory);
       form.append("loggedVia", formData.loggedVia);
       form.append("description", formData.description);
-      form.append("status", formData.status);
-      form.append("sla", formData.sla);
-      form.append("tat", formData.tat);
-      form.append("feedback", formData.feedback);
-      // Append all fields to form data
-      form.append("userId", user?.userId);
-      form.append("subject", formData.subject);
-      form.append("category", formData.category);
-      form.append("subCategory", formData.subCategory);
-      form.append("loggedVia", formData.loggedVia);
-      form.append("description", formData.description);
-      form.append("status", formData.status);
+      // form.append("status", formData.status);
       form.append("sla", formData.sla);
       form.append("tat", formData.tat);
       form.append("feedback", formData.feedback);
@@ -197,15 +186,9 @@ function NewIncidents() {
       if (formData.attachment) {
         form.append("attachment", formData.attachment);
       }
-
-      // console.log(JSON.stringify(submitterData));
-      
-
-      await createIncident(form);
       await createIncident(form);
 
       toast.success("Incident Added Successfully");
-      // Optionally reset form here
       setFormData({
         userId: "",
         incidentId: "",
@@ -509,7 +492,7 @@ function NewIncidents() {
                         />
                       )}
                     />
-                    {console.log(formData.submitter)}
+                    {/* {console.log(formData.submitter)} */}
                   </div>
                 </>
               )}

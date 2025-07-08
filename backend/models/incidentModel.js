@@ -7,7 +7,7 @@ const statusEntrySchema = new mongoose.Schema({
 }, { _id: false });
 
 const fieldChangeEntrySchema = new mongoose.Schema({
-    changes: Object, // { fieldName: { from, to }, ... }
+    changes: Object, 
     changedAt: { type: Date, default: Date.now },
     changedBy: String
 }, { _id: false });

@@ -9,10 +9,12 @@ function VendorDashboard() {
   const navigate = useNavigate();
   const vendorByCategory = [
     { id: 0, value: 30, label: "Category - A", color: "#1976d2" },
+    { id: 1, value: 170, label: "Category - B", color: "#00C853" },
   ];
 
   const vendorByStatus = [
     { id: 0, value: 30, label: "Active", color: "#1976d2" },
+    { id: 1, value: 170, label: "In-Active", color: "#00C853" },
   ];
   return (
     <>

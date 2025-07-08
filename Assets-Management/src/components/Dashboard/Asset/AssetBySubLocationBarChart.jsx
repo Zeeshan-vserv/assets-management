@@ -1,8 +1,18 @@
 import React from "react";
-import { BarChart } from "@mui/x-charts/BarChart";
+import { Bar } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
 import { Card, CardContent, Typography, Box } from "@mui/material";
 
-const browserData = [
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+
+const subLocationData = [
   { name: "BSO Faridabad", value: 1020 },
   { name: "BSO PRAYAGRAJ", value: 350 },
   { name: "BHOPAL CCO", value: 290 },
@@ -10,6 +20,55 @@ const browserData = [
   { name: "BSO Bokaro", value: 10 },
   { name: "BSO Delhi", value: 5 },
 ];
+
+const data = {
+  labels: subLocationData.map((item) => item.name),
+  datasets: [
+    {
+      label: "Assets",
+      data: subLocationData.map((item) => item.value),
+      backgroundColor: "#2196f3",
+      borderRadius: 4,
+      barThickness: 30,
+    },
+  ],
+};
+
+const options = {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    y: {
+      min: 0,
+      max: 400,
+      ticks: {
+        stepSize: 100,
+        callback: function (value) {
+          return [0, 100, 200, 300, 400].includes(value) ? value : "";
+        },
+      },
+      grid: {
+        drawBorder: false,
+        color: "#e0e0e0",
+      },
+    },
+    x: {
+      ticks: {
+        font: {
+          style: "italic",
+        },
+      },
+      grid: {
+        display: false,
+      },
+    },
+  },
+  plugins: {
+    legend: {
+      display: false,
+    },
+  },
+};
 
 const AssetBySubLocationBarChart = () => {
   return (
@@ -19,36 +78,8 @@ const AssetBySubLocationBarChart = () => {
           Assets By Sub Location
         </Typography>
 
-        <Box sx={{ width: "100%", height: { xs: 300, sm: 350, md: 400 } }}>
-          <BarChart
-            xAxis={[
-              {
-                scaleType: "band",
-                data: browserData.map((d) => d.name),
-
-                tickLabelStyle: {
-                  fontStyle: "italic",
-                  textAnchor: "end",
-                },
-              },
-            ]}
-            yAxis={[
-              {
-                tickValues: [0, 100, 200, 300, 400],
-                max: 400,
-              },
-            ]}
-            series={[
-              {
-                data: browserData.map((d) => d.value),
-                color: "#2196f3",
-              },
-            ]}
-            grid={{ horizontal: true }}
-            slotProps={{
-              legend: { hidden: true },
-            }}
-          />
+        <Box sx={{ width: "100%", height: { xs: 300, sm: 400, md: 500 } }}>
+          <Bar data={data} options={options} />
         </Box>
       </CardContent>
     </Card>

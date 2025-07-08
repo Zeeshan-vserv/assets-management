@@ -10,20 +10,21 @@ import AssetsByBusinessUnitBarChart from "./AssetsByBusinessUnitBarChart.jsx";
 
 function DashboardAsset() {
   const navigate = useNavigate();
-  const [assets, setAssets] = useState([]);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchAssets = async () => {
       try {
         const response = await getAllAssets();
-        console.log("rr", response);
-        setAssets(response?.data?.data || []);
+        setData(response?.data?.data || []);
       } catch (error) {
         setAssets([]);
       }
     };
     fetchAssets();
   }, []);
+
+  console.log("rr", data);
 
   //static data later chnage
   const AssetsByStatus = [

@@ -12,17 +12,17 @@ import { Card, CardContent, Typography, Box } from "@mui/material";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const businessUnitData = [{ name: "BSO Faridabad", value: 300 }];
+const browserData = [{ name: "N/A", value: 10 }];
 
 const data = {
-  labels: businessUnitData.map((item) => item.name),
+  labels: browserData.map((item) => item.name),
   datasets: [
     {
       label: "Assets",
-      data: businessUnitData.map((item) => item.value),
+      data: browserData.map((item) => item.value),
       backgroundColor: "#2196f3",
       borderRadius: 4,
-      barThickness: 30
+      barThickness: 30,
     },
   ],
 };
@@ -33,11 +33,11 @@ const options = {
   scales: {
     y: {
       min: 0,
-      max: 3000,
+      max: 1.0,
       ticks: {
-        stepSize: 600,
+        stepSize: 0.2,
         callback: function (value) {
-          return [0, 600, 1200, 1800, 2400, 3000].includes(value) ? value : "";
+          return [0.0, 0.2, 0.4, 0.6, 0.8, 1.0].includes(value) ? value : "";
         },
       },
       grid: {
@@ -63,12 +63,12 @@ const options = {
   },
 };
 
-const AssetsByBusinessUnitBarChart = () => {
+const VendorByLocationBarChart = () => {
   return (
     <Card sx={{ maxWidth: "100%", mx: "auto", boxShadow: 3 }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          Assets By Business Unit
+          Vendor By Location
         </Typography>
 
         <Box sx={{ width: "100%", height: { xs: 300, sm: 400, md: 500 } }}>
@@ -79,4 +79,4 @@ const AssetsByBusinessUnitBarChart = () => {
   );
 };
 
-export default AssetsByBusinessUnitBarChart;
+export default VendorByLocationBarChart;

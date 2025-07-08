@@ -17,7 +17,7 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 // import FilterAltIcon from "@mui/icons-material/FilterAlt";
 import { FaDesktop } from "react-icons/fa";
 import { getAllAssets } from "../../../api/AssetsRequest"; //Later change this api
@@ -30,6 +30,7 @@ const csvConfig = mkConfig({
 });
 
 function AllVendors() {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [openVendorDeleteModal, setOpenVendorsDeleteModal] = useState(false);
@@ -323,7 +324,10 @@ function AllVendors() {
       <div className="flex flex-col w-[100%] min-h-full  p-4 bg-slate-100">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold mb-6 text-start">ALL VENDORS</h2>
-          <button className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-3 py-2 rounded-md text-sm text-white transition-all">
+          <button
+            onClick={() => navigate("/main/dashboard/vendor")}
+            className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-3 py-2 rounded-md text-sm text-white transition-all"
+          >
             <div className="flex flex-row justify-between items-center gap-1">
               <FaDesktop size={12} />
               <span> View Dashboard</span>

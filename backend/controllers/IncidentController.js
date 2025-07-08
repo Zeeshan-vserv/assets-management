@@ -57,6 +57,7 @@ export const createIncident = async (req, res) => {
         submitter = {
             user: submitter?.user || user?.employeeName || "",
             userContactNumber: submitter?.userContactNumber || user?.mobileNumber || "",
+            userId: submitter?.userId || user?.userId || "",
             userEmail: submitter?.userEmail || user?.emailAddress || "",
             userDepartment: submitter?.userDepartment || user?.department || "",
             loggedBy: submitter?.loggedBy || user?.employeeName || "",

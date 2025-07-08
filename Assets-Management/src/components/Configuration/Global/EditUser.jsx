@@ -22,69 +22,43 @@ const EditUser = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [formData, setFormData] = useState({
-    employeeName: "",
-    employeeCode: "",
-    emailAddress: "",
-    mobileNumber: "",
-    designation: "",
-    location: "",
-    subLocation: "",
-    department: "",
-    subDepartment: "",
-    reportingManager: "",
-    departmentHead: "",
-    businessHead: "",
-    users: {
-      isView: false,
-      isEdit: false,
-      isDelete: false,
-    },
-    components: {
-      isView: false,
-      isEdit: false,
-      isDelete: false,
-    },
-    departments: {
-      isView: false,
-      isEdit: false,
-      isDelete: false,
-    },
-    subDepartments: {
-      isView: false,
-      isEdit: false,
-      isDelete: false,
-    },
-    locations: {
-      isView: false,
-      isEdit: false,
-      isDelete: false,
-    },
-    subLocations: {
-      isView: false,
-      isEdit: false,
-      isDelete: false,
-    },
-    assets: {
-      isView: false,
-    },
-    tickets: {
-      isView: false,
-    },
-    showUsers: {
-      isView: false,
-    },
-    summary: {
-      isView: false,
-    },
-    importAsset: {
-      isView: false,
-    },
+           employeeName: "",
+        employeeCode: "",
+        emailAddress: "",
+        mobileNumber: "",
+        designation: "",
+        location: "",
+        subLocation: "",
+        department: "",
+        subDepartment: "",
+        reportingManager: "",
+        departmentHead: "",
+        businessHead: "",
+        isVip: false,
+        userRole: "",
+        supportDepartmentName: "",
+        supportGroups: "",
+        password: "",
+        confirmPassword: "",
+        users: { isView: false, isEdit: false, isDelete: false },
+        components: { isView: false, isEdit: false, isDelete: false },
+        departments: { isView: false, isEdit: false, isDelete: false },
+        subDepartments: { isView: false, isEdit: false, isDelete: false },
+        locations: { isView: false, isEdit: false, isDelete: false },
+        subLocations: { isView: false, isEdit: false, isDelete: false },
+        assets: { isView: false },
+        tickets: { isView: false },
+        showUsers: { isView: false },
+        summary: { isView: false },
+        importAsset: { isView: false },
   });
   const [locationData, setLocationData] = useState([]);
   const [subLocationData, setSubLocationData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
   const [subDepartmentData, setSubDepartmentData] = useState([]);
   const [reportingManagerData, setReportingManagerData] = useState([]);
+  const [supportDepartmentData, setSupportDepartmentData] = useState([]);
+  const [supportGroupData, setSupportGroupData] = useState([]);
 
   const fetchUser = async () => {
     try {
@@ -493,6 +467,137 @@ const EditUser = () => {
                 )}
               />
             </div>
+            <div className="flex items-center w-[46%] max-lg:w-[100%]">
+              <label
+                htmlFor="userRole"
+                className="w-[25%] text-xs font-semibold text-slate-600"
+              >
+                User Role
+                <span className="text-red-500 text-base">*</span>
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                name="userRole"
+                value={formData.userRole}
+                onChange={(e, value) =>
+                  setFormData((prev) => ({ ...prev, userRole: value }))
+                }
+                options={[
+                  "Employee",
+                  "GoCollect Support Department",
+                  "Grievance Support Team",
+                  "L1 Technician",
+                  "L2 Technician",
+                  "L3 Technician",
+                  "Application Support Team",
+                  "Asset Management",
+                  "Admin",
+                  "Super Admin",
+                ]}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Movement Type"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+            </div>
+            {(formData.userRole === "GoCollect Support Department" ||
+              formData.userRole === "Grievance Support Team" ||
+              formData.userRole === "L1 Technician" ||
+              formData.userRole === "L2 Technician" ||
+              formData.userRole === "L3 Technician" ||
+              formData.userRole === "Application Support Team") && (
+              <>
+                <div className="flex items-center w-[46%] max-lg:w-[100%]">
+                  <label
+                    htmlFor="supportDepartment"
+                    className="w-[25%] text-xs font-semibold text-slate-600"
+                  >
+                    Support Department
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={supportDepartmentData}
+                    getOptionLabel={(option) => option.supportDepartmentName}
+                    value={
+                      supportDepartmentData.find(
+                        (dept) =>
+                          dept.supportDepartmentName ===
+                          formData.supportDepartmentName
+                      ) || null
+                    }
+                    onChange={(event, newValue) => {
+                      setFormData({
+                        ...formData,
+                        supportDepartmentName: newValue
+                          ? newValue.supportDepartmentName
+                          : "",
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select Support Department"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex items-center w-[46%] max-lg:w-[100%]">
+                  <label
+                    htmlFor="supportGroup"
+                    className="w-[25%] text-xs font-semibold text-slate-600"
+                  >
+                    Support Group
+                  </label>
+
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={supportGroupData}
+                    getOptionLabel={(option) => option.supportGroupName}
+                    value={
+                      supportGroupData.find(
+                        (group) =>
+                          group.supportGroupName === formData.supportGroups
+                      ) || null
+                    }
+                    onChange={(event, newValue) => {
+                      setFormData({
+                        ...formData,
+                        supportGroups: newValue
+                          ? newValue.supportGroupName
+                          : "",
+                      });
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select Support Group"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </>
+            )}
             <div className="flex items-center w-[46%]">
               <label
                 htmlFor="departmentHead"

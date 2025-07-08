@@ -1,6 +1,6 @@
 import axios from "axios";
-import store from "../store/ReduxStore";
-import { UserLogout } from "../action/AuthAction";
+import store from "../store2/ReduxStore2";
+import { UserLogout } from "../action2/AuthAction2";
 
 const API = axios.create({ baseURL: "http://localhost:5001" });
 

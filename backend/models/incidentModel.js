@@ -27,6 +27,7 @@ const incidentSchema = mongoose.Schema({
     attachment: String,
     submitter:{
         user: String,
+        userId: String,
         userContactNumber: Number,
         userEmail: String,
         userDepartment: String,
@@ -48,6 +49,7 @@ const incidentSchema = mongoose.Schema({
     classificaton: {
         excludeSLA: {type: Boolean, default: false},
         severityLevel: String,
+        priorityLevel: String,
         supportDepartmentName: String,
         supportGroupName: String,
         technician: String

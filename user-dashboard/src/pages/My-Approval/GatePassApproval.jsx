@@ -3,15 +3,15 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
 import { AiOutlineFileExcel } from "react-icons/ai";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { useNavigate } from "react-router";
 import axios from "axios";
+import CheckIcon from "@mui/icons-material/Check";
+import ClearIcon from "@mui/icons-material/Clear";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -20,59 +20,142 @@ const csvConfig = mkConfig({
   filename: "Assets-Management-Department.csv",
 });
 
-function ServiceRequest() {
-  const navigate = useNavigate();
+function GatePassApproval() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchServiceRequest = async () => {
+  const fetchGatePassApproval = async () => {
     try {
       setIsLoading(true);
-      // const response = await axios.get("https://dummyjson.com/recipes");
+    //   const response = await axios.get("https://dummyjson.com/recipes");
       setData(response?.data?.recipes || []);
     } catch (error) {
-      console.error("Error fetching service request:", error);
+      console.error("Error fetching get pass approval:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchServiceRequest();
+    fetchGatePassApproval();
   }, []);
-  // console.log("data", data);
+  //   console.log("data", data);
 
   const columns = useMemo(
     () => [
       {
         accessorKey: "id",
-        header: "Service Req Id",
+        header: "Id",
       },
       {
         accessorKey: "cuisine",
-        header: "Subject",
+        header: "Movement Type",
       },
+
       {
-        accessorKey: "difficulty",
-        header: "Assigned To",
+        accessorFn: (row) => new Date(row.difficulty),
+        id: "difficulty",
+        header: "Expected Date of Return",
+        filterVariant: "date",
+        filterFn: "lessThan",
+        sortingFn: "datetime",
+        Cell: ({ cell }) => cell.getValue()?.toLocaleDateString(),
+        Header: ({ column }) => <em>{column.columnDef.header}</em>,
+        muiFilterTextFieldProps: {
+          sx: {
+            minWidth: "250px",
+          },
+        },
       },
       {
         accessorKey: "caloriesPerServing",
-        header: "Logged Time",
+        header: "Status",
+      },
+
+      {
+        accessorFn: (row) => new Date(row.reviewCount),
+        id: "reviewCount",
+        header: "Created Date",
+        filterVariant: "date",
+        filterFn: "lessThan",
+        sortingFn: "datetime",
+        Cell: ({ cell }) => cell.getValue()?.toLocaleDateString(),
+        Header: ({ column }) => <em>{column.columnDef.header}</em>,
+        muiFilterTextFieldProps: {
+          sx: {
+            minWidth: "250px",
+          },
+        },
       },
       {
-        accessorKey: "reviewCount",
-        header: "Status",
+        accessorKey: "servings",
+        header: "Get Pass Validity",
+      },
+      {
+        accessorKey: "userId",
+        header: "Attachment",
+      },
+      {
+        id: "accept",
+        header: "Accept",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton
+            onClick={() => handleAccept(row.original.id)}
+            color="success"
+            aria-label="accept"
+          >
+            <CheckIcon
+              sx={{
+                color: "#f44336",
+              }}
+            />
+          </IconButton>
+        ),
+      },
+      {
+        id: "reject",
+        header: "Reject",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton
+            onClick={() => handleReject(row.original.id)}
+            color="error"
+            aria-label="reject"
+          >
+            <ClearIcon
+              sx={{
+                color: "#4caf50",
+              }}
+            />
+          </IconButton>
+        ),
       },
     ],
     [isLoading]
   );
 
+  const handleAccept = (id) => {
+    console.log("accept", id);
+  };
+
+  const handleReject = (id) => {
+    console.log("reject", id);
+  };
+
   //Exports
   const handleExportRows = (rows) => {
     const visibleColumns = table
       .getAllLeafColumns()
-      .filter((col) => col.getIsVisible() && col.id !== "mrt-row-select");
+      .filter(
+        (col) =>
+          col.getIsVisible() &&
+          col.id !== "mrt-row-select" &&
+          col.id !== "accept" &&
+          col.id !== "reject"
+      );
 
     const rowData = rows.map((row) => {
       const result = {};
@@ -89,7 +172,13 @@ function ServiceRequest() {
   const handleExportData = () => {
     const visibleColumns = table
       .getAllLeafColumns()
-      .filter((col) => col.getIsVisible() && col.id !== "mrt-row-select");
+      .filter(
+        (col) =>
+          col.getIsVisible() &&
+          col.id !== "mrt-row-select" &&
+          col.id !== "accept" &&
+          col.id !== "reject"
+      );
 
     const exportData = data.map((item) => {
       const result = {};
@@ -104,7 +193,7 @@ function ServiceRequest() {
     download(csvConfig)(csv);
   };
   const handlePdfData = () => {
-    const excludedColumns = ["mrt-row-select"];
+    const excludedColumns = ["mrt-row-select", "accept", "reject"];
 
     const visibleColumns = table
       .getAllLeafColumns()
@@ -145,21 +234,6 @@ function ServiceRequest() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          <Button
-            onClick={() => navigate("/new-service-request")}
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlineIcon />}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "#fff",
-              textTransform: "none",
-              mt: 1,
-              mb: 1,
-            }}
-          >
-            New
-          </Button>
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -252,9 +326,9 @@ function ServiceRequest() {
 
   return (
     <>
-      <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
+      <div>
         <h2 className="text-md font-semibold mb-4 text-start">
-          SERVICE REQUESTS
+          GATE PASS APPROVAL
         </h2>
         <MaterialReactTable table={table} />
       </div>
@@ -262,4 +336,4 @@ function ServiceRequest() {
   );
 }
 
-export default ServiceRequest;
+export default GatePassApproval;

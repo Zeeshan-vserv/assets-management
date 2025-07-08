@@ -101,6 +101,8 @@ function ConfigurationRoute() {
         <Route path="priority-matrix" element={<PriorityMatrix />} />
         <Route path="holiday-calendar" element={<HolidayCalendar />} />
         <Route path="holiday-list" element={<HoliDayList />} />
+
+        
       </Routes>
     </>
   );

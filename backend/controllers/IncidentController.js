@@ -149,7 +149,7 @@ export const updateIncident = async (req, res) => {
             }
         });
 
-        // Track status change
+        // Track status change0
         let statusChanged = false;
         if (incident.status !== status) {
             statusChanged = true;

@@ -290,7 +290,7 @@ function NewIncidents() {
               </div>
             </div>
             <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
-              <div className="flex items-center w-[46%]">
+              <div className="flex items-center w-[46%] max-lg:w-[100%]">
                 <label
                   htmlFor="subject"
                   className="w-[28%] text-xs font-semibold text-slate-600"
@@ -306,7 +306,7 @@ function NewIncidents() {
                   onChange={handleChange}
                 />
               </div>
-              <div className="flex items-center w-[46%]">
+              <div className="flex items-center w-[46%] max-lg:w-[100%]">
                 <label
                   htmlFor="category"
                   className="w-[28%] text-xs font-semibold text-slate-600"
@@ -342,7 +342,7 @@ function NewIncidents() {
                   )}
                 />
               </div>
-              <div className="flex items-center w-[46%]">
+              <div className="flex items-center w-[46%] max-lg:w-[100%]">
                 <label
                   htmlFor="subCategory"
                   className="w-[28%] text-xs font-semibold text-slate-600"

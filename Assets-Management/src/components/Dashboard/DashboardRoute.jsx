@@ -1,12 +1,11 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import DashboardAsset from "./DashboardAsset";
-import IncidentDashboard from "./IncidentDashboard";
-import RequestDashboard from "./RequestDashboard";
-import SoftwareDashboard from "./SoftwareDashboard";
-import VendorDashboard from "./VendorDashboard";
-import TaskDashboard from "./TaskDashboard";
-
+import DashboardAsset from "./Asset/DashboardAsset";
+import IncidentDashboard from "./Incident/IncidentDashboard"
+import RequestDashboard from "./Request/RequestDashboard";
+import SoftwareDashboard from "./Software/SoftwareDashboard";
+import VendorDashboard from "./Vendor/VendorDashboard";
+import TaskDashboard from "./Task/TaskDashboard"
 function DashboardRoute() {
   return (
     <>

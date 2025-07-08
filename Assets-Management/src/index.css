@@ -3,5 +3,10 @@
 @tailwind utilities;
 
 ::-webkit-scrollbar {
-    display: none;
-  }
+  display: none;
+}
+
+/* use for mui chart */
+.MuiBarElement-series-auto-generated-id-0 {
+  width: 2rem;
+}

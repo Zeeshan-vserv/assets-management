@@ -5,7 +5,7 @@ import { Routes, Route } from "react-router-dom";
 import AssetRoute from "./Asset/AssetRoute";
 import Test from "../pages/Test";
 import ServiceDeskRoute from "./ServiceDesk/ServiceDeskRoute";
-import DashboardRoute from "./Dashboard/DashboardRoute";
+import DashboardRoute from "./Dashboard/DashboardRoute.jsx";
 
 const Body = ({ nav, setNav }) => {
   return (

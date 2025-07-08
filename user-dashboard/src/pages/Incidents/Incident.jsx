@@ -6,11 +6,11 @@ import {
 import {
   Box,
   Button,
-  IconButton,
   Menu,
   MenuItem,
-  Tooltip,
 } from "@mui/material";
+import { useSelector } from "react-redux";
+import { Autocomplete, TextField } from "@mui/material";
 import { AiOutlineFileExcel, AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
@@ -30,11 +30,16 @@ const csvConfig = mkConfig({
   filename: "Incident-Report",
 });
 
+const ticketOptions = ["My Tickets", "Other User Tickets"];
+
 function Incident() {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [assignedToViewModal, setAssignedToViewModal] = useState(false);
+  const [ticketType, setTicketType] = useState(ticketOptions[0]); // Default: My Tickets
 
   const fetchIncident = async () => {
     try {
@@ -52,7 +57,22 @@ function Incident() {
     fetchIncident();
   }, []);
 
-  console.log(data);
+  // Filter data based on ticketType
+  const filteredData = useMemo(() => {
+    if (ticketType === "My Tickets") {
+      return data.filter(
+        (item) => item.userId === user?.userId
+      );
+    } else if (ticketType === "Other User Tickets") {
+      return data.filter(
+        (item) =>
+          item.userId !== user?.userId &&
+          item.submitter &&
+          item.submitter.userId === user?.userId
+      );
+    }
+    return data;
+  }, [data, ticketType, user]);
 
   const columns = useMemo(
     () => [
@@ -182,7 +202,7 @@ function Incident() {
   };
 
   const table = useMaterialReactTable({
-    data,
+    data: filteredData,
     columns,
     getRowId: (row) => row?._id?.toString(),
     enableRowSelection: true,
@@ -192,7 +212,7 @@ function Incident() {
     },
     renderTopToolbarCustomActions: ({ table }) => {
       return (
-        <Box>
+        <Box className="flex flex-wrap items-center w-full">
           <Button
             onClick={() => navigate("/new-incident")}
             variant="contained"
@@ -208,6 +228,42 @@ function Incident() {
           >
             New
           </Button>
+          <Autocomplete
+            className="w-40"
+            sx={{
+              ml: 2,
+              mt: 1,
+              mb: 1,
+              "& .MuiInputBase-root": {
+                borderRadius: "0.35rem",
+                backgroundColor: "#f9fafb",
+                fontSize: "0.85rem",
+                border: "1px solid #e2e8f0",
+                transition: "all 0.3s ease",
+              },
+              "& .MuiInputBase-root:hover": {
+                borderColor: "#94a3b8",
+              },
+            }}
+            options={ticketOptions}
+            value={ticketType}
+            onChange={(_, newValue) => setTicketType(newValue || ticketOptions[0])}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                placeholder="Select"
+                InputProps={{
+                  ...params.InputProps,
+                  disableUnderline: true,
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  style: { fontSize: "0.85rem", padding: "8px" },
+                }}
+              />
+            )}
+          />
           <Button
             variant="contained"
             size="small"
@@ -330,7 +386,192 @@ function Incident() {
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
         <h2 className="text-md font-semibold text-start">MY INCIDENTS</h2>
+        {/* <Box className="flex flex-wrap items-center w-full">
+          <Button
+            onClick={() => navigate("/new-incident")}
+            variant="contained"
+            size="small"
+            startIcon={<AddCircleOutlineIcon />}
+            sx={{
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+            }}
+          >
+            New
+          </Button>
+          <Autocomplete
+            className="w-40"
+            sx={{
+              ml: 2,
+              mt: 1,
+              mb: 1,
+              "& .MuiInputBase-root": {
+                borderRadius: "0.35rem",
+                backgroundColor: "#f9fafb",
+                fontSize: "0.85rem",
+                border: "1px solid #e2e8f0",
+                transition: "all 0.3s ease",
+              },
+              "& .MuiInputBase-root:hover": {
+                borderColor: "#94a3b8",
+              },
+            }}
+            options={ticketOptions}
+            value={ticketType}
+            onChange={(_, newValue) => setTicketType(newValue || ticketOptions[0])}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                placeholder="Select"
+                InputProps={{
+                  ...params.InputProps,
+                  disableUnderline: true,
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  style: { fontSize: "0.85rem", padding: "8px" },
+                }}
+              />
+            )}
+          />
+          <Button
+            variant="contained"
+            size="small"
+            startIcon={<MdDashboard size={16} />}
+            onClick={handleClick}
+            sx={{
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+              ml: 1,
+            }}
+          >
+            Action
+          </Button>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+          >
+            <MenuItem
+              onClick={handleChangeStatus}
+              sx={{ fontSize: "0.875rem" }}
+            >
+              Change Status
+            </MenuItem>
+          </Menu>
+          <Button
+            onClick={handlePdfData}
+            startIcon={<AiOutlineFilePdf />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export as PDF
+          </Button>
+          <Button
+            onClick={handleExportData}
+            startIcon={<AiOutlineFileExcel />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export All Data
+          </Button>
+          <Button
+            disabled={table.getPrePaginationRowModel().rows.length === 0}
+            onClick={() =>
+              handleExportRows(table.getPrePaginationRowModel().rows)
+            }
+            startIcon={<AiOutlineFileExcel />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export All Rows
+          </Button>
+          <Button
+            disabled={table.getRowModel().rows.length === 0}
+            onClick={() => handleExportRows(table.getRowModel().rows)}
+            startIcon={<AiOutlineFileExcel />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export Page Rows
+          </Button>
+          <Button
+            disabled={
+              !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
+            }
+            onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
+            startIcon={<AiOutlineFileExcel />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export Selected Rows
+          </Button>
+        </Box> */}
         <MaterialReactTable table={table} />
+        {assignedToViewModal && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+              <div className="bg-white rounded-md shadow-2xl w-[90%] max-w-3xl p-5 animate-fade-in">
+                <div className="flex justify-between items-center bg-blue-100 px-4 py-2 rounded-md">
+                  <h2 className="text-sm font-semibold text-blue-900">
+                    Technician Details
+                  </h2>
+                  <RxCrossCircled
+                    onClick={() => setAssignedToViewModal(false)}
+                    size={24}
+                    className="text-blue-700 flex items-center justify-center cursor-pointer"
+                  />
+                </div>
+                <div className="overflow-x-auto px-6 py-4">
+                  <table className="w-full border border-collapse">
+                    <thead>
+                      <tr className="bg-blue-50 text-gray-700 text-left">
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Emp Id
+                        </th>
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Email Id
+                        </th>
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Name
+                        </th>
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Mobile No
+                        </th>
+                        <th className="border px-4 py-2 text-sm font-medium">
+                          Designation
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr className="bg-white text-sm text-gray-900">
+                        <td className="border px-4 py-2">133</td>
+                        <td className="border px-4 py-2">
+                          deydebabratahooghly@gmail.com
+                        </td>
+                        <td className="border px-4 py-2">Debabrata Dey</td>
+                        <td className="border px-4 py-2">6291167601</td>
+                        <td className="border px-4 py-2"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

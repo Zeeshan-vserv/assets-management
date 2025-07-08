@@ -7,33 +7,27 @@ import {
   getAllCategory,
   getAllSubCategory,
 } from "../../api/IncidentCategoryRequest";
-import { toast } from "react-toastify";
 import { getAllAssets } from "../../api/AssetsRequest";
+import { createIncident } from "../../api/IncidentRequest";
+import { toast } from "react-toastify";
 import { getAllUsers } from "../../api/UserAuth";
-import { createIncident } from "../../api/IncidentRequest copy";
 
 function NewIncidents() {
   const user = useSelector((state) => state.authReducer.authData);
   const [isLoading, setIsLoading] = useState(true);
   const [selectUser, setSelectUser] = useState(false);
   const [category, setCategory] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [userData, setUserData] = useState({});
   const [subCategory, setSubCategory] = useState([]);
   const [assetData, setAssetData] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [userData, setUserData] = useState([]);
 
   const [formData, setFormData] = useState({
-    userId: "",
-    incidentId: "",
     subject: "",
     category: "",
     subCategory: "",
     loggedVia: "",
     description: "",
-    status: "",
-    sla: "",
-    tat: "",
-    feedback: "",
     attachment: "",
     submitter: {
       user: "",
@@ -41,8 +35,7 @@ function NewIncidents() {
       userContactNumber: "",
       userEmail: "",
       userDepartment: "",
-      // loggedBy: "",
-      // loggedInTime: "",
+      loggedBy: "",
     },
     assetDetails: {
       asset: "",
@@ -77,8 +70,8 @@ function NewIncidents() {
       const responseSubCategory = await getAllSubCategory();
       setSubCategory(responseSubCategory?.data?.data || []);
 
-      const responseReportingManager = await getAllUsers();
-      setUsers(responseReportingManager?.data || []);
+         const responseReportingManager = await getAllUsers();
+            setUsers(responseReportingManager?.data || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
@@ -93,6 +86,10 @@ function NewIncidents() {
     try {
       setIsLoading(true);
       const response = await getUserById(user.userId);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+
       setUserData(response?.data || []);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -108,14 +105,10 @@ function NewIncidents() {
   console.log(userData._id);
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
 
-    if (name === "attachment") {
-      setFormData((prev) => ({
-        ...prev,
-        attachment: files[0], // store the File object
-      }));
-    } else if (name.includes(".")) {
+    // Handle nested properties
+    if (name.includes(".")) {
       const [section, key] = name.split(".");
       setFormData((prev) => ({
         ...prev,
@@ -182,6 +175,17 @@ function NewIncidents() {
       form.append("sla", formData.sla);
       form.append("tat", formData.tat);
       form.append("feedback", formData.feedback);
+      // Append all fields to form data
+      form.append("userId", user?.userId);
+      form.append("subject", formData.subject);
+      form.append("category", formData.category);
+      form.append("subCategory", formData.subCategory);
+      form.append("loggedVia", formData.loggedVia);
+      form.append("description", formData.description);
+      form.append("status", formData.status);
+      form.append("sla", formData.sla);
+      form.append("tat", formData.tat);
+      form.append("feedback", formData.feedback);
 
       // Nested objects must be stringified
       form.append("submitter", JSON.stringify(submitterData));
@@ -197,6 +201,7 @@ function NewIncidents() {
       // console.log(JSON.stringify(submitterData));
       
 
+      await createIncident(form);
       await createIncident(form);
 
       toast.success("Incident Added Successfully");
@@ -284,9 +289,8 @@ function NewIncidents() {
                 </NavLink>
               </div>
             </div>
-
             <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
-              <div className="flex items-center w-[46%] max-lg:w-[100%]">
+              <div className="flex items-center w-[46%]">
                 <label
                   htmlFor="subject"
                   className="w-[28%] text-xs font-semibold text-slate-600"
@@ -302,7 +306,7 @@ function NewIncidents() {
                   onChange={handleChange}
                 />
               </div>
-              <div className="flex items-center w-[46%] max-lg:w-[100%]">
+              <div className="flex items-center w-[46%]">
                 <label
                   htmlFor="category"
                   className="w-[28%] text-xs font-semibold text-slate-600"
@@ -338,7 +342,7 @@ function NewIncidents() {
                   )}
                 />
               </div>
-              <div className="flex items-center w-[46%] max-lg:w-[100%]">
+              <div className="flex items-center w-[46%]">
                 <label
                   htmlFor="subCategory"
                   className="w-[28%] text-xs font-semibold text-slate-600"
@@ -458,10 +462,10 @@ function NewIncidents() {
                 <>
                   <div className="flex items-center w-[46%] max-lg:w-[100%]">
                     <label
-                      htmlFor="user"
-                      className="w-[28%] text-xs font-semibold text-slate-600"
+                      htmlFor=""
+                      className="w-[25%] text-xs font-semibold text-slate-600"
                     >
-                      User
+                      User<span className="text-red-500 text-base">*</span>
                     </label>
                     <Autocomplete
                       className="w-[65%]"
@@ -496,8 +500,8 @@ function NewIncidents() {
                         <TextField
                           {...params}
                           variant="standard"
-                          className="text-sm text-slate-800"
-                          placeholder="Select Users"
+                          className="text-xs text-slate-600"
+                          placeholder="Select User"
                           inputProps={{
                             ...params.inputProps,
                             style: { fontSize: "0.8rem" },

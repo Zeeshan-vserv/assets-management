@@ -1,14 +1,14 @@
 import React from "react";
-import { FaDesktop } from "react-icons/fa";
+import { MdOutlineDashboard } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 function RequestDashboard() {
   const navigate = useNavigate();
   const serviceRequestData = [
-    {
-      name: "",
-      value: "",
-    },
-    
+    { id: "1", newCount: 1, description: "" },
+    { id: "2", approvalPendingCount: 2, description: "" },
+    { id: "3", provisioningCount: 9, description: "" },
+    { id: "4", assignedCount: 7, description: "" },
+    { id: "5", inProgressCount: 5, description: "" },
   ];
   return (
     <>
@@ -20,7 +20,7 @@ function RequestDashboard() {
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-3 py-2 rounded-md text-sm text-white transition-all"
           >
             <div className="flex flex-row justify-between items-center gap-1">
-              <FaDesktop size={12} />
+              <MdOutlineDashboard size={12} />
               <span>Go To Module</span>
             </div>
           </button>

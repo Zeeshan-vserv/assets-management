@@ -15,6 +15,7 @@ import { getAllIncident } from "../../../api/IncidentRequest";
 import { NavLink } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
+import { getAllSLAs } from "../../../api/slaRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -25,6 +26,7 @@ const csvConfig = mkConfig({
 
 const IncidentsData = () => {
   const [data, setData] = useState([]);
+  const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchDepartment = async () => {
@@ -44,7 +46,23 @@ const IncidentsData = () => {
     fetchDepartment();
   }, []);
 
-  console.log(data);
+  const fetchSlaCreation = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllSLAs();
+      setSlaData(response?.data?.data[0] || []);
+    } catch (error) {
+      console.error("Error fetching holiday calendar:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSlaCreation();
+  }, []);
+
+  console.log("sladata",slaData , "data", data[0].createdAt);
 
   const columns = useMemo(
     () => [
@@ -348,7 +366,7 @@ const IncidentsData = () => {
     positionToolbarAlertBanner: "bottom",
     muiPaginationProps: {
       color: "secondary",
-      rowsPerPageOptions: [10, 15, 20],
+      rowsPerPageOptions: [5, 10, 15],
       shape: "rounded",
       variant: "outlined",
     },

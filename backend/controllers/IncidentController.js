@@ -72,6 +72,11 @@ export const createIncident = async (req, res) => {
             roomNo: locationDetails?.roomNo || user?.roomNo || ""
         };
 
+        let sla = incidentData.sla;
+if (!sla || sla === "undefined" || sla === "") {
+  sla = undefined; // Let Mongoose use the default
+}
+
         const newIncident = new IncidentModel({
             userId,
             incidentId: newIncidentId,
@@ -81,7 +86,7 @@ export const createIncident = async (req, res) => {
             loggedVia: incidentData.loggedVia,
             description: incidentData.description,
             status: incidentData.status,
-            sla: incidentData.sla,
+            sla: sla,
             tat: incidentData.tat,
             feedback: incidentData.feedback,
             attachment: attachmentPath,

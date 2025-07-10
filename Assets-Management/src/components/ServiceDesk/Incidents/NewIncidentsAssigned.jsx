@@ -11,11 +11,12 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { Autocomplete, TextField } from "@mui/material";
 import { getAllDepartment } from "../../../api/DepartmentRequest";
-import { getAllIncident } from "../../../api/IncidentRequest";
+import { getAllIncident, updateIncident } from "../../../api/IncidentRequest";
 import { NavLink } from "react-router-dom";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
 import { getAllSLAs } from "../../../api/slaRequest";
+import { getAllUsers } from "../../../api/AuthRequest";
+import { useSelector } from "react-redux";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -24,10 +25,18 @@ const csvConfig = mkConfig({
   filename: "Assets-Management-Department.csv",
 });
 
-const IncidentsData = () => {
+const NewIncidentsAssigned = () => {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [newAssignedModal, setNewAssignedModal] = useState(false);
+  const [newIncidentAssignedTo, setNewIncidentAssigendTo] = useState({
+    role: "",
+    technician: "",
+  });
+  const [technicianData, setTechnicianData] = useState([]);
+  const [assignedId, setAssignedId] = useState(null);
 
   const fetchDepartment = async () => {
     try {
@@ -62,7 +71,27 @@ const IncidentsData = () => {
     fetchSlaCreation();
   }, []);
 
-  // console.log("sladata",slaData , "data", data[0].createdAt);
+  const fetchTechnicans = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllUsers();
+      setTechnicianData(response?.data || []);
+    } catch (error) {
+      console.error("Error fetching users role:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTechnicans();
+  }, []);
+
+  const filteredTechnicians = useMemo(() => {
+    return technicianData?.filter(
+      (tech) => tech.userRole === newIncidentAssignedTo.role
+    );
+  }, [technicianData, newIncidentAssignedTo.role]);
 
   const columns = useMemo(
     () => [
@@ -111,9 +140,29 @@ const IncidentsData = () => {
         header: "Severity",
       },
       {
-        accessorKey: "classificaton.technician",
+        id: "assignedTo",
         header: "Assigned To",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <Button
+            onClick={() => handleAssignedTo(row.original)}
+            color="error"
+            sx={{
+              textTransform: "none",
+              color: "white",
+              backgroundColor: "#4bcf5a",
+              borderRadius: "4px",
+              padding: "4px 8px",
+              fontSize: "0.72rem",
+              fontWeight: 500,
+            }}
+          >
+            New Assigned
+          </Button>
+        ),
       },
+
       {
         accessorKey: "departmentName",
         header: "SLA",
@@ -150,6 +199,35 @@ const IncidentsData = () => {
     ],
     [isLoading]
   );
+  const handleAssignedTo = (id) => {
+    setNewAssignedModal(true);
+    setAssignedId(id);
+  };
+
+  const newIncidentsAssignedToChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setNewIncidentAssigendTo((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const addNewAssignedToHandler = async (e) => {
+    e.preventDefault();
+    try {
+      const updateData = {
+        status: "Task Assigned",
+        changedBy: user.userId,
+        role: newIncidentAssignedTo.role,
+        technician: newIncidentAssignedTo.technician,
+      };
+      const response = await updateIncident(assignedId._id, updateData);
+      // console.log("sub", assignedId._id, updateData);
+    } catch (error) {
+      console.log("Error updateing technicians", error);
+    }
+  };
+  // console.log("id", assignedId);
 
   //Exports
   const handleExportRows = (rows) => {
@@ -241,62 +319,6 @@ const IncidentsData = () => {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box className="flex flex-wrap w-full">
-          <NavLink to="/main/ServiceDesk/NewIncident">
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<AddCircleOutlineIcon />}
-              sx={{
-                backgroundColor: "#2563eb",
-                color: "#fff",
-                textTransform: "none",
-                mt: 1,
-                mb: 1,
-              }}
-            >
-              New Asset
-            </Button>
-          </NavLink>
-          <Autocomplete
-            className="w-[15%]"
-            sx={{
-              ml: 2,
-              mt: 1,
-              mb: 1,
-              "& .MuiInputBase-root": {
-                borderRadius: "0.35rem",
-                backgroundColor: "#f9fafb",
-                fontSize: "0.85rem",
-                border: "1px solid #e2e8f0",
-                transition: "all 0.3s ease",
-              },
-              "& .MuiInputBase-root:hover": {
-                borderColor: "#94a3b8",
-              },
-            }}
-            options={[
-              "My Tickets",
-              "Group Tickets",
-              "Department Tickets",
-              "All Tickets",
-            ]}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="standard"
-                placeholder="Select"
-                InputProps={{
-                  ...params.InputProps,
-                  disableUnderline: true,
-                }}
-                inputProps={{
-                  ...params.inputProps,
-                  style: { fontSize: "0.85rem", padding: "8px" },
-                }}
-              />
-            )}
-          />
-
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -387,89 +409,87 @@ const IncidentsData = () => {
     }),
   });
 
-  const cardData = [
-    {
-      id: "1",
-      totalCount: "100",
-      description: "New",
-    },
-    {
-      id: "2",
-      storeCount: "70",
-      description: "Assigned",
-    },
-    {
-      id: "3",
-      allocatedCount: "40",
-      description: "In-Progress",
-    },
-    {
-      id: "4",
-      inRepairCount: "30",
-      description: "Pause",
-    },
-    {
-      id: "5",
-      inTransitCount: "10",
-      description: "Resolved",
-    },
-    {
-      id: "6",
-      handOverCount: "0",
-      description: "Cancelled",
-    },
-    {
-      id: "7",
-      underRecoveryCount: "0",
-      description: "Reopened",
-    },
-    {
-      id: "8",
-      discardReplacedCount: "0",
-      description: "Closed",
-    },
-    {
-      id: "9",
-      theftLostCount: "0",
-      description: "Converted to SR",
-    },
-    {
-      id: "11",
-      soldCount: "0",
-      description: "Total",
-    },
-  ];
-
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">INCIDENT DATA</h2>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-          {cardData.map((item) => {
-            const countKey = Object.keys(item).find((key) =>
-              key.endsWith("Count")
-            );
-            const count = item[countKey];
-
-            return (
-              <div
-                key={item?.id}
-                className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition"
-              >
-                <h2 className="font-semibold text-xl text-blue-600 mb-1">
-                  {count}
-                </h2>
-                <span className="text-sm">{item.description}</span>
-              </div>
-            );
-          })}
-        </div>
-
+        <h2 className="text-lg font-semibold mb-6 text-start">
+          ASSIGNED NEW INCIDENT DATA
+        </h2>
         <MaterialReactTable table={table} />
+
+        {newAssignedModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+              <h2 className="text-xl font-medium text-gray-800 mb-6">
+                Select Technicians
+              </h2>
+              <form onSubmit={addNewAssignedToHandler} className="space-y-4">
+                <div className="flex flex-row justify-center items-center">
+                  <label
+                    htmlFor="role"
+                    className="text-sm font-medium text-gray-600 mb-1 w-[30%]"
+                  >
+                    Select<span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="role"
+                    name="role"
+                    value={newIncidentAssignedTo?.role || ""}
+                    onChange={newIncidentsAssignedToChangeHandler}
+                    required
+                    placeholder="Select Technicians"
+                    className="w-[70%] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none transition-all cursor-pointer"
+                  >
+                    <option value=""></option>
+                    <option value="L1 Technician">L1 Technician</option>
+                    <option value="L2 Technician">L2 Technician</option>
+                    <option value="L3 Technician">L3 Technician</option>
+                  </select>
+                </div>
+                <div className="flex flex-row justify-center items-center">
+                  <label
+                    htmlFor="componentName"
+                    className="text-sm font-medium text-gray-600 mb-1 w-[30%]"
+                  >
+                    Select<span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="technician"
+                    value={newIncidentAssignedTo.technician}
+                    onChange={newIncidentsAssignedToChangeHandler}
+                    required
+                    placeholder="Select Technicians"
+                    className="w-[70%] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none transition-all cursor-pointer"
+                  >
+                    <option value=""></option>
+                    {filteredTechnicians.map((tech) => (
+                      <option key={tech._id}>{tech.emailAddress}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-4 border-t mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setNewAssignedModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
 };
 
-export default IncidentsData;
+export default NewIncidentsAssigned;

@@ -68,21 +68,21 @@ function SlaCreation() {
           </IconButton>
         ),
       },
-      {
-        id: "delete",
-        header: "Delete",
-        size: 80,
-        enableSorting: false,
-        Cell: ({ row }) => (
-          <IconButton
-            onClick={() => handleDeleteSlaCreation(row.original._id)}
-            color="error"
-            aria-label="delete"
-          >
-            <DeleteIcon />
-          </IconButton>
-        ),
-      },
+      // {
+      //   id: "delete",
+      //   header: "Delete",
+      //   size: 80,
+      //   enableSorting: false,
+      //   Cell: ({ row }) => (
+      //     <IconButton
+      //       onClick={() => handleDeleteSlaCreation(row.original._id)}
+      //       color="error"
+      //       aria-label="delete"
+      //     >
+      //       <DeleteIcon />
+      //     </IconButton>
+      //   ),
+      // },
     ],
     [isLoading]
   );
@@ -141,7 +141,9 @@ function SlaCreation() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          <Button
+          {console.log(data.length === 0)}
+          {data.length === 0 && (
+            <Button
             onClick={() => navigate("/main/configuration/new-sla-creation")}
             variant="contained"
             size="small"
@@ -156,7 +158,9 @@ function SlaCreation() {
           >
             New
           </Button>
-          <Button
+          )}
+          
+          {/* <Button
             onClick={handleActionClick}
             variant="contained"
             size="small"
@@ -174,7 +178,7 @@ function SlaCreation() {
           <Menu anchorEl={anchorEl} open={open} onClose={handleCloseMenu}>
             <MenuItem onClick={handleChangeStatus}>Change Ststus</MenuItem>
             <MenuItem onClick={handleDefault}>Default</MenuItem>
-          </Menu>
+          </Menu> */}
         </Box>
       );
     },
@@ -220,7 +224,7 @@ function SlaCreation() {
           SERVICE LEVEL AGREEMENT
         </h2>
         <MaterialReactTable table={table} />
-        {deleteConfirmationModal && (
+        {/* {deleteConfirmationModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
               <h2 className="text-xl font-semibold text-red-600 mb-3">
@@ -249,7 +253,7 @@ function SlaCreation() {
               </form>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </>
   );

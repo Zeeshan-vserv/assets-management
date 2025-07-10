@@ -2,29 +2,120 @@ import React, { useRef, useState } from "react";
 import { useParams } from "react-router";
 import { MdOutlineReply } from "react-icons/md";
 import { FaPlus, FaMinus } from "react-icons/fa";
+import { getIncidentById } from "../../api/IncidentRequest";
+import { useEffect } from "react";
+import dayjs from "dayjs";
+import { getUserById } from "../../api/UserAuth";
 // import { Editor } from "@tinymce/tinymce-react";
 
 function IncidentDetails() {
   const { id } = useParams();
   const [openIndex, setOpenIndex] = useState(null);
-  // const editorRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [userDets, setUserDets] = useState("");
+  const [formData, setFormData] = useState({
+    subject: "",
+    category: "",
+    subCategory: "",
+    loggedVia: "",
+    description: "",
+    submitter: {
+      user: "",
+      userContactNumber: "",
+      userEmail: "",
+      userDepartment: "",
+      loggedBy: "",
+    },
+    assetDetails: {
+      asset: "",
+      make: "",
+      model: "",
+      serialNo: "",
+    },
+    locationDetails: {
+      location: "",
+      subLocation: "",
+      floor: "",
+      roomNo: "",
+    },
+    classificaton: {
+      excludeSLA: false,
+      severityLevel: "",
+      supportDepartmentName: "",
+      supportGroupName: "",
+      technician: "",
+    },
+  });
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getIncidentById(id);
+      if (response?.data?.data) {
+        setFormData(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching incident:", error);
+      toast.error("Failed to load incident data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchUser = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getUserById(formData.userId);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setUserDets(response?.data || {});
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      toast.error("Failed to fetch user details");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (formData.userId) {
+      fetchUser();
+    }
+  }, [formData.userId]);  
 
   const incidentDetails = [
-    { label: "Status", value: "Resolved" },
-    { label: "Priority", value: "Severity - 3" },
-    { label: "Subject", value: "VC connect issue" },
-    { label: "Support Dept.", value: "IT Support" },
-    { label: "Support Group", value: "VIDEO CONFERENCE" },
-    { label: "Logged Time", value: "6/30/2025 – 12:38" },
-    { label: "Email", value: "deydebabratahooghly@gmail.com" },
-    { label: "Business Unit", value: "Steel Authority of India Ltd" },
-    { label: "Asset", value: "CALIBVC6THCONF" },
-    { label: "Asset S.No.", value: "POLY6TH" },
-    { label: "User", value: "Debabrata Dey" },
-    { label: "VIP User", value: "NO" },
-    { label: "Assigned To", value: "Debabrata Dey" },
-    { label: "Contact No.", value: "6291167601" },
-    { label: "Category", value: "VIDEO CONFERENCE" },
+    { label: "Status", value: formData.status || "" },
+    { label: "Priority", value: formData.classificaton.priorityLevel || "" },
+    { label: "Subject", value: formData.subject || "" },
+    {
+      label: "Support Dept.",
+      value: formData.classificaton.supportDepartmentName || "",
+    },
+    {
+      label: "Support Group",
+      value: formData.classificaton.supportGroupName || "",
+    },
+    {
+      label: "Logged Time",
+      value: formData.createdAt
+        ? dayjs(formData.createdAt).format("DD MMM YYYY, hh:mm A")
+        : "",
+    },
+    { label: "Email", value: formData.submitter.userEmail || "" },
+    { label: "Asset", value: formData.assetDetails.asset || "" },
+    { label: "Asset S.No.", value: formData.assetDetails.serialNo || "" },
+    { label: "User", value: formData.submitter.user || "" },
+    { label: "VIP User", value: userDets?.isVip ? "Yes" : "No" },
+    { label: "Assigned To", value: formData.classificaton.technician || "" },
+    {
+      label: "Contact No.",
+      value: formData.submitter.userContactNumber || "",
+    },
+    { label: "Category", value: formData.category || "" },
   ];
 
   const messages = [

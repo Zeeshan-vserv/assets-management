@@ -57,6 +57,7 @@ export const createIncident = async (req, res) => {
         submitter = {
             user: submitter?.user || user?.employeeName || "",
             userContactNumber: submitter?.userContactNumber || user?.mobileNumber || "",
+            userId: submitter?.userId || user?.userId || "",
             userEmail: submitter?.userEmail || user?.emailAddress || "",
             userDepartment: submitter?.userDepartment || user?.department || "",
             loggedBy: submitter?.loggedBy || user?.employeeName || "",
@@ -71,6 +72,11 @@ export const createIncident = async (req, res) => {
             roomNo: locationDetails?.roomNo || user?.roomNo || ""
         };
 
+        let sla = incidentData.sla;
+if (!sla || sla === "undefined" || sla === "") {
+  sla = undefined; // Let Mongoose use the default
+}
+
         const newIncident = new IncidentModel({
             userId,
             incidentId: newIncidentId,
@@ -80,7 +86,7 @@ export const createIncident = async (req, res) => {
             loggedVia: incidentData.loggedVia,
             description: incidentData.description,
             status: incidentData.status,
-            sla: incidentData.sla,
+            sla: sla,
             tat: incidentData.tat,
             feedback: incidentData.feedback,
             attachment: attachmentPath,
@@ -149,7 +155,7 @@ export const updateIncident = async (req, res) => {
             }
         });
 
-        // Track status change
+        // Track status change0
         let statusChanged = false;
         if (incident.status !== status) {
             statusChanged = true;

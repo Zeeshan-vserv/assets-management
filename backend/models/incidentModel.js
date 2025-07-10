@@ -7,7 +7,7 @@ const statusEntrySchema = new mongoose.Schema({
 }, { _id: false });
 
 const fieldChangeEntrySchema = new mongoose.Schema({
-    changes: Object, // { fieldName: { from, to }, ... }
+    changes: Object, 
     changedAt: { type: Date, default: Date.now },
     changedBy: String
 }, { _id: false });
@@ -21,12 +21,14 @@ const incidentSchema = mongoose.Schema({
     loggedVia: String,
     description: String,
     status: {type: String, default:"New"},
-    sla: String,
+    sla: { type: Date, default: Date.now },
+    isSla: {type: Boolean, default: true},
     tat: String,
     feedback: String,
     attachment: String,
     submitter:{
         user: String,
+        userId: String,
         userContactNumber: Number,
         userEmail: String,
         userDepartment: String,
@@ -48,6 +50,7 @@ const incidentSchema = mongoose.Schema({
     classificaton: {
         excludeSLA: {type: Boolean, default: false},
         severityLevel: String,
+        priorityLevel: String,
         supportDepartmentName: String,
         supportGroupName: String,
         technician: String

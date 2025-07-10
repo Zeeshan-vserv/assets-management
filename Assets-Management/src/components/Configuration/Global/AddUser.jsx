@@ -491,6 +491,7 @@ const AddUser = () => {
                   setFormData((prev) => ({ ...prev, userRole: value }))
                 }
                 options={[
+                  "Employee",
                   "GoCollect Support Department",
                   "Grievance Support Team",
                   "L1 Technician",

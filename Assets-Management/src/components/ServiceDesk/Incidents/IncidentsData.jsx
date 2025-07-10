@@ -15,7 +15,7 @@ import { getAllIncident } from "../../../api/IncidentRequest";
 import { NavLink } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
-import { getAllSLAs } from "../../../api/slaRequest";
+import { getAllSLAs, getAllSLATimelines } from "../../../api/slaRequest";
 import SLAClock from "../../Configuration/SLA/SLAClock";
 
 const csvConfig = mkConfig({
@@ -29,6 +29,20 @@ const IncidentsData = () => {
   const [data, setData] = useState([]);
   const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [slaTimelineData, setSlaTimelineData] = useState([]);
+
+  const fetchSlaTimelineData = async () => {
+  try {
+    const response = await getAllSLATimelines();
+    setSlaTimelineData(response?.data?.data || []);
+  } catch (error) {
+    console.error("Error fetching SLA timelines:", error);
+  }
+};
+
+useEffect(() => {
+  fetchSlaTimelineData();
+}, []);
 
   const fetchDepartment = async () => {
     try {
@@ -64,6 +78,53 @@ const IncidentsData = () => {
   }, []);
 
   // console.log("sladata",slaData , "data", data[0].createdAt);
+
+  function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
+  let remainingMinutes = Math.round(hoursToAdd * 60);
+  let current = new Date(startDate);
+
+  // Helper: get business window for a given date
+  function getBusinessWindow(date) {
+    const weekDay = date.toLocaleString("en-US", { weekday: "long" });
+    const slot = slaTimeline.find(s => s.weekDay === weekDay);
+    if (!slot) return null;
+    // slot.startTime and slot.endTime are Date objects (time part only)
+    const start = new Date(date);
+    start.setHours(new Date(slot.startTime).getUTCHours(), new Date(slot.startTime).getUTCMinutes(), 0, 0);
+    const end = new Date(date);
+    end.setHours(new Date(slot.endTime).getUTCHours(), new Date(slot.endTime).getUTCMinutes(), 0, 0);
+    return { start, end };
+  }
+
+  while (remainingMinutes > 0) {
+    const window = getBusinessWindow(current);
+    if (!window) {
+      // No business hours today, go to next day
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    // If before business hours, jump to start
+    if (current < window.start) current = new Date(window.start);
+    // If after business hours, go to next day
+    if (current >= window.end) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    // Minutes left in today's business window
+    const minutesLeftToday = Math.floor((window.end - current) / 60000);
+    const minutesToAdd = Math.min(remainingMinutes, minutesLeftToday);
+    current = new Date(current.getTime() + minutesToAdd * 60000);
+    remainingMinutes -= minutesToAdd;
+    if (remainingMinutes > 0) {
+      // Go to next business day
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+    }
+  }
+  return current;
+}
 
   const columns = useMemo(
     () => [
@@ -115,39 +176,50 @@ const IncidentsData = () => {
         accessorKey: "classificaton.technician",
         header: "Assigned To",
       },
-      {
+     {
   accessorKey: "sla",
   header: "SLA Remaining",
   Cell: ({ row }) => {
     const incident = row.original;
+    const severity = incident?.classificaton?.severityLevel;
+    const loggedIn = new Date(incident?.createdAt || incident?.submitter?.loggedInTime);
 
-    const loggedIn = incident?.submitter?.loggedInTime;
-    const slaDeadline = incident?.sla;
+    if (!severity || !loggedIn || slaTimelineData.length === 0) return "N/A";
+
+    // Find SLA timeline for this severity
+    const cleanSeverity = severity.trim().toLowerCase();
+    const matchedTimeline = slaTimelineData.find(
+      (item) => item.priority?.trim()?.toLowerCase() === cleanSeverity
+    );
+
+    // Get SLA duration (e.g., "04:00" for 4 hours)
+    const resolution = matchedTimeline?.resolutionSLA || "00:30";
+    const [slaHours, slaMinutes] = resolution.split(":").map(Number);
+
+    // Calculate SLA deadline
+    const slaDeadline = new Date(loggedIn);
+    slaDeadline.setHours(slaDeadline.getHours() + slaHours);
+    slaDeadline.setMinutes(slaDeadline.getMinutes() + slaMinutes);
+
+    // Calculate remaining time in minutes
     const now = new Date();
+    const diffMs = slaDeadline - now;
+    const remainingMinutes = Math.floor(diffMs / 60000);
 
-    const serviceWindow = slaData?.serviceWindow;
-    const slaTimeline = slaData?.slaTimeline || [];
-
-    if (!loggedIn || !slaDeadline) return "N/A";
-
-    // ✅ Calculate remaining time in minutes (can be negative)
-    const remaining = SLAClock(now, slaDeadline, serviceWindow, slaTimeline);
-
-    const abs = Math.abs(remaining);
+    const abs = Math.abs(remainingMinutes);
     const hr = Math.floor(abs / 60);
     const min = abs % 60;
-    const formatted = `${hr > 0 ? `${hr} hr ` : ''}${min} min`;
 
-    const color = remaining >= 0 ? "green" : "red";
-    const icon = remaining >= 0 ? "⏳" : "❌";
-    const label = `${icon} ${remaining < 0 ? '-' : ''}${formatted}`;
+    const color = remainingMinutes < 0 ? "red" : "green";
+    const icon = remainingMinutes < 0 ? "❌" : "⏳";
+    const prefix = remainingMinutes < 0 ? "-" : "";
 
     return (
-      <span style={{ color, fontWeight: 'bold' }}>
-        {label}
+      <span style={{ color, fontWeight: "bold" }}>
+        {icon} {prefix}{hr} hr {min} min
       </span>
     );
-  }
+  },
 },
 
       {

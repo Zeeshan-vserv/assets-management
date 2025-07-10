@@ -29,6 +29,12 @@ const IncidentsData = () => {
   const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const [currentTime, setCurrentTime] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setCurrentTime(new Date()), 60000); // update every minute
+    return () => clearInterval(interval);
+  }, []);
+
   const fetchDepartment = async () => {
     try {
       setIsLoading(true);
@@ -62,7 +68,570 @@ const IncidentsData = () => {
     fetchSlaCreation();
   }, []);
 
-  console.log("sladata",slaData , "data", data[0].createdAt);
+  // console.log("sladata", slaData, "data", data[0].createdAt);
+
+  // const getSLAWorkingMinutes = (createdAtStr, slaTimeline) => {
+  //   const slaHoursByDay = {};
+  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
+  //     slaHoursByDay[weekDay] = {
+  //       start:
+  //         new Date(startTime).getUTCHours() * 60 +
+  //         new Date(startTime).getUTCMinutes(),
+  //       end:
+  //         new Date(endTime).getUTCHours() * 60 +
+  //         new Date(endTime).getUTCMinutes(),
+  //     };
+  //   });
+
+  //   let totalMinutes = 0;
+  //   let startDate = new Date(createdAtStr);
+  //   const now = new Date();
+
+  //   while (startDate < now) {
+  //     const dayName = startDate.toLocaleDateString("en-US", {
+  //       weekday: "long",
+  //       timeZone: "UTC",
+  //     });
+  //     const daySla = slaHoursByDay[dayName];
+
+  //     if (daySla) {
+  //       const [startMin, endMin] = [daySla.start, daySla.end];
+
+  //       const startHour = Math.floor(startMin / 60);
+  //       const startMinute = startMin % 60;
+  //       const endHour = Math.floor(endMin / 60);
+  //       const endMinute = endMin % 60;
+
+  //       const workStart = new Date(
+  //         Date.UTC(
+  //           startDate.getUTCFullYear(),
+  //           startDate.getUTCMonth(),
+  //           startDate.getUTCDate(),
+  //           startHour,
+  //           startMinute
+  //         )
+  //       );
+  //       let workEnd = new Date(
+  //         Date.UTC(
+  //           startDate.getUTCFullYear(),
+  //           startDate.getUTCMonth(),
+  //           startDate.getUTCDate(),
+  //           endHour,
+  //           endMinute
+  //         )
+  //       );
+
+  //       if (endMin < startMin) {
+  //         workEnd.setUTCDate(workEnd.getUTCDate() + 1);
+  //       }
+
+  //       const rangeStart = startDate > workStart ? startDate : workStart;
+  //       const rangeEnd = now < workEnd ? now : workEnd;
+
+  //       if (rangeStart < rangeEnd) {
+  //         const diff = (rangeEnd - rangeStart) / (1000 * 60);
+  //         totalMinutes += diff;
+  //       }
+  //     }
+
+  //     startDate.setUTCDate(startDate.getUTCDate() + 1);
+  //     startDate.setUTCHours(0, 0, 0, 0);
+  //   }
+
+  //   return totalMinutes;
+  // };
+
+  // const getSLAWorkingMinutes = (createdAtStr, slaTimeline) => {
+  //   const slaHoursByDay = {};
+
+  //   // Map SLA timelines to minutes
+  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
+  //     const start = new Date(startTime);
+  //     const end = new Date(endTime);
+
+  //     slaHoursByDay[weekDay] = {
+  //       start: start.getUTCHours() * 60 + start.getUTCMinutes(),
+  //       end: end.getUTCHours() * 60 + end.getUTCMinutes(),
+  //     };
+  //   });
+
+  //   let totalMinutes = 0;
+  //   let startDate = new Date(createdAtStr);
+  //   const now = new Date();
+
+  //   while (startDate < now) {
+  //     const dayName = startDate.toLocaleDateString("en-US", {
+  //       weekday: "long",
+  //       timeZone: "UTC",
+  //     });
+  //     const daySla = slaHoursByDay[dayName];
+
+  //     if (daySla) {
+  //       const [startMin, endMin] = [daySla.start, daySla.end];
+
+  //       const startHour = Math.floor(startMin / 60);
+  //       const startMinute = startMin % 60;
+  //       const endHour = Math.floor(endMin / 60);
+  //       const endMinute = endMin % 60;
+
+  //       const dayStart = new Date(
+  //         Date.UTC(
+  //           startDate.getUTCFullYear(),
+  //           startDate.getUTCMonth(),
+  //           startDate.getUTCDate(),
+  //           startHour,
+  //           startMinute
+  //         )
+  //       );
+  //       let dayEnd = new Date(
+  //         Date.UTC(
+  //           startDate.getUTCFullYear(),
+  //           startDate.getUTCMonth(),
+  //           startDate.getUTCDate(),
+  //           endHour,
+  //           endMinute
+  //         )
+  //       );
+
+  //       // Handle overnight shift
+  //       if (endMin < startMin) {
+  //         dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+  //       }
+
+  //       const effectiveStart = startDate > dayStart ? startDate : dayStart;
+  //       const effectiveEnd = now < dayEnd ? now : dayEnd;
+
+  //       if (effectiveStart < effectiveEnd) {
+  //         const diffMinutes =
+  //           (effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60);
+  //         totalMinutes += diffMinutes;
+  //       }
+  //     }
+
+  //     // Move to next day
+  //     startDate.setUTCDate(startDate.getUTCDate() + 1);
+  //     startDate.setUTCHours(0, 0, 0, 0);
+  //   }
+
+  //   return totalMinutes;
+  // };
+
+  // const getSLAWorkingMinutes = (
+  //   createdAtStr,
+  //   slaTimeline,
+  //   now = new Date()
+  // ) => {
+  //   const slaHoursByDay = {};
+
+  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
+  //     const start = new Date(startTime);
+  //     const end = new Date(endTime);
+
+  //     slaHoursByDay[weekDay] = {
+  //       start: start.getUTCHours() * 60 + start.getUTCMinutes(),
+  //       end: end.getUTCHours() * 60 + end.getUTCMinutes(),
+  //     };
+  //   });
+
+  //   let totalMinutes = 0;
+  //   let startDate = new Date(createdAtStr);
+
+  //   while (startDate < now) {
+  //     const dayName = startDate.toLocaleDateString("en-US", {
+  //       weekday: "long",
+  //       timeZone: "UTC",
+  //     });
+  //     const daySla = slaHoursByDay[dayName];
+
+  //     if (daySla) {
+  //       const [startMin, endMin] = [daySla.start, daySla.end];
+
+  //       const startHour = Math.floor(startMin / 60);
+  //       const startMinute = startMin % 60;
+  //       const endHour = Math.floor(endMin / 60);
+  //       const endMinute = endMin % 60;
+
+  //       const dayStart = new Date(
+  //         Date.UTC(
+  //           startDate.getUTCFullYear(),
+  //           startDate.getUTCMonth(),
+  //           startDate.getUTCDate(),
+  //           startHour,
+  //           startMinute
+  //         )
+  //       );
+  //       let dayEnd = new Date(
+  //         Date.UTC(
+  //           startDate.getUTCFullYear(),
+  //           startDate.getUTCMonth(),
+  //           startDate.getUTCDate(),
+  //           endHour,
+  //           endMinute
+  //         )
+  //       );
+
+  //       // Handle overnight shift
+  //       if (endMin < startMin) {
+  //         dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+  //       }
+
+  //       const effectiveStart = startDate > dayStart ? startDate : dayStart;
+  //       const effectiveEnd = now < dayEnd ? now : dayEnd;
+
+  //       if (effectiveStart < effectiveEnd) {
+  //         const diffMinutes =
+  //           (effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60);
+  //         totalMinutes += diffMinutes;
+  //       }
+  //     }
+
+  //     // Move to next day
+  //     startDate.setUTCDate(startDate.getUTCDate() + 1);
+  //     startDate.setUTCHours(0, 0, 0, 0);
+  //   }
+
+  //   return totalMinutes;
+  // };
+
+  // const getSLAWorkingMinutes = (
+  //   createdAtStr,
+  //   slaTimeline,
+  //   now = new Date()
+  // ) => {
+  //   const slaHoursByDay = {};
+
+  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
+  //     const start = new Date(startTime);
+  //     const end = new Date(endTime);
+
+  //     slaHoursByDay[weekDay] = {
+  //       start: start.getUTCHours() * 60 + start.getUTCMinutes(),
+  //       end: end.getUTCHours() * 60 + end.getUTCMinutes(),
+  //     };
+  //   });
+
+  //   let totalMinutes = 0;
+  //   let startDate = new Date(createdAtStr);
+
+  //   while (startDate < now) {
+  //     const dayName = startDate.toLocaleDateString("en-US", {
+  //       weekday: "long",
+  //       timeZone: "UTC",
+  //     });
+  //     const daySla = slaHoursByDay[dayName];
+
+  //     if (daySla) {
+  //       const [startMin, endMin] = [daySla.start, daySla.end];
+
+  //       const startHour = Math.floor(startMin / 60);
+  //       const startMinute = startMin % 60;
+  //       const endHour = Math.floor(endMin / 60);
+  //       const endMinute = endMin % 60;
+
+  //       const dayStart = new Date(
+  //         Date.UTC(
+  //           startDate.getUTCFullYear(),
+  //           startDate.getUTCMonth(),
+  //           startDate.getUTCDate(),
+  //           startHour,
+  //           startMinute
+  //         )
+  //       );
+  //       let dayEnd = new Date(
+  //         Date.UTC(
+  //           startDate.getUTCFullYear(),
+  //           startDate.getUTCMonth(),
+  //           startDate.getUTCDate(),
+  //           endHour,
+  //           endMinute
+  //         )
+  //       );
+
+  //       // Handle overnight shifts
+  //       if (endMin < startMin) {
+  //         dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+  //       }
+
+  //       const effectiveStart = startDate > dayStart ? startDate : dayStart;
+  //       const effectiveEnd = now < dayEnd ? now : dayEnd;
+
+  //       if (effectiveStart < effectiveEnd) {
+  //         const diffMinutes =
+  //           (effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60);
+  //         totalMinutes += diffMinutes;
+  //       }
+  //     }
+
+  //     // Move to next day
+  //     startDate.setUTCDate(startDate.getUTCDate() + 1);
+  //     startDate.setUTCHours(0, 0, 0, 0);
+  //   }
+
+  //   return totalMinutes;
+  // };
+  // const getSLAWorkingMinutes = (
+  //   createdAtStr,
+  //   slaTimeline,
+  //   now = new Date()
+  // ) => {
+  //   const slaHoursByDay = {};
+
+  //   // Map SLA timings to minutes for each weekday
+  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
+  //     const start = new Date(startTime);
+  //     const end = new Date(endTime);
+
+  //     slaHoursByDay[weekDay] = {
+  //       start: start.getUTCHours() * 60 + start.getUTCMinutes(),
+  //       end: end.getUTCHours() * 60 + end.getUTCMinutes(),
+  //     };
+  //     // console.log(slaHoursByDay[weekDay]);
+
+  //   });
+
+  //   let totalMinutes = 0;
+  //   let current = new Date(createdAtStr);
+
+  //   // console.log(current , now, "current and now");
+
+  //   while (current < now) {
+  //     const dayName = current.toLocaleDateString("en-US", {
+  //       weekday: "long",
+  //       timeZone: "UTC",
+  //     }
+  //   );
+  //   // console.log(dayName, "dayName")
+
+  //     const daySla = slaHoursByDay[dayName];
+
+  //     if (daySla) {
+  //       const { start: startMin, end: endMin } = daySla;
+
+  //       const startHour = Math.floor(startMin / 60);
+  //       const startMinute = startMin % 60;
+  //       const endHour = Math.floor(endMin / 60);
+  //       const endMinute = endMin % 60;
+
+  //       // console.log(startHour, startMinute, endHour, endMinute, "start and end time");
+
+  //       const dayStart = new Date(
+  //         Date.UTC(
+  //           current.getUTCFullYear(),
+  //           current.getUTCMonth(),
+  //           current.getUTCDate(),
+  //           startHour,
+  //           startMinute
+  //         )
+  //       );
+
+  //       let dayEnd = new Date(
+  //         Date.UTC(
+  //           current.getUTCFullYear(),
+  //           current.getUTCMonth(),
+  //           current.getUTCDate(),
+  //           endHour,
+  //           endMinute
+  //         )
+  //       );
+
+  //       console.log(dayStart, dayEnd, "dayStart and dayEnd");
+
+  //       // If SLA ends after midnight
+  //       if (endMin < startMin) {
+  //         dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
+  //       }
+
+  //       // Effective working time window for this day
+  //       const effectiveStart = current > dayStart ? current : dayStart;
+  //       const effectiveEnd = now < dayEnd ? now : dayEnd;
+
+  //       if (effectiveStart < effectiveEnd) {
+  //         const diff = (effectiveEnd - effectiveStart) / (1000 * 60); // in minutes
+  //         totalMinutes += diff;
+  //       }
+  //     }
+
+  //     // Go to next day at 00:00 UTC
+  //     current.setUTCDate(current.getUTCDate() + 1);
+  //     current.setUTCHours(0, 0, 0, 0);
+  //   }
+
+  //   return totalMinutes;
+  // };
+
+  // const getSLAWorkingMinutes = (
+  //   createdAtStr,
+  //   slaTimeline,
+  //   now = new Date()
+  // ) => {
+  //   const IST_OFFSET_MINUTES = 330; // 5 hours 30 mins = 330 mins
+  //   const slaHoursByDay = {};
+
+  //   // Convert SLA time range to minutes for each weekday in IST
+  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
+  //     const start = new Date(startTime);
+  //     const end = new Date(endTime);
+
+  //     // Assumes startTime/endTime are in UTC → convert to IST
+  //     const startISTMinutes =
+  //       (start.getUTCHours() * 60 +
+  //         start.getUTCMinutes() +
+  //         IST_OFFSET_MINUTES) %
+  //       (24 * 60);
+  //     const endISTMinutes =
+  //       (end.getUTCHours() * 60 + end.getUTCMinutes() + IST_OFFSET_MINUTES) %
+  //       (24 * 60);
+
+  //     slaHoursByDay[weekDay] = {
+  //       start: startISTMinutes,
+  //       end: endISTMinutes,
+  //     };
+  //     console.log(slaHoursByDay[weekDay]);
+
+  //   });
+
+  //   let totalMinutes = 0;
+  //   let current = new Date(createdAtStr);
+
+  //   while (current < now) {
+  //     // Convert `current` to IST
+  //     const currentIST = new Date(
+  //       current.getTime() + IST_OFFSET_MINUTES * 60000
+  //     );
+  //     const nowIST = new Date(now.getTime() + IST_OFFSET_MINUTES * 60000);
+
+  //     const dayName = currentIST.toLocaleDateString("en-US", {
+  //       weekday: "long",
+  //     });
+
+  //     const daySla = slaHoursByDay[dayName];
+
+  //     if (daySla) {
+  //       const { start: startMin, end: endMin } = daySla;
+
+  //       const startHour = Math.floor(startMin / 60);
+  //       const startMinute = startMin % 60;
+  //       const endHour = Math.floor(endMin / 60);
+  //       const endMinute = endMin % 60;
+
+  //       const dayStartIST = new Date(
+  //         Date.UTC(
+  //           currentIST.getFullYear(),
+  //           currentIST.getMonth(),
+  //           currentIST.getDate(),
+  //           0,
+  //           0
+  //         )
+  //       );
+  //       dayStartIST.setMinutes(startMin);
+
+  //       let dayEndIST = new Date(
+  //         Date.UTC(
+  //           currentIST.getFullYear(),
+  //           currentIST.getMonth(),
+  //           currentIST.getDate(),
+  //           0,
+  //           0
+  //         )
+  //       );
+  //       dayEndIST.setMinutes(endMin);
+
+  //       // If SLA end time is before start time → overnight shift
+  //       if (endMin < startMin) {
+  //         dayEndIST.setDate(dayEndIST.getDate() + 1);
+  //       }
+
+  //       const effectiveStart =
+  //         currentIST > dayStartIST ? currentIST : dayStartIST;
+  //       const effectiveEnd = nowIST < dayEndIST ? nowIST : dayEndIST;
+
+  //       if (effectiveStart < effectiveEnd) {
+  //         const diff = (effectiveEnd - effectiveStart) / (1000 * 60);
+  //         totalMinutes += diff;
+  //       }
+  //     }
+
+  //     // Move `current` to next day at 00:00 UTC
+  //     current.setUTCDate(current.getUTCDate() + 1);
+  //     current.setUTCHours(0, 0, 0, 0);
+  //   }
+
+  //   return Math.floor(totalMinutes);
+  // };
+
+  const getSLAWorkingMinutes = (
+    createdAtStr,
+    slaTimeline,
+    now = new Date()
+  ) => {
+    const slaHoursByDay = {};
+
+    // Convert SLA timeline to minutes (assumed already in IST)
+    slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
+      const start = new Date(startTime); // IST
+      const end = new Date(endTime); // IST
+
+      slaHoursByDay[weekDay] = {
+        start: start.getHours() * 60 + start.getMinutes(),
+        end: end.getHours() * 60 + end.getMinutes(),
+      };
+    });
+
+    let totalMinutes = 0;
+    let current = new Date(createdAtStr); // IST-based
+
+    while (current < now) {
+      const dayName = current.toLocaleDateString("en-US", {
+        weekday: "long",
+      });
+
+      const daySla = slaHoursByDay[dayName];
+
+      if (daySla) {
+        const { start: startMin, end: endMin } = daySla;
+
+        const startHour = Math.floor(startMin / 60);
+        const startMinute = startMin % 60;
+        const endHour = Math.floor(endMin / 60);
+        const endMinute = endMin % 60;
+
+        const dayStart = new Date(
+          current.getFullYear(),
+          current.getMonth(),
+          current.getDate(),
+          startHour,
+          startMinute
+        );
+
+        let dayEnd = new Date(
+          current.getFullYear(),
+          current.getMonth(),
+          current.getDate(),
+          endHour,
+          endMinute
+        );
+
+        // Handle overnight SLA (e.g. 10 PM to 6 AM)
+        if (endMin < startMin) {
+          dayEnd.setDate(dayEnd.getDate() + 1);
+        }
+
+        const effectiveStart = current > dayStart ? current : dayStart;
+        const effectiveEnd = now < dayEnd ? now : dayEnd;
+
+        if (effectiveStart < effectiveEnd) {
+          const diff = (effectiveEnd - effectiveStart) / (1000 * 60); // in minutes
+          totalMinutes += diff;
+        }
+      }
+
+      // Move to next day, midnight IST
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+    }
+
+    return Math.floor(totalMinutes);
+  };
 
   const columns = useMemo(
     () => [
@@ -114,10 +683,93 @@ const IncidentsData = () => {
         accessorKey: "classificaton.technician",
         header: "Assigned To",
       },
+      // {
+      //   accessorKey: "departmentName",
+      //   header: "SLA",
+      // },
+      // {
+      //   id: "slaTime",
+      //   header: "SLA Time",
+      //   Cell: ({ row }) => {
+      //     const createdAt = row.original.createdAt;
+      //     if (!createdAt || !slaData?.slaTimeline) return "-";
+
+      //     const minutes = getSLAWorkingMinutes(createdAt, slaData.slaTimeline);
+      //     const hours = Math.floor(minutes / 60);
+      //     const mins = Math.floor(minutes % 60);
+      //     return `${hours}h ${mins}m`;
+      //   },
+      // },
+      // {
+      //   id: "slaTime",
+      //   header: "SLA Time",
+      //   Cell: ({ row }) => {
+      //     const createdAt = row.original.createdAt;
+      //     if (!createdAt || !slaData?.slaTimeline) return "-";
+
+      //     // Pass currentTime for live updates
+      //     const minutes = getSLAWorkingMinutes(
+      //       createdAt,
+      //       slaData.slaTimeline,
+      //       currentTime
+      //     );
+      //     const hours = Math.floor(minutes / 60);
+      //     const mins = Math.floor(minutes % 60);
+      //     return `${hours}h ${mins}m`;
+      //   },
+      // },
+
+      // {
+      //   id: "slaTime",
+      //   header: "SLA Time",
+      //   Cell: ({ row }) => {
+      //     const createdAt = row.original.createdAt;
+      //     if (!createdAt || !slaData?.slaTimeline) return "-";
+
+      //     // Pass currentTime for live updates
+      //     const minutes = Math.floor(
+      //       getSLAWorkingMinutes(createdAt, slaData.slaTimeline, currentTime)
+      //     );
+      //     console.log(createdAt, slaData.slaTimeline, currentTime)
+
+      //     const days = Math.floor(minutes / (24 * 60));
+      //     const hours = Math.floor((minutes % (24 * 60)) / 60);
+      //     const mins = minutes % 60;
+
+      //     let result = "";
+      //     if (days > 0) result += `${days}d `;
+      //     if (hours > 0 || days > 0) result += `${hours}h `;
+      //     result += `${mins}m`;
+      //     return result.trim();
+      //   },
+      // },
+
       {
-        accessorKey: "departmentName",
-        header: "SLA",
+        id: "slaTime",
+        header: "SLA Time",
+        Cell: ({ row }) => {
+          const createdAt = row.original.createdAt;
+          if (!createdAt || !slaData?.slaTimeline) return "-";
+
+          // Get working minutes
+          const minutes = getSLAWorkingMinutes(
+            createdAt,
+            slaData.slaTimeline,
+            currentTime
+          );
+          const days = Math.floor(minutes / (24 * 60));
+          const hours = Math.floor((minutes % (24 * 60)) / 60);
+          const mins = Math.round(minutes % 60); // use round for accuracy
+
+          let result = "";
+          if (days > 0) result += `${days}d `;
+          if (hours > 0 || days > 0) result += `${hours}h `;
+          result += `${mins}m`;
+
+          return result.trim();
+        },
       },
+
       {
         accessorKey: "departmentName",
         header: "TAT",
@@ -148,7 +800,7 @@ const IncidentsData = () => {
         ),
       },
     ],
-    [isLoading]
+    [isLoading, slaData, currentTime]
   );
 
   //Exports
@@ -473,3 +1125,163 @@ const IncidentsData = () => {
 };
 
 export default IncidentsData;
+
+// import React, { useEffect, useMemo, useState } from "react";
+// import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
+// import { Box, CircularProgress } from "@mui/material";
+// import { getAllIncident } from "../../../api/IncidentRequest";
+// import { getAllSLAs } from "../../../api/slaRequest";
+
+// const getSLAWorkingMinutes = (createdAtStr, slaTimeline, now = new Date()) => {
+//   const slaHoursByDay = {};
+
+//   // Parse SLA timings into minutes in IST
+//   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
+//     const start = new Date(startTime);
+//     const end = new Date(endTime);
+
+//     slaHoursByDay[weekDay] = {
+//       startMinutes: start.getHours() * 60 + start.getMinutes(),
+//       endMinutes: end.getHours() * 60 + end.getMinutes(),
+//     };
+//   });
+
+//   let totalMinutes = 0;
+//   let current = new Date(createdAtStr);
+
+//   while (current < now) {
+//     const dayName = current.toLocaleDateString("en-US", { weekday: "long" });
+//     const sla = slaHoursByDay[dayName];
+
+//     if (sla) {
+//       const { startMinutes, endMinutes } = sla;
+
+//       const workStart = new Date(
+//         current.getFullYear(),
+//         current.getMonth(),
+//         current.getDate(),
+//         Math.floor(startMinutes / 60),
+//         startMinutes % 60,
+//         0
+//       );
+
+//       let workEnd = new Date(
+//         current.getFullYear(),
+//         current.getMonth(),
+//         current.getDate(),
+//         Math.floor(endMinutes / 60),
+//         endMinutes % 60,
+//         0
+//       );
+
+//       if (endMinutes <= startMinutes) {
+//         workEnd.setDate(workEnd.getDate() + 1);
+//       }
+
+//       const effectiveStart = current > workStart ? current : workStart;
+//       const effectiveEnd = now < workEnd ? now : workEnd;
+
+//       if (effectiveStart < effectiveEnd) {
+//         const diff = Math.floor((effectiveEnd - effectiveStart) / (1000 * 60));
+//         totalMinutes += diff;
+//       }
+//     }
+
+//     // Move to next day
+//     current.setDate(current.getDate() + 1);
+//     current.setHours(0, 0, 0, 0);
+//   }
+
+//   return totalMinutes;
+// };
+
+// const IncidentSLAView = () => {
+//   const [data, setData] = useState([]);
+//   const [slaData, setSlaData] = useState(null);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [currentTime, setCurrentTime] = useState(new Date());
+
+//   useEffect(() => {
+//     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       try {
+//         setIsLoading(true);
+//         const incidentsRes = await getAllIncident();
+//         const slaRes = await getAllSLAs();
+
+//         setData(incidentsRes?.data?.data || []);
+//         setSlaData(slaRes?.data?.data?.[0] || null);
+//       } catch (error) {
+//         console.error("Fetch error:", error);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+
+//     fetchData();
+//   }, []);
+
+//   const columns = useMemo(() => [
+//     {
+//       accessorKey: "incidentId",
+//       header: "Incident ID",
+//     },
+//     {
+//       accessorKey: "subject",
+//       header: "Subject",
+//     },
+//     {
+//       accessorKey: "category",
+//       header: "Category",
+//     },
+//     {
+//       accessorKey: "createdAt",
+//       header: "Created At",
+//       Cell: ({ cell }) =>
+//         new Date(cell.getValue()).toLocaleString("en-IN", {
+//           timeZone: "Asia/Kolkata",
+//         }),
+//     },
+//     {
+//       id: "slaTime",
+//       header: "SLA Time (IST)",
+//       Cell: ({ row }) => {
+//         const createdAt = row.original.createdAt;
+//         if (!createdAt || !slaData?.slaTimeline) return "-";
+
+//         const totalMinutes = getSLAWorkingMinutes(createdAt, slaData.slaTimeline, currentTime);
+//         const hours = Math.floor(totalMinutes / 60);
+//         const minutes = totalMinutes % 60;
+
+//         return `${hours}h ${minutes}m`;
+//       },
+//     },
+//   ], [slaData, currentTime]);
+
+//   const table = useMaterialReactTable({
+//     data,
+//     columns,
+//     getRowId: (row) => row._id,
+//     initialState: {
+//       pagination: { pageSize: 5 },
+//     },
+//     enablePagination: true,
+//   });
+
+//   return (
+//     <Box p={2}>
+//       <h2 style={{ fontSize: "1.2rem", marginBottom: "1rem" }}>Incident SLA Tracker</h2>
+//       {isLoading ? (
+//         <CircularProgress />
+//       ) : (
+//         <MaterialReactTable table={table} />
+//       )}
+//     </Box>
+//   );
+// };
+
+// export default IncidentSLAView;

@@ -21,7 +21,7 @@ const incidentSchema = mongoose.Schema({
     loggedVia: String,
     description: String,
     status: {type: String, default:"New"},
-    sla: { type: Date, default: Date.now },
+    sla: { type: Date },
     isSla: {type: Boolean, default: true},
     tat: String,
     feedback: String,

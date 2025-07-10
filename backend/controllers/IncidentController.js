@@ -1,112 +1,162 @@
 import AuthModel from "../models/authModel.js";
 import IncidentCounterModel from "../models/incidentCounterModel.js";
 import IncidentModel from "../models/incidentModel.js";
+import { SLACreationModel, SLATimelineModel } from "../models/slaModel.js";
 
-export const createIncident = async (req, res) => {
-    try {
-        const { userId, ...incidentData } = req.body;
-
-        if (!userId) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Fetch user details for defaults
-        const user = await AuthModel.findById(userId);
-
-        // Handle attachment
-        let attachmentPath = "";
-        if (req.file) {
-            attachmentPath = req.file.path;
-        }
-
-        // Atomically increment the incident counter
-        const counter = await IncidentCounterModel.findOneAndUpdate(
-            { name: "incident" },
-            { $inc: { seq: 1 } },
-            { new: true, upsert: true }
-        );
-
-        // Get current date in DDMMYYYY format
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const dateStr = `${day}${month}${year}`;
-
-        const newIncidentId = `INC${dateStr}${counter.seq}`;
-
-        // Parse nested fields if they are strings (from FormData)
-        let submitter = incidentData.submitter;
-        if (typeof submitter === "string") {
-            submitter = JSON.parse(submitter);
-        }
-        let assetDetails = incidentData.assetDetails;
-        if (typeof assetDetails === "string") {
-            assetDetails = JSON.parse(assetDetails);
-        }
-        let locationDetails = incidentData.locationDetails;
-        if (typeof locationDetails === "string") {
-            locationDetails = JSON.parse(locationDetails);
-        }
-        let classificaton = incidentData.classificaton;
-        if (typeof classificaton === "string") {
-            classificaton = JSON.parse(classificaton);
-        }
-
-        // Set default values for submitter if missing, using user details
-        submitter = {
-            user: submitter?.user || user?.employeeName || "",
-            userContactNumber: submitter?.userContactNumber || user?.mobileNumber || "",
-            userId: submitter?.userId || user?.userId || "",
-            userEmail: submitter?.userEmail || user?.emailAddress || "",
-            userDepartment: submitter?.userDepartment || user?.department || "",
-            loggedBy: submitter?.loggedBy || user?.employeeName || "",
-            loggedInTime: submitter?.loggedInTime || new Date()
-        };
-
-        // Set default values for locationDetails if missing, using user details
-        locationDetails = {
-            location: locationDetails?.location || user?.location || "",
-            subLocation: locationDetails?.subLocation || user?.subLocation || "",
-            floor: locationDetails?.floor || user?.floor || "",
-            roomNo: locationDetails?.roomNo || user?.roomNo || ""
-        };
-
-        let sla = incidentData.sla;
-if (!sla || sla === "undefined" || sla === "") {
-  sla = undefined; // Let Mongoose use the default
+// ✅ Utility: Get IST Time
+// Convert date to IST
+function getISTDate(date = new Date()) {
+  return new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
 }
 
-        const newIncident = new IncidentModel({
-            userId,
-            incidentId: newIncidentId,
-            subject: incidentData.subject,
-            category: incidentData.category,
-            subCategory: incidentData.subCategory,
-            loggedVia: incidentData.loggedVia,
-            description: incidentData.description,
-            status: incidentData.status,
-            sla: sla,
-            tat: incidentData.tat,
-            feedback: incidentData.feedback,
-            attachment: attachmentPath,
-            submitter,
-            assetDetails,
-            locationDetails,
-            classificaton,
-            statusTimeline: [{
-                status: "New",
-                changedAt: new Date(),
-                changedBy: userId
-            }]
-        });
+// Calculate SLA deadline
+function calculateSLADeadline(loggedInTime, slaHours, slaTimeline = [], serviceWindow = true) {
+  if (serviceWindow) {
+    return new Date(loggedInTime.getTime() + slaHours * 60 * 60 * 1000);
+  } else {
+    let remainingHours = slaHours;
+    let current = dayjs(loggedInTime);
+    let deadline = current;
 
-        await newIncident.save();
+    while (remainingHours > 0) {
+      const weekday = deadline.format('dddd');
+      const slot = slaTimeline.find(s => s.weekDay === weekday);
 
-        res.status(201).json({ success: true, data: newIncident, message: 'Incident created successfully' });
-    } catch (error) {
-        res.status(400).json({ message: 'An error has been occured while creating incident', error: error.message });
+      if (slot) {
+        const workStart = dayjs(deadline.format('YYYY-MM-DD') + 'T' + dayjs(slot.startTime).format('HH:mm'));
+        const workEnd = dayjs(deadline.format('YYYY-MM-DD') + 'T' + dayjs(slot.endTime).format('HH:mm'));
+
+        if (deadline.isBefore(workEnd)) {
+          const available = Math.max(0, workEnd.diff(dayjs.max(deadline, workStart), 'hour', true));
+          const used = Math.min(available, remainingHours);
+          remainingHours -= used;
+          deadline = deadline.add(used, 'hour');
+        }
+      }
+
+      if (remainingHours > 0) {
+        deadline = deadline.add(1, 'day').startOf('day');
+      }
     }
+
+    return deadline.toDate();
+  }
+}
+
+export const createIncident = async (req, res) => {
+  try {
+    const { userId, ...incidentData } = req.body;
+    if (!userId) return res.status(404).json({ message: "User not found" });
+
+    const user = await AuthModel.findById(userId);
+
+    let attachmentPath = "";
+    if (req.file) {
+      attachmentPath = req.file.path;
+    }
+
+    const counter = await IncidentCounterModel.findOneAndUpdate(
+      { name: "incident" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+
+    const now = getISTDate();
+    const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}`;
+    const newIncidentId = `INC${dateStr}${counter.seq}`;
+
+    let submitter = typeof incidentData.submitter === "string" ? JSON.parse(incidentData.submitter) : incidentData.submitter;
+    let assetDetails = typeof incidentData.assetDetails === "string" ? JSON.parse(incidentData.assetDetails) : incidentData.assetDetails;
+    let locationDetails = typeof incidentData.locationDetails === "string" ? JSON.parse(incidentData.locationDetails) : incidentData.locationDetails;
+    let classificaton = typeof incidentData.classificaton === "string" ? JSON.parse(incidentData.classificaton) : incidentData.classificaton;
+
+    const loggedInTime = submitter?.loggedInTime ? getISTDate(new Date(submitter.loggedInTime)) : now;
+
+    submitter = {
+      user: submitter?.user || user?.employeeName || "",
+      userContactNumber: submitter?.userContactNumber || user?.mobileNumber || "",
+      userId: submitter?.userId || user?.userId || "",
+      userEmail: submitter?.userEmail || user?.emailAddress || "",
+      userDepartment: submitter?.userDepartment || user?.department || "",
+      loggedBy: submitter?.loggedBy || user?.employeeName || "",
+      loggedInTime: loggedInTime,
+    };
+
+    locationDetails = {
+      location: locationDetails?.location || user?.location || "",
+      subLocation: locationDetails?.subLocation || user?.subLocation || "",
+      floor: locationDetails?.floor || user?.floor || "",
+      roomNo: locationDetails?.roomNo || user?.roomNo || "",
+    };
+
+    // ✅ SLA Calculation
+    const severity = classificaton?.severityLevel || "";
+    let resolutionHours = 24; // default
+    let slaTimeline = [];
+    let serviceWindow = true;
+
+    if (severity) {
+      const cleanSeverity = severity.replace(/[\s\-]/g, "").toLowerCase();
+      const allTimelines = await SLATimelineModel.find();
+      const matched = allTimelines.find(t =>
+        t.priority.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
+      );
+
+      if (matched?.resolutionSLA) {
+        const [h, m] = matched.resolutionSLA.split(":").map(Number);
+        resolutionHours = h + m / 60;
+      }
+    }
+
+    const slaConfig = await SLACreationModel.findOne({ default: true });
+    if (slaConfig) {
+      serviceWindow = slaConfig.serviceWindow;
+      slaTimeline = slaConfig.slaTimeline || [];
+    }
+
+    const slaDeadline = calculateSLADeadline(loggedInTime, resolutionHours, slaTimeline, serviceWindow);
+
+    // Save Incident
+    const newIncident = new IncidentModel({
+      userId,
+      incidentId: newIncidentId,
+      subject: incidentData.subject,
+      category: incidentData.category,
+      subCategory: incidentData.subCategory,
+      loggedVia: incidentData.loggedVia,
+      description: incidentData.description,
+      status: incidentData.status || "New",
+      sla: slaDeadline,
+      isSla: true,
+      tat: incidentData.tat || "",
+      feedback: incidentData.feedback || "",
+      attachment: attachmentPath,
+      submitter,
+      assetDetails,
+      locationDetails,
+      classificaton,
+      statusTimeline: [
+        {
+          status: "New",
+          changedAt: now,
+          changedBy: userId,
+        },
+      ],
+    });
+
+    await newIncident.save();
+
+    res.status(201).json({
+      success: true,
+      data: newIncident,
+      message: "Incident created successfully",
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: "An error occurred while creating incident",
+      error: error.message,
+    });
+  }
 };
 
 export const getAllIncident = async (req, res) => {

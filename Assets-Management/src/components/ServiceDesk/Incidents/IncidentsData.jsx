@@ -176,7 +176,7 @@ useEffect(() => {
         accessorKey: "classificaton.technician",
         header: "Assigned To",
       },
-     {
+    {
   accessorKey: "sla",
   header: "SLA Remaining",
   Cell: ({ row }) => {
@@ -184,27 +184,71 @@ useEffect(() => {
     const severity = incident?.classificaton?.severityLevel;
     const loggedIn = new Date(incident?.createdAt || incident?.submitter?.loggedInTime);
 
-    if (!severity || !loggedIn || slaTimelineData.length === 0) return "N/A";
+    // Use business hours from SLACreation
+    const businessHours = slaData?.slaTimeline || [];
 
-    // Find SLA timeline for this severity
-    const cleanSeverity = severity.trim().toLowerCase();
+    // Find SLA duration for this severity from slaTimelineData
+    const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
     const matchedTimeline = slaTimelineData.find(
-      (item) => item.priority?.trim()?.toLowerCase() === cleanSeverity
+      (item) => item.priority?.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
     );
-
-    // Get SLA duration (e.g., "04:00" for 4 hours)
     const resolution = matchedTimeline?.resolutionSLA || "00:30";
     const [slaHours, slaMinutes] = resolution.split(":").map(Number);
+    const totalHours = slaHours + slaMinutes / 60;
 
-    // Calculate SLA deadline
-    const slaDeadline = new Date(loggedIn);
-    slaDeadline.setHours(slaDeadline.getHours() + slaHours);
-    slaDeadline.setMinutes(slaDeadline.getMinutes() + slaMinutes);
+    // Calculate SLA deadline using business hours
+    const slaDeadline = addBusinessTime(loggedIn, totalHours, businessHours);
 
-    // Calculate remaining time in minutes
+    // Helper: Calculate remaining business minutes from now to deadline
+    function getBusinessMinutesBetween(now, end, slaTimeline) {
+      let minutes = 0;
+      let current = new Date(now);
+      while (current < end) {
+        // Get business window for current day
+        const weekDay = current.toLocaleString("en-US", { weekday: "long" });
+        const slot = slaTimeline.find(s => s.weekDay === weekDay);
+        if (!slot) {
+          // No business hours today, go to next day
+          current.setDate(current.getDate() + 1);
+          current.setHours(0, 0, 0, 0);
+          continue;
+        }
+        const start = new Date(current);
+        start.setHours(new Date(slot.startTime).getUTCHours(), new Date(slot.startTime).getUTCMinutes(), 0, 0);
+        const endWindow = new Date(current);
+        endWindow.setHours(new Date(slot.endTime).getUTCHours(), new Date(slot.endTime).getUTCMinutes(), 0, 0);
+
+        // If after business hours, go to next day
+        if (current >= endWindow) {
+          current.setDate(current.getDate() + 1);
+          current.setHours(0, 0, 0, 0);
+          continue;
+        }
+        // If before business hours, jump to start
+        if (current < start) current = new Date(start);
+
+        // Calculate minutes to count for this day
+        const until = end < endWindow ? end : endWindow;
+        const diff = Math.max(0, (until - current) / 60000);
+        minutes += diff;
+        current = new Date(until);
+        if (current < end) {
+          // Go to next business day
+          current.setDate(current.getDate() + 1);
+          current.setHours(0, 0, 0, 0);
+        }
+      }
+      return Math.round(minutes);
+    }
+
     const now = new Date();
-    const diffMs = slaDeadline - now;
-    const remainingMinutes = Math.floor(diffMs / 60000);
+    let remainingMinutes;
+    if (now < slaDeadline) {
+      remainingMinutes = getBusinessMinutesBetween(now, slaDeadline, businessHours);
+    } else {
+      // SLA breached: show negative overdue time
+      remainingMinutes = -getBusinessMinutesBetween(slaDeadline, now, businessHours);
+    }
 
     const abs = Math.abs(remainingMinutes);
     const hr = Math.floor(abs / 60);
@@ -221,7 +265,6 @@ useEffect(() => {
     );
   },
 },
-
       {
         accessorKey: "departmentName",
         header: "TAT",

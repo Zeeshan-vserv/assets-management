@@ -16,6 +16,7 @@ import { NavLink } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
 import { getAllSLAs } from "../../../api/slaRequest";
+import SLAClock from "../../Configuration/SLA/SLAClock";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -115,9 +116,41 @@ const IncidentsData = () => {
         header: "Assigned To",
       },
       {
-        accessorKey: "departmentName",
-        header: "SLA",
+        accessorKey: "sla",
+        header: "SLA Remaining",
+        Cell: ({ row }) => {
+          const incident = row.original;
+
+          const loggedIn = incident?.submitter?.loggedInTime;
+          const slaDeadline = incident?.sla;
+          const now = new Date();
+
+          const serviceWindow = slaData?.serviceWindow;
+          const slaTimeline = slaData?.slaTimeline || [];
+
+          if (!loggedIn || !slaDeadline) return "N/A";
+
+          // ✅ Calculate remaining time in minutes (can be negative)
+          const remaining = SLAClock(
+            now,
+            slaDeadline,
+            serviceWindow,
+            slaTimeline
+          );
+
+          const abs = Math.abs(remaining);
+          const hr = Math.floor(abs / 60);
+          const min = abs % 60;
+          const formatted = `${hr > 0 ? `${hr} hr ` : ""}${min} min`;
+
+          const color = remaining >= 0 ? "green" : "red";
+          const icon = remaining >= 0 ? "⏳" : "❌";
+          const label = `${icon} ${remaining < 0 ? "-" : ""}${formatted}`;
+
+          return <span style={{ color, fontWeight: "bold" }}>{label}</span>;
+        },
       },
+
       {
         accessorKey: "departmentName",
         header: "TAT",

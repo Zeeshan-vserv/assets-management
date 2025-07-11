@@ -313,10 +313,10 @@ function SlaTimeLines() {
                       </label>
                       <Autocomplete
                         options={[
-                          "Priority - 1",
-                          "Priority - 2",
-                          "Priority - 3",
-                          "Priority - 4",
+                          "Severity-1",
+                          "Severity-2",
+                          "Severity-3",
+                          "Severity-4",
                         ]}
                         value={addNewSlaTimeLines.priority || ""}
                         onChange={(event, newValue) =>

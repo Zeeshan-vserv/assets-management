@@ -176,7 +176,7 @@ useEffect(() => {
         accessorKey: "classificaton.technician",
         header: "Assigned To",
       },
-     {
+    {
   accessorKey: "sla",
   header: "SLA Remaining",
   Cell: ({ row }) => {
@@ -184,27 +184,71 @@ useEffect(() => {
     const severity = incident?.classificaton?.severityLevel;
     const loggedIn = new Date(incident?.createdAt || incident?.submitter?.loggedInTime);
 
-    if (!severity || !loggedIn || slaTimelineData.length === 0) return "N/A";
+    // Use business hours from SLACreation
+    const businessHours = slaData?.slaTimeline || [];
 
-    // Find SLA timeline for this severity
-    const cleanSeverity = severity.trim().toLowerCase();
+    // Find SLA duration for this severity from slaTimelineData
+    const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
     const matchedTimeline = slaTimelineData.find(
-      (item) => item.priority?.trim()?.toLowerCase() === cleanSeverity
+      (item) => item.priority?.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
     );
-
-    // Get SLA duration (e.g., "04:00" for 4 hours)
     const resolution = matchedTimeline?.resolutionSLA || "00:30";
     const [slaHours, slaMinutes] = resolution.split(":").map(Number);
+    const totalHours = slaHours + slaMinutes / 60;
 
-    // Calculate SLA deadline
-    const slaDeadline = new Date(loggedIn);
-    slaDeadline.setHours(slaDeadline.getHours() + slaHours);
-    slaDeadline.setMinutes(slaDeadline.getMinutes() + slaMinutes);
+    // Calculate SLA deadline using business hours
+    const slaDeadline = addBusinessTime(loggedIn, totalHours, businessHours);
 
-    // Calculate remaining time in minutes
+    // Helper: Calculate remaining business minutes from now to deadline
+    function getBusinessMinutesBetween(now, end, slaTimeline) {
+      let minutes = 0;
+      let current = new Date(now);
+      while (current < end) {
+        // Get business window for current day
+        const weekDay = current.toLocaleString("en-US", { weekday: "long" });
+        const slot = slaTimeline.find(s => s.weekDay === weekDay);
+        if (!slot) {
+          // No business hours today, go to next day
+          current.setDate(current.getDate() + 1);
+          current.setHours(0, 0, 0, 0);
+          continue;
+        }
+        const start = new Date(current);
+        start.setHours(new Date(slot.startTime).getUTCHours(), new Date(slot.startTime).getUTCMinutes(), 0, 0);
+        const endWindow = new Date(current);
+        endWindow.setHours(new Date(slot.endTime).getUTCHours(), new Date(slot.endTime).getUTCMinutes(), 0, 0);
+
+        // If after business hours, go to next day
+        if (current >= endWindow) {
+          current.setDate(current.getDate() + 1);
+          current.setHours(0, 0, 0, 0);
+          continue;
+        }
+        // If before business hours, jump to start
+        if (current < start) current = new Date(start);
+
+        // Calculate minutes to count for this day
+        const until = end < endWindow ? end : endWindow;
+        const diff = Math.max(0, (until - current) / 60000);
+        minutes += diff;
+        current = new Date(until);
+        if (current < end) {
+          // Go to next business day
+          current.setDate(current.getDate() + 1);
+          current.setHours(0, 0, 0, 0);
+        }
+      }
+      return Math.round(minutes);
+    }
+
     const now = new Date();
-    const diffMs = slaDeadline - now;
-    const remainingMinutes = Math.floor(diffMs / 60000);
+    let remainingMinutes;
+    if (now < slaDeadline) {
+      remainingMinutes = getBusinessMinutesBetween(now, slaDeadline, businessHours);
+    } else {
+      // SLA breached: show negative overdue time
+      remainingMinutes = -getBusinessMinutesBetween(slaDeadline, now, businessHours);
+    }
 
     const abs = Math.abs(remainingMinutes);
     const hr = Math.floor(abs / 60);
@@ -221,7 +265,6 @@ useEffect(() => {
     );
   },
 },
-
       {
         accessorKey: "departmentName",
         header: "TAT",
@@ -252,7 +295,7 @@ useEffect(() => {
         ),
       },
     ],
-    [isLoading, slaData]
+    [isLoading]
   );
 
   //Exports
@@ -577,163 +620,3 @@ useEffect(() => {
 };
 
 export default IncidentsData;
-
-// import React, { useEffect, useMemo, useState } from "react";
-// import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
-// import { Box, CircularProgress } from "@mui/material";
-// import { getAllIncident } from "../../../api/IncidentRequest";
-// import { getAllSLAs } from "../../../api/slaRequest";
-
-// const getSLAWorkingMinutes = (createdAtStr, slaTimeline, now = new Date()) => {
-//   const slaHoursByDay = {};
-
-//   // Parse SLA timings into minutes in IST
-//   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
-//     const start = new Date(startTime);
-//     const end = new Date(endTime);
-
-//     slaHoursByDay[weekDay] = {
-//       startMinutes: start.getHours() * 60 + start.getMinutes(),
-//       endMinutes: end.getHours() * 60 + end.getMinutes(),
-//     };
-//   });
-
-//   let totalMinutes = 0;
-//   let current = new Date(createdAtStr);
-
-//   while (current < now) {
-//     const dayName = current.toLocaleDateString("en-US", { weekday: "long" });
-//     const sla = slaHoursByDay[dayName];
-
-//     if (sla) {
-//       const { startMinutes, endMinutes } = sla;
-
-//       const workStart = new Date(
-//         current.getFullYear(),
-//         current.getMonth(),
-//         current.getDate(),
-//         Math.floor(startMinutes / 60),
-//         startMinutes % 60,
-//         0
-//       );
-
-//       let workEnd = new Date(
-//         current.getFullYear(),
-//         current.getMonth(),
-//         current.getDate(),
-//         Math.floor(endMinutes / 60),
-//         endMinutes % 60,
-//         0
-//       );
-
-//       if (endMinutes <= startMinutes) {
-//         workEnd.setDate(workEnd.getDate() + 1);
-//       }
-
-//       const effectiveStart = current > workStart ? current : workStart;
-//       const effectiveEnd = now < workEnd ? now : workEnd;
-
-//       if (effectiveStart < effectiveEnd) {
-//         const diff = Math.floor((effectiveEnd - effectiveStart) / (1000 * 60));
-//         totalMinutes += diff;
-//       }
-//     }
-
-//     // Move to next day
-//     current.setDate(current.getDate() + 1);
-//     current.setHours(0, 0, 0, 0);
-//   }
-
-//   return totalMinutes;
-// };
-
-// const IncidentSLAView = () => {
-//   const [data, setData] = useState([]);
-//   const [slaData, setSlaData] = useState(null);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [currentTime, setCurrentTime] = useState(new Date());
-
-//   useEffect(() => {
-//     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
-//     return () => clearInterval(interval);
-//   }, []);
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         setIsLoading(true);
-//         const incidentsRes = await getAllIncident();
-//         const slaRes = await getAllSLAs();
-
-//         setData(incidentsRes?.data?.data || []);
-//         setSlaData(slaRes?.data?.data?.[0] || null);
-//       } catch (error) {
-//         console.error("Fetch error:", error);
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-
-//     fetchData();
-//   }, []);
-
-//   const columns = useMemo(() => [
-//     {
-//       accessorKey: "incidentId",
-//       header: "Incident ID",
-//     },
-//     {
-//       accessorKey: "subject",
-//       header: "Subject",
-//     },
-//     {
-//       accessorKey: "category",
-//       header: "Category",
-//     },
-//     {
-//       accessorKey: "createdAt",
-//       header: "Created At",
-//       Cell: ({ cell }) =>
-//         new Date(cell.getValue()).toLocaleString("en-IN", {
-//           timeZone: "Asia/Kolkata",
-//         }),
-//     },
-//     {
-//       id: "slaTime",
-//       header: "SLA Time (IST)",
-//       Cell: ({ row }) => {
-//         const createdAt = row.original.createdAt;
-//         if (!createdAt || !slaData?.slaTimeline) return "-";
-
-//         const totalMinutes = getSLAWorkingMinutes(createdAt, slaData.slaTimeline, currentTime);
-//         const hours = Math.floor(totalMinutes / 60);
-//         const minutes = totalMinutes % 60;
-
-//         return `${hours}h ${minutes}m`;
-//       },
-//     },
-//   ], [slaData, currentTime]);
-
-//   const table = useMaterialReactTable({
-//     data,
-//     columns,
-//     getRowId: (row) => row._id,
-//     initialState: {
-//       pagination: { pageSize: 5 },
-//     },
-//     enablePagination: true,
-//   });
-
-//   return (
-//     <Box p={2}>
-//       <h2 style={{ fontSize: "1.2rem", marginBottom: "1rem" }}>Incident SLA Tracker</h2>
-//       {isLoading ? (
-//         <CircularProgress />
-//       ) : (
-//         <MaterialReactTable table={table} />
-//       )}
-//     </Box>
-//   );
-// };
-
-// export default IncidentSLAView;

@@ -15,7 +15,8 @@ import { getAllIncident } from "../../../api/IncidentRequest";
 import { NavLink } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
-import { getAllSLAs } from "../../../api/slaRequest";
+import { getAllSLAs, getAllSLATimelines } from "../../../api/slaRequest";
+import SLAClock from "../../Configuration/SLA/SLAClock";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -28,12 +29,20 @@ const IncidentsData = () => {
   const [data, setData] = useState([]);
   const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [slaTimelineData, setSlaTimelineData] = useState([]);
 
-  const [currentTime, setCurrentTime] = useState(new Date());
-  useEffect(() => {
-    const interval = setInterval(() => setCurrentTime(new Date()), 60000); // update every minute
-    return () => clearInterval(interval);
-  }, []);
+  const fetchSlaTimelineData = async () => {
+  try {
+    const response = await getAllSLATimelines();
+    setSlaTimelineData(response?.data?.data || []);
+  } catch (error) {
+    console.error("Error fetching SLA timelines:", error);
+  }
+};
+
+useEffect(() => {
+  fetchSlaTimelineData();
+}, []);
 
   const fetchDepartment = async () => {
     try {
@@ -68,570 +77,54 @@ const IncidentsData = () => {
     fetchSlaCreation();
   }, []);
 
-  // console.log("sladata", slaData, "data", data[0].createdAt);
-
-  // const getSLAWorkingMinutes = (createdAtStr, slaTimeline) => {
-  //   const slaHoursByDay = {};
-  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
-  //     slaHoursByDay[weekDay] = {
-  //       start:
-  //         new Date(startTime).getUTCHours() * 60 +
-  //         new Date(startTime).getUTCMinutes(),
-  //       end:
-  //         new Date(endTime).getUTCHours() * 60 +
-  //         new Date(endTime).getUTCMinutes(),
-  //     };
-  //   });
-
-  //   let totalMinutes = 0;
-  //   let startDate = new Date(createdAtStr);
-  //   const now = new Date();
-
-  //   while (startDate < now) {
-  //     const dayName = startDate.toLocaleDateString("en-US", {
-  //       weekday: "long",
-  //       timeZone: "UTC",
-  //     });
-  //     const daySla = slaHoursByDay[dayName];
-
-  //     if (daySla) {
-  //       const [startMin, endMin] = [daySla.start, daySla.end];
-
-  //       const startHour = Math.floor(startMin / 60);
-  //       const startMinute = startMin % 60;
-  //       const endHour = Math.floor(endMin / 60);
-  //       const endMinute = endMin % 60;
-
-  //       const workStart = new Date(
-  //         Date.UTC(
-  //           startDate.getUTCFullYear(),
-  //           startDate.getUTCMonth(),
-  //           startDate.getUTCDate(),
-  //           startHour,
-  //           startMinute
-  //         )
-  //       );
-  //       let workEnd = new Date(
-  //         Date.UTC(
-  //           startDate.getUTCFullYear(),
-  //           startDate.getUTCMonth(),
-  //           startDate.getUTCDate(),
-  //           endHour,
-  //           endMinute
-  //         )
-  //       );
-
-  //       if (endMin < startMin) {
-  //         workEnd.setUTCDate(workEnd.getUTCDate() + 1);
-  //       }
-
-  //       const rangeStart = startDate > workStart ? startDate : workStart;
-  //       const rangeEnd = now < workEnd ? now : workEnd;
-
-  //       if (rangeStart < rangeEnd) {
-  //         const diff = (rangeEnd - rangeStart) / (1000 * 60);
-  //         totalMinutes += diff;
-  //       }
-  //     }
-
-  //     startDate.setUTCDate(startDate.getUTCDate() + 1);
-  //     startDate.setUTCHours(0, 0, 0, 0);
-  //   }
-
-  //   return totalMinutes;
-  // };
-
-  // const getSLAWorkingMinutes = (createdAtStr, slaTimeline) => {
-  //   const slaHoursByDay = {};
-
-  //   // Map SLA timelines to minutes
-  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
-  //     const start = new Date(startTime);
-  //     const end = new Date(endTime);
-
-  //     slaHoursByDay[weekDay] = {
-  //       start: start.getUTCHours() * 60 + start.getUTCMinutes(),
-  //       end: end.getUTCHours() * 60 + end.getUTCMinutes(),
-  //     };
-  //   });
-
-  //   let totalMinutes = 0;
-  //   let startDate = new Date(createdAtStr);
-  //   const now = new Date();
-
-  //   while (startDate < now) {
-  //     const dayName = startDate.toLocaleDateString("en-US", {
-  //       weekday: "long",
-  //       timeZone: "UTC",
-  //     });
-  //     const daySla = slaHoursByDay[dayName];
-
-  //     if (daySla) {
-  //       const [startMin, endMin] = [daySla.start, daySla.end];
-
-  //       const startHour = Math.floor(startMin / 60);
-  //       const startMinute = startMin % 60;
-  //       const endHour = Math.floor(endMin / 60);
-  //       const endMinute = endMin % 60;
-
-  //       const dayStart = new Date(
-  //         Date.UTC(
-  //           startDate.getUTCFullYear(),
-  //           startDate.getUTCMonth(),
-  //           startDate.getUTCDate(),
-  //           startHour,
-  //           startMinute
-  //         )
-  //       );
-  //       let dayEnd = new Date(
-  //         Date.UTC(
-  //           startDate.getUTCFullYear(),
-  //           startDate.getUTCMonth(),
-  //           startDate.getUTCDate(),
-  //           endHour,
-  //           endMinute
-  //         )
-  //       );
-
-  //       // Handle overnight shift
-  //       if (endMin < startMin) {
-  //         dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
-  //       }
-
-  //       const effectiveStart = startDate > dayStart ? startDate : dayStart;
-  //       const effectiveEnd = now < dayEnd ? now : dayEnd;
-
-  //       if (effectiveStart < effectiveEnd) {
-  //         const diffMinutes =
-  //           (effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60);
-  //         totalMinutes += diffMinutes;
-  //       }
-  //     }
-
-  //     // Move to next day
-  //     startDate.setUTCDate(startDate.getUTCDate() + 1);
-  //     startDate.setUTCHours(0, 0, 0, 0);
-  //   }
-
-  //   return totalMinutes;
-  // };
-
-  // const getSLAWorkingMinutes = (
-  //   createdAtStr,
-  //   slaTimeline,
-  //   now = new Date()
-  // ) => {
-  //   const slaHoursByDay = {};
-
-  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
-  //     const start = new Date(startTime);
-  //     const end = new Date(endTime);
-
-  //     slaHoursByDay[weekDay] = {
-  //       start: start.getUTCHours() * 60 + start.getUTCMinutes(),
-  //       end: end.getUTCHours() * 60 + end.getUTCMinutes(),
-  //     };
-  //   });
-
-  //   let totalMinutes = 0;
-  //   let startDate = new Date(createdAtStr);
-
-  //   while (startDate < now) {
-  //     const dayName = startDate.toLocaleDateString("en-US", {
-  //       weekday: "long",
-  //       timeZone: "UTC",
-  //     });
-  //     const daySla = slaHoursByDay[dayName];
-
-  //     if (daySla) {
-  //       const [startMin, endMin] = [daySla.start, daySla.end];
-
-  //       const startHour = Math.floor(startMin / 60);
-  //       const startMinute = startMin % 60;
-  //       const endHour = Math.floor(endMin / 60);
-  //       const endMinute = endMin % 60;
-
-  //       const dayStart = new Date(
-  //         Date.UTC(
-  //           startDate.getUTCFullYear(),
-  //           startDate.getUTCMonth(),
-  //           startDate.getUTCDate(),
-  //           startHour,
-  //           startMinute
-  //         )
-  //       );
-  //       let dayEnd = new Date(
-  //         Date.UTC(
-  //           startDate.getUTCFullYear(),
-  //           startDate.getUTCMonth(),
-  //           startDate.getUTCDate(),
-  //           endHour,
-  //           endMinute
-  //         )
-  //       );
-
-  //       // Handle overnight shift
-  //       if (endMin < startMin) {
-  //         dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
-  //       }
-
-  //       const effectiveStart = startDate > dayStart ? startDate : dayStart;
-  //       const effectiveEnd = now < dayEnd ? now : dayEnd;
-
-  //       if (effectiveStart < effectiveEnd) {
-  //         const diffMinutes =
-  //           (effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60);
-  //         totalMinutes += diffMinutes;
-  //       }
-  //     }
-
-  //     // Move to next day
-  //     startDate.setUTCDate(startDate.getUTCDate() + 1);
-  //     startDate.setUTCHours(0, 0, 0, 0);
-  //   }
-
-  //   return totalMinutes;
-  // };
-
-  // const getSLAWorkingMinutes = (
-  //   createdAtStr,
-  //   slaTimeline,
-  //   now = new Date()
-  // ) => {
-  //   const slaHoursByDay = {};
-
-  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
-  //     const start = new Date(startTime);
-  //     const end = new Date(endTime);
-
-  //     slaHoursByDay[weekDay] = {
-  //       start: start.getUTCHours() * 60 + start.getUTCMinutes(),
-  //       end: end.getUTCHours() * 60 + end.getUTCMinutes(),
-  //     };
-  //   });
-
-  //   let totalMinutes = 0;
-  //   let startDate = new Date(createdAtStr);
-
-  //   while (startDate < now) {
-  //     const dayName = startDate.toLocaleDateString("en-US", {
-  //       weekday: "long",
-  //       timeZone: "UTC",
-  //     });
-  //     const daySla = slaHoursByDay[dayName];
-
-  //     if (daySla) {
-  //       const [startMin, endMin] = [daySla.start, daySla.end];
-
-  //       const startHour = Math.floor(startMin / 60);
-  //       const startMinute = startMin % 60;
-  //       const endHour = Math.floor(endMin / 60);
-  //       const endMinute = endMin % 60;
-
-  //       const dayStart = new Date(
-  //         Date.UTC(
-  //           startDate.getUTCFullYear(),
-  //           startDate.getUTCMonth(),
-  //           startDate.getUTCDate(),
-  //           startHour,
-  //           startMinute
-  //         )
-  //       );
-  //       let dayEnd = new Date(
-  //         Date.UTC(
-  //           startDate.getUTCFullYear(),
-  //           startDate.getUTCMonth(),
-  //           startDate.getUTCDate(),
-  //           endHour,
-  //           endMinute
-  //         )
-  //       );
-
-  //       // Handle overnight shifts
-  //       if (endMin < startMin) {
-  //         dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
-  //       }
-
-  //       const effectiveStart = startDate > dayStart ? startDate : dayStart;
-  //       const effectiveEnd = now < dayEnd ? now : dayEnd;
-
-  //       if (effectiveStart < effectiveEnd) {
-  //         const diffMinutes =
-  //           (effectiveEnd.getTime() - effectiveStart.getTime()) / (1000 * 60);
-  //         totalMinutes += diffMinutes;
-  //       }
-  //     }
-
-  //     // Move to next day
-  //     startDate.setUTCDate(startDate.getUTCDate() + 1);
-  //     startDate.setUTCHours(0, 0, 0, 0);
-  //   }
-
-  //   return totalMinutes;
-  // };
-  // const getSLAWorkingMinutes = (
-  //   createdAtStr,
-  //   slaTimeline,
-  //   now = new Date()
-  // ) => {
-  //   const slaHoursByDay = {};
-
-  //   // Map SLA timings to minutes for each weekday
-  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
-  //     const start = new Date(startTime);
-  //     const end = new Date(endTime);
-
-  //     slaHoursByDay[weekDay] = {
-  //       start: start.getUTCHours() * 60 + start.getUTCMinutes(),
-  //       end: end.getUTCHours() * 60 + end.getUTCMinutes(),
-  //     };
-  //     // console.log(slaHoursByDay[weekDay]);
-
-  //   });
-
-  //   let totalMinutes = 0;
-  //   let current = new Date(createdAtStr);
-
-  //   // console.log(current , now, "current and now");
-
-  //   while (current < now) {
-  //     const dayName = current.toLocaleDateString("en-US", {
-  //       weekday: "long",
-  //       timeZone: "UTC",
-  //     }
-  //   );
-  //   // console.log(dayName, "dayName")
-
-  //     const daySla = slaHoursByDay[dayName];
-
-  //     if (daySla) {
-  //       const { start: startMin, end: endMin } = daySla;
-
-  //       const startHour = Math.floor(startMin / 60);
-  //       const startMinute = startMin % 60;
-  //       const endHour = Math.floor(endMin / 60);
-  //       const endMinute = endMin % 60;
-
-  //       // console.log(startHour, startMinute, endHour, endMinute, "start and end time");
-
-  //       const dayStart = new Date(
-  //         Date.UTC(
-  //           current.getUTCFullYear(),
-  //           current.getUTCMonth(),
-  //           current.getUTCDate(),
-  //           startHour,
-  //           startMinute
-  //         )
-  //       );
-
-  //       let dayEnd = new Date(
-  //         Date.UTC(
-  //           current.getUTCFullYear(),
-  //           current.getUTCMonth(),
-  //           current.getUTCDate(),
-  //           endHour,
-  //           endMinute
-  //         )
-  //       );
-
-  //       console.log(dayStart, dayEnd, "dayStart and dayEnd");
-
-  //       // If SLA ends after midnight
-  //       if (endMin < startMin) {
-  //         dayEnd.setUTCDate(dayEnd.getUTCDate() + 1);
-  //       }
-
-  //       // Effective working time window for this day
-  //       const effectiveStart = current > dayStart ? current : dayStart;
-  //       const effectiveEnd = now < dayEnd ? now : dayEnd;
-
-  //       if (effectiveStart < effectiveEnd) {
-  //         const diff = (effectiveEnd - effectiveStart) / (1000 * 60); // in minutes
-  //         totalMinutes += diff;
-  //       }
-  //     }
-
-  //     // Go to next day at 00:00 UTC
-  //     current.setUTCDate(current.getUTCDate() + 1);
-  //     current.setUTCHours(0, 0, 0, 0);
-  //   }
-
-  //   return totalMinutes;
-  // };
-
-  // const getSLAWorkingMinutes = (
-  //   createdAtStr,
-  //   slaTimeline,
-  //   now = new Date()
-  // ) => {
-  //   const IST_OFFSET_MINUTES = 330; // 5 hours 30 mins = 330 mins
-  //   const slaHoursByDay = {};
-
-  //   // Convert SLA time range to minutes for each weekday in IST
-  //   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
-  //     const start = new Date(startTime);
-  //     const end = new Date(endTime);
-
-  //     // Assumes startTime/endTime are in UTC → convert to IST
-  //     const startISTMinutes =
-  //       (start.getUTCHours() * 60 +
-  //         start.getUTCMinutes() +
-  //         IST_OFFSET_MINUTES) %
-  //       (24 * 60);
-  //     const endISTMinutes =
-  //       (end.getUTCHours() * 60 + end.getUTCMinutes() + IST_OFFSET_MINUTES) %
-  //       (24 * 60);
-
-  //     slaHoursByDay[weekDay] = {
-  //       start: startISTMinutes,
-  //       end: endISTMinutes,
-  //     };
-  //     console.log(slaHoursByDay[weekDay]);
-
-  //   });
-
-  //   let totalMinutes = 0;
-  //   let current = new Date(createdAtStr);
-
-  //   while (current < now) {
-  //     // Convert `current` to IST
-  //     const currentIST = new Date(
-  //       current.getTime() + IST_OFFSET_MINUTES * 60000
-  //     );
-  //     const nowIST = new Date(now.getTime() + IST_OFFSET_MINUTES * 60000);
-
-  //     const dayName = currentIST.toLocaleDateString("en-US", {
-  //       weekday: "long",
-  //     });
-
-  //     const daySla = slaHoursByDay[dayName];
-
-  //     if (daySla) {
-  //       const { start: startMin, end: endMin } = daySla;
-
-  //       const startHour = Math.floor(startMin / 60);
-  //       const startMinute = startMin % 60;
-  //       const endHour = Math.floor(endMin / 60);
-  //       const endMinute = endMin % 60;
-
-  //       const dayStartIST = new Date(
-  //         Date.UTC(
-  //           currentIST.getFullYear(),
-  //           currentIST.getMonth(),
-  //           currentIST.getDate(),
-  //           0,
-  //           0
-  //         )
-  //       );
-  //       dayStartIST.setMinutes(startMin);
-
-  //       let dayEndIST = new Date(
-  //         Date.UTC(
-  //           currentIST.getFullYear(),
-  //           currentIST.getMonth(),
-  //           currentIST.getDate(),
-  //           0,
-  //           0
-  //         )
-  //       );
-  //       dayEndIST.setMinutes(endMin);
-
-  //       // If SLA end time is before start time → overnight shift
-  //       if (endMin < startMin) {
-  //         dayEndIST.setDate(dayEndIST.getDate() + 1);
-  //       }
-
-  //       const effectiveStart =
-  //         currentIST > dayStartIST ? currentIST : dayStartIST;
-  //       const effectiveEnd = nowIST < dayEndIST ? nowIST : dayEndIST;
-
-  //       if (effectiveStart < effectiveEnd) {
-  //         const diff = (effectiveEnd - effectiveStart) / (1000 * 60);
-  //         totalMinutes += diff;
-  //       }
-  //     }
-
-  //     // Move `current` to next day at 00:00 UTC
-  //     current.setUTCDate(current.getUTCDate() + 1);
-  //     current.setUTCHours(0, 0, 0, 0);
-  //   }
-
-  //   return Math.floor(totalMinutes);
-  // };
-
-  const getSLAWorkingMinutes = (
-    createdAtStr,
-    slaTimeline,
-    now = new Date()
-  ) => {
-    const slaHoursByDay = {};
-
-    // Convert SLA timeline to minutes (assumed already in IST)
-    slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
-      const start = new Date(startTime); // IST
-      const end = new Date(endTime); // IST
-
-      slaHoursByDay[weekDay] = {
-        start: start.getHours() * 60 + start.getMinutes(),
-        end: end.getHours() * 60 + end.getMinutes(),
-      };
-    });
-
-    let totalMinutes = 0;
-    let current = new Date(createdAtStr); // IST-based
-
-    while (current < now) {
-      const dayName = current.toLocaleDateString("en-US", {
-        weekday: "long",
-      });
-
-      const daySla = slaHoursByDay[dayName];
-
-      if (daySla) {
-        const { start: startMin, end: endMin } = daySla;
-
-        const startHour = Math.floor(startMin / 60);
-        const startMinute = startMin % 60;
-        const endHour = Math.floor(endMin / 60);
-        const endMinute = endMin % 60;
-
-        const dayStart = new Date(
-          current.getFullYear(),
-          current.getMonth(),
-          current.getDate(),
-          startHour,
-          startMinute
-        );
-
-        let dayEnd = new Date(
-          current.getFullYear(),
-          current.getMonth(),
-          current.getDate(),
-          endHour,
-          endMinute
-        );
-
-        // Handle overnight SLA (e.g. 10 PM to 6 AM)
-        if (endMin < startMin) {
-          dayEnd.setDate(dayEnd.getDate() + 1);
-        }
-
-        const effectiveStart = current > dayStart ? current : dayStart;
-        const effectiveEnd = now < dayEnd ? now : dayEnd;
-
-        if (effectiveStart < effectiveEnd) {
-          const diff = (effectiveEnd - effectiveStart) / (1000 * 60); // in minutes
-          totalMinutes += diff;
-        }
-      }
-
-      // Move to next day, midnight IST
+  // console.log("sladata",slaData , "data", data[0].createdAt);
+
+  function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
+  let remainingMinutes = Math.round(hoursToAdd * 60);
+  let current = new Date(startDate);
+
+  // Helper: get business window for a given date
+  function getBusinessWindow(date) {
+    const weekDay = date.toLocaleString("en-US", { weekday: "long" });
+    const slot = slaTimeline.find(s => s.weekDay === weekDay);
+    if (!slot) return null;
+    // slot.startTime and slot.endTime are Date objects (time part only)
+    const start = new Date(date);
+    start.setHours(new Date(slot.startTime).getUTCHours(), new Date(slot.startTime).getUTCMinutes(), 0, 0);
+    const end = new Date(date);
+    end.setHours(new Date(slot.endTime).getUTCHours(), new Date(slot.endTime).getUTCMinutes(), 0, 0);
+    return { start, end };
+  }
+
+  while (remainingMinutes > 0) {
+    const window = getBusinessWindow(current);
+    if (!window) {
+      // No business hours today, go to next day
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    // If before business hours, jump to start
+    if (current < window.start) current = new Date(window.start);
+    // If after business hours, go to next day
+    if (current >= window.end) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    // Minutes left in today's business window
+    const minutesLeftToday = Math.floor((window.end - current) / 60000);
+    const minutesToAdd = Math.min(remainingMinutes, minutesLeftToday);
+    current = new Date(current.getTime() + minutesToAdd * 60000);
+    remainingMinutes -= minutesToAdd;
+    if (remainingMinutes > 0) {
+      // Go to next business day
       current.setDate(current.getDate() + 1);
       current.setHours(0, 0, 0, 0);
     }
-
-    return Math.floor(totalMinutes);
-  };
+  }
+  return current;
+}
 
   const columns = useMemo(
     () => [
@@ -683,92 +176,51 @@ const IncidentsData = () => {
         accessorKey: "classificaton.technician",
         header: "Assigned To",
       },
-      // {
-      //   accessorKey: "departmentName",
-      //   header: "SLA",
-      // },
-      // {
-      //   id: "slaTime",
-      //   header: "SLA Time",
-      //   Cell: ({ row }) => {
-      //     const createdAt = row.original.createdAt;
-      //     if (!createdAt || !slaData?.slaTimeline) return "-";
+     {
+  accessorKey: "sla",
+  header: "SLA Remaining",
+  Cell: ({ row }) => {
+    const incident = row.original;
+    const severity = incident?.classificaton?.severityLevel;
+    const loggedIn = new Date(incident?.createdAt || incident?.submitter?.loggedInTime);
 
-      //     const minutes = getSLAWorkingMinutes(createdAt, slaData.slaTimeline);
-      //     const hours = Math.floor(minutes / 60);
-      //     const mins = Math.floor(minutes % 60);
-      //     return `${hours}h ${mins}m`;
-      //   },
-      // },
-      // {
-      //   id: "slaTime",
-      //   header: "SLA Time",
-      //   Cell: ({ row }) => {
-      //     const createdAt = row.original.createdAt;
-      //     if (!createdAt || !slaData?.slaTimeline) return "-";
+    if (!severity || !loggedIn || slaTimelineData.length === 0) return "N/A";
 
-      //     // Pass currentTime for live updates
-      //     const minutes = getSLAWorkingMinutes(
-      //       createdAt,
-      //       slaData.slaTimeline,
-      //       currentTime
-      //     );
-      //     const hours = Math.floor(minutes / 60);
-      //     const mins = Math.floor(minutes % 60);
-      //     return `${hours}h ${mins}m`;
-      //   },
-      // },
+    // Find SLA timeline for this severity
+    const cleanSeverity = severity.trim().toLowerCase();
+    const matchedTimeline = slaTimelineData.find(
+      (item) => item.priority?.trim()?.toLowerCase() === cleanSeverity
+    );
 
-      // {
-      //   id: "slaTime",
-      //   header: "SLA Time",
-      //   Cell: ({ row }) => {
-      //     const createdAt = row.original.createdAt;
-      //     if (!createdAt || !slaData?.slaTimeline) return "-";
+    // Get SLA duration (e.g., "04:00" for 4 hours)
+    const resolution = matchedTimeline?.resolutionSLA || "00:30";
+    const [slaHours, slaMinutes] = resolution.split(":").map(Number);
 
-      //     // Pass currentTime for live updates
-      //     const minutes = Math.floor(
-      //       getSLAWorkingMinutes(createdAt, slaData.slaTimeline, currentTime)
-      //     );
-      //     console.log(createdAt, slaData.slaTimeline, currentTime)
+    // Calculate SLA deadline
+    const slaDeadline = new Date(loggedIn);
+    slaDeadline.setHours(slaDeadline.getHours() + slaHours);
+    slaDeadline.setMinutes(slaDeadline.getMinutes() + slaMinutes);
 
-      //     const days = Math.floor(minutes / (24 * 60));
-      //     const hours = Math.floor((minutes % (24 * 60)) / 60);
-      //     const mins = minutes % 60;
+    // Calculate remaining time in minutes
+    const now = new Date();
+    const diffMs = slaDeadline - now;
+    const remainingMinutes = Math.floor(diffMs / 60000);
 
-      //     let result = "";
-      //     if (days > 0) result += `${days}d `;
-      //     if (hours > 0 || days > 0) result += `${hours}h `;
-      //     result += `${mins}m`;
-      //     return result.trim();
-      //   },
-      // },
+    const abs = Math.abs(remainingMinutes);
+    const hr = Math.floor(abs / 60);
+    const min = abs % 60;
 
-      {
-        id: "slaTime",
-        header: "SLA Time",
-        Cell: ({ row }) => {
-          const createdAt = row.original.createdAt;
-          if (!createdAt || !slaData?.slaTimeline) return "-";
+    const color = remainingMinutes < 0 ? "red" : "green";
+    const icon = remainingMinutes < 0 ? "❌" : "⏳";
+    const prefix = remainingMinutes < 0 ? "-" : "";
 
-          // Get working minutes
-          const minutes = getSLAWorkingMinutes(
-            createdAt,
-            slaData.slaTimeline,
-            currentTime
-          );
-          const days = Math.floor(minutes / (24 * 60));
-          const hours = Math.floor((minutes % (24 * 60)) / 60);
-          const mins = Math.round(minutes % 60); // use round for accuracy
-
-          let result = "";
-          if (days > 0) result += `${days}d `;
-          if (hours > 0 || days > 0) result += `${hours}h `;
-          result += `${mins}m`;
-
-          return result.trim();
-        },
-      },
+    return (
+      <span style={{ color, fontWeight: "bold" }}>
+        {icon} {prefix}{hr} hr {min} min
+      </span>
+    );
+  },
+},
 
       {
         accessorKey: "departmentName",
@@ -800,7 +252,7 @@ const IncidentsData = () => {
         ),
       },
     ],
-    [isLoading, slaData, currentTime]
+    [isLoading, slaData]
   );
 
   //Exports

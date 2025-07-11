@@ -10,6 +10,7 @@ function ServiceDeskRoute() {
   return (
     <>
       <Routes>
+        {/* inciendt and vendor routes */}
         <Route path="NewIncident" element={<NewIncident />} />
         <Route
           path="new-incidents-assigned"

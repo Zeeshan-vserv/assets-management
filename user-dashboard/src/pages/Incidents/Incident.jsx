@@ -35,6 +35,7 @@ function Incident() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [assignedToViewModal, setAssignedToViewModal] = useState(false);
   const [ticketType, setTicketType] = useState(ticketOptions[0]); // Default: My Tickets
+  
 
   const fetchIncident = async () => {
     try {

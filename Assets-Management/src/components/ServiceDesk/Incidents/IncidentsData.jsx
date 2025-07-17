@@ -30,6 +30,11 @@ const IncidentsData = () => {
   const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [slaTimelineData, setSlaTimelineData] = useState([]);
+  const [changeStatus, setChangeStatus] = useState(false);
+  const [seletecetdRowId, setSelectedRowId] = useState(null);
+  const [assignedValue, setAssignedValue] = useState("");
+  const [reopenValue, setReOpenValue] = useState("");
+  const [inProgressValue, setInProgressValue] = useState("");
 
   const fetchSlaTimelineData = async () => {
     try {
@@ -78,6 +83,17 @@ const IncidentsData = () => {
   useEffect(() => {
     fetchSlaCreation();
   }, []);
+
+  const statusSubmitHandler = (e) => {
+    e.preventDefault();
+    console.log("clicked");
+  };
+
+  const selectedRow = data.find((item) => item._id === seletecetdRowId);
+  //  console.log("selectedRow",selectedRow?._id)
+
+  const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
+  // console.log("status", latestStatus);
 
   // console.log("sladata",slaData , "data", data[0].createdAt);
 
@@ -534,7 +550,38 @@ const IncidentsData = () => {
               />
             )}
           />
-
+          <Button
+            variant="contained"
+            size="small"
+            disabled={table.getSelectedRowModel().rows.length !== 1}
+            sx={{
+              padding: "4px 12px",
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+              ml: 2,
+              "&.Mui-disabled": {
+                backgroundColor: "#B0BBE5",
+                color: "#FFFFFF",
+                cursor: "not-allowed",
+              },
+              opacity: table.getSelectedRowModel().rows.length !== 1 ? 0.5 : 1,
+              cursor:
+                table.getSelectedRowModel().rows.length !== 1
+                  ? "not-allowed"
+                  : "pointer",
+            }}
+            onClick={() => {
+              const selectedRow = table.getSelectedRowModel().rows[0];
+              const id = selectedRow.original?._id;
+              setSelectedRowId(id);
+              setChangeStatus(true);
+            }}
+          >
+            Change Status
+          </Button>
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -705,6 +752,320 @@ const IncidentsData = () => {
         </div>
 
         <MaterialReactTable table={table} />
+        {changeStatus && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+                <h2 className="text-md font-medium text-gray-800 mb-4">
+                  CHANGE INCIDENT STATUS
+                </h2>
+                <form onSubmit={statusSubmitHandler} className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-1">
+                    {latestStatus === "New" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={assignedValue}
+                            onChange={(e) => setAssignedValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select
+                            </option>
+                            <option value="assigned" className="text-start">
+                              Assigned
+                            </option>
+                            <option value="cancel" className="text-start">
+                              Cancel
+                            </option>
+                          </select>
+                        </div>
+                        {assignedValue === "assigned" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Support Department
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["IT Support"]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Support Group
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={[
+                                    "Application",
+                                    "Hardware",
+                                    "Network",
+                                    "Server",
+                                    "VIDEO CONFERENCE",
+                                  ]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Technician
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["", ""]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+                    {latestStatus === "Resolved" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={reopenValue}
+                            onChange={(e) => setReOpenValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select status
+                            </option>
+                            <option value="reopen" className="text-start">
+                              reopen
+                            </option>
+                          </select>
+                        </div>
+                        {reopenValue === "reopen" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Reason for Reopen
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+                    {latestStatus === "In Progress" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={inProgressValue}
+                            onChange={(e) => setInProgressValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select Status
+                            </option>
+                            <option value="assigned" className="text-start">
+                              Assigned
+                            </option>
+                            <option value="pause" className="text-start">
+                              Pause
+                            </option>
+                            <option value="resolved" className="text-start">
+                              Resolved
+                            </option>
+                            <option value="cancel" className="text-start">
+                              Cancel
+                            </option>
+                          </select>
+                        </div>
+                        {inProgressValue === "assigned" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Support Department
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["IT Support"]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Support Group
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={[
+                                    "Application",
+                                    "Hardware",
+                                    "Network",
+                                    "Server",
+                                    "VIDEO CONFERENCE",
+                                  ]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Technician
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["", ""]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {inProgressValue === "pause" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Pause Category
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={[
+                                    "Pending With Vendor/OEM",
+                                    "Pause With Other Reason",
+                                    "Standby Provided",
+                                  ]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Enter Remarks
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                            </div>
+                          </>
+                        )}
+                        {inProgressValue === "resolved" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Closure Code
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["", "", ""]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Sloution Update
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea rows={2} className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setChangeStatus(false)}
+                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

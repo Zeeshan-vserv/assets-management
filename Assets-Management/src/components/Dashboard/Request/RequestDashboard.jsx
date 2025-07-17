@@ -16,7 +16,7 @@ function RequestDashboard() {
         <div className="flex justify-between mb-4">
           <h2 className="text-lg font-semibold text-start">SERVICE REQUEST</h2>
           <button
-            onClick={() => navigate("")}
+            onClick={() => navigate("/main/ServiceDesk/service-request")}
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-3 py-2 rounded-md text-sm text-white transition-all"
           >
             <div className="flex flex-row justify-between items-center gap-1">

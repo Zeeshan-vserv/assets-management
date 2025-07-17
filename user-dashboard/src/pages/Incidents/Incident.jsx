@@ -56,8 +56,8 @@ function Incident() {
     fetchIncident();
   }, []);
 
-  console.log("data", data);
-  
+  // console.log("data", data);
+
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
   //  console.log("selectedRow",selectedRow?._id)
 
@@ -644,46 +644,28 @@ function Incident() {
                             >
                               Technical Escalation
                             </option>
-                          </select>
-                        </div>
-                      </>
-                    )}
-                    {latestStatus === "Resolved" && (
-                      <>
-                        <div className="flex items-center gap-2 mt-2">
-                          <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Status <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={reopenValue}
-                            onChange={(e) => setReOpenValue(e.target.value)}
-                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
-                          >
-                            <option value="" className="text-start">
-                              Select status
-                            </option>
-                            <option value="reopen" className="text-start">
-                              reopen
+                            <option value="resolved" className="text-start">
+                              Resolved
                             </option>
                           </select>
                         </div>
-                        {reopenValue === "reopen" && (
+                        {assignedValue === "resolved" && (
                           <>
-                            <div className="flex items-center gap-2 mt-2">
+                            <div className="flex items-center gap-2">
                               <label className="w-[40%] text-sm font-medium text-gray-500">
                                 Closing Summary
                                 <span className="text-red-500">*</span>
                               </label>
                               <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
                             </div>
-                            <div className="flex items-center gap-2 mt-2">
+                            <div className="flex items-center gap-2">
                               <label className="w-[40%] text-sm font-medium text-gray-500">
                                 Close Remarks
                                 <span className="text-red-500">*</span>
                               </label>
                               <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
                             </div>
-                            <div className="flex items-center gap-2 mt-2">
+                            <div className="flex items-center gap-2">
                               <label className="w-[40%] text-sm font-medium text-gray-500">
                                 Closure Category
                                 <span className="text-red-500">*</span>
@@ -704,6 +686,30 @@ function Incident() {
                             </div>
                           </>
                         )}
+                      </>
+                    )}
+                    {latestStatus === "Resolved" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={reopenValue}
+                            onChange={(e) => setReOpenValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select status
+                            </option>
+                            <option value="reopen" className="text-start">
+                              Reopened
+                            </option>
+                            <option value="cancel" className="text-start">
+                              Cancel
+                            </option>
+                          </select>
+                        </div>
                       </>
                     )}
                     {latestStatus === "Closed" && (

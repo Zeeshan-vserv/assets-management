@@ -11,12 +11,16 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { Autocomplete, TextField } from "@mui/material";
 import { getAllDepartment } from "../../../api/DepartmentRequest";
-import { getAllIncident } from "../../../api/IncidentRequest";
+import { getAllIncident, updateIncident } from "../../../api/IncidentRequest";
 import { NavLink } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
 import { getAllSLAs, getAllSLATimelines } from "../../../api/slaRequest";
-import SLAClock from "../../Configuration/SLA/SLAClock";
+import {
+  getAllSupportDepartment,
+  getAllSupportGroup,
+} from "../../../api/SuportDepartmentRequest";
+import { getAllUsers } from "../../../api/AuthRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -35,6 +39,46 @@ const IncidentsData = () => {
   const [assignedValue, setAssignedValue] = useState("");
   const [reopenValue, setReOpenValue] = useState("");
   const [inProgressValue, setInProgressValue] = useState("");
+  const [selectedSupportDepartment, setSelectedSupportDepartment] = useState(
+    []
+  );
+  const [selectedSupportGroup, setSelectedSupportGroup] = useState([]);
+  const [selectedTechnician, setSelectedTechnician] = useState([]);
+  const [supportDepartment, setSupportDepartment] = useState([]);
+  const [supportGroup, setSupportGroup] = useState([]);
+  const [technician, setTechnician] = useState([]);
+
+  useEffect(() => {
+    const fetchDropdownData = async () => {
+      try {
+        // Fetch Support Department
+        const responseSupportDepartment = await getAllSupportDepartment();
+        setSupportDepartment(responseSupportDepartment?.data?.data || []);
+
+        // Fetch Support Group
+        const responseSupportGroup = await getAllSupportGroup();
+        setSupportGroup(responseSupportGroup?.data?.data || []);
+
+        // Fetch Technicians (users)
+        const responseTechnician = await getAllUsers();
+        setTechnician(Array.isArray(responseTechnician?.data) ? responseTechnician.data : []);
+      } catch (error) {
+        console.error("Error fetching dropdown data:", error);
+      }
+    };
+
+    fetchDropdownData();
+  }, []);
+
+  useEffect(() => {
+    if (selectedSupportDepartment && selectedSupportDepartment.supportGroups) {
+      setSupportGroup(selectedSupportDepartment.supportGroups);
+      setSelectedSupportGroup(null);
+    } else {
+      setSupportGroup([]);
+      setSelectedSupportGroup(null);
+    }
+  }, [selectedSupportDepartment]);
 
   const fetchSlaTimelineData = async () => {
     try {
@@ -84,10 +128,81 @@ const IncidentsData = () => {
     fetchSlaCreation();
   }, []);
 
-  const statusSubmitHandler = (e) => {
+  const statusSubmitHandler = async (e) => {
     e.preventDefault();
-    console.log("clicked");
+    if (!seletecetdRowId) return;
+
+    // Build the update payload based on the selected status
+    let updateData = {};
+    if (latestStatus === "New" && assignedValue === "Assigned") {
+      updateData = {
+        status: "Assigned",
+        classificaton: {
+          supportDepartmentName: "IT Support",
+          supportGroupName: "Application", // Replace with selected value
+          technician: "", // Replace with selected value
+        },
+      };
+    } else if (latestStatus === "Resolved" && reopenValue === "reopen") {
+      updateData = {
+        status: "Reopened",
+        reopenReason: "", // Get from textarea
+      };
+    } else if (latestStatus === "In Progress") {
+      updateData = {
+        status:
+          inProgressValue.charAt(0).toUpperCase() + inProgressValue.slice(1),
+        // Add other fields as needed
+      };
+    }
+
+    try {
+      await updateIncident(seletecetdRowId, updateData);
+      setChangeStatus(false);
+      // Optionally, refresh the incident list
+      fetchDepartment();
+    } catch (error) {
+      console.error("Error updating incident:", error);
+    }
   };
+
+  const handleStatusUpdate = async (e) => {
+  e.preventDefault();
+  if (!seletecetdRowId) return;
+
+  let updateData = {};
+
+  if (latestStatus === "New" && assignedValue === "Assigned") {
+    updateData = {
+      status: "Assigned",
+      classificaton: {
+        supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+        supportGroupName: selectedSupportGroup?.supportGroupName || "",
+        technician: selectedTechnician?.employeeName || "",
+      },
+    };
+  } else if (latestStatus === "In Progress" && inProgressValue === "Assigned") {
+    updateData = {
+      status: "Assigned",
+      classificaton: {
+        supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+        supportGroupName: selectedSupportGroup?.supportGroupName || "",
+        technician: selectedTechnician?.employeeName || "",
+      },
+    };
+  } else {
+    // Only status update for other cases
+    updateData = { status: newStatus };
+  }
+
+  try {
+    await updateIncident(seletecetdRowId, updateData);
+    setChangeStatus(false);
+    fetchDepartment();
+  } catch (error) {
+    console.error("Error updating status:", error);
+  }
+};
 
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
   //  console.log("selectedRow",selectedRow?._id)
@@ -352,7 +467,7 @@ const IncidentsData = () => {
 
           // Find assigned and resolved times
           const assignedEntry = timeline.find(
-            (t) => t.status?.toLowerCase() === "assigned"
+            (t) => t.status?.toLowerCase() === "Assigned"
           );
           const resolvedEntry = timeline.find(
             (t) => t.status?.toLowerCase() === "resolved"
@@ -759,7 +874,7 @@ const IncidentsData = () => {
                 <h2 className="text-md font-medium text-gray-800 mb-4">
                   CHANGE INCIDENT STATUS
                 </h2>
-                <form onSubmit={statusSubmitHandler} className="space-y-2">
+                <form onSubmit={handleStatusUpdate} className="space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-1">
                     {latestStatus === "New" && (
                       <>
@@ -775,7 +890,7 @@ const IncidentsData = () => {
                             <option value="" className="text-start">
                               Select
                             </option>
-                            <option value="assigned" className="text-start">
+                            <option value="Assigned" className="text-start">
                               Assigned
                             </option>
                             <option value="cancel" className="text-start">
@@ -783,7 +898,7 @@ const IncidentsData = () => {
                             </option>
                           </select>
                         </div>
-                        {assignedValue === "assigned" && (
+                        {assignedValue === "Assigned" && (
                           <>
                             <div className="flex items-center gap-2 mt-2">
                               <label className="w-[40%] text-sm font-medium text-gray-500">
@@ -792,7 +907,16 @@ const IncidentsData = () => {
                               </label>
                               <div className="w-[60%]">
                                 <Autocomplete
-                                  options={["IT Support"]}
+                                  options={supportDepartment}
+                                  getOptionLabel={(option) =>
+                                    option && typeof option === "object"
+                                      ? option.supportDepartmentName || ""
+                                      : ""
+                                  }
+                                  value={selectedSupportDepartment}
+                                  onChange={(event, newValue) =>
+                                    setSelectedSupportDepartment(newValue)
+                                  }
                                   renderInput={(params) => (
                                     <TextField
                                       {...params}
@@ -811,13 +935,16 @@ const IncidentsData = () => {
                               </label>
                               <div className="w-[60%]">
                                 <Autocomplete
-                                  options={[
-                                    "Application",
-                                    "Hardware",
-                                    "Network",
-                                    "Server",
-                                    "VIDEO CONFERENCE",
-                                  ]}
+                                  options={supportGroup}
+                                  getOptionLabel={(option) =>
+                                    option && typeof option === "object"
+                                      ? option.supportGroupName || ""
+                                      : ""
+                                  }
+                                  value={selectedSupportGroup}
+                                  onChange={(event, newValue) =>
+                                    setSelectedSupportGroup(newValue)
+                                  }
                                   renderInput={(params) => (
                                     <TextField
                                       {...params}
@@ -836,7 +963,18 @@ const IncidentsData = () => {
                               </label>
                               <div className="w-[60%]">
                                 <Autocomplete
-                                  options={["", ""]}
+                                  options={technician.filter(
+                                    (t) => typeof t.emailAddress === "string"
+                                  )}
+                                  getOptionLabel={(option) =>
+                                    option?.employeeName && option?.emailAddress
+                                      ? `${option.employeeName} (${option.emailAddress})`
+                                      : option?.emailAddress || ""
+                                  }
+                                  value={selectedTechnician}
+                                  onChange={(event, newValue) =>
+                                    setSelectedTechnician(newValue)
+                                  }
                                   renderInput={(params) => (
                                     <TextField
                                       {...params}
@@ -898,7 +1036,7 @@ const IncidentsData = () => {
                             <option value="" className="text-start">
                               Select Status
                             </option>
-                            <option value="assigned" className="text-start">
+                            <option value="Assigned" className="text-start">
                               Assigned
                             </option>
                             <option value="pause" className="text-start">
@@ -912,7 +1050,7 @@ const IncidentsData = () => {
                             </option>
                           </select>
                         </div>
-                        {inProgressValue === "assigned" && (
+                        {inProgressValue === "Assigned" && (
                           <>
                             <div className="flex items-center gap-2 mt-2">
                               <label className="w-[40%] text-sm font-medium text-gray-500">
@@ -921,7 +1059,14 @@ const IncidentsData = () => {
                               </label>
                               <div className="w-[60%]">
                                 <Autocomplete
-                                  options={["IT Support"]}
+                                  options={supportDepartment}
+                                  getOptionLabel={(option) =>
+                                    option?.supportDepartmentName || ""
+                                  }
+                                  value={selectedSupportDepartment}
+                                  onChange={(event, newValue) =>
+                                    setSelectedSupportDepartment(newValue)
+                                  }
                                   renderInput={(params) => (
                                     <TextField
                                       {...params}
@@ -940,13 +1085,14 @@ const IncidentsData = () => {
                               </label>
                               <div className="w-[60%]">
                                 <Autocomplete
-                                  options={[
-                                    "Application",
-                                    "Hardware",
-                                    "Network",
-                                    "Server",
-                                    "VIDEO CONFERENCE",
-                                  ]}
+                                  options={supportGroup}
+                                  getOptionLabel={(option) =>
+                                    option?.supportGroupName || ""
+                                  }
+                                  value={selectedSupportGroup}
+                                  onChange={(event, newValue) =>
+                                    setSelectedSupportGroup(newValue)
+                                  }
                                   renderInput={(params) => (
                                     <TextField
                                       {...params}
@@ -965,7 +1111,18 @@ const IncidentsData = () => {
                               </label>
                               <div className="w-[60%]">
                                 <Autocomplete
-                                  options={["", ""]}
+                                  options={technician.filter(
+                                    (t) => typeof t.emailAddress === "string"
+                                  )}
+                                  getOptionLabel={(option) =>
+                                    option?.employeeName && option?.emailAddress
+                                      ? `${option.employeeName} (${option.emailAddress})`
+                                      : option?.emailAddress || ""
+                                  }
+                                  value={selectedTechnician}
+                                  onChange={(event, newValue) =>
+                                    setSelectedTechnician(newValue)
+                                  }
                                   renderInput={(params) => (
                                     <TextField
                                       {...params}
@@ -1039,7 +1196,10 @@ const IncidentsData = () => {
                                 Sloution Update
                                 <span className="text-red-500">*</span>
                               </label>
-                              <textarea rows={2} className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                              <textarea
+                                rows={2}
+                                className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                              ></textarea>
                             </div>
                           </>
                         )}

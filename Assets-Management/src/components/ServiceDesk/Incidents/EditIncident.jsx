@@ -1119,7 +1119,7 @@ const EditIncident = () => {
       }));
     }
   };
-  console.log("Form Data:", formData);
+  // console.log("Form Data:", formData);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

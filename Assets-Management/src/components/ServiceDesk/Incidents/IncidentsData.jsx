@@ -49,7 +49,7 @@ const IncidentsData = () => {
       setIsLoading(true);
       // const response = await getAllDepartment();
       const response = await getAllIncident();
-      console.log("response", response);
+      // console.log("response", response);
 
       setData(response?.data?.data || []);
     } catch (error) {

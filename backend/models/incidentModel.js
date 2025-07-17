@@ -24,7 +24,7 @@ const incidentSchema = mongoose.Schema({
     sla: { type: Date },
     isSla: {type: Boolean, default: true},
     tat: String,
-    feedback: String,
+    feedback: { type: String, default: "N/A"},
     attachment: String,
     submitter:{
         user: String,
@@ -49,8 +49,8 @@ const incidentSchema = mongoose.Schema({
     },
     classificaton: {
         excludeSLA: {type: Boolean, default: false},
-        severityLevel: String,
-        priorityLevel: String,
+        severityLevel: { type: String, default: "Severity-3" },
+        priorityLevel: { type: String, default: "Priority-3" },
         supportDepartmentName: String,
         supportGroupName: String,
         technician: String

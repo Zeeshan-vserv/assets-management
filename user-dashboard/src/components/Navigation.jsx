@@ -45,6 +45,18 @@ const Navigation = ({ nav, setNav }) => {
               </li>
               <li className="list-none">
                 <NavLink
+                  to="/Task-Assign"
+                  className={({ isActive }) =>
+                    `hover:underline cursor-pointer ${
+                      isActive ? "text-blue-400" : ""
+                    }`
+                  }
+                >
+                  Task Assign
+                </NavLink>
+              </li>
+              <li className="list-none">
+                <NavLink
                   to="/service-request"
                   className={({ isActive }) =>
                     `hover:underline cursor-pointer ${

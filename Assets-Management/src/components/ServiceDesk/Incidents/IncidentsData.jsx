@@ -30,7 +30,6 @@ const IncidentsData = () => {
   const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [slaTimelineData, setSlaTimelineData] = useState([]);
-
   const [changeStatus, setChangeStatus] = useState(false);
   const [seletecetdRowId, setSelectedRowId] = useState(null);
   const [assignedValue, setAssignedValue] = useState("");
@@ -55,6 +54,8 @@ const IncidentsData = () => {
       setIsLoading(true);
       // const response = await getAllDepartment();
       const response = await getAllIncident();
+      // console.log("response", response);
+
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching departments:", error);
@@ -164,12 +165,15 @@ const IncidentsData = () => {
       //   header: "Status",
       // },
       {
-        accessorKey: "statusTimeline",
         header: "Status",
+        accessorKey: "statusTimeline",
         Cell: ({ row }) => {
           const timeline = row.original.statusTimeline;
-          const latestStatus = timeline?.[timeline.length - 1]?.status || "N/A";
-          return <span>{latestStatus}</span>;
+          // Debug: show JSON if not as expected
+          if (!Array.isArray(timeline)) return "No Timeline";
+          if (timeline.length === 0) return "No Status";
+          const lastStatus = timeline[timeline.length - 1];
+          return lastStatus.status || "No Status";
         },
       },
 
@@ -202,8 +206,14 @@ const IncidentsData = () => {
         header: "Sub Location",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "submitter.loggedInTime",
         header: "Logged Time",
+        Cell: ({ cell }) =>
+          cell.getValue()
+            ? new Date(cell.getValue()).toLocaleString("en-IN", {
+                timeZone: "UTC",
+              })
+            : "",
       },
       {
         accessorKey: "classificaton.severityLevel",
@@ -215,7 +225,7 @@ const IncidentsData = () => {
       },
       {
         accessorKey: "sla",
-        header: "SLA Remaining",
+        header: "SLA",
         Cell: ({ row }) => {
           const incident = row.original;
           const severity = incident?.classificaton?.severityLevel;
@@ -332,8 +342,44 @@ const IncidentsData = () => {
         },
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "tat",
         header: "TAT",
+        Cell: ({ row }) => {
+          const timeline = row.original.statusTimeline;
+          const businessHours = slaData?.slaTimeline || []; // from SLACreation
+
+          if (
+            !Array.isArray(timeline) ||
+            timeline.length === 0 ||
+            businessHours.length === 0
+          )
+            return "N/A";
+
+          // Find assigned and resolved times
+          const assignedEntry = timeline.find(
+            (t) => t.status?.toLowerCase() === "assigned"
+          );
+          const resolvedEntry = timeline.find(
+            (t) => t.status?.toLowerCase() === "resolved"
+          );
+
+          if (!assignedEntry || !resolvedEntry) return "N/A";
+
+          const assignedTime = new Date(assignedEntry.changedAt);
+          const resolvedTime = new Date(resolvedEntry.changedAt);
+
+          if (resolvedTime <= assignedTime) return "N/A";
+
+          const tatMinutes = getBusinessMinutesBetween(
+            assignedTime,
+            resolvedTime,
+            businessHours
+          );
+          const hr = Math.floor(tatMinutes / 60);
+          const min = tatMinutes % 60;
+
+          return `${hr} hr ${min} min`;
+        },
       },
       {
         accessorKey: "classificaton.supportDepartmentName",
@@ -344,7 +390,7 @@ const IncidentsData = () => {
         header: "Support Group",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "feedback",
         header: "Feedback Available",
       },
       {

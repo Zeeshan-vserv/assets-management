@@ -30,25 +30,32 @@ const IncidentsData = () => {
   const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [slaTimelineData, setSlaTimelineData] = useState([]);
+  const [changeStatus, setChangeStatus] = useState(false);
+  const [seletecetdRowId, setSelectedRowId] = useState(null);
+  const [assignedValue, setAssignedValue] = useState("");
+  const [reopenValue, setReOpenValue] = useState("");
+  const [inProgressValue, setInProgressValue] = useState("");
 
   const fetchSlaTimelineData = async () => {
-  try {
-    const response = await getAllSLATimelines();
-    setSlaTimelineData(response?.data?.data || []);
-  } catch (error) {
-    console.error("Error fetching SLA timelines:", error);
-  }
-};
+    try {
+      const response = await getAllSLATimelines();
+      setSlaTimelineData(response?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching SLA timelines:", error);
+    }
+  };
 
-useEffect(() => {
-  fetchSlaTimelineData();
-}, []);
+  useEffect(() => {
+    fetchSlaTimelineData();
+  }, []);
 
   const fetchDepartment = async () => {
     try {
       setIsLoading(true);
       // const response = await getAllDepartment();
       const response = await getAllIncident();
+      // console.log("response", response);
+
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching departments:", error);
@@ -77,54 +84,75 @@ useEffect(() => {
     fetchSlaCreation();
   }, []);
 
+  const statusSubmitHandler = (e) => {
+    e.preventDefault();
+    console.log("clicked");
+  };
+
+  const selectedRow = data.find((item) => item._id === seletecetdRowId);
+  //  console.log("selectedRow",selectedRow?._id)
+
+  const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
+  // console.log("status", latestStatus);
+
   // console.log("sladata",slaData , "data", data[0].createdAt);
 
   function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
-  let remainingMinutes = Math.round(hoursToAdd * 60);
-  let current = new Date(startDate);
+    let remainingMinutes = Math.round(hoursToAdd * 60);
+    let current = new Date(startDate);
 
-  // Helper: get business window for a given date
-  function getBusinessWindow(date) {
-    const weekDay = date.toLocaleString("en-US", { weekday: "long" });
-    const slot = slaTimeline.find(s => s.weekDay === weekDay);
-    if (!slot) return null;
-    // slot.startTime and slot.endTime are Date objects (time part only)
-    const start = new Date(date);
-    start.setHours(new Date(slot.startTime).getUTCHours(), new Date(slot.startTime).getUTCMinutes(), 0, 0);
-    const end = new Date(date);
-    end.setHours(new Date(slot.endTime).getUTCHours(), new Date(slot.endTime).getUTCMinutes(), 0, 0);
-    return { start, end };
-  }
+    // Helper: get business window for a given date
+    function getBusinessWindow(date) {
+      const weekDay = date.toLocaleString("en-US", { weekday: "long" });
+      const slot = slaTimeline.find((s) => s.weekDay === weekDay);
+      if (!slot) return null;
+      // slot.startTime and slot.endTime are Date objects (time part only)
+      const start = new Date(date);
+      start.setHours(
+        new Date(slot.startTime).getUTCHours(),
+        new Date(slot.startTime).getUTCMinutes(),
+        0,
+        0
+      );
+      const end = new Date(date);
+      end.setHours(
+        new Date(slot.endTime).getUTCHours(),
+        new Date(slot.endTime).getUTCMinutes(),
+        0,
+        0
+      );
+      return { start, end };
+    }
 
-  while (remainingMinutes > 0) {
-    const window = getBusinessWindow(current);
-    if (!window) {
-      // No business hours today, go to next day
-      current.setDate(current.getDate() + 1);
-      current.setHours(0, 0, 0, 0);
-      continue;
+    while (remainingMinutes > 0) {
+      const window = getBusinessWindow(current);
+      if (!window) {
+        // No business hours today, go to next day
+        current.setDate(current.getDate() + 1);
+        current.setHours(0, 0, 0, 0);
+        continue;
+      }
+      // If before business hours, jump to start
+      if (current < window.start) current = new Date(window.start);
+      // If after business hours, go to next day
+      if (current >= window.end) {
+        current.setDate(current.getDate() + 1);
+        current.setHours(0, 0, 0, 0);
+        continue;
+      }
+      // Minutes left in today's business window
+      const minutesLeftToday = Math.floor((window.end - current) / 60000);
+      const minutesToAdd = Math.min(remainingMinutes, minutesLeftToday);
+      current = new Date(current.getTime() + minutesToAdd * 60000);
+      remainingMinutes -= minutesToAdd;
+      if (remainingMinutes > 0) {
+        // Go to next business day
+        current.setDate(current.getDate() + 1);
+        current.setHours(0, 0, 0, 0);
+      }
     }
-    // If before business hours, jump to start
-    if (current < window.start) current = new Date(window.start);
-    // If after business hours, go to next day
-    if (current >= window.end) {
-      current.setDate(current.getDate() + 1);
-      current.setHours(0, 0, 0, 0);
-      continue;
-    }
-    // Minutes left in today's business window
-    const minutesLeftToday = Math.floor((window.end - current) / 60000);
-    const minutesToAdd = Math.min(remainingMinutes, minutesLeftToday);
-    current = new Date(current.getTime() + minutesToAdd * 60000);
-    remainingMinutes -= minutesToAdd;
-    if (remainingMinutes > 0) {
-      // Go to next business day
-      current.setDate(current.getDate() + 1);
-      current.setHours(0, 0, 0, 0);
-    }
+    return current;
   }
-  return current;
-}
 
   const columns = useMemo(
     () => [
@@ -133,8 +161,16 @@ useEffect(() => {
         header: "Incident ID",
       },
       {
-        accessorKey: "classificaton.",
         header: "Status",
+        accessorKey: "statusTimeline",
+        Cell: ({ row }) => {
+          const timeline = row.original.statusTimeline;
+          // Debug: show JSON if not as expected
+          if (!Array.isArray(timeline)) return "No Timeline";
+          if (timeline.length === 0) return "No Status";
+          const lastStatus = timeline[timeline.length - 1];
+          return lastStatus.status || "No Status";
+        },
       },
       {
         accessorKey: "subject",
@@ -165,8 +201,14 @@ useEffect(() => {
         header: "Sub Location",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "submitter.loggedInTime",
         header: "Logged Time",
+        Cell: ({ cell }) =>
+          cell.getValue()
+            ? new Date(cell.getValue()).toLocaleString("en-IN", {
+                timeZone: "UTC",
+              })
+            : "",
       },
       {
         accessorKey: "classificaton.severityLevel",
@@ -176,98 +218,163 @@ useEffect(() => {
         accessorKey: "classificaton.technician",
         header: "Assigned To",
       },
-    {
-  accessorKey: "sla",
-  header: "SLA Remaining",
-  Cell: ({ row }) => {
-    const incident = row.original;
-    const severity = incident?.classificaton?.severityLevel;
-    const loggedIn = new Date(incident?.createdAt || incident?.submitter?.loggedInTime);
-
-    // Use business hours from SLACreation
-    const businessHours = slaData?.slaTimeline || [];
-
-    // Find SLA duration for this severity from slaTimelineData
-    const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
-    const matchedTimeline = slaTimelineData.find(
-      (item) => item.priority?.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
-    );
-    const resolution = matchedTimeline?.resolutionSLA || "00:30";
-    const [slaHours, slaMinutes] = resolution.split(":").map(Number);
-    const totalHours = slaHours + slaMinutes / 60;
-
-    // Calculate SLA deadline using business hours
-    const slaDeadline = addBusinessTime(loggedIn, totalHours, businessHours);
-
-    // Helper: Calculate remaining business minutes from now to deadline
-    function getBusinessMinutesBetween(now, end, slaTimeline) {
-      let minutes = 0;
-      let current = new Date(now);
-      while (current < end) {
-        // Get business window for current day
-        const weekDay = current.toLocaleString("en-US", { weekday: "long" });
-        const slot = slaTimeline.find(s => s.weekDay === weekDay);
-        if (!slot) {
-          // No business hours today, go to next day
-          current.setDate(current.getDate() + 1);
-          current.setHours(0, 0, 0, 0);
-          continue;
-        }
-        const start = new Date(current);
-        start.setHours(new Date(slot.startTime).getUTCHours(), new Date(slot.startTime).getUTCMinutes(), 0, 0);
-        const endWindow = new Date(current);
-        endWindow.setHours(new Date(slot.endTime).getUTCHours(), new Date(slot.endTime).getUTCMinutes(), 0, 0);
-
-        // If after business hours, go to next day
-        if (current >= endWindow) {
-          current.setDate(current.getDate() + 1);
-          current.setHours(0, 0, 0, 0);
-          continue;
-        }
-        // If before business hours, jump to start
-        if (current < start) current = new Date(start);
-
-        // Calculate minutes to count for this day
-        const until = end < endWindow ? end : endWindow;
-        const diff = Math.max(0, (until - current) / 60000);
-        minutes += diff;
-        current = new Date(until);
-        if (current < end) {
-          // Go to next business day
-          current.setDate(current.getDate() + 1);
-          current.setHours(0, 0, 0, 0);
-        }
-      }
-      return Math.round(minutes);
-    }
-
-    const now = new Date();
-    let remainingMinutes;
-    if (now < slaDeadline) {
-      remainingMinutes = getBusinessMinutesBetween(now, slaDeadline, businessHours);
-    } else {
-      // SLA breached: show negative overdue time
-      remainingMinutes = -getBusinessMinutesBetween(slaDeadline, now, businessHours);
-    }
-
-    const abs = Math.abs(remainingMinutes);
-    const hr = Math.floor(abs / 60);
-    const min = abs % 60;
-
-    const color = remainingMinutes < 0 ? "red" : "green";
-    const icon = remainingMinutes < 0 ? "❌" : "⏳";
-    const prefix = remainingMinutes < 0 ? "-" : "";
-
-    return (
-      <span style={{ color, fontWeight: "bold" }}>
-        {icon} {prefix}{hr} hr {min} min
-      </span>
-    );
-  },
-},
       {
-        accessorKey: "departmentName",
+        accessorKey: "sla",
+        header: "SLA",
+        Cell: ({ row }) => {
+          const incident = row.original;
+          const severity = incident?.classificaton?.severityLevel;
+          const loggedIn = new Date(
+            incident?.createdAt || incident?.submitter?.loggedInTime
+          );
+
+          // Use business hours from SLACreation
+          const businessHours = slaData?.slaTimeline || [];
+
+          // Find SLA duration for this severity from slaTimelineData
+          const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
+          const matchedTimeline = slaTimelineData.find(
+            (item) =>
+              item.priority?.replace(/[\s\-]/g, "").toLowerCase() ===
+              cleanSeverity
+          );
+          const resolution = matchedTimeline?.resolutionSLA || "00:30";
+          const [slaHours, slaMinutes] = resolution.split(":").map(Number);
+          const totalHours = slaHours + slaMinutes / 60;
+
+          // Calculate SLA deadline using business hours
+          const slaDeadline = addBusinessTime(
+            loggedIn,
+            totalHours,
+            businessHours
+          );
+
+          // Helper: Calculate remaining business minutes from now to deadline
+          function getBusinessMinutesBetween(now, end, slaTimeline) {
+            let minutes = 0;
+            let current = new Date(now);
+            while (current < end) {
+              // Get business window for current day
+              const weekDay = current.toLocaleString("en-US", {
+                weekday: "long",
+              });
+              const slot = slaTimeline.find((s) => s.weekDay === weekDay);
+              if (!slot) {
+                // No business hours today, go to next day
+                current.setDate(current.getDate() + 1);
+                current.setHours(0, 0, 0, 0);
+                continue;
+              }
+              const start = new Date(current);
+              start.setHours(
+                new Date(slot.startTime).getUTCHours(),
+                new Date(slot.startTime).getUTCMinutes(),
+                0,
+                0
+              );
+              const endWindow = new Date(current);
+              endWindow.setHours(
+                new Date(slot.endTime).getUTCHours(),
+                new Date(slot.endTime).getUTCMinutes(),
+                0,
+                0
+              );
+
+              // If after business hours, go to next day
+              if (current >= endWindow) {
+                current.setDate(current.getDate() + 1);
+                current.setHours(0, 0, 0, 0);
+                continue;
+              }
+              // If before business hours, jump to start
+              if (current < start) current = new Date(start);
+
+              // Calculate minutes to count for this day
+              const until = end < endWindow ? end : endWindow;
+              const diff = Math.max(0, (until - current) / 60000);
+              minutes += diff;
+              current = new Date(until);
+              if (current < end) {
+                // Go to next business day
+                current.setDate(current.getDate() + 1);
+                current.setHours(0, 0, 0, 0);
+              }
+            }
+            return Math.round(minutes);
+          }
+
+          const now = new Date();
+          let remainingMinutes;
+          if (now < slaDeadline) {
+            remainingMinutes = getBusinessMinutesBetween(
+              now,
+              slaDeadline,
+              businessHours
+            );
+          } else {
+            // SLA breached: show negative overdue time
+            remainingMinutes = -getBusinessMinutesBetween(
+              slaDeadline,
+              now,
+              businessHours
+            );
+          }
+
+          const abs = Math.abs(remainingMinutes);
+          const hr = Math.floor(abs / 60);
+          const min = abs % 60;
+
+          const color = remainingMinutes < 0 ? "red" : "green";
+          const icon = remainingMinutes < 0 ? "❌" : "⏳";
+          const prefix = remainingMinutes < 0 ? "-" : "";
+
+          return (
+            <span style={{ color, fontWeight: "bold" }}>
+              {icon} {prefix}
+              {hr} hr {min} min
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "tat",
         header: "TAT",
+        Cell: ({ row }) => {
+          const timeline = row.original.statusTimeline;
+          const businessHours = slaData?.slaTimeline || []; // from SLACreation
+
+          if (
+            !Array.isArray(timeline) ||
+            timeline.length === 0 ||
+            businessHours.length === 0
+          )
+            return "N/A";
+
+          // Find assigned and resolved times
+          const assignedEntry = timeline.find(
+            (t) => t.status?.toLowerCase() === "assigned"
+          );
+          const resolvedEntry = timeline.find(
+            (t) => t.status?.toLowerCase() === "resolved"
+          );
+
+          if (!assignedEntry || !resolvedEntry) return "N/A";
+
+          const assignedTime = new Date(assignedEntry.changedAt);
+          const resolvedTime = new Date(resolvedEntry.changedAt);
+
+          if (resolvedTime <= assignedTime) return "N/A";
+
+          const tatMinutes = getBusinessMinutesBetween(
+            assignedTime,
+            resolvedTime,
+            businessHours
+          );
+          const hr = Math.floor(tatMinutes / 60);
+          const min = tatMinutes % 60;
+
+          return `${hr} hr ${min} min`;
+        },
       },
       {
         accessorKey: "classificaton.supportDepartmentName",
@@ -278,7 +385,7 @@ useEffect(() => {
         header: "Support Group",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "feedback",
         header: "Feedback Available",
       },
       {
@@ -443,7 +550,38 @@ useEffect(() => {
               />
             )}
           />
-
+          <Button
+            variant="contained"
+            size="small"
+            disabled={table.getSelectedRowModel().rows.length !== 1}
+            sx={{
+              padding: "4px 12px",
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+              ml: 2,
+              "&.Mui-disabled": {
+                backgroundColor: "#B0BBE5",
+                color: "#FFFFFF",
+                cursor: "not-allowed",
+              },
+              opacity: table.getSelectedRowModel().rows.length !== 1 ? 0.5 : 1,
+              cursor:
+                table.getSelectedRowModel().rows.length !== 1
+                  ? "not-allowed"
+                  : "pointer",
+            }}
+            onClick={() => {
+              const selectedRow = table.getSelectedRowModel().rows[0];
+              const id = selectedRow.original?._id;
+              setSelectedRowId(id);
+              setChangeStatus(true);
+            }}
+          >
+            Change Status
+          </Button>
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -614,6 +752,320 @@ useEffect(() => {
         </div>
 
         <MaterialReactTable table={table} />
+        {changeStatus && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+                <h2 className="text-md font-medium text-gray-800 mb-4">
+                  CHANGE INCIDENT STATUS
+                </h2>
+                <form onSubmit={statusSubmitHandler} className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-1">
+                    {latestStatus === "New" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={assignedValue}
+                            onChange={(e) => setAssignedValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select
+                            </option>
+                            <option value="assigned" className="text-start">
+                              Assigned
+                            </option>
+                            <option value="cancel" className="text-start">
+                              Cancel
+                            </option>
+                          </select>
+                        </div>
+                        {assignedValue === "assigned" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Support Department
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["IT Support"]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Support Group
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={[
+                                    "Application",
+                                    "Hardware",
+                                    "Network",
+                                    "Server",
+                                    "VIDEO CONFERENCE",
+                                  ]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Technician
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["", ""]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+                    {latestStatus === "Resolved" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={reopenValue}
+                            onChange={(e) => setReOpenValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select status
+                            </option>
+                            <option value="reopen" className="text-start">
+                              reopen
+                            </option>
+                          </select>
+                        </div>
+                        {reopenValue === "reopen" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Reason for Reopen
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+                    {latestStatus === "In Progress" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={inProgressValue}
+                            onChange={(e) => setInProgressValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select Status
+                            </option>
+                            <option value="assigned" className="text-start">
+                              Assigned
+                            </option>
+                            <option value="pause" className="text-start">
+                              Pause
+                            </option>
+                            <option value="resolved" className="text-start">
+                              Resolved
+                            </option>
+                            <option value="cancel" className="text-start">
+                              Cancel
+                            </option>
+                          </select>
+                        </div>
+                        {inProgressValue === "assigned" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Support Department
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["IT Support"]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Support Group
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={[
+                                    "Application",
+                                    "Hardware",
+                                    "Network",
+                                    "Server",
+                                    "VIDEO CONFERENCE",
+                                  ]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Technician
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["", ""]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                        {inProgressValue === "pause" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Pause Category
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={[
+                                    "Pending With Vendor/OEM",
+                                    "Pause With Other Reason",
+                                    "Standby Provided",
+                                  ]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Enter Remarks
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                            </div>
+                          </>
+                        )}
+                        {inProgressValue === "resolved" && (
+                          <>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Closure Code
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["", "", ""]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Sloution Update
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea rows={2} className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setChangeStatus(false)}
+                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

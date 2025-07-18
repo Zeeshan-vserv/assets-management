@@ -79,7 +79,7 @@ function DashboardAsset() {
 
   return (
     <>
-      <div className="flrx flex-col gap-6 justify-center p-6">
+      <div className="flex flex-col gap-6 justify-center p-6">
         <div className="flex justify-end mb-4">
           <button
             onClick={() => navigate("/main/asset/AssetData")}

@@ -13,12 +13,12 @@ import { Card, CardContent, Typography, Box } from "@mui/material";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const subLocationData = [
-  { name: "BSO Faridabad", value: 1020 },
-  { name: "BSO PRAYAGRAJ", value: 350 },
-  { name: "BHOPAL CCO", value: 290 },
-  { name: "GO AHMEDABAD", value: 610 },
-  { name: "BSO Bokaro", value: 10 },
-  { name: "BSO Delhi", value: 5 },
+  { name: "BSO Faridabad", value: 350 },
+  { name: "BSO PRAYAGRAJ", value: 115 },
+  { name: "BHOPAL CCO", value: 200 },
+  { name: "GO AHMEDABAD", value: 310 },
+  { name: "BSO Bokaro", value: 100 },
+  { name: "BSO Delhi", value: 50 },
 ];
 
 const data = {

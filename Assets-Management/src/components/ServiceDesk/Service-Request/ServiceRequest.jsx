@@ -32,6 +32,7 @@ function ServiceRequest() {
 
   const [changeStatus, setChangeStatus] = useState(false);
   const [seletecetdRowId, setSelectedRowId] = useState(null);
+  const [selectDropDownValue, setSelectDropDownValue] = useState("");
 
   const fetchIncident = async () => {
     try {
@@ -53,10 +54,7 @@ function ServiceRequest() {
 
   //status
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
-  //   console.log("selectedRow", selectedRow?._id); //use later
-
-  const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
-  //   console.log("status", latestStatus);  //use later
+  // console.log("selectedRow", selectedRow?._id); //use later
 
   const statusSubmitHandler = (e) => {
     e.preventDefault();
@@ -522,22 +520,198 @@ function ServiceRequest() {
             <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
                 <h2 className="text-md font-medium text-gray-800 mb-4">
-                  CHANGE INCIDENT STATUS
+                  CHANGE SERVICE REQUEST STATUS
                 </h2>
                 <form onSubmit={statusSubmitHandler} className="space-y-2">
                   <div className="grid grid-cols-1 md:grid-cols-1">
-                    {latestStatus == "New" && <></>}
-                    {latestStatus == "Approval Pending" && <></>}
-                    {latestStatus == "Provisioning" && <></>}
-                    {latestStatus == "Assigned" && <></>}
-                    {latestStatus == "In Progress" && <></>}
-                    {latestStatus == "On Hold" && <></>}
-                    {latestStatus == "Cancelled" && <></>}
-                    {latestStatus == "Rejected" && <></>}
-                    {latestStatus == "Resolved" && <></>}
-                    {latestStatus == "Closed" && <></>}
-                    {latestStatus == "Service To Incident" && <></>}
-                    {latestStatus == "Wating for Update" && <></>}
+                    <div className="flex items-center gap-2 mt-2">
+                      <label className="w-[40%] text-sm font-medium text-gray-500">
+                        Status <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={selectDropDownValue}
+                        onChange={(e) => setSelectDropDownValue(e.target.value)}
+                        className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                      >
+                        <option value="" className="text-start">
+                          Select
+                        </option>
+                        <option value="new" className="text-start">
+                          New
+                        </option>
+                        <option value="approvalPending" className="text-start">
+                          Approval Pending
+                        </option>
+                        <option value="provisioning" className="text-start">
+                          Provisioning
+                        </option>
+                        <option value="assigned" className="text-start">
+                          Assigned
+                        </option>
+                        <option value="inProgress" className="text-start">
+                          In Progress
+                        </option>
+                        <option value="onHold" className="text-start">
+                          On Hold
+                        </option>
+                        <option value="cancelled" className="text-start">
+                          Cancelled
+                        </option>
+                        <option value="rejected" className="text-start">
+                          Rejected
+                        </option>
+                        <option value="resolved" className="text-start">
+                          Resolved
+                        </option>
+                        <option value="closed" className="text-start">
+                          Closed
+                        </option>
+                        <option
+                          value="serviceToIncident"
+                          className="text-start"
+                        >
+                          Service To Incident
+                        </option>
+                        <option value="waitingForUpdate" className="text-start">
+                          Waiting For Update
+                        </option>
+                      </select>
+                    </div>
+                    {selectDropDownValue === "assigned" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Department
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={["IT Support"]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Group
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={["", ""]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Technician
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={["", ""]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {selectDropDownValue === "onHold" && (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Enter Comments
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Department
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={[
+                                "Pending With Vendor / OEM",
+                                "Pause With Other Reason",
+                                "Standby Provided",
+                              ]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Enter Remarks
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                        </div>
+                      </>
+                    )}
+                    {selectDropDownValue === "resolved" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Enter Comments
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <textarea
+                            rows={2}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          ></textarea>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Closure Code
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={[""]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                   <div className="flex justify-end gap-3 pt-4 mt-6">
                     <button

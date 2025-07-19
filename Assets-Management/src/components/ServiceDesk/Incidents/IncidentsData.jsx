@@ -1,25 +1,22 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton } from "@mui/material";
-import { AiOutlineFileExcel } from "react-icons/ai";
-import { AiOutlineFilePdf } from "react-icons/ai";
+import { Box, Button, IconButton, Autocomplete, TextField } from "@mui/material";
+import { AiOutlineFileExcel, AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { Autocomplete, TextField } from "@mui/material";
+import { NavLink } from "react-router-dom";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { MdModeEdit } from "react-icons/md";
 import {
   getAllIncident,
   getAllIncidentsSla,
   getAllIncidentsTat,
   updateIncident,
 } from "../../../api/IncidentRequest";
-import { NavLink } from "react-router-dom";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { MdModeEdit } from "react-icons/md";
-import { getAllSLAs, getAllSLATimelines } from "../../../api/slaRequest";
 import {
   getAllSupportDepartment,
   getAllSupportGroup,
@@ -35,82 +32,79 @@ const csvConfig = mkConfig({
 });
 
 const IncidentsData = () => {
-  const currentUserId = useSelector((state) => state.authReducer.authData?.userId);
+  // Redux userId
+  const currentUserId = useSelector(
+    (state) => state.authReducer.authData?.userId
+  );
+
+  // State
   const [data, setData] = useState([]);
-  // const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  // const [slaTimelineData, setSlaTimelineData] = useState([]);
   const [changeStatus, setChangeStatus] = useState(false);
   const [seletecetdRowId, setSelectedRowId] = useState(null);
   const [assignedValue, setAssignedValue] = useState("");
   const [reopenValue, setReOpenValue] = useState("");
   const [inProgressValue, setInProgressValue] = useState("");
-  const [selectedSupportDepartment, setSelectedSupportDepartment] = useState([]);
-  const [selectedSupportGroup, setSelectedSupportGroup] = useState([]);
-  const [selectedTechnician, setSelectedTechnician] = useState([]);
+  const [selectedSupportDepartment, setSelectedSupportDepartment] = useState(null);
+  const [selectedSupportGroup, setSelectedSupportGroup] = useState(null);
+  const [selectedTechnician, setSelectedTechnician] = useState(null);
   const [supportDepartment, setSupportDepartment] = useState([]);
   const [supportGroup, setSupportGroup] = useState([]);
   const [technician, setTechnician] = useState([]);
   const [allSla, setAllSla] = useState([]);
   const [allTat, setAllTat] = useState([]);
 
-  useEffect(() => {
-    // Fetch all incidents
-    fetchDepartment();
-
-    // Fetch all SLA and TAT for all incidents
-    // getAllIncidentsSla()
-    //   .then((res) => setAllSla(res.data.data || []))
-    //   .catch(() => setAllSla([]));
-    // getAllIncidentsTat()
-    //   .then((res) => setAllTat(res.data.data || []))
-    //   .catch(() => setAllTat([]));
+  // Fetch incidents
+  const fetchDepartment = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await getAllIncident();
+      setData(response?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  useEffect(() => {
-    const fetchSlaTat = async () => {
-      try {
-        const responseAllSla = await getAllIncidentsSla();
-        console.log("responseAllSla", responseAllSla);
-        setAllSla(responseAllSla?.data?.data || []);
-        const responseAllTat = await getAllIncidentsTat();
-        setAllTat(responseAllTat?.data?.data || []);
-      } catch (error) {
-        console.error("Error fetching SLA/TAT data:", error);
-      }
-    };
-    fetchSlaTat();
+  // Fetch dropdowns
+  const fetchDropdownData = useCallback(async () => {
+    try {
+      const [deptRes, groupRes, techRes] = await Promise.all([
+        getAllSupportDepartment(),
+        getAllSupportGroup(),
+        getAllUsers(),
+      ]);
+      setSupportDepartment(deptRes?.data?.data || []);
+      setSupportGroup(groupRes?.data?.data || []);
+      setTechnician(Array.isArray(techRes?.data) ? techRes.data : []);
+    } catch (error) {
+      console.error("Error fetching dropdown data:", error);
+    }
+  }, []);  
+
+  // Fetch SLA/TAT
+  const fetchSlaTat = useCallback(async () => {
+    try {
+      const [slaRes, tatRes] = await Promise.all([
+        getAllIncidentsSla(),
+        getAllIncidentsTat(),
+      ]);
+      setAllSla(slaRes?.data?.data || []);
+      setAllTat(tatRes?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching SLA/TAT data:", error);
+    }
   }, []);
 
-  // console.log("allSla", allSla);
-  // console.log("allTat", allTat);
+  // Effects
+  useEffect(() => { fetchDepartment(); }, [fetchDepartment]);
+  useEffect(() => { fetchDropdownData(); }, [fetchDropdownData]);
+  useEffect(() => { fetchSlaTat(); }, [fetchSlaTat]);
 
+  // Update support group when department changes
   useEffect(() => {
-    const fetchDropdownData = async () => {
-      try {
-        // Fetch Support Department
-        const responseSupportDepartment = await getAllSupportDepartment();
-        setSupportDepartment(responseSupportDepartment?.data?.data || []);
-
-        // Fetch Support Group
-        const responseSupportGroup = await getAllSupportGroup();
-        setSupportGroup(responseSupportGroup?.data?.data || []);
-
-        // Fetch Technicians (users)
-        const responseTechnician = await getAllUsers();
-        setTechnician(
-          Array.isArray(responseTechnician?.data) ? responseTechnician.data : []
-        );
-      } catch (error) {
-        console.error("Error fetching dropdown data:", error);
-      }
-    };
-
-    fetchDropdownData();
-  }, []);
-
-  useEffect(() => {
-    if (selectedSupportDepartment && selectedSupportDepartment.supportGroups) {
+    if (selectedSupportDepartment?.supportGroups) {
       setSupportGroup(selectedSupportDepartment.supportGroups);
       setSelectedSupportGroup(null);
     } else {
@@ -119,242 +113,92 @@ const IncidentsData = () => {
     }
   }, [selectedSupportDepartment]);
 
-  // const fetchSlaTimelineData = async () => {
-  //   try {
-  //     const response = await getAllSLATimelines();
-  //     setSlaTimelineData(response?.data?.data || []);
-  //   } catch (error) {
-  //     console.error("Error fetching SLA timelines:", error);
-  //   }
-  // };
+  // Selected row and status
+  const selectedRow = data.find((item) => item._id === seletecetdRowId);
+  const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
 
-  // useEffect(() => {
-  //   fetchSlaTimelineData();
-  // }, []);
+  // Status update handler
+  const handleStatusUpdate = async (e) => {
+    e.preventDefault();
+    if (!seletecetdRowId) return;
 
-  const fetchDepartment = async () => {
+    let updateData = {};
+    if (latestStatus === "New" && assignedValue === "Assigned") {
+      updateData = {
+        status: "Assigned",
+        changedBy: currentUserId,
+        classificaton: {
+          supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+          supportGroupName: selectedSupportGroup?.supportGroupName || "",
+          technician: selectedTechnician?.employeeName || "",
+        },
+      };
+    } else if (
+      latestStatus === "In Progress" &&
+      inProgressValue === "Assigned"
+    ) {
+      updateData = {
+        status: "Assigned",
+        changedBy: currentUserId,
+        classificaton: {
+          supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+          supportGroupName: selectedSupportGroup?.supportGroupName || "",
+          technician: selectedTechnician?.employeeName || "",
+        },
+      };
+    } else if (latestStatus === "In Progress" && inProgressValue) {
+      updateData = {
+        status: inProgressValue,
+        changedBy: currentUserId,
+      };
+    } else if (latestStatus === "Resolved" && reopenValue) {
+      updateData = {
+        status: reopenValue,
+        changedBy: currentUserId,
+      };
+    } else {
+      updateData = { status: assignedValue || inProgressValue || reopenValue || "", changedBy: currentUserId };
+    }
+
     try {
-      setIsLoading(true);
-      // const response = await getAllDepartment();
-      const response = await getAllIncident();
-      // console.log("response", response);
-
-      setData(response?.data?.data || []);
+      await updateIncident(seletecetdRowId, updateData);
+      setChangeStatus(false);
+      fetchDepartment();
     } catch (error) {
-      console.error("Error fetching departments:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Error updating status:", error);
     }
   };
 
-  useEffect(() => {
-    fetchDepartment();
-  }, []);
-
-  // const fetchSlaCreation = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await getAllSLAs();
-  //     setSlaData(response?.data?.data[0] || []);
-  //   } catch (error) {
-  //     console.error("Error fetching holiday calendar:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchSlaCreation();
-  // }, []);
-
-  const handleStatusUpdate = async (e) => {
-  e.preventDefault();
-  if (!seletecetdRowId) return;
-
-  let updateData = {};
-
-  if (latestStatus === "New" && assignedValue === "Assigned") {
-    updateData = {
-      status: "Assigned",
-      changedBy: currentUserId,
-      classificaton: {
-        supportDepartmentName:
-          selectedSupportDepartment?.supportDepartmentName || "",
-        supportGroupName: selectedSupportGroup?.supportGroupName || "",
-        technician: selectedTechnician?.employeeName || "",
-      },
-    };
-  } else if (
-    latestStatus === "In Progress" &&
-    inProgressValue === "Assigned"
-  ) {
-    updateData = {
-      status: "Assigned",
-      changedBy: currentUserId,
-      classificaton: {
-        supportDepartmentName:
-          selectedSupportDepartment?.supportDepartmentName || "",
-        supportGroupName: selectedSupportGroup?.supportGroupName || "",
-        technician: selectedTechnician?.employeeName || "",
-      },
-    };
-  } else if (latestStatus === "In Progress" && inProgressValue) {
-    updateData = {
-      status: inProgressValue,
-      changedBy: currentUserId,
-      // Add pause/resolve/cancel fields here if needed
-    };
-  } else if (latestStatus === "Resolved" && reopenValue) {
-    updateData = {
-      status: reopenValue,
-      changedBy: currentUserId,
-      // Add reason for reopen if needed
-    };
-  } else {
-    // For other direct status/data updates
-    updateData = { status: newStatus, changedBy: currentUserId };
-    // If you want to update other fields, add them here
-  }
-
-  try {
-    await updateIncident(seletecetdRowId, updateData);
-    setChangeStatus(false);
-    fetchDepartment();
-  } catch (error) {
-    console.error("Error updating status:", error);
-  }
-};
-
-  const selectedRow = data.find((item) => item._id === seletecetdRowId);
-  //  console.log("selectedRow",selectedRow?._id)
-
-  const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
-  // console.log("status", latestStatus);
-
-  // console.log("sladata",slaData , "data", data[0].createdAt);
-
-  // function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
-  //   let remainingMinutes = Math.round(hoursToAdd * 60);
-  //   let current = new Date(startDate);
-
-  //   // Helper: get business window for a given date
-  //   function getBusinessWindow(date) {
-  //     const weekDay = date.toLocaleString("en-US", { weekday: "long" });
-  //     const slot = slaTimeline.find((s) => s.weekDay === weekDay);
-  //     if (!slot) return null;
-  //     // slot.startTime and slot.endTime are Date objects (time part only)
-  //     const start = new Date(date);
-  //     start.setHours(
-  //       new Date(slot.startTime).getUTCHours(),
-  //       new Date(slot.startTime).getUTCMinutes(),
-  //       0,
-  //       0
-  //     );
-  //     const end = new Date(date);
-  //     end.setHours(
-  //       new Date(slot.endTime).getUTCHours(),
-  //       new Date(slot.endTime).getUTCMinutes(),
-  //       0,
-  //       0
-  //     );
-  //     return { start, end };
-  //   }
-
-  //   while (remainingMinutes > 0) {
-  //     const window = getBusinessWindow(current);
-  //     if (!window) {
-  //       // No business hours today, go to next day
-  //       current.setDate(current.getDate() + 1);
-  //       current.setHours(0, 0, 0, 0);
-  //       continue;
-  //     }
-  //     // If before business hours, jump to start
-  //     if (current < window.start) current = new Date(window.start);
-  //     // If after business hours, go to next day
-  //     if (current >= window.end) {
-  //       current.setDate(current.getDate() + 1);
-  //       current.setHours(0, 0, 0, 0);
-  //       continue;
-  //     }
-  //     // Minutes left in today's business window
-  //     const minutesLeftToday = Math.floor((window.end - current) / 60000);
-  //     const minutesToAdd = Math.min(remainingMinutes, minutesLeftToday);
-  //     current = new Date(current.getTime() + minutesToAdd * 60000);
-  //     remainingMinutes -= minutesToAdd;
-  //     if (remainingMinutes > 0) {
-  //       // Go to next business day
-  //       current.setDate(current.getDate() + 1);
-  //       current.setHours(0, 0, 0, 0);
-  //     }
-  //   }
-  //   return current;
-  // }
-
+  // Table columns
   const columns = useMemo(
     () => [
-      {
-        accessorKey: "incidentId",
-        header: "Incident ID",
-      },
+      { accessorKey: "incidentId", header: "Incident ID" },
       {
         header: "Status",
         accessorKey: "statusTimeline",
         Cell: ({ row }) => {
           const timeline = row.original.statusTimeline;
-          // Debug: show JSON if not as expected
-          if (!Array.isArray(timeline)) return "No Timeline";
-          if (timeline.length === 0) return "No Status";
-          const lastStatus = timeline[timeline.length - 1];
-          return lastStatus.status || "No Status";
+          if (!Array.isArray(timeline) || timeline.length === 0) return "No Status";
+          return timeline[timeline.length - 1]?.status || "No Status";
         },
       },
-
-      {
-        accessorKey: "subject",
-        header: "Subject",
-      },
-      {
-        accessorKey: "category",
-        header: "Category",
-      },
-      {
-        accessorKey: "subCategory",
-        header: "Sub Category",
-      },
-      {
-        accessorKey: "submitter.user",
-        header: "Submitter",
-      },
-      {
-        accessorKey: "assetDetails.asset",
-        header: "Asset Id",
-      },
-      {
-        accessorKey: "locationDetails.location",
-        header: "Location",
-      },
-      {
-        accessorKey: "locationDetails.subLocation",
-        header: "Sub Location",
-      },
+      { accessorKey: "subject", header: "Subject" },
+      { accessorKey: "category", header: "Category" },
+      { accessorKey: "subCategory", header: "Sub Category" },
+      { accessorKey: "submitter.user", header: "Submitter" },
+      { accessorKey: "assetDetails.asset", header: "Asset Id" },
+      { accessorKey: "locationDetails.location", header: "Location" },
+      { accessorKey: "locationDetails.subLocation", header: "Sub Location" },
       {
         accessorKey: "submitter.loggedInTime",
         header: "Logged Time",
         Cell: ({ cell }) =>
           cell.getValue()
-            ? new Date(cell.getValue()).toLocaleString("en-IN", {
-                timeZone: "UTC",
-              })
+            ? new Date(cell.getValue()).toLocaleString("en-IN", { timeZone: "UTC" })
             : "",
       },
-      {
-        accessorKey: "classificaton.severityLevel",
-        header: "Severity",
-      },
-      {
-        accessorKey: "classificaton.technician",
-        header: "Assigned To",
-      },
+      { accessorKey: "classificaton.severityLevel", header: "Severity" },
+      { accessorKey: "classificaton.technician", header: "Assigned To" },
       {
         accessorKey: "sla",
         header: "SLA",
@@ -365,7 +209,6 @@ const IncidentsData = () => {
           const breached = slaObj.slaRawMinutes < 0;
           const color = breached ? "red" : "green";
           const prefix = breached ? "-" : "";
-          // Remove minus from formatted string if present, add our own
           const formattedSla = slaObj.sla.replace(/^-/, "");
           return (
             <span style={{ fontWeight: "bold", color }}>
@@ -388,18 +231,9 @@ const IncidentsData = () => {
           );
         },
       },
-      {
-        accessorKey: "classificaton.supportDepartmentName",
-        header: "Support Department",
-      },
-      {
-        accessorKey: "classificaton.supportGroupName",
-        header: "Support Group",
-      },
-      {
-        accessorKey: "feedback",
-        header: "Feedback Available",
-      },
+      { accessorKey: "classificaton.supportDepartmentName", header: "Support Department" },
+      { accessorKey: "classificaton.supportGroupName", header: "Support Group" },
+      { accessorKey: "feedback", header: "Feedback Available" },
       {
         id: "edit",
         header: "Edit",
@@ -414,12 +248,12 @@ const IncidentsData = () => {
         ),
       },
     ],
-    [isLoading,allTat, allSla]
+    [isLoading, allTat, allSla]
   );
 
-  //Exports
-  const handleExportRows = (rows) => {
-    const visibleColumns = table
+  // Export helpers
+  const getVisibleColumns = () =>
+    table
       .getAllLeafColumns()
       .filter(
         (col) =>
@@ -429,6 +263,8 @@ const IncidentsData = () => {
           col.id !== "delete"
       );
 
+  const handleExportRows = (rows) => {
+    const visibleColumns = getVisibleColumns();
     const rowData = rows.map((row) => {
       const result = {};
       visibleColumns.forEach((col) => {
@@ -437,21 +273,12 @@ const IncidentsData = () => {
       });
       return result;
     });
-
     const csv = generateCsv(csvConfig)(rowData);
     download(csvConfig)(csv);
   };
-  const handleExportData = () => {
-    const visibleColumns = table
-      .getAllLeafColumns()
-      .filter(
-        (col) =>
-          col.getIsVisible() &&
-          col.id !== "mrt-row-select" &&
-          col.id !== "edit" &&
-          col.id !== "delete"
-      );
 
+  const handleExportData = () => {
+    const visibleColumns = getVisibleColumns();
     const exportData = data.map((item) => {
       const result = {};
       visibleColumns.forEach((col) => {
@@ -460,22 +287,16 @@ const IncidentsData = () => {
       });
       return result;
     });
-
     const csv = generateCsv(csvConfig)(exportData);
     download(csvConfig)(csv);
   };
 
   const handlePdfData = () => {
     const excludedColumns = ["mrt-row-select", "edit", "delete"];
-
     const visibleColumns = table
       .getAllLeafColumns()
       .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
-
-    // Prepare headers for PDF
     const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
-
-    // Prepare data rows for PDF
     const exportData = data.map((item) =>
       visibleColumns.map((col) => {
         const key = col.id || col.accessorKey;
@@ -483,7 +304,6 @@ const IncidentsData = () => {
         return value ?? "";
       })
     );
-
     const doc = new jsPDF({});
     autoTable(doc, {
       head: [headers],
@@ -495,6 +315,7 @@ const IncidentsData = () => {
     doc.save("Assets-Management-Components.pdf");
   };
 
+  // Table instance
   const table = useMaterialReactTable({
     data,
     columns,
@@ -504,161 +325,155 @@ const IncidentsData = () => {
       density: "compact",
       pagination: { pageSize: 5 },
     },
-    renderTopToolbarCustomActions: ({ table }) => {
-      return (
-        <Box className="flex flex-wrap w-full">
-          <NavLink to="/main/ServiceDesk/NewIncident">
-            <Button
-              variant="contained"
-              size="small"
-              startIcon={<AddCircleOutlineIcon />}
-              sx={{
-                backgroundColor: "#2563eb",
-                color: "#fff",
-                textTransform: "none",
-                mt: 1,
-                mb: 1,
-              }}
-            >
-              New Incident
-            </Button>
-          </NavLink>
-          <Autocomplete
-            className="w-[15%]"
-            sx={{
-              ml: 2,
-              mt: 1,
-              mb: 1,
-              "& .MuiInputBase-root": {
-                borderRadius: "0.35rem",
-                backgroundColor: "#f9fafb",
-                fontSize: "0.85rem",
-                border: "1px solid #e2e8f0",
-                transition: "all 0.3s ease",
-              },
-              "& .MuiInputBase-root:hover": {
-                borderColor: "#94a3b8",
-              },
-            }}
-            options={[
-              "My Tickets",
-              "Group Tickets",
-              "Department Tickets",
-              "All Tickets",
-            ]}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="standard"
-                placeholder="Select"
-                InputProps={{
-                  ...params.InputProps,
-                  disableUnderline: true,
-                }}
-                inputProps={{
-                  ...params.inputProps,
-                  style: { fontSize: "0.85rem", padding: "8px" },
-                }}
-              />
-            )}
-          />
+    renderTopToolbarCustomActions: ({ table }) => (
+      <Box className="flex flex-wrap w-full">
+        <NavLink to="/main/ServiceDesk/NewIncident">
           <Button
             variant="contained"
             size="small"
-            disabled={table.getSelectedRowModel().rows.length !== 1}
+            startIcon={<AddCircleOutlineIcon />}
             sx={{
-              padding: "4px 12px",
               backgroundColor: "#2563eb",
               color: "#fff",
               textTransform: "none",
               mt: 1,
               mb: 1,
-              ml: 2,
-              "&.Mui-disabled": {
-                backgroundColor: "#B0BBE5",
-                color: "#FFFFFF",
-                cursor: "not-allowed",
-              },
-              opacity: table.getSelectedRowModel().rows.length !== 1 ? 0.5 : 1,
-              cursor:
-                table.getSelectedRowModel().rows.length !== 1
-                  ? "not-allowed"
-                  : "pointer",
-            }}
-            onClick={() => {
-              const selectedRow = table.getSelectedRowModel().rows[0];
-              const id = selectedRow.original?._id;
-              setSelectedRowId(id);
-              setChangeStatus(true);
             }}
           >
-            Change Status
+            New Incident
           </Button>
-          <Button
-            onClick={handlePdfData}
-            startIcon={<AiOutlineFilePdf />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export as PDF
-          </Button>
-          <Button
-            onClick={handleExportData}
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export All Data
-          </Button>
-          <Button
-            disabled={table.getPrePaginationRowModel().rows.length === 0}
-            onClick={() =>
-              handleExportRows(table.getPrePaginationRowModel().rows)
-            }
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export All Rows
-          </Button>
-          <Button
-            disabled={table.getRowModel().rows.length === 0}
-            onClick={() => handleExportRows(table.getRowModel().rows)}
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export Page Rows
-          </Button>
-          <Button
-            disabled={
-              !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
-            }
-            onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export Selected Rows
-          </Button>
-        </Box>
-      );
-    },
-
+        </NavLink>
+        <Autocomplete
+          className="w-[15%]"
+          sx={{
+            ml: 2,
+            mt: 1,
+            mb: 1,
+            "& .MuiInputBase-root": {
+              borderRadius: "0.35rem",
+              backgroundColor: "#f9fafb",
+              fontSize: "0.85rem",
+              border: "1px solid #e2e8f0",
+              transition: "all 0.3s ease",
+            },
+            "& .MuiInputBase-root:hover": {
+              borderColor: "#94a3b8",
+            },
+          }}
+          options={[
+            "My Tickets",
+            "Group Tickets",
+            "Department Tickets",
+            "All Tickets",
+          ]}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              placeholder="Select"
+              InputProps={{
+                ...params.InputProps,
+                disableUnderline: true,
+              }}
+              inputProps={{
+                ...params.inputProps,
+                style: { fontSize: "0.85rem", padding: "8px" },
+              }}
+            />
+          )}
+        />
+        <Button
+          variant="contained"
+          size="small"
+          disabled={table.getSelectedRowModel().rows.length !== 1}
+          sx={{
+            padding: "4px 12px",
+            backgroundColor: "#2563eb",
+            color: "#fff",
+            textTransform: "none",
+            mt: 1,
+            mb: 1,
+            ml: 2,
+            "&.Mui-disabled": {
+              backgroundColor: "#B0BBE5",
+              color: "#FFFFFF",
+              cursor: "not-allowed",
+            },
+            opacity: table.getSelectedRowModel().rows.length !== 1 ? 0.5 : 1,
+            cursor:
+              table.getSelectedRowModel().rows.length !== 1
+                ? "not-allowed"
+                : "pointer",
+          }}
+          onClick={() => {
+            const selectedRow = table.getSelectedRowModel().rows[0];
+            const id = selectedRow.original?._id;
+            setSelectedRowId(id);
+            setChangeStatus(true);
+          }}
+        >
+          Change Status
+        </Button>
+        <Button
+          onClick={handlePdfData}
+          startIcon={<AiOutlineFilePdf />}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+        >
+          Export as PDF
+        </Button>
+        <Button
+          onClick={handleExportData}
+          startIcon={<AiOutlineFileExcel />}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+        >
+          Export All Data
+        </Button>
+        <Button
+          disabled={table.getPrePaginationRowModel().rows.length === 0}
+          onClick={() =>
+            handleExportRows(table.getPrePaginationRowModel().rows)
+          }
+          startIcon={<AiOutlineFileExcel />}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+        >
+          Export All Rows
+        </Button>
+        <Button
+          disabled={table.getRowModel().rows.length === 0}
+          onClick={() => handleExportRows(table.getRowModel().rows)}
+          startIcon={<AiOutlineFileExcel />}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+        >
+          Export Page Rows
+        </Button>
+        <Button
+          disabled={
+            !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
+          }
+          onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
+          startIcon={<AiOutlineFileExcel />}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+        >
+          Export Selected Rows
+        </Button>
+      </Box>
+    ),
     muiTableProps: {
       sx: {
         border: "1px solid rgba(81, 81, 81, .5)",
-        caption: {
-          captionSide: "top",
-        },
+        caption: { captionSide: "top" },
       },
     },
-
     paginationDisplayMode: "pages",
     positionToolbarAlertBanner: "bottom",
     muiPaginationProps: {
@@ -668,7 +483,6 @@ const IncidentsData = () => {
       variant: "outlined",
     },
     enablePagination: true,
-
     muiTableHeadCellProps: {
       sx: {
         backgroundColor: "#f1f5fa",
@@ -684,447 +498,412 @@ const IncidentsData = () => {
     }),
   });
 
-  const cardData = [
-    {
-      id: "1",
-      totalCount: "100",
-      description: "New",
-    },
-    {
-      id: "2",
-      storeCount: "70",
-      description: "Assigned",
-    },
-    {
-      id: "3",
-      allocatedCount: "40",
-      description: "In-Progress",
-    },
-    {
-      id: "4",
-      inRepairCount: "30",
-      description: "Pause",
-    },
-    {
-      id: "5",
-      inTransitCount: "10",
-      description: "Resolved",
-    },
-    {
-      id: "6",
-      handOverCount: "0",
-      description: "Cancelled",
-    },
-    {
-      id: "7",
-      underRecoveryCount: "0",
-      description: "Reopened",
-    },
-    {
-      id: "8",
-      discardReplacedCount: "0",
-      description: "Closed",
-    },
-    {
-      id: "9",
-      theftLostCount: "0",
-      description: "Converted to SR",
-    },
-    {
-      id: "11",
-      soldCount: "0",
-      description: "Total",
-    },
-  ];
+  // Compute counts for each status from data
+const statusCounts = data.reduce((acc, incident) => {
+  const timeline = incident.statusTimeline;
+  let latestStatus = Array.isArray(timeline) && timeline.length > 0
+    ? timeline[timeline.length - 1].status
+    : "No Status";
+  // Normalize status for matching
+  latestStatus = latestStatus.trim().toLowerCase().replace(/[-_]/g, " ");
+  acc[latestStatus] = (acc[latestStatus] || 0) + 1;
+  return acc;
+}, {});
 
+const cardData = [
+  { id: "1", count: statusCounts["new"] || 0, description: "New" },
+  { id: "2", count: statusCounts["assigned"] || 0, description: "Assigned" },
+  { id: "3", count: statusCounts["in progress"] || 0, description: "In-Progress" },
+  { id: "4", count: statusCounts["pause"] || 0, description: "Pause" },
+  { id: "5", count: statusCounts["resolved"] || 0, description: "Resolved" },
+  { id: "6", count: statusCounts["cancelled"] || statusCounts["cancel"] || 0, description: "Cancelled" },
+  { id: "7", count: statusCounts["reopened"] || statusCounts["reopen"] || 0, description: "Reopened" },
+  { id: "8", count: statusCounts["closed"] || 0, description: "Closed" },
+  { id: "9", count: statusCounts["converted to sr"] || 0, description: "Converted to SR" },
+  { id: "11", count: data.length, description: "Total" },
+];
+
+  // Card data
+  // const cardData = [
+  //   { id: "1", totalCount: "100", description: "New" },
+  //   { id: "2", storeCount: "70", description: "Assigned" },
+  //   { id: "3", allocatedCount: "40", description: "In-Progress" },
+  //   { id: "4", inRepairCount: "30", description: "Pause" },
+  //   { id: "5", inTransitCount: "10", description: "Resolved" },
+  //   { id: "6", handOverCount: "0", description: "Cancelled" },
+  //   { id: "7", underRecoveryCount: "0", description: "Reopened" },
+  //   { id: "8", discardReplacedCount: "0", description: "Closed" },
+  //   { id: "9", theftLostCount: "0", description: "Converted to SR" },
+  //   { id: "11", soldCount: "0", description: "Total" },
+  // ];
+
+  // Render
   return (
-    <>
-      <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">INCIDENT DATA</h2>
-
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-          {cardData.map((item) => {
-            const countKey = Object.keys(item).find((key) =>
-              key.endsWith("Count")
-            );
-            const count = item[countKey];
-
-            return (
-              <div
-                key={item?.id}
-                className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition"
-              >
-                <h2 className="font-semibold text-xl text-blue-600 mb-1">
-                  {count}
-                </h2>
-                <span className="text-sm">{item.description}</span>
-              </div>
-            );
-          })}
-        </div>
-
-        <MaterialReactTable table={table} />
-        {changeStatus && (
-          <>
-            <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-                <h2 className="text-md font-medium text-gray-800 mb-4">
-                  CHANGE INCIDENT STATUS
-                </h2>
-                <form onSubmit={handleStatusUpdate} className="space-y-2">
-                  <div className="grid grid-cols-1 md:grid-cols-1">
-                    {latestStatus === "New" && (
-                      <>
-                        <div className="flex items-center gap-2 mt-2">
-                          <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Status <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={assignedValue}
-                            onChange={(e) => setAssignedValue(e.target.value)}
-                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
-                          >
-                            <option value="" className="text-start">
-                              Select
-                            </option>
-                            <option value="Assigned" className="text-start">
-                              Assigned
-                            </option>
-                            <option value="cancel" className="text-start">
-                              Cancel
-                            </option>
-                          </select>
-                        </div>
-                        {assignedValue === "Assigned" && (
-                          <>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Support Department
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <div className="w-[60%]">
-                                <Autocomplete
-                                  options={supportDepartment}
-                                  getOptionLabel={(option) =>
-                                    option && typeof option === "object"
-                                      ? option.supportDepartmentName || ""
-                                      : ""
-                                  }
-                                  value={selectedSupportDepartment}
-                                  onChange={(event, newValue) =>
-                                    setSelectedSupportDepartment(newValue)
-                                  }
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      label="Select"
-                                      variant="standard"
-                                      required
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Support Group
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <div className="w-[60%]">
-                                <Autocomplete
-                                  options={supportGroup}
-                                  getOptionLabel={(option) =>
-                                    option && typeof option === "object"
-                                      ? option.supportGroupName || ""
-                                      : ""
-                                  }
-                                  value={selectedSupportGroup}
-                                  onChange={(event, newValue) =>
-                                    setSelectedSupportGroup(newValue)
-                                  }
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      label="Select"
-                                      variant="standard"
-                                      required
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Technician
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <div className="w-[60%]">
-                                <Autocomplete
-                                  options={technician.filter(
-                                    (t) => typeof t.emailAddress === "string"
-                                  )}
-                                  getOptionLabel={(option) =>
-                                    option?.employeeName && option?.emailAddress
-                                      ? `${option.employeeName} (${option.emailAddress})`
-                                      : option?.emailAddress || ""
-                                  }
-                                  value={selectedTechnician}
-                                  onChange={(event, newValue) =>
-                                    setSelectedTechnician(newValue)
-                                  }
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      label="Select"
-                                      variant="standard"
-                                      required
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-                          </>
-                        )}
-                      </>
-                    )}
-                    {latestStatus === "Resolved" && (
-                      <>
-                        <div className="flex items-center gap-2 mt-2">
-                          <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Status <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={reopenValue}
-                            onChange={(e) => setReOpenValue(e.target.value)}
-                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
-                          >
-                            <option value="" className="text-start">
-                              Select status
-                            </option>
-                            <option value="reopen" className="text-start">
-                              reopen
-                            </option>
-                          </select>
-                        </div>
-                        {reopenValue === "reopen" && (
-                          <>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Reason for Reopen
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
-                            </div>
-                          </>
-                        )}
-                      </>
-                    )}
-                    {latestStatus === "In Progress" && (
-                      <>
-                        <div className="flex items-center gap-2 mt-2">
-                          <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Status <span className="text-red-500">*</span>
-                          </label>
-                          <select
-                            value={inProgressValue}
-                            onChange={(e) => setInProgressValue(e.target.value)}
-                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
-                          >
-                            <option value="" className="text-start">
-                              Select Status
-                            </option>
-                            <option value="Assigned" className="text-start">
-                              Assigned
-                            </option>
-                            <option value="pause" className="text-start">
-                              Pause
-                            </option>
-                            <option value="resolved" className="text-start">
-                              Resolved
-                            </option>
-                            <option value="cancel" className="text-start">
-                              Cancel
-                            </option>
-                          </select>
-                        </div>
-                        {inProgressValue === "Assigned" && (
-                          <>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Support Department
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <div className="w-[60%]">
-                                <Autocomplete
-                                  options={supportDepartment}
-                                  getOptionLabel={(option) =>
-                                    option?.supportDepartmentName || ""
-                                  }
-                                  value={selectedSupportDepartment}
-                                  onChange={(event, newValue) =>
-                                    setSelectedSupportDepartment(newValue)
-                                  }
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      label="Select"
-                                      variant="standard"
-                                      required
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Support Group
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <div className="w-[60%]">
-                                <Autocomplete
-                                  options={supportGroup}
-                                  getOptionLabel={(option) =>
-                                    option?.supportGroupName || ""
-                                  }
-                                  value={selectedSupportGroup}
-                                  onChange={(event, newValue) =>
-                                    setSelectedSupportGroup(newValue)
-                                  }
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      label="Select"
-                                      variant="standard"
-                                      required
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Technician
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <div className="w-[60%]">
-                                <Autocomplete
-                                  options={technician.filter(
-                                    (t) => typeof t.emailAddress === "string"
-                                  )}
-                                  getOptionLabel={(option) =>
-                                    option?.employeeName && option?.emailAddress
-                                      ? `${option.employeeName} (${option.emailAddress})`
-                                      : option?.emailAddress || ""
-                                  }
-                                  value={selectedTechnician}
-                                  onChange={(event, newValue) =>
-                                    setSelectedTechnician(newValue)
-                                  }
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      label="Select"
-                                      variant="standard"
-                                      required
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-                          </>
-                        )}
-                        {inProgressValue === "pause" && (
-                          <>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Pause Category
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <div className="w-[60%]">
-                                <Autocomplete
-                                  options={[
-                                    "Pending With Vendor/OEM",
-                                    "Pause With Other Reason",
-                                    "Standby Provided",
-                                  ]}
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      label="Select"
-                                      variant="standard"
-                                      required
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Enter Remarks
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
-                            </div>
-                          </>
-                        )}
-                        {inProgressValue === "resolved" && (
-                          <>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Closure Code
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <div className="w-[60%]">
-                                <Autocomplete
-                                  options={["", "", ""]}
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      label="Select"
-                                      variant="standard"
-                                      required
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Sloution Update
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <textarea
-                                rows={2}
-                                className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
-                              ></textarea>
-                            </div>
-                          </>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <div className="flex justify-end gap-3 pt-4 mt-6">
-                    <button
-                      type="button"
-                      onClick={() => setChangeStatus(false)}
-                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                    >
-                      Submit
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </>
-        )}
+    <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
+      <h2 className="text-lg font-semibold mb-6 text-start">INCIDENT DATA</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
+        {cardData.map((item) => (
+          <div key={item.id} className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition">
+            <h2 className="font-semibold text-xl text-blue-600 mb-1">
+              {item.count}
+            </h2>
+            <span className="text-sm">{item.description}</span>
+          </div>
+        ))}
       </div>
-    </>
+      <MaterialReactTable table={table} />
+      {changeStatus && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+            <h2 className="text-md font-medium text-gray-800 mb-4">
+              CHANGE INCIDENT STATUS
+            </h2>
+            <form onSubmit={handleStatusUpdate} className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-1">
+                {latestStatus === "New" && (
+                  <>
+                    <div className="flex items-center gap-2 mt-2">
+                      <label className="w-[40%] text-sm font-medium text-gray-500">
+                        Status <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={assignedValue}
+                        onChange={(e) => setAssignedValue(e.target.value)}
+                        className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                      >
+                        <option value="" className="text-start">
+                          Select
+                        </option>
+                        <option value="Assigned" className="text-start">
+                          Assigned
+                        </option>
+                        <option value="cancel" className="text-start">
+                          Cancel
+                        </option>
+                      </select>
+                    </div>
+                    {assignedValue === "Assigned" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Department
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={supportDepartment}
+                              getOptionLabel={(option) =>
+                                option?.supportDepartmentName || ""
+                              }
+                              value={selectedSupportDepartment}
+                              onChange={(event, newValue) =>
+                                setSelectedSupportDepartment(newValue)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Group
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={supportGroup}
+                              getOptionLabel={(option) =>
+                                option?.supportGroupName || ""
+                              }
+                              value={selectedSupportGroup}
+                              onChange={(event, newValue) =>
+                                setSelectedSupportGroup(newValue)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Technician
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={technician.filter(
+                                (t) => typeof t.emailAddress === "string"
+                              )}
+                              getOptionLabel={(option) =>
+                                option?.employeeName && option?.emailAddress
+                                  ? `${option.employeeName} (${option.emailAddress})`
+                                  : option?.emailAddress || ""
+                              }
+                              value={selectedTechnician}
+                              onChange={(event, newValue) =>
+                                setSelectedTechnician(newValue)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+                {latestStatus === "Resolved" && (
+                  <>
+                    <div className="flex items-center gap-2 mt-2">
+                      <label className="w-[40%] text-sm font-medium text-gray-500">
+                        Status <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={reopenValue}
+                        onChange={(e) => setReOpenValue(e.target.value)}
+                        className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                      >
+                        <option value="" className="text-start">
+                          Select status
+                        </option>
+                        <option value="reopen" className="text-start">
+                          reopen
+                        </option>
+                      </select>
+                    </div>
+                    {reopenValue === "reopen" && (
+                      <div className="flex items-center gap-2 mt-2">
+                        <label className="w-[40%] text-sm font-medium text-gray-500">
+                          Reason for Reopen
+                          <span className="text-red-500">*</span>
+                        </label>
+                        <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                      </div>
+                    )}
+                  </>
+                )}
+                {latestStatus === "In Progress" && (
+                  <>
+                    <div className="flex items-center gap-2 mt-2">
+                      <label className="w-[40%] text-sm font-medium text-gray-500">
+                        Status <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={inProgressValue}
+                        onChange={(e) => setInProgressValue(e.target.value)}
+                        className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                      >
+                        <option value="" className="text-start">
+                          Select Status
+                        </option>
+                        <option value="Assigned" className="text-start">
+                          Assigned
+                        </option>
+                        <option value="pause" className="text-start">
+                          Pause
+                        </option>
+                        <option value="resolved" className="text-start">
+                          Resolved
+                        </option>
+                        <option value="cancel" className="text-start">
+                          Cancel
+                        </option>
+                      </select>
+                    </div>
+                    {inProgressValue === "Assigned" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Department
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={supportDepartment}
+                              getOptionLabel={(option) =>
+                                option?.supportDepartmentName || ""
+                              }
+                              value={selectedSupportDepartment}
+                              onChange={(event, newValue) =>
+                                setSelectedSupportDepartment(newValue)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Group
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={supportGroup}
+                              getOptionLabel={(option) =>
+                                option?.supportGroupName || ""
+                              }
+                              value={selectedSupportGroup}
+                              onChange={(event, newValue) =>
+                                setSelectedSupportGroup(newValue)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Technician
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={technician.filter(
+                                (t) => typeof t.emailAddress === "string"
+                              )}
+                              getOptionLabel={(option) =>
+                                option?.employeeName && option?.emailAddress
+                                  ? `${option.employeeName} (${option.emailAddress})`
+                                  : option?.emailAddress || ""
+                              }
+                              value={selectedTechnician}
+                              onChange={(event, newValue) =>
+                                setSelectedTechnician(newValue)
+                              }
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {inProgressValue === "pause" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Pause Category
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={[
+                                "Pending With Vendor/OEM",
+                                "Pause With Other Reason",
+                                "Standby Provided",
+                              ]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Enter Remarks
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                        </div>
+                      </>
+                    )}
+                    {inProgressValue === "resolved" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Closure Code
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={["", "", ""]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Sloution Update
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <textarea
+                            rows={2}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          ></textarea>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+              <div className="flex justify-end gap-3 pt-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setChangeStatus(false)}
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Submit
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

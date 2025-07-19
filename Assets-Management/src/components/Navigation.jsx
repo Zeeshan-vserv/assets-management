@@ -197,7 +197,16 @@ const Navigation = ({ nav, setNav }) => {
                 setNav(false);
               }}
             >
-              service request
+              <NavLink
+                to="/main/ServiceDesk/service-request"
+                className={({ isActive }) =>
+                  `hover:underline cursor-pointer ${
+                    isActive ? "text-blue-400" : ""
+                  }`
+                }
+              >
+                service request
+              </NavLink>
             </h3>
             <h3
               className="flex items-center justify-between hover:underline cursor-pointer"

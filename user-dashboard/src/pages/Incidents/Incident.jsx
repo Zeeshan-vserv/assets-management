@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, Menu, MenuItem } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { useSelector } from "react-redux";
 import { Autocomplete, TextField } from "@mui/material";
 import { AiOutlineFileExcel, AiOutlineFilePdf } from "react-icons/ai";
@@ -11,7 +11,6 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { MdDashboard } from "react-icons/md";
 import { useNavigate } from "react-router";
 import { ImEye } from "react-icons/im";
 import { getAllIncident } from "../../api/IncidentRequest";
@@ -32,9 +31,14 @@ function Incident() {
   const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [assignedToViewModal, setAssignedToViewModal] = useState(false);
   const [ticketType, setTicketType] = useState(ticketOptions[0]); // Default: My Tickets
+
+  const [chnageStatus, setChangeStatus] = useState(false);
+  const [seletecetdRowId, setSelectedRowId] = useState(null);
+  const [assignedValue, setAssignedValue] = useState("");
+  const [closedValue, setClosedValue] = useState("");
+  const [reopenValue, setReOpenValue] = useState("");
 
   const fetchIncident = async () => {
     try {
@@ -52,12 +56,23 @@ function Incident() {
     fetchIncident();
   }, []);
 
+  // console.log("data", data);
+
+  const selectedRow = data.find((item) => item._id === seletecetdRowId);
+  //  console.log("selectedRow",selectedRow?._id)
+
+  const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
+  // console.log("status", latestStatus);
+
+  const technicianStatusSubmitHandler = (e) => {
+    e.preventDefault();
+    console.log("clicked");
+  };
+
   // Filter data based on ticketType
   const filteredData = useMemo(() => {
     if (ticketType === "All Ticket") {
-      return data.filter(
-        (item) => item.userId === user?.userId
-      );
+      return data.filter((item) => item.userId === user?.userId);
     } else if (ticketType === "My Tickets") {
       return data.filter(
         (item) =>
@@ -122,25 +137,24 @@ function Incident() {
         Cell: ({ cell }) =>
           dayjs(cell.getValue()).format("DD MMM YYYY, hh:mm A"),
       },
+      // {
+      //   accessorKey: "status",
+      //   header: "Status",
+      // },
       {
-        accessorKey: "status",
         header: "Status",
+        accessorKey: "statusTimeline",
+        Cell: ({ row }) => {
+          const timeline = row.original.statusTimeline;
+          if (!Array.isArray(timeline)) return "No Timeline";
+          if (timeline.length === 0) return "No Status";
+          const lastStatus = timeline[timeline.length - 1];
+          return lastStatus.status || "No Status";
+        },
       },
     ],
     [isLoading]
   );
-
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-  const handleChangeStatus = () => {
-    console.log("Change Status Clicked"); //logic
-    handleClose();
-  };
 
   //Exports
   const handleExportRows = (rows) => {
@@ -241,7 +255,7 @@ function Incident() {
               mt: 1,
               mb: 1,
               "& .MuiInputBase-root": {
-                borderRadius: "0.35rem",
+                borderRadius: "0.25rem",
                 backgroundColor: "#f9fafb",
                 fontSize: "0.85rem",
                 border: "1px solid #e2e8f0",
@@ -267,7 +281,7 @@ function Incident() {
                 }}
                 inputProps={{
                   ...params.inputProps,
-                  style: { fontSize: "0.85rem", padding: "8px" },
+                  style: { fontSize: "0.85rem", padding: "4.5px" },
                 }}
               />
             )}
@@ -275,31 +289,36 @@ function Incident() {
           <Button
             variant="contained"
             size="small"
-            startIcon={<MdDashboard size={16} />}
-            onClick={handleClick}
+            disabled={table.getSelectedRowModel().rows.length !== 1}
             sx={{
+              padding: "4px 12px",
               backgroundColor: "#2563eb",
               color: "#fff",
               textTransform: "none",
               mt: 1,
               mb: 1,
-              ml: 1,
+              ml: 2,
+              "&.Mui-disabled": {
+                backgroundColor: "#B0BBE5",
+                color: "#FFFFFF",
+                cursor: "not-allowed",
+              },
+              opacity: table.getSelectedRowModel().rows.length !== 1 ? 0.5 : 1,
+              cursor:
+                table.getSelectedRowModel().rows.length !== 1
+                  ? "not-allowed"
+                  : "pointer",
+            }}
+            onClick={() => {
+              const selectedRow = table.getSelectedRowModel().rows[0];
+              const id = selectedRow.original?._id;
+              setSelectedRowId(id);
+              setChangeStatus(true);
             }}
           >
-            Action
+            Change Status
           </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-          >
-            <MenuItem
-              onClick={handleChangeStatus}
-              sx={{ fontSize: "0.875rem" }}
-            >
-              Change Status
-            </MenuItem>
-          </Menu>
+
           <Button
             onClick={handlePdfData}
             startIcon={<AiOutlineFilePdf />}
@@ -576,6 +595,161 @@ function Incident() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {chnageStatus && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+                <h2 className="text-md font-medium text-gray-800 mb-4">
+                  CHANGE INCIDENT STATUS
+                </h2>
+                <form
+                  onSubmit={technicianStatusSubmitHandler}
+                  className="space-y-2"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-1">
+                    {latestStatus === "Assigned" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={assignedValue}
+                            onChange={(e) => setAssignedValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select
+                            </option>
+                            <option value="wip" className="text-start">
+                              WIP (Work In Progress)
+                            </option>
+                            <option
+                              value="customerAwating"
+                              className="text-start"
+                            >
+                              Customer Awating
+                            </option>
+                            <option value="vendorAssign" className="text-start">
+                              OEM / Vendor Assign
+                            </option>
+                            <option
+                              value="technicalEscalation"
+                              className="text-start"
+                            >
+                              Technical Escalation
+                            </option>
+                            <option value="resolved" className="text-start">
+                              Resolved
+                            </option>
+                          </select>
+                        </div>
+                        {assignedValue === "resolved" && (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Closing Summary
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Close Remarks
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Closure Category
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={["", ""]}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </>
+                    )}
+                    {latestStatus === "Resolved" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={reopenValue}
+                            onChange={(e) => setReOpenValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select status
+                            </option>
+                            <option value="reopen" className="text-start">
+                              Reopened
+                            </option>
+                            <option value="cancel" className="text-start">
+                              Cancel
+                            </option>
+                          </select>
+                        </div>
+                      </>
+                    )}
+                    {latestStatus === "Closed" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Status <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={closedValue}
+                            onChange={(e) => setClosedValue(e.target.value)}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          >
+                            <option value="" className="text-start">
+                              Select
+                            </option>
+                            <option value="closed" className="text-start">
+                              Cancel
+                            </option>
+                          </select>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setChangeStatus(false)}
+                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </>

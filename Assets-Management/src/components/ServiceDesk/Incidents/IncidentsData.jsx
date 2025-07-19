@@ -161,6 +161,10 @@ const IncidentsData = () => {
         accessorKey: "incidentId",
         header: "Incident ID",
       },
+      // {
+      //   accessorKey: "status",
+      //   header: "Status",
+      // },
       {
         header: "Status",
         accessorKey: "statusTimeline",
@@ -173,6 +177,7 @@ const IncidentsData = () => {
           return lastStatus.status || "No Status";
         },
       },
+
       {
         accessorKey: "subject",
         header: "Subject",

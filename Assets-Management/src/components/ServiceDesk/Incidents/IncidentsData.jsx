@@ -10,8 +10,12 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { Autocomplete, TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest";
-import { getAllIncident, updateIncident } from "../../../api/IncidentRequest";
+import {
+  getAllIncident,
+  getAllIncidentsSla,
+  getAllIncidentsTat,
+  updateIncident,
+} from "../../../api/IncidentRequest";
 import { NavLink } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
@@ -21,6 +25,7 @@ import {
   getAllSupportGroup,
 } from "../../../api/SuportDepartmentRequest";
 import { getAllUsers } from "../../../api/AuthRequest";
+import { useSelector } from "react-redux";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -30,23 +35,55 @@ const csvConfig = mkConfig({
 });
 
 const IncidentsData = () => {
+  const currentUserId = useSelector((state) => state.authReducer.authData?.userId);
   const [data, setData] = useState([]);
-  const [slaData, setSlaData] = useState([]);
+  // const [slaData, setSlaData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [slaTimelineData, setSlaTimelineData] = useState([]);
+  // const [slaTimelineData, setSlaTimelineData] = useState([]);
   const [changeStatus, setChangeStatus] = useState(false);
   const [seletecetdRowId, setSelectedRowId] = useState(null);
   const [assignedValue, setAssignedValue] = useState("");
   const [reopenValue, setReOpenValue] = useState("");
   const [inProgressValue, setInProgressValue] = useState("");
-  const [selectedSupportDepartment, setSelectedSupportDepartment] = useState(
-    []
-  );
+  const [selectedSupportDepartment, setSelectedSupportDepartment] = useState([]);
   const [selectedSupportGroup, setSelectedSupportGroup] = useState([]);
   const [selectedTechnician, setSelectedTechnician] = useState([]);
   const [supportDepartment, setSupportDepartment] = useState([]);
   const [supportGroup, setSupportGroup] = useState([]);
   const [technician, setTechnician] = useState([]);
+  const [allSla, setAllSla] = useState([]);
+  const [allTat, setAllTat] = useState([]);
+
+  useEffect(() => {
+    // Fetch all incidents
+    fetchDepartment();
+
+    // Fetch all SLA and TAT for all incidents
+    // getAllIncidentsSla()
+    //   .then((res) => setAllSla(res.data.data || []))
+    //   .catch(() => setAllSla([]));
+    // getAllIncidentsTat()
+    //   .then((res) => setAllTat(res.data.data || []))
+    //   .catch(() => setAllTat([]));
+  }, []);
+
+  useEffect(() => {
+    const fetchSlaTat = async () => {
+      try {
+        const responseAllSla = await getAllIncidentsSla();
+        console.log("responseAllSla", responseAllSla);
+        setAllSla(responseAllSla?.data?.data || []);
+        const responseAllTat = await getAllIncidentsTat();
+        setAllTat(responseAllTat?.data?.data || []);
+      } catch (error) {
+        console.error("Error fetching SLA/TAT data:", error);
+      }
+    };
+    fetchSlaTat();
+  }, []);
+
+  // console.log("allSla", allSla);
+  // console.log("allTat", allTat);
 
   useEffect(() => {
     const fetchDropdownData = async () => {
@@ -61,7 +98,9 @@ const IncidentsData = () => {
 
         // Fetch Technicians (users)
         const responseTechnician = await getAllUsers();
-        setTechnician(Array.isArray(responseTechnician?.data) ? responseTechnician.data : []);
+        setTechnician(
+          Array.isArray(responseTechnician?.data) ? responseTechnician.data : []
+        );
       } catch (error) {
         console.error("Error fetching dropdown data:", error);
       }
@@ -80,18 +119,18 @@ const IncidentsData = () => {
     }
   }, [selectedSupportDepartment]);
 
-  const fetchSlaTimelineData = async () => {
-    try {
-      const response = await getAllSLATimelines();
-      setSlaTimelineData(response?.data?.data || []);
-    } catch (error) {
-      console.error("Error fetching SLA timelines:", error);
-    }
-  };
+  // const fetchSlaTimelineData = async () => {
+  //   try {
+  //     const response = await getAllSLATimelines();
+  //     setSlaTimelineData(response?.data?.data || []);
+  //   } catch (error) {
+  //     console.error("Error fetching SLA timelines:", error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchSlaTimelineData();
-  }, []);
+  // useEffect(() => {
+  //   fetchSlaTimelineData();
+  // }, []);
 
   const fetchDepartment = async () => {
     try {
@@ -112,59 +151,21 @@ const IncidentsData = () => {
     fetchDepartment();
   }, []);
 
-  const fetchSlaCreation = async () => {
-    try {
-      setIsLoading(true);
-      const response = await getAllSLAs();
-      setSlaData(response?.data?.data[0] || []);
-    } catch (error) {
-      console.error("Error fetching holiday calendar:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // const fetchSlaCreation = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await getAllSLAs();
+  //     setSlaData(response?.data?.data[0] || []);
+  //   } catch (error) {
+  //     console.error("Error fetching holiday calendar:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchSlaCreation();
-  }, []);
-
-  const statusSubmitHandler = async (e) => {
-    e.preventDefault();
-    if (!seletecetdRowId) return;
-
-    // Build the update payload based on the selected status
-    let updateData = {};
-    if (latestStatus === "New" && assignedValue === "Assigned") {
-      updateData = {
-        status: "Assigned",
-        classificaton: {
-          supportDepartmentName: "IT Support",
-          supportGroupName: "Application", // Replace with selected value
-          technician: "", // Replace with selected value
-        },
-      };
-    } else if (latestStatus === "Resolved" && reopenValue === "reopen") {
-      updateData = {
-        status: "Reopened",
-        reopenReason: "", // Get from textarea
-      };
-    } else if (latestStatus === "In Progress") {
-      updateData = {
-        status:
-          inProgressValue.charAt(0).toUpperCase() + inProgressValue.slice(1),
-        // Add other fields as needed
-      };
-    }
-
-    try {
-      await updateIncident(seletecetdRowId, updateData);
-      setChangeStatus(false);
-      // Optionally, refresh the incident list
-      fetchDepartment();
-    } catch (error) {
-      console.error("Error updating incident:", error);
-    }
-  };
+  // useEffect(() => {
+  //   fetchSlaCreation();
+  // }, []);
 
   const handleStatusUpdate = async (e) => {
   e.preventDefault();
@@ -175,24 +176,44 @@ const IncidentsData = () => {
   if (latestStatus === "New" && assignedValue === "Assigned") {
     updateData = {
       status: "Assigned",
+      changedBy: currentUserId,
       classificaton: {
-        supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+        supportDepartmentName:
+          selectedSupportDepartment?.supportDepartmentName || "",
         supportGroupName: selectedSupportGroup?.supportGroupName || "",
         technician: selectedTechnician?.employeeName || "",
       },
     };
-  } else if (latestStatus === "In Progress" && inProgressValue === "Assigned") {
+  } else if (
+    latestStatus === "In Progress" &&
+    inProgressValue === "Assigned"
+  ) {
     updateData = {
       status: "Assigned",
+      changedBy: currentUserId,
       classificaton: {
-        supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+        supportDepartmentName:
+          selectedSupportDepartment?.supportDepartmentName || "",
         supportGroupName: selectedSupportGroup?.supportGroupName || "",
         technician: selectedTechnician?.employeeName || "",
       },
     };
+  } else if (latestStatus === "In Progress" && inProgressValue) {
+    updateData = {
+      status: inProgressValue,
+      changedBy: currentUserId,
+      // Add pause/resolve/cancel fields here if needed
+    };
+  } else if (latestStatus === "Resolved" && reopenValue) {
+    updateData = {
+      status: reopenValue,
+      changedBy: currentUserId,
+      // Add reason for reopen if needed
+    };
   } else {
-    // Only status update for other cases
-    updateData = { status: newStatus };
+    // For other direct status/data updates
+    updateData = { status: newStatus, changedBy: currentUserId };
+    // If you want to update other fields, add them here
   }
 
   try {
@@ -212,62 +233,62 @@ const IncidentsData = () => {
 
   // console.log("sladata",slaData , "data", data[0].createdAt);
 
-  function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
-    let remainingMinutes = Math.round(hoursToAdd * 60);
-    let current = new Date(startDate);
+  // function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
+  //   let remainingMinutes = Math.round(hoursToAdd * 60);
+  //   let current = new Date(startDate);
 
-    // Helper: get business window for a given date
-    function getBusinessWindow(date) {
-      const weekDay = date.toLocaleString("en-US", { weekday: "long" });
-      const slot = slaTimeline.find((s) => s.weekDay === weekDay);
-      if (!slot) return null;
-      // slot.startTime and slot.endTime are Date objects (time part only)
-      const start = new Date(date);
-      start.setHours(
-        new Date(slot.startTime).getUTCHours(),
-        new Date(slot.startTime).getUTCMinutes(),
-        0,
-        0
-      );
-      const end = new Date(date);
-      end.setHours(
-        new Date(slot.endTime).getUTCHours(),
-        new Date(slot.endTime).getUTCMinutes(),
-        0,
-        0
-      );
-      return { start, end };
-    }
+  //   // Helper: get business window for a given date
+  //   function getBusinessWindow(date) {
+  //     const weekDay = date.toLocaleString("en-US", { weekday: "long" });
+  //     const slot = slaTimeline.find((s) => s.weekDay === weekDay);
+  //     if (!slot) return null;
+  //     // slot.startTime and slot.endTime are Date objects (time part only)
+  //     const start = new Date(date);
+  //     start.setHours(
+  //       new Date(slot.startTime).getUTCHours(),
+  //       new Date(slot.startTime).getUTCMinutes(),
+  //       0,
+  //       0
+  //     );
+  //     const end = new Date(date);
+  //     end.setHours(
+  //       new Date(slot.endTime).getUTCHours(),
+  //       new Date(slot.endTime).getUTCMinutes(),
+  //       0,
+  //       0
+  //     );
+  //     return { start, end };
+  //   }
 
-    while (remainingMinutes > 0) {
-      const window = getBusinessWindow(current);
-      if (!window) {
-        // No business hours today, go to next day
-        current.setDate(current.getDate() + 1);
-        current.setHours(0, 0, 0, 0);
-        continue;
-      }
-      // If before business hours, jump to start
-      if (current < window.start) current = new Date(window.start);
-      // If after business hours, go to next day
-      if (current >= window.end) {
-        current.setDate(current.getDate() + 1);
-        current.setHours(0, 0, 0, 0);
-        continue;
-      }
-      // Minutes left in today's business window
-      const minutesLeftToday = Math.floor((window.end - current) / 60000);
-      const minutesToAdd = Math.min(remainingMinutes, minutesLeftToday);
-      current = new Date(current.getTime() + minutesToAdd * 60000);
-      remainingMinutes -= minutesToAdd;
-      if (remainingMinutes > 0) {
-        // Go to next business day
-        current.setDate(current.getDate() + 1);
-        current.setHours(0, 0, 0, 0);
-      }
-    }
-    return current;
-  }
+  //   while (remainingMinutes > 0) {
+  //     const window = getBusinessWindow(current);
+  //     if (!window) {
+  //       // No business hours today, go to next day
+  //       current.setDate(current.getDate() + 1);
+  //       current.setHours(0, 0, 0, 0);
+  //       continue;
+  //     }
+  //     // If before business hours, jump to start
+  //     if (current < window.start) current = new Date(window.start);
+  //     // If after business hours, go to next day
+  //     if (current >= window.end) {
+  //       current.setDate(current.getDate() + 1);
+  //       current.setHours(0, 0, 0, 0);
+  //       continue;
+  //     }
+  //     // Minutes left in today's business window
+  //     const minutesLeftToday = Math.floor((window.end - current) / 60000);
+  //     const minutesToAdd = Math.min(remainingMinutes, minutesLeftToday);
+  //     current = new Date(current.getTime() + minutesToAdd * 60000);
+  //     remainingMinutes -= minutesToAdd;
+  //     if (remainingMinutes > 0) {
+  //       // Go to next business day
+  //       current.setDate(current.getDate() + 1);
+  //       current.setHours(0, 0, 0, 0);
+  //     }
+  //   }
+  //   return current;
+  // }
 
   const columns = useMemo(
     () => [
@@ -275,10 +296,6 @@ const IncidentsData = () => {
         accessorKey: "incidentId",
         header: "Incident ID",
       },
-      // {
-      //   accessorKey: "status",
-      //   header: "Status",
-      // },
       {
         header: "Status",
         accessorKey: "statusTimeline",
@@ -342,116 +359,18 @@ const IncidentsData = () => {
         accessorKey: "sla",
         header: "SLA",
         Cell: ({ row }) => {
-          const incident = row.original;
-          const severity = incident?.classificaton?.severityLevel;
-          const loggedIn = new Date(
-            incident?.createdAt || incident?.submitter?.loggedInTime
-          );
-
-          // Use business hours from SLACreation
-          const businessHours = slaData?.slaTimeline || [];
-
-          // Find SLA duration for this severity from slaTimelineData
-          const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
-          const matchedTimeline = slaTimelineData.find(
-            (item) =>
-              item.priority?.replace(/[\s\-]/g, "").toLowerCase() ===
-              cleanSeverity
-          );
-          const resolution = matchedTimeline?.resolutionSLA || "00:30";
-          const [slaHours, slaMinutes] = resolution.split(":").map(Number);
-          const totalHours = slaHours + slaMinutes / 60;
-
-          // Calculate SLA deadline using business hours
-          const slaDeadline = addBusinessTime(
-            loggedIn,
-            totalHours,
-            businessHours
-          );
-
-          // Helper: Calculate remaining business minutes from now to deadline
-          function getBusinessMinutesBetween(now, end, slaTimeline) {
-            let minutes = 0;
-            let current = new Date(now);
-            while (current < end) {
-              // Get business window for current day
-              const weekDay = current.toLocaleString("en-US", {
-                weekday: "long",
-              });
-              const slot = slaTimeline.find((s) => s.weekDay === weekDay);
-              if (!slot) {
-                // No business hours today, go to next day
-                current.setDate(current.getDate() + 1);
-                current.setHours(0, 0, 0, 0);
-                continue;
-              }
-              const start = new Date(current);
-              start.setHours(
-                new Date(slot.startTime).getUTCHours(),
-                new Date(slot.startTime).getUTCMinutes(),
-                0,
-                0
-              );
-              const endWindow = new Date(current);
-              endWindow.setHours(
-                new Date(slot.endTime).getUTCHours(),
-                new Date(slot.endTime).getUTCMinutes(),
-                0,
-                0
-              );
-
-              // If after business hours, go to next day
-              if (current >= endWindow) {
-                current.setDate(current.getDate() + 1);
-                current.setHours(0, 0, 0, 0);
-                continue;
-              }
-              // If before business hours, jump to start
-              if (current < start) current = new Date(start);
-
-              // Calculate minutes to count for this day
-              const until = end < endWindow ? end : endWindow;
-              const diff = Math.max(0, (until - current) / 60000);
-              minutes += diff;
-              current = new Date(until);
-              if (current < end) {
-                // Go to next business day
-                current.setDate(current.getDate() + 1);
-                current.setHours(0, 0, 0, 0);
-              }
-            }
-            return Math.round(minutes);
-          }
-
-          const now = new Date();
-          let remainingMinutes;
-          if (now < slaDeadline) {
-            remainingMinutes = getBusinessMinutesBetween(
-              now,
-              slaDeadline,
-              businessHours
-            );
-          } else {
-            // SLA breached: show negative overdue time
-            remainingMinutes = -getBusinessMinutesBetween(
-              slaDeadline,
-              now,
-              businessHours
-            );
-          }
-
-          const abs = Math.abs(remainingMinutes);
-          const hr = Math.floor(abs / 60);
-          const min = abs % 60;
-
-          const color = remainingMinutes < 0 ? "red" : "green";
-          const icon = remainingMinutes < 0 ? "❌" : "⏳";
-          const prefix = remainingMinutes < 0 ? "-" : "";
-
+          const id = row.original._id;
+          const slaObj = allSla.find((item) => String(item._id) === String(id));
+          if (!slaObj) return <span style={{ fontWeight: "bold" }}>...</span>;
+          const breached = slaObj.slaRawMinutes < 0;
+          const color = breached ? "red" : "green";
+          const prefix = breached ? "-" : "";
+          // Remove minus from formatted string if present, add our own
+          const formattedSla = slaObj.sla.replace(/^-/, "");
           return (
-            <span style={{ color, fontWeight: "bold" }}>
-              {icon} {prefix}
-              {hr} hr {min} min
+            <span style={{ fontWeight: "bold", color }}>
+              {prefix}
+              {formattedSla}
             </span>
           );
         },
@@ -460,40 +379,13 @@ const IncidentsData = () => {
         accessorKey: "tat",
         header: "TAT",
         Cell: ({ row }) => {
-          const timeline = row.original.statusTimeline;
-          const businessHours = slaData?.slaTimeline || []; // from SLACreation
-
-          if (
-            !Array.isArray(timeline) ||
-            timeline.length === 0 ||
-            businessHours.length === 0
-          )
-            return "N/A";
-
-          // Find assigned and resolved times
-          const assignedEntry = timeline.find(
-            (t) => t.status?.toLowerCase() === "Assigned"
+          const id = row.original._id;
+          const tatObj = allTat.find((item) => String(item._id) === String(id));
+          return (
+            <span style={{ fontWeight: "bold" }}>
+              {tatObj ? tatObj.tat : "..."}
+            </span>
           );
-          const resolvedEntry = timeline.find(
-            (t) => t.status?.toLowerCase() === "resolved"
-          );
-
-          if (!assignedEntry || !resolvedEntry) return "N/A";
-
-          const assignedTime = new Date(assignedEntry.changedAt);
-          const resolvedTime = new Date(resolvedEntry.changedAt);
-
-          if (resolvedTime <= assignedTime) return "N/A";
-
-          const tatMinutes = getBusinessMinutesBetween(
-            assignedTime,
-            resolvedTime,
-            businessHours
-          );
-          const hr = Math.floor(tatMinutes / 60);
-          const min = tatMinutes % 60;
-
-          return `${hr} hr ${min} min`;
         },
       },
       {
@@ -522,7 +414,7 @@ const IncidentsData = () => {
         ),
       },
     ],
-    [isLoading]
+    [isLoading,allTat, allSla]
   );
 
   //Exports

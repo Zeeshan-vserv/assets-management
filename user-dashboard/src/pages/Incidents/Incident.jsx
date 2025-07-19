@@ -13,7 +13,7 @@ import autoTable from "jspdf-autotable";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useNavigate } from "react-router";
 import { ImEye } from "react-icons/im";
-import { getAllIncident } from "../../api/IncidentRequest";
+import { getAllIncident, updateIncident } from "../../api/IncidentRequest";
 import { NavLink } from "react-router-dom";
 import dayjs from "dayjs";
 
@@ -39,6 +39,9 @@ function Incident() {
   const [assignedValue, setAssignedValue] = useState("");
   const [closedValue, setClosedValue] = useState("");
   const [reopenValue, setReOpenValue] = useState("");
+  const [closingSummary, setClosingSummary] = useState("");
+const [closeRemarks, setCloseRemarks] = useState("");
+const [closureCategory, setClosureCategory] = useState("");
 
   const fetchIncident = async () => {
     try {
@@ -56,18 +59,53 @@ function Incident() {
     fetchIncident();
   }, []);
 
-  console.log("data", data);
-  
+  // console.log("data", data);
+
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
   //  console.log("selectedRow",selectedRow?._id)
 
   const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
   // console.log("status", latestStatus);
 
-  const technicianStatusSubmitHandler = (e) => {
-    e.preventDefault();
-    console.log("clicked");
-  };
+  const technicianStatusSubmitHandler = async (e) => {
+  e.preventDefault();
+  if (!seletecetdRowId) return;
+
+  // Collect closure fields if status is resolved
+  let payload = {};
+
+  if (latestStatus === "Assigned") {
+    if (assignedValue === "resolved") {
+      // Get values from your form fields (add state for these fields)
+      payload = {
+        status: "Resolved",
+        closingSummary, // from state
+        closeRemarks,   // from state
+        closureCategory, // from state
+      };
+    } else {
+      payload = {
+        status: assignedValue,
+      };
+    }
+  } else if (latestStatus === "Resolved") {
+    payload = {
+      status: reopenValue === "reopen" ? "Reopened" : latestStatus,
+    };
+  } else if (latestStatus === "Closed") {
+    payload = {
+      status: closedValue === "closed" ? "Cancelled" : latestStatus,
+    };
+  }
+
+  try {
+    await updateIncident(seletecetdRowId, payload);
+    setChangeStatus(false);
+    fetchIncident(); // Refresh the incident list
+  } catch (error) {
+    console.error("Error updating status:", error);
+  }
+};
 
   // Filter data based on ticketType
   const filteredData = useMemo(() => {
@@ -626,7 +664,7 @@ function Incident() {
                             <option value="" className="text-start">
                               Select
                             </option>
-                            <option value="wip" className="text-start">
+                            <option value="In-Progress" className="text-start">
                               WIP (Work In Progress)
                             </option>
                             <option
@@ -644,8 +682,57 @@ function Incident() {
                             >
                               Technical Escalation
                             </option>
+                            <option value="resolved" className="text-start">
+                              Resolved
+                            </option>
                           </select>
                         </div>
+                        {assignedValue === "resolved" && (
+  <>
+    <div className="flex items-center gap-2">
+      <label className="w-[40%] text-sm font-medium text-gray-500">
+        Closing Summary <span className="text-red-500">*</span>
+      </label>
+      <textarea
+        className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+        value={closingSummary}
+        onChange={(e) => setClosingSummary(e.target.value)}
+        required
+      />
+    </div>
+    <div className="flex items-center gap-2">
+      <label className="w-[40%] text-sm font-medium text-gray-500">
+        Close Remarks <span className="text-red-500">*</span>
+      </label>
+      <textarea
+        className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+        value={closeRemarks}
+        onChange={(e) => setCloseRemarks(e.target.value)}
+        required
+      />
+    </div>
+    <div className="flex items-center gap-2">
+      <label className="w-[40%] text-sm font-medium text-gray-500">
+        Closure Category <span className="text-red-500">*</span>
+      </label>
+      <div className="w-[60%]">
+        <Autocomplete
+          options={["Hardware", "Software", "Network", "Other"]}
+          value={closureCategory}
+          onChange={(_, newValue) => setClosureCategory(newValue)}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="Select"
+              variant="standard"
+              required
+            />
+          )}
+        />
+      </div>
+    </div>
+  </>
+)}
                       </>
                     )}
                     {latestStatus === "Resolved" && (
@@ -663,47 +750,11 @@ function Incident() {
                               Select status
                             </option>
                             <option value="reopen" className="text-start">
-                              reopen
+                              Reopen
                             </option>
+
                           </select>
                         </div>
-                        {reopenValue === "reopen" && (
-                          <>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Closing Summary
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Close Remarks
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2">
-                              <label className="w-[40%] text-sm font-medium text-gray-500">
-                                Closure Category
-                                <span className="text-red-500">*</span>
-                              </label>
-                              <div className="w-[60%]">
-                                <Autocomplete
-                                  options={["", ""]}
-                                  renderInput={(params) => (
-                                    <TextField
-                                      {...params}
-                                      label="Select"
-                                      variant="standard"
-                                      required
-                                    />
-                                  )}
-                                />
-                              </div>
-                            </div>
-                          </>
-                        )}
                       </>
                     )}
                     {latestStatus === "Closed" && (

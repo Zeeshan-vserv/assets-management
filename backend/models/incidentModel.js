@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 
 const statusEntrySchema = new mongoose.Schema({
     status: { type: String, required: true },
+    closingSummary: String,
+closeRemarks: String,
+closureCategory: String,
     changedAt: { type: Date, default: Date.now },
     changedBy: String
 }, { _id: false });

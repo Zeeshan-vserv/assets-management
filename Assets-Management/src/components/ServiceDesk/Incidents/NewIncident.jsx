@@ -843,9 +843,12 @@ const NewIncident = () => {
                 onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
-                    supportDepartmentName: newValue
-                      ? newValue.supportDepartmentName
-                      : "",
+                    classificaton: {
+                      ...formData.classificaton,
+                      supportDepartmentName: newValue
+                        ? newValue.supportDepartmentName
+                        : "",
+                    },
                   });
                 }}
                 renderInput={(params) => (
@@ -881,7 +884,10 @@ const NewIncident = () => {
                 onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
-                    supportGroups: newValue ? newValue.supportGroupName : "",
+                    classificaton: {
+                      ...formData.classificaton,
+                      supportGroupName: newValue ? newValue.supportGroupName : "",
+                    },
                   });
                 }}
                 renderInput={(params) => (

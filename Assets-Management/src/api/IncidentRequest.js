@@ -39,3 +39,14 @@ export const getIncidentById = (id) => API.get(`/incident/${id}`);
 export const updateIncident = (id, updateData) =>
   API.put(`/incident/${id}`, updateData);
 export const deleteIncident = (id) => API.delete(`/incident/${id}`);
+export const getIncidentSla = (id) =>
+  API.get(`/incident/sla/${id}`);
+
+export const getIncidentTat = (id) =>
+  API.get(`/incident/tat/${id}`);
+
+export const getAllIncidentsSla = () =>
+  API.get(`/incident/sla-all`);
+
+export const getAllIncidentsTat = () =>
+  API.get(`/incident/tat-all`);

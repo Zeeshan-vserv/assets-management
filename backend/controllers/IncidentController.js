@@ -345,7 +345,12 @@ function calculateTAT(assignedAt, resolvedAt) {
 }
 
 // Calculate SLA deadline
-function calculateSLADeadline(loggedInTime, slaHours, slaTimeline = [], serviceWindow = true) {
+function calculateSLADeadline(
+  loggedInTime,
+  slaHours,
+  slaTimeline = [],
+  serviceWindow = true
+) {
   if (serviceWindow) {
     return new Date(loggedInTime.getTime() + slaHours * 60 * 60 * 1000);
   } else {
@@ -354,23 +359,34 @@ function calculateSLADeadline(loggedInTime, slaHours, slaTimeline = [], serviceW
     let deadline = current;
 
     while (remainingHours > 0) {
-      const weekday = deadline.format('dddd');
-      const slot = slaTimeline.find(s => s.weekDay === weekday);
+      const weekday = deadline.format("dddd");
+      const slot = slaTimeline.find((s) => s.weekDay === weekday);
 
       if (slot) {
-        const workStart = dayjs(deadline.format('YYYY-MM-DD') + 'T' + dayjs(slot.startTime).format('HH:mm'));
-        const workEnd = dayjs(deadline.format('YYYY-MM-DD') + 'T' + dayjs(slot.endTime).format('HH:mm'));
+        const workStart = dayjs(
+          deadline.format("YYYY-MM-DD") +
+            "T" +
+            dayjs(slot.startTime).format("HH:mm")
+        );
+        const workEnd = dayjs(
+          deadline.format("YYYY-MM-DD") +
+            "T" +
+            dayjs(slot.endTime).format("HH:mm")
+        );
 
         if (deadline.isBefore(workEnd)) {
-          const available = Math.max(0, workEnd.diff(dayjs.max(deadline, workStart), 'hour', true));
+          const available = Math.max(
+            0,
+            workEnd.diff(dayjs.max(deadline, workStart), "hour", true)
+          );
           const used = Math.min(available, remainingHours);
           remainingHours -= used;
-          deadline = deadline.add(used, 'hour');
+          deadline = deadline.add(used, "hour");
         }
       }
 
       if (remainingHours > 0) {
-        deadline = deadline.add(1, 'day').startOf('day');
+        deadline = deadline.add(1, "day").startOf("day");
       }
     }
 
@@ -412,13 +428,16 @@ export const createIncident = async (req, res) => {
     );
 
     const now = getISTDate();
-    const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}`;
+    const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(
+      now.getMonth() + 1
+    ).padStart(2, "0")}${now.getFullYear()}`;
     const newIncidentId = `INC${dateStr}${counter.seq}`;
 
     // Fill submitter defaults
     submitter = {
       user: submitter?.user || user?.employeeName || "",
-      userContactNumber: submitter?.userContactNumber || user?.mobileNumber || "",
+      userContactNumber:
+        submitter?.userContactNumber || user?.mobileNumber || "",
       userId: submitter?.userId || user?.userId || "",
       userEmail: submitter?.userEmail || user?.emailAddress || "",
       userDepartment: submitter?.userDepartment || user?.department || "",
@@ -443,8 +462,8 @@ export const createIncident = async (req, res) => {
     if (severity) {
       const cleanSeverity = severity.replace(/[\s\-]/g, "").toLowerCase();
       const allTimelines = await SLATimelineModel.find();
-      const matched = allTimelines.find(t =>
-        t.priority.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
+      const matched = allTimelines.find(
+        (t) => t.priority.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
       );
       if (matched?.resolutionSLA) {
         const [h, m] = matched.resolutionSLA.split(":").map(Number);
@@ -504,27 +523,33 @@ export const createIncident = async (req, res) => {
 };
 
 export const getAllIncident = async (req, res) => {
-    try {
-        const incident = await IncidentModel.find()
-        res.status(200).json({ success: true, data: incident })
-    } catch (error) {
-        res.status(500).json({ message: 'An error occurred while fetching incidents' });
-    }
-}
+  try {
+    const incident = await IncidentModel.find();
+    res.status(200).json({ success: true, data: incident });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching incidents" });
+  }
+};
 
 export const getIncidentById = async (req, res) => {
-    try {
-        const { id } = req.params
-        const incident = await IncidentModel.findById(id)
+  try {
+    const { id } = req.params;
+    const incident = await IncidentModel.findById(id);
 
-        if (!incident) {
-            return res.status(404).json({ success: false, message: 'Incident Id not found' })
-        }
-        res.status(200).json({ success: true, data: incident })
-    } catch (error) {
-        res.status(500).json({ message: 'An error occurred while fetching incident' });
+    if (!incident) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Incident Id not found" });
     }
-}
+    res.status(200).json({ success: true, data: incident });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching incident" });
+  }
+};
 
 export const updateIncident = async (req, res) => {
   try {
@@ -591,15 +616,21 @@ export const updateIncident = async (req, res) => {
 };
 
 export const deleteIncident = async (req, res) => {
-    try {
-        const { id } = req.params
-        const deletedIncident = await IncidentModel.findByIdAndDelete(id)
+  try {
+    const { id } = req.params;
+    const deletedIncident = await IncidentModel.findByIdAndDelete(id);
 
-        if (!deletedIncident) {
-            return res.status(404).json({ success: false, message: 'Incident Id not found' })
-        }
-        res.status(200).json({ success: true, message: 'Incident deleted successfullly' })
-    } catch (error) {
-        res.status(500).json({ message: 'An error occurred while deleting incident' })
+    if (!deletedIncident) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Incident Id not found" });
     }
-}
+    res
+      .status(200)
+      .json({ success: true, message: "Incident deleted successfullly" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "An error occurred while deleting incident" });
+  }
+};

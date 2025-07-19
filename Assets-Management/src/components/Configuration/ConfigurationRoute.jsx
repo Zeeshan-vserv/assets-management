@@ -42,6 +42,9 @@ import HolidayCalendar from "./SLA/HolidayCalendar.jsx";
 import HoliDayList from "./SLA/HoliDayList.jsx";
 import EditRule from "./Incident/EditRule.jsx";
 import IncidentStatus from "./Incident/IncidentStatus.jsx";
+import AutoClosedTime from "./Request/AutoClosedTime.jsx";
+import ReqCategory from "./Request/ReqCategory.jsx";
+import ReqSubCategory from "./Request/ReqSubCategory.jsx";
 function ConfigurationRoute() {
   return (
     <>
@@ -101,6 +104,12 @@ function ConfigurationRoute() {
         <Route path="priority-matrix" element={<PriorityMatrix />} />
         <Route path="holiday-calendar" element={<HolidayCalendar />} />
         <Route path="holiday-list" element={<HoliDayList />} />
+
+
+        {/* Request */}
+        <Route path="ReqAutoClosedTime" element={<AutoClosedTime />} />
+        <Route path="ReqCategory" element={<ReqCategory />} />
+        <Route path="ReqSubCategory" element={<ReqSubCategory />} />
 
         
       </Routes>

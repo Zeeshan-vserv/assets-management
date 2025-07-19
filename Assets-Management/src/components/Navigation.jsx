@@ -955,7 +955,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  auto closed time
+                  <NavLink
+                    to="/main/configuration/ReqAutoClosedTime"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    auto closed time
+                  </NavLink>
                 </li>
                 <li
                   className="text-[11px] hover:underline"
@@ -963,7 +972,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  predefined replies
+                  <NavLink
+                    to="/main/configuration/ReqCategory"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    category
+                  </NavLink>
                 </li>
                 <li
                   className="text-[11px] hover:underline"
@@ -971,31 +989,16 @@ const Navigation = ({ nav, setNav }) => {
                     setNav(false);
                   }}
                 >
-                  category
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  sub category
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  templates
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  rules
+                  <NavLink
+                    to="/main/configuration/ReqSubCategory"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
+                  >
+                    sub category
+                  </NavLink>
                 </li>
               </ul>
             )}

@@ -132,7 +132,7 @@ export const getAllServiceCategory = async (req, res) => {
 
 export const getAllServiceSubCategory = async (req, res) => {
     try {
-        const category = await ServiceCounterModel.find()
+        const category = await ServiceCategoryModel.find()
         const allSubCategory = category.flatMap(cat => cat.subCategories)
         res.status(200).json({ success: true, data: allSubCategory})
     } catch (error) {

@@ -1,9 +1,413 @@
-import React, { useState } from "react";
-
-import { FaDesktop } from "react-icons/fa";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  MaterialReactTable,
+  useMaterialReactTable,
+} from "material-react-table";
+import { Box, Button, IconButton } from "@mui/material";
+import { AiOutlineFileExcel } from "react-icons/ai";
+import { AiOutlineFilePdf } from "react-icons/ai";
+import { mkConfig, generateCsv, download } from "export-to-csv";
+import { jsPDF } from "jspdf";
+import { autoTable } from "jspdf-autotable";
+import { Autocomplete, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { MdModeEdit } from "react-icons/md";
+import { FaDesktop } from "react-icons/fa";
+import { IoMdCheckmark } from "react-icons/io";
+import { RxCross2 } from "react-icons/rx";
+import { getAllIncident } from "../../../api/IncidentRequest";
+
+const csvConfig = mkConfig({
+  fieldSeparator: ",",
+  decimalSeparator: ".",
+  useKeysAsHeaders: true,
+  filename: "Assets-Management-Department.csv",
+});
+
 function ServiceRequest() {
   const navigate = useNavigate();
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [changeStatus, setChangeStatus] = useState(false);
+  const [seletecetdRowId, setSelectedRowId] = useState(null);
+  const [selectDropDownValue, setSelectDropDownValue] = useState("");
+
+  const fetchIncident = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllIncident();
+      setData(response?.data?.data || []);
+    } catch (error) {
+      console.error("Error fetching incidents:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchIncident();
+  }, []);
+
+  // console.log("data", data);
+
+  //status
+  const selectedRow = data.find((item) => item._id === seletecetdRowId);
+  // console.log("selectedRow", selectedRow?._id); //use later
+
+  const statusSubmitHandler = (e) => {
+    e.preventDefault();
+  };
+
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "incidentId",
+        header: "Service Req ID",
+      },
+      {
+        accessorKey: "subject",
+        header: "Subject",
+      },
+      {
+        accessorKey: "category",
+        header: "Category",
+      },
+      {
+        accessorKey: "subCategory",
+        header: "Sub Category",
+      },
+      {
+        accessorKey: "submitter.user",
+        header: "Submitter",
+      },
+      {
+        accessorKey: "assetDetails.asset",
+        header: "Assigned To",
+      },
+      // {
+      //   accessorKey: "",
+      //   header: "Approval",
+      // },
+      {
+        accessorKey: "submitter.loggedInTime",
+        header: "Logged Time",
+        Cell: ({ cell }) =>
+          cell.getValue()
+            ? new Date(cell.getValue()).toLocaleString("en-IN", {
+                timeZone: "UTC",
+              })
+            : "",
+      },
+      // {
+      //   accessorKey: "",
+      //   header: "SLA",
+      // },
+      {
+        header: "Status",
+        accessorKey: "statusTimeline",
+        Cell: ({ row }) => {
+          const timeline = row.original.statusTimeline;
+          if (!Array.isArray(timeline)) return "No Timeline";
+          if (timeline.length === 0) return "No Status";
+          const lastStatus = timeline[timeline.length - 1];
+          return lastStatus.status || "No Status";
+        },
+      },
+
+      // {
+      //   accessorKey: "",
+      //   header: "TAT",
+      // },
+      {
+        id: "edit",
+        header: "Edit",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton
+            onClick={() =>
+              navigate(
+                `/main/ServiceDesk/edit-service-request/${row.original._id}`
+              )
+            }
+            color="primary"
+            aria-label="edit"
+          >
+            <MdModeEdit />
+          </IconButton>
+        ),
+      },
+      {
+        id: "accept",
+        header: "Accept",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton
+            onClick={() => handleAcceptServiceRequestApproval(row.original._id)}
+            color="primary"
+            aria-label="accept"
+          >
+            <IoMdCheckmark />
+          </IconButton>
+        ),
+      },
+      {
+        id: "reject",
+        header: "Reject",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton
+            onClick={() => handleRejectServiceRequestApproval(row.original._id)}
+            color="primary"
+            aria-label="reject"
+          >
+            <RxCross2 />
+          </IconButton>
+        ),
+      },
+    ],
+    [isLoading]
+  );
+
+  //Approval
+  const handleAcceptServiceRequestApproval = (id) => {
+    console.log("Accept Id", id);
+  };
+
+  const handleRejectServiceRequestApproval = (id) => {
+    console.log("Reject Id", id);
+  };
+
+  //Exports
+  const handleExportRows = (rows) => {
+    const visibleColumns = table
+      .getAllLeafColumns()
+      .filter(
+        (col) =>
+          col.getIsVisible() &&
+          col.id !== "mrt-row-select" &&
+          col.id !== "edit" &&
+          col.id !== "delete"
+      );
+
+    const rowData = rows.map((row) => {
+      const result = {};
+      visibleColumns.forEach((col) => {
+        const key = col.id || col.accessorKey;
+        result[key] = row.original[key];
+      });
+      return result;
+    });
+
+    const csv = generateCsv(csvConfig)(rowData);
+    download(csvConfig)(csv);
+  };
+  const handleExportData = () => {
+    const visibleColumns = table
+      .getAllLeafColumns()
+      .filter(
+        (col) =>
+          col.getIsVisible() &&
+          col.id !== "mrt-row-select" &&
+          col.id !== "edit" &&
+          col.id !== "delete"
+      );
+
+    const exportData = data.map((item) => {
+      const result = {};
+      visibleColumns.forEach((col) => {
+        const key = col.id || col.accessorKey;
+        result[key] = item[key];
+      });
+      return result;
+    });
+
+    const csv = generateCsv(csvConfig)(exportData);
+    download(csvConfig)(csv);
+  };
+
+  const handlePdfData = () => {
+    const excludedColumns = ["mrt-row-select", "edit", "delete"];
+
+    const visibleColumns = table
+      .getAllLeafColumns()
+      .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
+
+    // Prepare headers for PDF
+    const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
+
+    // Prepare data rows for PDF
+    const exportData = data.map((item) =>
+      visibleColumns.map((col) => {
+        const key = col.id || col.accessorKey;
+        let value = item[key];
+        return value ?? "";
+      })
+    );
+
+    const doc = new jsPDF({});
+    autoTable(doc, {
+      head: [headers],
+      body: exportData,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [66, 139, 202] },
+      margin: { top: 20 },
+    });
+    doc.save("Assets-Management-Components.pdf");
+  };
+
+  const table = useMaterialReactTable({
+    data,
+    columns,
+    getRowId: (row) => row?._id?.toString(),
+    enableRowSelection: true,
+    initialState: {
+      density: "compact",
+      pagination: { pageSize: 5 },
+    },
+    renderTopToolbarCustomActions: ({ table }) => {
+      return (
+        <Box className="flex flex-wrap w-full">
+          <Button
+            variant="contained"
+            size="small"
+            onClick={() => navigate("/main/ServiceDesk/new-service-request")}
+            startIcon={<AddCircleOutlineIcon />}
+            sx={{
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+            }}
+          >
+            New
+          </Button>
+          <Button
+            variant="contained"
+            size="small"
+            disabled={table.getSelectedRowModel().rows.length !== 1}
+            sx={{
+              padding: "4px 12px",
+              backgroundColor: "#2563eb",
+              color: "#fff",
+              textTransform: "none",
+              mt: 1,
+              mb: 1,
+              ml: 2,
+              "&.Mui-disabled": {
+                backgroundColor: "#B0BBE5",
+                color: "#FFFFFF",
+                cursor: "not-allowed",
+              },
+              opacity: table.getSelectedRowModel().rows.length !== 1 ? 0.5 : 1,
+              cursor:
+                table.getSelectedRowModel().rows.length !== 1
+                  ? "not-allowed"
+                  : "pointer",
+            }}
+            onClick={() => {
+              const selectedRow = table.getSelectedRowModel().rows[0];
+              const id = selectedRow.original?._id;
+              setSelectedRowId(id);
+              setChangeStatus(true);
+            }}
+          >
+            Change Status
+          </Button>
+          <Button
+            onClick={handlePdfData}
+            startIcon={<AiOutlineFilePdf />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export as PDF
+          </Button>
+          <Button
+            onClick={handleExportData}
+            startIcon={<AiOutlineFileExcel />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export All Data
+          </Button>
+          <Button
+            disabled={table.getPrePaginationRowModel().rows.length === 0}
+            onClick={() =>
+              handleExportRows(table.getPrePaginationRowModel().rows)
+            }
+            startIcon={<AiOutlineFileExcel />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export All Rows
+          </Button>
+          <Button
+            disabled={table.getRowModel().rows.length === 0}
+            onClick={() => handleExportRows(table.getRowModel().rows)}
+            startIcon={<AiOutlineFileExcel />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export Page Rows
+          </Button>
+          <Button
+            disabled={
+              !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
+            }
+            onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
+            startIcon={<AiOutlineFileExcel />}
+            size="small"
+            variant="outlined"
+            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
+          >
+            Export Selected Rows
+          </Button>
+        </Box>
+      );
+    },
+
+    muiTableProps: {
+      sx: {
+        border: "1px solid rgba(81, 81, 81, .5)",
+        caption: {
+          captionSide: "top",
+        },
+      },
+    },
+
+    paginationDisplayMode: "pages",
+    positionToolbarAlertBanner: "bottom",
+    muiPaginationProps: {
+      color: "secondary",
+      rowsPerPageOptions: [5, 10, 15],
+      shape: "rounded",
+      variant: "outlined",
+    },
+    enablePagination: true,
+
+    muiTableHeadCellProps: {
+      sx: {
+        backgroundColor: "#f1f5fa",
+        color: "#303E67",
+        fontSize: "14px",
+        fontWeight: "500",
+      },
+    },
+    muiTableBodyRowProps: ({ row }) => ({
+      sx: {
+        backgroundColor: row.index % 2 === 1 ? "#f1f5fa" : "inherit",
+      },
+    }),
+  });
 
   const cardData = [
     {
@@ -110,6 +514,225 @@ function ServiceRequest() {
             );
           })}
         </div>
+        <MaterialReactTable table={table} />
+        {changeStatus && (
+          <>
+            <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+                <h2 className="text-md font-medium text-gray-800 mb-4">
+                  CHANGE SERVICE REQUEST STATUS
+                </h2>
+                <form onSubmit={statusSubmitHandler} className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-1">
+                    <div className="flex items-center gap-2 mt-2">
+                      <label className="w-[40%] text-sm font-medium text-gray-500">
+                        Status <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={selectDropDownValue}
+                        onChange={(e) => setSelectDropDownValue(e.target.value)}
+                        className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                      >
+                        <option value="" className="text-start">
+                          Select
+                        </option>
+                        <option value="new" className="text-start">
+                          New
+                        </option>
+                        <option value="approvalPending" className="text-start">
+                          Approval Pending
+                        </option>
+                        <option value="provisioning" className="text-start">
+                          Provisioning
+                        </option>
+                        <option value="assigned" className="text-start">
+                          Assigned
+                        </option>
+                        <option value="inProgress" className="text-start">
+                          In Progress
+                        </option>
+                        <option value="onHold" className="text-start">
+                          On Hold
+                        </option>
+                        <option value="cancelled" className="text-start">
+                          Cancelled
+                        </option>
+                        <option value="rejected" className="text-start">
+                          Rejected
+                        </option>
+                        <option value="resolved" className="text-start">
+                          Resolved
+                        </option>
+                        <option value="closed" className="text-start">
+                          Closed
+                        </option>
+                        <option
+                          value="serviceToIncident"
+                          className="text-start"
+                        >
+                          Service To Incident
+                        </option>
+                        <option value="waitingForUpdate" className="text-start">
+                          Waiting For Update
+                        </option>
+                      </select>
+                    </div>
+                    {selectDropDownValue === "assigned" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Department
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={["IT Support"]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Group
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={["", ""]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Technician
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={["", ""]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    {selectDropDownValue === "onHold" && (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Enter Comments
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Support Department
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={[
+                                "Pending With Vendor / OEM",
+                                "Pause With Other Reason",
+                                "Standby Provided",
+                              ]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Enter Remarks
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                        </div>
+                      </>
+                    )}
+                    {selectDropDownValue === "resolved" && (
+                      <>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Enter Comments
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <textarea
+                            rows={2}
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                          ></textarea>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <label className="w-[40%] text-sm font-medium text-gray-500">
+                            Closure Code
+                            <span className="text-red-500">*</span>
+                          </label>
+                          <div className="w-[60%]">
+                            <Autocomplete
+                              options={[""]}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4 mt-6">
+                    <button
+                      type="button"
+                      onClick={() => setChangeStatus(false)}
+                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </>
   );

@@ -1,5 +1,4 @@
 import { ServiceAutoCloseModel, ServiceCategoryModel } from "../models/globalServiceReqModel.js";
-import ServiceCounterModel from "../models/serviceCounterModel.js";
 
 //Service Auto Close Time
 export const createAutoCloseTime = async (req, res) => {

@@ -14,6 +14,7 @@ import departmentRoute from './routes/departmentRoute.js'
 import locationRoute from './routes/locationRoute.js'
 import incidentCategoryRoute from './routes/incidentCategoryRoute.js'
 import incidentRoute from './routes/incidentRoute.js'
+import serviceRoute from './routes/serviceRequestRoute.js'
 import gatePass from './routes/gatePassRoute.js'
 import softwareCategory from './routes/softwareCategoryRoute.js'
 import storeLocation from './routes/storeLocationRoute.js'
@@ -52,6 +53,7 @@ app.use('/department', departmentRoute)
 app.use('/location', locationRoute)
 app.use('/category', incidentCategoryRoute)
 app.use('/incident', incidentRoute)
+app.use('/service', serviceRoute)
 app.use('/gatePass', gatePass)
 app.use('/software', softwareCategory)
 app.use('/storeLocation', storeLocation)

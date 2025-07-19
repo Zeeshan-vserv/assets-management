@@ -489,7 +489,7 @@ function ServiceRequest() {
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-2 py-2 rounded-md text-sm text-white transition-all"
           >
             <div className="flex flex-row justify-between items-center gap-1">
-              <FaDesktop size={12} />
+              <FaDesktop size={13} />
               <span> View Dashboard</span>
             </div>
           </button>

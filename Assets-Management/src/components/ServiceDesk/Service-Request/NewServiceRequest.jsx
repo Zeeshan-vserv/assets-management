@@ -5,6 +5,7 @@ import { Autocomplete, TextField } from "@mui/material";
 function NewServiceRequest() {
   const navigate = useNavigate();
   const [excludeSLA, setExcludeSLA] = useState(false);
+  const [approvalRequired, setApprovalRequired] = useState("");
 
   const handleSubmitNewRequest = (e) => {
     e.preventDefault();
@@ -180,6 +181,8 @@ function NewServiceRequest() {
                 <div className="w-[65%]">
                   <Autocomplete
                     options={["Yes", "No"]}
+                    value={approvalRequired}
+                    onChange={(e, newValue) => setApprovalRequired(newValue)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -191,6 +194,82 @@ function NewServiceRequest() {
                   />
                 </div>
               </div>
+              {approvalRequired === "Yes" && (
+                <>
+                  <div className="flex items-center w-[46%]">
+                    <label className="w-[28%] text-xs font-semibold text-slate-600">
+                      Approval Type<span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-[65%]">
+                      <Autocomplete
+                        options={["Hierarchical", "Custom"]}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Select"
+                            variant="standard"
+                            required
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center w-[46%]">
+                    <label className="w-[28%] text-xs font-semibold text-slate-600">
+                      Approver (Level 1)<span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-[65%]">
+                      <Autocomplete
+                        options={["", ""]}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Select"
+                            variant="standard"
+                            required
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center w-[46%]">
+                    <label className="w-[28%] text-xs font-semibold text-slate-600">
+                      Approver (Level 2)<span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-[65%]">
+                      <Autocomplete
+                        options={["", ""]}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Select"
+                            variant="standard"
+                            required
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center w-[46%]">
+                    <label className="w-[28%] text-xs font-semibold text-slate-600">
+                      Approver (Level 3)<span className="text-red-500">*</span>
+                    </label>
+                    <div className="w-[65%]">
+                      <Autocomplete
+                        options={["", ""]}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Select"
+                            variant="standard"
+                            required
+                          />
+                        )}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

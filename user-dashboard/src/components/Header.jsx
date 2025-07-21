@@ -1,11 +1,17 @@
 import React, { useState } from "react";
 import { IoMdMenu } from "react-icons/io";
+import { logout } from "../../../Assets-Management/src/action/AuthAction";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 const Header = ({ toggleNav }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const handleLogout = () => {
-    console.log("gddg");
-  };
+      dispatch(logout());
+      navigate("/auth");
+    };
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
     setTimeout(() => {

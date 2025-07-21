@@ -523,20 +523,6 @@ const cardData = [
   { id: "11", count: data.length, description: "Total" },
 ];
 
-  // Card data
-  // const cardData = [
-  //   { id: "1", totalCount: "100", description: "New" },
-  //   { id: "2", storeCount: "70", description: "Assigned" },
-  //   { id: "3", allocatedCount: "40", description: "In-Progress" },
-  //   { id: "4", inRepairCount: "30", description: "Pause" },
-  //   { id: "5", inTransitCount: "10", description: "Resolved" },
-  //   { id: "6", handOverCount: "0", description: "Cancelled" },
-  //   { id: "7", underRecoveryCount: "0", description: "Reopened" },
-  //   { id: "8", discardReplacedCount: "0", description: "Closed" },
-  //   { id: "9", theftLostCount: "0", description: "Converted to SR" },
-  //   { id: "11", soldCount: "0", description: "Total" },
-  // ];
-
   // Render
   return (
     <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">

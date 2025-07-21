@@ -18,7 +18,7 @@ const fieldChangeEntrySchema = new mongoose.Schema({
 const serviceRequestSchema = new mongoose.Schema({
     userId: String,
     serviceId: String,
-    title: String,
+    subject: String,
     loggedVia: String,
     category: String,
     subCategory: String,

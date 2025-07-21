@@ -43,17 +43,7 @@ function ServiceRequest() {
     fetchServiceRequest();
   }, []);
 
-  useEffect(() => {
-    fetchServiceRequest();
-  }, []);
-
-  useEffect(() => {
-    if (data.length > 0) {
-      console.log("Sample row data:", data[0]);
-    }
-  }, [data]);
-
-  console.log("data", data);
+  // console.log("data", data);
 
   const columns = useMemo(
     () => [
@@ -62,12 +52,12 @@ function ServiceRequest() {
         header: "Service Req Id",
       },
       {
-        accessorKey: "cuisine",
+        accessorKey: "subject",
         header: "Subject",
       },
       {
-        header: "Technician",
-        Cell: ({ row }) => row.original?.classificaton?.technician || "N/A",
+        header: "",
+        header: "Assigned To",
       },
       {
         header: "Logged Time",

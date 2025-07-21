@@ -391,7 +391,7 @@ function NewServiceRequest() {
                         {...params}
                         label="Select"
                         variant="standard"
-                        required
+                        required 
                       />
                     )}
                   />

@@ -32,7 +32,7 @@ export const updateSupportDepartment = (id,updateData)=>API.put(`/supportDepartm
 export const getSupportDepartmentById = (id)=>API.get(`/supportDepartment/${id}`)
 export const deleteSupportDepartment = (id)=>API.delete(`/supportDepartment/${id}`)
 
-//Sub-Location
+//Sipport Group
 export const addSupportGroup = (locationId,subLocationData)=>API.post(`/supportDepartment/${locationId}/supportGroup`,subLocationData)
 export const getAllSupportGroup = ()=>API.get('/supportDepartment/supportGroup')
 export const getSupportGroupById = (id)=>API.get(`/supportDepartment/supportGroup/${id}`)

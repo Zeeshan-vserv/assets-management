@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
@@ -11,46 +10,51 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 import {
-  createAutoCloseTime,
-  getAllAutoCloseTimes,
-  updateAutoCloseTime,
-  deleteClosureCode, // ✅ If API name is correct; else use deleteAutoCloseTime
-} from "../../../api/ConfigurationIncidentRequest";
+  createServiceCategory,
+  deleteServiceCategory,
+  getAllServiceCategory,
+  updateServiceCategory,
+} from "../../../api/globalServiceRequest";
 
-const IncidentAutoCloserTime = () => {
+const ReqCategory = () => {
   const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Add Modal State
   const [openAddModal, setOpenAddModal] = useState(false);
-  const [addForm, setAddForm] = useState({ autoCloseTime: "" });
+  const [addForm, setAddForm] = useState({ categoryName: "" });
 
+  // Edit Modal State
   const [openEditModal, setOpenEditModal] = useState(false);
   const [editForm, setEditForm] = useState(null);
 
+  // Delete Modal State
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
 
-  const fetchAutoCloseTimes = async () => {
+  // Fetch categories
+  const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const res = await getAllAutoCloseTimes();
+      const res = await getAllServiceCategory();
       setData(res?.data?.data || []);
     } catch (err) {
-      toast.error("Failed to fetch auto close times");
+      toast.error("Failed to fetch categories");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchAutoCloseTimes();
+    fetchCategories();
   }, []);
 
+  // Table columns
   const columns = useMemo(
     () => [
-      { accessorKey: "autoCloseTimeId", header: "Auto Close Time ID" },
-      { accessorKey: "autoCloseTime", header: "Auto Close Time" },
+      { accessorKey: "categoryId", header: "Category Id" },
+      { accessorKey: "categoryName", header: "Category Name" },
       {
         id: "edit",
         header: "Edit",
@@ -61,7 +65,7 @@ const IncidentAutoCloserTime = () => {
             onClick={() => {
               setEditForm({
                 _id: row.original._id,
-                autoCloseTime: row.original.autoCloseTime,
+                categoryName: row.original.categoryName,
               });
               setOpenEditModal(true);
             }}
@@ -69,6 +73,24 @@ const IncidentAutoCloserTime = () => {
             aria-label="edit"
           >
             <MdModeEdit />
+          </IconButton>
+        ),
+      },
+      {
+        id: "delete",
+        header: "Delete",
+        size: 60,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton
+            onClick={() => {
+              setDeleteId(row.original._id);
+              setDeleteModal(true);
+            }}
+            color="error"
+            aria-label="delete"
+          >
+            <DeleteIcon />
           </IconButton>
         ),
       },
@@ -84,23 +106,21 @@ const IncidentAutoCloserTime = () => {
     initialState: { density: "compact", pagination: { pageSize: 5 } },
     renderTopToolbarCustomActions: () => (
       <Box>
-        {data.length === 0 && (
-          <Button
-            onClick={() => setOpenAddModal(true)}
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlineIcon />}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "#fff",
-              textTransform: "none",
-              mt: 1,
-              mb: 1,
-            }}
-          >
-            New
-          </Button>
-        )}
+        <Button
+          onClick={() => setOpenAddModal(true)}
+          variant="contained"
+          size="small"
+          startIcon={<AddCircleOutlineIcon />}
+          sx={{
+            backgroundColor: "#2563eb",
+            color: "#fff",
+            textTransform: "none",
+            mt: 1,
+            mb: 1,
+          }}
+        >
+          New
+        </Button>
       </Box>
     ),
     muiTableProps: {
@@ -133,95 +153,80 @@ const IncidentAutoCloserTime = () => {
     }),
   });
 
-  const handleAddAutoCloseTime = async (e) => {
+  // Add Category Handler
+  const handleAddCategory = async (e) => {
     e.preventDefault();
-    if (!addForm.autoCloseTime.trim()) {
-      toast.error("Auto Close Time cannot be empty");
-      return;
-    }
-
     try {
       const formData = {
         userId: user?.userId,
-        autoCloseTime: addForm.autoCloseTime.trim(),
+        categoryName: addForm.categoryName,
       };
-      const res = await createAutoCloseTime(formData);
+      const res = await createServiceCategory(formData);
       if (res?.data?.success) {
-        toast.success("Auto Close Time created successfully");
+        toast.success("Category created successfully");
         setOpenAddModal(false);
-        setAddForm({ autoCloseTime: "" });
-        fetchAutoCloseTimes();
+        setAddForm({ categoryName: "" });
+        fetchCategories();
       }
     } catch (err) {
-      toast.error("Failed to create auto close time");
+      toast.error("Failed to create category");
     }
   };
 
-  const handleEditAutoCloseTime = async (e) => {
+  // Edit Category Handler
+  const handleEditCategory = async (e) => {
     e.preventDefault();
-    if (!editForm.autoCloseTime.trim()) {
-      toast.error("Auto Close Time cannot be empty");
-      return;
-    }
-
     try {
       const updateData = {
-        autoCloseTime: editForm.autoCloseTime.trim(),
+        categoryName: editForm.categoryName,
       };
-      const res = await updateAutoCloseTime(editForm._id, updateData);
+      const res = await updateServiceCategory(editForm._id, updateData);
       if (res?.data?.success) {
-        toast.success("Auto Close Time updated successfully");
+        toast.success("Category updated successfully");
         setOpenEditModal(false);
         setEditForm(null);
-        fetchAutoCloseTimes();
+        fetchCategories();
       }
     } catch (err) {
-      toast.error("Failed to update auto close time");
+      toast.error("Failed to update category");
     }
   };
 
-  const handleDeleteAutoCloseTime = async () => {
+  // Delete Category Handler
+  const handleDeleteCategory = async () => {
     try {
-      await deleteClosureCode(deleteId); // ✅ or `deleteAutoCloseTime`
-      toast.success("Auto Close Time deleted successfully");
+      await deleteServiceCategory(deleteId);
+      toast.success("Category deleted successfully");
       setDeleteModal(false);
       setDeleteId(null);
-      fetchAutoCloseTimes();
+      fetchCategories();
     } catch (err) {
-      toast.error("Failed to delete auto close time");
+      toast.error("Failed to delete category");
     }
   };
 
   return (
     <>
-      <div className="flex flex-col w-full min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">
-          INCIDENT AUTO CLOSE TIME
-        </h2>
+      <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
+        <h2 className="text-lg font-semibold mb-6 text-start">SERVICE CATEGORY</h2>
         <MaterialReactTable table={table} />
       </div>
 
       {/* Add Modal */}
       {openAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
-              Add Auto Close Time
-            </h2>
-            <form onSubmit={handleAddAutoCloseTime} className="space-y-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">Add Category</h2>
+            <form onSubmit={handleAddCategory} className="space-y-4">
               <div className="flex items-center gap-2">
-                <label className="w-40 text-sm font-medium text-gray-500">
-                  Auto Close Time*
-                </label>
+                <label className="w-40 text-sm font-medium text-gray-500">Category Name*</label>
                 <TextField
-                  name="autoCloseTime"
+                  name="categoryName"
                   required
                   fullWidth
-                  value={addForm.autoCloseTime}
-                  onChange={(e) =>
-                    setAddForm({ autoCloseTime: e.target.value })
-                  }
-                  placeholder="Enter time in minutes/hours"
+                  value={addForm.categoryName}
+                  onChange={(e) => setAddForm({ categoryName: e.target.value })}
+                  placeholder="Enter Category Name"
                   variant="standard"
                   sx={{ width: 250 }}
                 />
@@ -230,13 +235,13 @@ const IncidentAutoCloserTime = () => {
                 <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
-                  className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
                   Add
                 </button>
@@ -249,27 +254,18 @@ const IncidentAutoCloserTime = () => {
       {/* Edit Modal */}
       {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
-              Edit Auto Close Time
-            </h2>
-            <form onSubmit={handleEditAutoCloseTime} className="space-y-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-6">Edit Category</h2>
+            <form onSubmit={handleEditCategory} className="space-y-4">
               <div className="flex items-center gap-2">
-                <label className="w-40 text-sm font-medium text-gray-500">
-                  Auto Close Time*
-                </label>
+                <label className="w-40 text-sm font-medium text-gray-500">Category Name*</label>
                 <TextField
-                  name="autoCloseTime"
+                  name="categoryName"
                   required
                   fullWidth
-                  value={editForm.autoCloseTime}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      autoCloseTime: e.target.value,
-                    }))
-                  }
-                  placeholder="Enter time in minutes/hours"
+                  value={editForm.categoryName}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, categoryName: e.target.value }))}
+                  placeholder="Enter Category Name"
                   variant="standard"
                   sx={{ width: 250 }}
                 />
@@ -278,13 +274,13 @@ const IncidentAutoCloserTime = () => {
                 <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
-                  className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
                   Update
                 </button>
@@ -302,20 +298,20 @@ const IncidentAutoCloserTime = () => {
               Are you sure?
             </h2>
             <p className="text-gray-700 mb-6">
-              This action will permanently delete the Auto Close Time.
+              This action will permanently delete the category.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setDeleteModal(false)}
-                className="border px-4 py-2 rounded-lg text-sm"
+                className="shadow-md px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:border-gray-500 transition-all"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                onClick={handleDeleteAutoCloseTime}
-                className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm"
+                onClick={handleDeleteCategory}
+                className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
               >
                 Delete
               </button>
@@ -327,4 +323,4 @@ const IncidentAutoCloserTime = () => {
   );
 };
 
-export default IncidentAutoCloserTime;
+export default ReqCategory;

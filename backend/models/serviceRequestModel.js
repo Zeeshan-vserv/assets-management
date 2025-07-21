@@ -3,8 +3,8 @@ import mongoose from "mongoose";
 const statusEntrySchema = new mongoose.Schema({
     status: { type: String, required: true },
     closingSummary: String,
-closeRemarks: String,
-closureCategory: String,
+    closeRemarks: String,
+    closureCategory: String,
     changedAt: { type: Date, default: Date.now },
     changedBy: String
 }, { _id: false });
@@ -15,40 +15,36 @@ const fieldChangeEntrySchema = new mongoose.Schema({
     changedBy: String
 }, { _id: false });
 
-const incidentSchema = mongoose.Schema({
+const serviceRequestSchema = new mongoose.Schema({
     userId: String,
-    incidentId: String,
-    subject: String,
+    serviceId: String,
+    title: String,
+    loggedVia: String,
     category: String,
     subCategory: String,
-    loggedVia: String,
-    description: String,
-    status: {type: String, default:"New"},
-    sla: { type: Date },
-    isSla: {type: Boolean, default: true},
-    tat: String,
-    feedback: { type: String, default: "N/A"},
-    attachment: String,
+    requestDescription: String,
+    catalogueDescription: String,
+    purchaseRequest: { type: Boolean, default: false },
+    cost: Number,
+    approval: { type: Boolean, default: false },
+    approver1: String,
+    approver2: String,
+    approver3: String,
     submitter:{
         user: String,
-        userId: String,
-        userContactNumber: Number,
         userEmail: String,
-        userDepartment: String,
         loggedBy: String,
         loggedInTime: { type: Date, default: Date.now }
     },
-    assetDetails: {
+    asset: {
         asset: String,
         make: String,
         model: String,
         serialNo: String
     },
-    locationDetails: {
+    location: {
         location: String,
         subLocation: String,
-        floor: String,
-        roomNo: String
     },
     classificaton: {
         excludeSLA: {type: Boolean, default: false},
@@ -62,6 +58,6 @@ const incidentSchema = mongoose.Schema({
     fieldChangeHistory: [fieldChangeEntrySchema]
 }, { timestamps: true})
 
-const IncidentModel = mongoose.model('Incident', incidentSchema)
+const ServiceRequestModel = mongoose.model('ServiceRequest', serviceRequestSchema)
 
-export default IncidentModel
+export default ServiceRequestModel

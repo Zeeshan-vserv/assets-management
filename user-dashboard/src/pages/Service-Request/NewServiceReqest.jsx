@@ -20,7 +20,7 @@ function NewServiceReqest() {
   const [purchaseRequired, setPurchaseRequired] = useState("");
   const [approvalRequired, setApprovalRequired] = useState("");
   const [formData, setFormData] = useState({
-    title: "",
+    subject: "",
     category: "",
     subCategory: "",
     requestDescription: "",
@@ -128,7 +128,7 @@ function NewServiceReqest() {
         toast.success("Service Request created successfully");
       }
       setFormData({
-        title: "",
+        subject: "",
         category: "",
         subCategory: "",
         requestDescription: "",
@@ -283,12 +283,13 @@ function NewServiceReqest() {
                   Cost
                 </label>
                 <input
-                  className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                  className={`w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none ${purchaseRequired === "No"?"bg-gray-100 cursor-not-allowed" : "focus:border-blue-500"}`}
                   type="number"
                   id="cost"
                   name="cost"
                   value={formData.cost}
                   onChange={handleChange}
+                  disabled={purchaseRequired === "No"}
                   placeholder="Enter Cost"
                 />
               </div>

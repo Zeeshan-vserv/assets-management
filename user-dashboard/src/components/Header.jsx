@@ -35,7 +35,7 @@ const Header = ({ toggleNav }) => {
         {dropdownVisible && (
           <div className="absolute z-50 right-0 mt-20 w-42 bg-white border rounded shadow-lg">
             <button
-              className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
+              className="block w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 cursor-pointer"
               onClick={handleLogout}
             >
               Logout

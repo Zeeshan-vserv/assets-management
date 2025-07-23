@@ -2,10 +2,20 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import AuthModel from "../models/authModel.js";
 import dotenv from "dotenv";
-import xlsx from 'xlsx';
-import fs from 'fs';
-
+import xlsx from "xlsx";
+import fs from "fs";
+import nodemailer from "nodemailer";
 dotenv.config();
+
+const transporter = nodemailer.createTransport({
+  host: "vservit.icewarpcloud.in",
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 export const signup = async (req, res) => {
   const { password, confirmPassword, ...userData } = req.body;
@@ -22,16 +32,37 @@ export const signup = async (req, res) => {
 
       const user = await newSignup.save();
 
-            const token = jwt.sign({
-                emailAddress: user.emailAddress,
-                id: user._id,
-            }, process.env.JWT_KEY, { expiresIn: '2h' });
+      const token = jwt.sign(
+        {
+          emailAddress: user.emailAddress,
+          id: user._id,
+        },
+        process.env.JWT_KEY,
+        { expiresIn: "2h" }
+      );
 
       res.status(201).json({
         user,
         message: "User registered successfully",
         token,
       });
+
+      //send email
+      const loginUrl = process.env.VITE_FRONTEND_KEY;
+      const mailOptions = {
+        from: `"Vserv Infosystems Asset Management" <${process.env.EMAIL_USER}>`,
+        to: user.emailAddress,
+        subject: "Login Credentials",
+        html: `
+      <p>Dear ${user.employeeName},</p>
+      <p>Your account has been successfully created.</p>
+      <p>You can now login using your email: <strong>${user.emailAddress}</strong> and password: <strong>${password}</strong>.</p>
+      <p><b>We recommend changing the password after your first login for security purposes.</b></p>
+      <p>You can now log in using the following link: <a href="${loginUrl}" target="_blank">${loginUrl}</a></p>
+      <p>Thank you,<br/>Vserv Team</p>
+      `,
+      };
+      await transporter.sendMail(mailOptions);
     } else {
       res.status(400).json("Password and Confirm Password does not match");
     }
@@ -59,10 +90,14 @@ export const login = async (req, res) => {
         .json({ success: false, message: "Invalid credentials" });
     }
 
-        const token = jwt.sign({
-            emailAddress: user.emailAddress,
-            id: user._id,
-        }, process.env.JWT_KEY, { expiresIn: '2h' });
+    const token = jwt.sign(
+      {
+        emailAddress: user.emailAddress,
+        id: user._id,
+      },
+      process.env.JWT_KEY,
+      { expiresIn: "2h" }
+    );
 
     // Remove sensitive fields
     const { password: pwd, confirmPassword, ...safeUser } = user._doc;
@@ -116,78 +151,103 @@ export const updateUser = async (req, res) => {
       new: true,
     });
     if (!updatedUser) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     res.status(200).json({ success: true, data: updatedUser });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Error updating user: " + error.message });
+    res.status(500).json({
+      success: false,
+      message: "Error updating user: " + error.message,
+    });
   }
 };
 
 export const getUserById = async (req, res) => {
-    try {
-        const { id } = req.params
-        const userData = await AuthModel.findById(id);
-        if(!userData){
-            return res.status(404).json({ success: false, message: 'User not found'})
-        }
-        res.status(200).json({ success:true, data: userData})
-    } catch (error) {
-        res.status(500).json({ message: 'Internal server error while fetching user details'})
+  try {
+    const { id } = req.params;
+    const userData = await AuthModel.findById(id);
+    if (!userData) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
-}
+    res.status(200).json({ success: true, data: userData });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Internal server error while fetching user details" });
+  }
+};
 
 export const deleteUser = async (req, res) => {
-    try {
-        const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-        const deletedUser = await AuthModel.findByIdAndDelete(id);
-        if (!deletedUser) {
-            return res.status(404).json({ success: false, message: 'User not found' });
-        }
-
-        res.status(200).json({ success: true, message: 'User deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: "Failed to delete user", error: error.message });
+    const deletedUser = await AuthModel.findByIdAndDelete(id);
+    if (!deletedUser) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
+
+    res
+      .status(200)
+      .json({ success: true, message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete user",
+      error: error.message,
+    });
+  }
 };
 
 export const uploadUsersFromExcel = async (req, res) => {
-    try {
-        if (!req.file) {
-            return res.status(400).json({ success: false, message: 'No file uploaded' })
-        }
-
-        // Read the uploaded Excel file
-        const workbook = xlsx.readFile(req.file.path)
-        const sheetName = workbook.SheetNames[0]
-        const sheet = workbook.Sheets[sheetName]
-        const users = xlsx.utils.sheet_to_json(sheet)
-
-        // Prepare users for insertion
-        const usersToInsert = await Promise.all(users.map(async (user) => {
-            // Hash password if present
-            let hashedPassword = user.password
-            if (user.password) {
-                const salt = await bcrypt.genSalt(10)
-                hashedPassword = await bcrypt.hash(user.password, salt)
-            }
-            return {
-                ...user,
-                password: hashedPassword
-            }
-        }))
-
-        // Insert users into DB
-        await AuthModel.insertMany(usersToInsert)
-
-        // Remove the uploaded file
-        fs.unlinkSync(req.file.path)
-
-        res.status(201).json({ success: true, message: 'Users uploaded successfully' })
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Failed to upload users', error: error.message })
+  try {
+    if (!req.file) {
+      return res
+        .status(400)
+        .json({ success: false, message: "No file uploaded" });
     }
-}
+
+    // Read the uploaded Excel file
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const users = xlsx.utils.sheet_to_json(sheet);
+
+    // Prepare users for insertion
+    const usersToInsert = await Promise.all(
+      users.map(async (user) => {
+        // Hash password if present
+        let hashedPassword = user.password;
+        if (user.password) {
+          const salt = await bcrypt.genSalt(10);
+          hashedPassword = await bcrypt.hash(user.password, salt);
+        }
+        return {
+          ...user,
+          password: hashedPassword,
+        };
+      })
+    );
+
+    // Insert users into DB
+    await AuthModel.insertMany(usersToInsert);
+
+    // Remove the uploaded file
+    fs.unlinkSync(req.file.path);
+
+    res
+      .status(201)
+      .json({ success: true, message: "Users uploaded successfully" });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload users",
+      error: error.message,
+    });
+  }
+};

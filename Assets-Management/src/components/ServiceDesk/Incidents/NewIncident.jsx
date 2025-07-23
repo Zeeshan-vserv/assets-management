@@ -146,6 +146,10 @@ const NewIncident = () => {
       await createIncident({
         ...formData,
         userId: user?.userId,
+        classificaton: {
+          ...formData.classificaton,
+          excludeSLA: formData.classificaton.excludeSLA || false,
+        },
       });
       toast.success("Incident Added Successfully");
       setFormData({
@@ -886,7 +890,9 @@ const NewIncident = () => {
                     ...formData,
                     classificaton: {
                       ...formData.classificaton,
-                      supportGroupName: newValue ? newValue.supportGroupName : "",
+                      supportGroupName: newValue
+                        ? newValue.supportGroupName
+                        : "",
                     },
                   });
                 }}

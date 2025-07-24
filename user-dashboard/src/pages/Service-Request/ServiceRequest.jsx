@@ -11,7 +11,7 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { useNavigate } from "react-router";
-import axios from "axios";
+import { getAllServiceRequests } from "../../api/ServiceRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -28,8 +28,10 @@ function ServiceRequest() {
   const fetchServiceRequest = async () => {
     try {
       setIsLoading(true);
-      // const response = await axios.get("https://dummyjson.com/recipes");
-      setData(response?.data?.recipes || []);
+      const response = await getAllServiceRequests();
+      if (response?.data?.data) {
+        setData(response.data.data);
+      }
     } catch (error) {
       console.error("Error fetching service request:", error);
     } finally {
@@ -40,29 +42,46 @@ function ServiceRequest() {
   useEffect(() => {
     fetchServiceRequest();
   }, []);
+
   // console.log("data", data);
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
+        accessorKey: "serviceId",
         header: "Service Req Id",
       },
       {
-        accessorKey: "cuisine",
+        accessorKey: "subject",
         header: "Subject",
       },
       {
-        accessorKey: "difficulty",
+        header: "",
         header: "Assigned To",
       },
       {
-        accessorKey: "caloriesPerServing",
         header: "Logged Time",
+        Cell: ({ row }) => {
+          const value = row.original?.submitter?.loggedInTime;
+          if (!value) return "N/A";
+          const date = new Date(value);
+          return isNaN(date)
+            ? "Invalid Date"
+            : date.toLocaleString("en-IN", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              });
+        },
       },
       {
-        accessorKey: "reviewCount",
+        accessorKey: "statusTimeline",
         header: "Status",
+        Cell: ({ cell }) => {
+          const timeline = cell.getValue();
+          return timeline?.length > 0
+            ? timeline[timeline.length - 1]?.status
+            : "N/A";
+        },
       },
     ],
     [isLoading]

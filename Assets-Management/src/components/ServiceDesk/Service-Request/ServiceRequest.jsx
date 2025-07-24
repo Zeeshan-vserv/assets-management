@@ -17,6 +17,7 @@ import { FaDesktop } from "react-icons/fa";
 import { IoMdCheckmark } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { getAllIncident } from "../../../api/IncidentRequest";
+import { getAllServiceRequests } from "../../../api/serviceRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -37,7 +38,7 @@ function ServiceRequest() {
   const fetchIncident = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllIncident();
+      const response = await getAllServiceRequests();
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching incidents:", error);
@@ -63,7 +64,7 @@ function ServiceRequest() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Service Req ID",
       },
       {
@@ -83,7 +84,7 @@ function ServiceRequest() {
         header: "Submitter",
       },
       {
-        accessorKey: "assetDetails.asset",
+        accessorKey: "classificaton.technician",
         header: "Assigned To",
       },
       // {

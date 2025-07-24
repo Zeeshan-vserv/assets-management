@@ -16,6 +16,7 @@ import {
   getAllSupportGroup,
 } from "../../../api/SuportDepartmentRequest";
 import { createServiceRequest } from "../../../api/serviceRequest";
+import { getAllServiceCategory, getAllServiceSubCategory } from "../../../api/globalServiceRequest";
 
 function NewServiceRequest() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -84,10 +85,10 @@ function NewServiceRequest() {
       const responseAsset = await getAllAssets();
       setAssetData(responseAsset?.data?.data || []);
 
-      const responseCategory = await getAllCategory();
+      const responseCategory = await getAllServiceCategory();
       setCategory(responseCategory?.data?.data || []);
 
-      const responseSubCategory = await getAllSubCategory();
+      const responseSubCategory = await getAllServiceSubCategory();
       setSubCategory(responseSubCategory?.data?.data || []);
 
       const responseReportingManager = await getAllUsers();
@@ -366,7 +367,7 @@ function NewServiceRequest() {
                   htmlFor=""
                   className="w-[28%] text-xs font-semibold text-slate-600"
                 >
-                  Cost<span className="text-red-500">*</span>
+                  Cost
                 </label>
                 <input
                   type="text"
@@ -390,7 +391,7 @@ function NewServiceRequest() {
                         {...params}
                         label="Select"
                         variant="standard"
-                        required
+                        required 
                       />
                     )}
                   />

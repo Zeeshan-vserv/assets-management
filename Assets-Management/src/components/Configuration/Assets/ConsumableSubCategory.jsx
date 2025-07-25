@@ -665,6 +665,7 @@ import {
   deleteSubConsumable,
 } from "../../../api/ConsumableRequest";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -693,6 +694,7 @@ function ConsumableSubCategory() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteInfo, setDeleteInfo] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch all subcategories and categories
   const fetchAll = async () => {
@@ -853,6 +855,7 @@ function ConsumableSubCategory() {
       });
       toast.success("Sub Category updated!");
       setOpenEditModal(false);
+      setShowConfirm(true);
       setEditForm({ _id: "", subConsumableName: "", consumableId: "" });
       fetchAll();
     } catch (error) {
@@ -883,83 +886,83 @@ function ConsumableSubCategory() {
     }
   };
 
-    //Exports
-    const handleExportRows = (rows) => {
-      const visibleColumns = table
-        .getAllLeafColumns()
-        .filter(
-          (col) =>
-            col.getIsVisible() &&
-            col.id !== "mrt-row-select" &&
-            col.id !== "edit" &&
-            col.id !== "delete"
-        );
-  
-      const rowData = rows.map((row) => {
-        const result = {};
-        visibleColumns.forEach((col) => {
-          const key = col.id || col.accessorKey;
-          result[key] = row.original[key];
-        });
-        return result;
-      });
-  
-      const csv = generateCsv(csvConfig)(rowData);
-      download(csvConfig)(csv);
-    };
-    const handleExportData = () => {
-      const visibleColumns = table
-        .getAllLeafColumns()
-        .filter(
-          (col) =>
-            col.getIsVisible() &&
-            col.id !== "mrt-row-select" &&
-            col.id !== "edit" &&
-            col.id !== "delete"
-        );
-  
-      const exportData = data.map((item) => {
-        const result = {};
-        visibleColumns.forEach((col) => {
-          const key = col.id || col.accessorKey;
-          result[key] = item[key];
-        });
-        return result;
-      });
-  
-      const csv = generateCsv(csvConfig)(exportData);
-      download(csvConfig)(csv);
-    };
-    const handlePdfData = () => {
-      const excludedColumns = ["mrt-row-select", "edit", "delete"];
-  
-      const visibleColumns = table
-        .getAllLeafColumns()
-        .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
-  
-      // Prepare headers for PDF
-      const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
-  
-      // Prepare data rows for PDF
-      const exportData = data.map((item) =>
-        visibleColumns.map((col) => {
-          const key = col.id || col.accessorKey;
-          let value = item[key];
-          return value ?? "";
-        })
+  //Exports
+  const handleExportRows = (rows) => {
+    const visibleColumns = table
+      .getAllLeafColumns()
+      .filter(
+        (col) =>
+          col.getIsVisible() &&
+          col.id !== "mrt-row-select" &&
+          col.id !== "edit" &&
+          col.id !== "delete"
       );
-  
-      const doc = new jsPDF({});
-      autoTable(doc, {
-        head: [headers],
-        body: exportData,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [66, 139, 202] },
-        margin: { top: 20 },
+
+    const rowData = rows.map((row) => {
+      const result = {};
+      visibleColumns.forEach((col) => {
+        const key = col.id || col.accessorKey;
+        result[key] = row.original[key];
       });
-      doc.save("Assets-Management-Components.pdf");
-    };
-  
+      return result;
+    });
+
+    const csv = generateCsv(csvConfig)(rowData);
+    download(csvConfig)(csv);
+  };
+  const handleExportData = () => {
+    const visibleColumns = table
+      .getAllLeafColumns()
+      .filter(
+        (col) =>
+          col.getIsVisible() &&
+          col.id !== "mrt-row-select" &&
+          col.id !== "edit" &&
+          col.id !== "delete"
+      );
+
+    const exportData = data.map((item) => {
+      const result = {};
+      visibleColumns.forEach((col) => {
+        const key = col.id || col.accessorKey;
+        result[key] = item[key];
+      });
+      return result;
+    });
+
+    const csv = generateCsv(csvConfig)(exportData);
+    download(csvConfig)(csv);
+  };
+  const handlePdfData = () => {
+    const excludedColumns = ["mrt-row-select", "edit", "delete"];
+
+    const visibleColumns = table
+      .getAllLeafColumns()
+      .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
+
+    // Prepare headers for PDF
+    const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
+
+    // Prepare data rows for PDF
+    const exportData = data.map((item) =>
+      visibleColumns.map((col) => {
+        const key = col.id || col.accessorKey;
+        let value = item[key];
+        return value ?? "";
+      })
+    );
+
+    const doc = new jsPDF({});
+    autoTable(doc, {
+      head: [headers],
+      body: exportData,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [66, 139, 202] },
+      margin: { top: 20 },
+    });
+    doc.save("Assets-Management-Components.pdf");
+  };
+
   const table = useMaterialReactTable({
     data,
     columns,
@@ -1131,17 +1134,17 @@ function ConsumableSubCategory() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Add
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Add
                 </button>
               </div>
             </form>
@@ -1196,18 +1199,26 @@ function ConsumableSubCategory() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  onConfirm={handleEditSubmit}
+                  message="Are you sure you want to update this consumable sub category?"
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>

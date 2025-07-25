@@ -41,6 +41,9 @@ const AssetData = () => {
   const [qrCodesModalOpen, setQrCodesModalOpen] = useState(false);
   const [selectedRowsForQrCodes, setSelectedRowsForQrCodes] = useState([]);
 
+  // const [assignedUserModalOpen, setAssignedUserModalOpen] = useState(false);
+  // const [assignedUserDetails, setAssignedUserDetails] = useState(null);
+
   // console.log(filteredData);
 
   const fetchAsset = async () => {
@@ -61,6 +64,8 @@ const AssetData = () => {
   useEffect(() => {
     fetchAsset();
   }, []);
+
+  // console.log("data",data)
 
   // Extract unique categories from data
   const categories = useMemo(() => {
@@ -125,6 +130,24 @@ const AssetData = () => {
         accessorKey: "assetState.user",
         header: "Assigned To",
       },
+      // {
+      //   accessorKey: "assetState.user",
+      //   header: "Assigned To",
+      //   Cell: ({ row }) => {
+      //     const user = row.original.assetState?.user;
+      //     const email = user?.emailAddress || "";
+      //     return (
+      //       <div className="flex items-center gap-1 cursor-pointer">
+      //         <ImEye
+      //           className="ml-1 text-slate-500 hover:text-slate-700"
+      //           size={14}
+      //           onClick={() => handleAssignedUserClick(user)}
+      //         />
+      //         {email}
+      //       </div>
+      //     );
+      //   },
+      // },
       {
         accessorKey: "assetInformation.model",
         header: "Model",
@@ -185,6 +208,11 @@ const AssetData = () => {
     ],
     [isLoading]
   );
+
+  // const handleAssignedUserClick = (user) => {
+  //   setAssignedUserDetails(user);
+  //   setAssignedUserModalOpen(true);
+  // };
 
   const handleExportRows = (rows) => {
     const visibleColumns = table
@@ -706,6 +734,36 @@ Location: ${row?.locationInformation?.location ?? ""}`;
               </div>
             </div>
           </>
+        )} */}
+
+        {/* {assignedUserModalOpen && assignedUserDetails && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800 mb-6">
+                  Assigned User Details
+                </h2>
+                <button
+                  onClick={() => setAssignedUserModalOpen(false)}
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-sm text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                >
+                  Close
+                </button>
+              </div>
+              <table>
+                <tbody>
+                  <tr>
+                    <td className="font-medium">Employee Name</td>
+                    <td className="font-medium">Email Address</td>
+                  </tr>
+                  <tr>
+                    <td>{assignedUserDetails.employeeName}</td>
+                    <td>{assignedUserDetails.emailAddress}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         )} */}
       </div>
     </>

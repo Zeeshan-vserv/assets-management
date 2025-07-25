@@ -493,6 +493,10 @@ export const createServiceRequest = async (req, res) => {
       assetDetails,
       locationDetails,
       classificaton,
+      approval: serviceRequestData.approval || false,
+      approver1: serviceRequestData.approver1 || "",
+      approver2: serviceRequestData.approver2 || "",
+      approver3: serviceRequestData.approver3 || "",
       statusTimeline: [
         {
           status,

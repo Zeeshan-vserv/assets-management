@@ -1,4 +1,3 @@
-
 import React, { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
@@ -16,6 +15,7 @@ import {
   updateAutoCloseTime,
   deleteClosureCode, // ✅ If API name is correct; else use deleteAutoCloseTime
 } from "../../../api/ConfigurationIncidentRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const IncidentAutoCloserTime = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -30,6 +30,8 @@ const IncidentAutoCloserTime = () => {
 
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchAutoCloseTimes = async () => {
     setIsLoading(true);
@@ -174,6 +176,7 @@ const IncidentAutoCloserTime = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchAutoCloseTimes();
+        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update auto close time");
@@ -276,18 +279,26 @@ const IncidentAutoCloserTime = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                   type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
                   className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  onConfirm={handleEditAutoCloseTime}
+                  message="Are you sure you want to update this auto close time?"
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>

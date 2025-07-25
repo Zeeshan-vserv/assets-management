@@ -1,4 +1,3 @@
-
 // import React, { useEffect, useMemo, useState } from "react";
 // import {
 //   MaterialReactTable,
@@ -345,6 +344,7 @@ import {
   updateAutoCloseTime,
   deleteAutoCloseTime, // <-- Correct function
 } from "../../../api/globalServiceRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const AutoClosedTime = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -359,6 +359,8 @@ const AutoClosedTime = () => {
 
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch all auto close times
   const fetchAutoCloseTimes = async () => {
@@ -520,6 +522,7 @@ const AutoClosedTime = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchAutoCloseTimes();
+        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update auto close time");
@@ -575,17 +578,17 @@ const AutoClosedTime = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  type="submit"
+                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
+                >
+                  Add
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
                   className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
-                >
-                  Add
                 </button>
               </div>
             </form>
@@ -623,18 +626,26 @@ const AutoClosedTime = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
                   className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  onConfirm={handleEditAutoCloseTime}
+                  message="Are you sure you want to update this auto close time?"
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>

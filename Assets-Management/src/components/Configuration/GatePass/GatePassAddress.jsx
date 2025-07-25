@@ -20,6 +20,7 @@ import {
 } from "../../../api/gatePassAddressRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -45,6 +46,7 @@ function GatePassAddress() {
 
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const user = useSelector((state) => state.authReducer?.authData);
 
@@ -168,6 +170,7 @@ function GatePassAddress() {
         fetchAddresses();
         setEditModal(false);
         setEditForm({ _id: "", addressName: "" });
+        setShowConfirm(false);
       } else {
         toast.error(res.data.message || "Failed to update address");
       }
@@ -359,7 +362,7 @@ function GatePassAddress() {
         </Button>
       </Box>
     ),
-      muiTableProps: {
+    muiTableProps: {
       sx: {
         border: "1px solid rgba(81, 81, 81, .5)",
         caption: {
@@ -425,17 +428,17 @@ function GatePassAddress() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Add
+                </button>
+                <button
                   type="button"
                   onClick={() => setAddModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Add
                 </button>
               </div>
             </form>
@@ -466,18 +469,26 @@ function GatePassAddress() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setEditModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  onConfirm={handleEditSubmit}
+                  message="Are you sure you want to update this Get pass address?"
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>

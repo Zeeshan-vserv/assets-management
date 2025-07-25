@@ -13,7 +13,15 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { TextField } from "@mui/material";
-import { getAllDepartment } from "../../../api/DepartmentRequest"; //later chnage it
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
+import {
+  createCondition,
+  deleteCondition,
+  getAllConditions,
+  updateCondition,
+} from "../../../api/ConditionRequest";
+import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -23,6 +31,7 @@ const csvConfig = mkConfig({
 });
 
 function Condition() {
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -35,10 +44,12 @@ function Condition() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteConditionId, setDeleteConditionId] = useState(null);
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const fetchCondition = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllDepartment(); //later chnage it
+      const response = await getAllConditions();
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching condition:", error);
@@ -54,11 +65,11 @@ function Condition() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "departmentId",
+        accessorKey: "conditionId",
         header: "Condition Id",
       },
       {
-        accessorKey: "departmentName",
+        accessorKey: "conditionName",
         header: "Condition Name",
       },
       {
@@ -106,8 +117,19 @@ function Condition() {
 
   const addNewConditionHandler = async (e) => {
     e.preventDefault();
-    // console.log("addNewCondition", addNewCondition);
-    //call api
+    const formData = {
+      userId: user.userId,
+      conditionName: addNewCondition.conditionName,
+    };
+    const response = await createCondition(formData);
+    if (response?.data?.success) {
+      setData((prev) => [...prev, response.data.data]);
+      toast.success("Condition created successfully");
+    } else {
+      console.error("Error creating condition:", response?.data?.message);
+    }
+    setAddNewCondition({ conditionName: "" });
+    fetchCondition();
     setAddConditionModal(false);
   };
 
@@ -116,6 +138,7 @@ function Condition() {
     const conditionToEdit = data?.find((d) => d._id === id);
     if (conditionToEdit) {
       setEditCondition({
+        _id: conditionToEdit._id,
         conditionName: conditionToEdit.conditionName,
       });
       setOpenUpdateModal(true);
@@ -134,9 +157,17 @@ function Condition() {
     e.preventDefault();
     if (!editCondition?._id) return;
     try {
-      // console.log("editCondition", editCondition);
-      //call api
+      const updatedData = {
+        conditionName: editCondition.conditionName,
+      };
+      const response = await updateCondition(editCondition._id, updatedData);
+      if (response?.data?.success) {
+        toast.success("Condition updated successfully");
+        fetchCondition();
+        setShowConfirm(false);
+      }
       setEditCondition(null);
+      setOpenUpdateModal(false);
     } catch (error) {
       console.error("Error updating condition:", error);
     }
@@ -147,11 +178,15 @@ function Condition() {
     setDeleteConditionId(id);
     setDeleteConfirmationModal(true);
   };
+
   const deleteConditionHandler = async (e) => {
     e.preventDefault();
     try {
-      // console.log("deleteConditionId", deleteConditionId);
-      //call api
+      const responseDelete = await deleteCondition(deleteConditionId);
+      if (responseDelete?.data?.success) {
+        toast.success("Condition deleted successfully");
+      }
+      fetchCondition();
     } catch (error) {
       console.error("Error deleting condition:", error);
     }
@@ -383,17 +418,17 @@ function Condition() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setAddConditionModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
                   </button>
                 </div>
               </form>
@@ -426,18 +461,26 @@ function Condition() {
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
                     <button
+                      // type="submit"
+                      type="button"
+                      onClick={() => setShowConfirm(true)}
+                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                    >
+                      Update
+                    </button>
+                    <button
                       type="button"
                       onClick={() => setOpenUpdateModal(false)}
                       className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                     >
                       Cancel
                     </button>
-                    <button
-                      type="submit"
-                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                    >
-                      Update
-                    </button>
+                    <ConfirmUpdateModal
+                      isOpen={showConfirm}
+                      onConfirm={updateConditionHandler}
+                      message="Are you sure you want to update this condition?"
+                      onCancel={() => setShowConfirm(false)}
+                    />
                   </div>
                 </form>
               </div>

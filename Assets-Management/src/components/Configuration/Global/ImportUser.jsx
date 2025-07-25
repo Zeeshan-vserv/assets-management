@@ -3,9 +3,11 @@ import { uploadUsersFromExcel } from "../../../api/AuthRequest.js";
 import { toast } from "react-toastify";
 import { IoCloudUploadOutline } from "react-icons/io5";
 import { IoMdDownload } from "react-icons/io";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal.jsx";
 
 function ImportUser() {
   const [fileData, setFileData] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const uploadFileChangeHandler = (e) => {
     const file = e.target.files[0];
@@ -26,6 +28,7 @@ function ImportUser() {
         toast.success("Users uploaded successfully");
         setFileData(null);
       }
+      setShowConfirm(false);
     } catch (error) {
       console.log(error);
       console.error("User Upload Failed:", error);
@@ -61,7 +64,9 @@ function ImportUser() {
             <div className="flex justify-end gap-4">
               <div className="flex justify-center items-center border-[0.1rem] border-green-500 rounded-md p-1 cursor-pointer">
                 <button
-                  type="submit"
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
                   className="text-green-500 rounded-sm transition outline-none"
                 >
                   <div className="flex justify-center items-center gap-1">
@@ -69,6 +74,12 @@ function ImportUser() {
                     <IoCloudUploadOutline size={22} />
                   </div>
                 </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  message="Are you sure you want to upload users?"
+                  onConfirm={importUserHandler}
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
 
               <div className="flex justify-center items-center gap-1 border-[0.1rem] border-blue-600 rounded-md p-1 cursor-pointer">

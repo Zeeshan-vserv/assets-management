@@ -21,6 +21,7 @@ import {
   deleteSubLocation,
 } from "../../../api/LocationRequest";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -43,6 +44,7 @@ function SubLocation() {
   const [deleteSubLocationInfo, setDeleteSubLocationInfo] = useState(null);
   const [updateSubLocationModal, setUpdateSubLocationModal] = useState(false);
   const [editSubLocation, setEditSubLocation] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchSubLocations = async () => {
     try {
@@ -186,6 +188,7 @@ function SubLocation() {
       setUpdateSubLocationModal(false);
       setEditSubLocation(null);
       fetchSubLocations();
+      setShowConfirm(false);
     } catch (error) {
       toast.error("Failed to update sub location");
     }
@@ -453,7 +456,7 @@ function SubLocation() {
             <h2 className="text-xl font-bold text-gray-800 mb-6">
               Edit Sub Location
             </h2>
-            {console.log(editSubLocation)}
+            {/* {console.log(editSubLocation)} */}
             <form onSubmit={updateSubLocationHandler}>
               <div className="flex items-center gap-2 mb-4">
                 <label className="w-40 text-sm font-medium text-gray-500">
@@ -494,18 +497,26 @@ function SubLocation() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setUpdateSubLocationModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  message="Are you sure you want to update Sub Location?"
+                  onConfirm={updateSubLocationHandler}
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>
@@ -554,17 +565,17 @@ function SubLocation() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Add
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenAddSubLocationModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Add
                 </button>
               </div>
             </form>

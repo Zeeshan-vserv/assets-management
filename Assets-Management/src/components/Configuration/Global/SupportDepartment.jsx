@@ -564,7 +564,13 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton, Autocomplete, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Autocomplete,
+  TextField,
+} from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -581,6 +587,7 @@ import {
 } from "../../../api/SuportDepartmentRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -601,6 +608,7 @@ const SupportDepartment = () => {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteDepartmentId, setDeleteDepartmentId] = useState(null);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchDepartment = async () => {
     try {
@@ -693,6 +701,7 @@ const SupportDepartment = () => {
       setOpenUpdateModal(false);
       toast.success("Support Department Updated successfully");
       setEditDepartment(null);
+      setShowConfirm(false);
     } catch (error) {
       toast.error("Error updating support department");
     }
@@ -940,7 +949,9 @@ const SupportDepartment = () => {
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">SUPPORT DEPARTMENT</h2>
+        <h2 className="text-lg font-semibold mb-6 text-start">
+          SUPPORT DEPARTMENT
+        </h2>
         <MaterialReactTable table={table} />
         {openAddDepartemntModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
@@ -965,17 +976,17 @@ const SupportDepartment = () => {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Submit
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenAddDepartemntModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Submit
                   </button>
                 </div>
               </form>
@@ -1033,18 +1044,26 @@ const SupportDepartment = () => {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    // type="submit"
+                    type="button"
+                    onClick={() => setShowConfirm(true)}
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenUpdateModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
+                  <ConfirmUpdateModal
+                    isOpen={showConfirm}
+                    message="Are you sure you want to update Support Department Name?"
+                    onConfirm={updateNewDepartmentHandler}
+                    onCancel={() => setShowConfirm(false)}
+                  />
                 </div>
               </form>
             </div>

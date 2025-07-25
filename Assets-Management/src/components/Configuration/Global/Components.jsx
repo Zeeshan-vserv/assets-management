@@ -20,6 +20,7 @@ import {
 } from "../../../api/ComponentsRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -38,6 +39,7 @@ function Components() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteComponentsId, setDeleteComponentsId] = useState(null);
   const [newComponent, setNewComponent] = useState({ componentName: "" });
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchUser = async () => {
     try {
@@ -142,6 +144,7 @@ function Components() {
         );
         await fetchUser();
         setOpenModal(false);
+        setShowConfirm(false);
       }
     } catch (error) {
       console.error("Error updating component:", error);
@@ -452,17 +455,24 @@ function Components() {
                 <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                   <button
                     type="button"
+                    onClick={() => setShowConfirm(true)}
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setOpenModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
+                  <ConfirmUpdateModal
+                    isOpen={showConfirm}
+                    message="Are you sure you want to update Component Name?"
+                    onConfirm={updateComponentsHandler}
+                    onCancel={() => setShowConfirm(false)}
+                  />
                 </div>
               </form>
             </div>
@@ -496,17 +506,17 @@ function Components() {
 
                 <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenAddModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
                   </button>
                 </div>
               </form>

@@ -16,7 +16,10 @@ import {
   getAllSupportGroup,
 } from "../../../api/SuportDepartmentRequest";
 import { createServiceRequest } from "../../../api/serviceRequest";
-import { getAllServiceCategory, getAllServiceSubCategory } from "../../../api/globalServiceRequest";
+import {
+  getAllServiceCategory,
+  getAllServiceSubCategory,
+} from "../../../api/globalServiceRequest";
 
 function NewServiceRequest() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -28,6 +31,7 @@ function NewServiceRequest() {
   const [subCategory, setSubCategory] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
   const [assetData, setAssetData] = useState([]);
+  const [userData, setUserData] = useState([]);
   const [supportDepartmentData, setSupportDepartmentData] = useState([]);
   const [supportGroupData, setSupportGroupData] = useState([]);
   const [users, setUsers] = useState([]);
@@ -72,6 +76,24 @@ function NewServiceRequest() {
       technician: "",
     },
   });
+
+    const fetchGetAllUsersData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllUsers();
+      if (response?.data) {
+        setUserData(response?.data);
+      }
+    } catch (error) {
+      console.error("Error fetching service request:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGetAllUsersData();
+  }, []);
 
   const fetchDetails = async () => {
     try {
@@ -128,6 +150,13 @@ function NewServiceRequest() {
         [name]: type === "checkbox" ? checked : value,
       }));
     }
+  };
+
+    const handleAutoChange = (name, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value || "",
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -370,7 +399,7 @@ function NewServiceRequest() {
                   Cost
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   id=""
                   name=""
                   className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -391,7 +420,7 @@ function NewServiceRequest() {
                         {...params}
                         label="Select"
                         variant="standard"
-                        required 
+                        required
                       />
                     )}
                   />
@@ -399,7 +428,7 @@ function NewServiceRequest() {
               </div>
               {approvalRequired === "Yes" && (
                 <>
-                  <div className="flex items-center w-[46%]">
+                  {/* <div className="flex items-center w-[46%]">
                     <label className="w-[28%] text-xs font-semibold text-slate-600">
                       Approval Type<span className="text-red-500">*</span>
                     </label>
@@ -416,8 +445,8 @@ function NewServiceRequest() {
                         )}
                       />
                     </div>
-                  </div>
-                  <div className="flex items-center w-[46%]">
+                  </div> */}
+                  {/* <div className="flex items-center w-[46%]">
                     <label className="w-[28%] text-xs font-semibold text-slate-600">
                       Approver (Level 1)<span className="text-red-500">*</span>
                     </label>
@@ -470,6 +499,96 @@ function NewServiceRequest() {
                         )}
                       />
                     </div>
+                  </div> */}
+
+                  <div className="flex items-center w-[46%]">
+                    <label className="w-[28%] text-xs font-semibold text-slate-600">
+                      Approval (Level-1)
+                    </label>
+                    <Autocomplete
+                      className="w-[65%]"
+                      options={userData}
+                      value={
+                        userData.find(
+                          (user) => user.emailAddress === formData.approver1
+                        ) || null
+                      }
+                      onChange={(e, newValue) =>
+                        handleAutoChange("approver1", newValue?.emailAddress)
+                      }
+                      getOptionLabel={(option) => option?.emailAddress || ""}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="standard"
+                          placeholder="Select Approver Level-1"
+                          inputProps={{
+                            ...params.inputProps,
+                            style: { fontSize: "0.8rem" },
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex items-center w-[46%]">
+                    <label className="w-[28%] text-xs font-semibold text-slate-600">
+                      Approval (Level-2)
+                    </label>
+                    <Autocomplete
+                      className="w-[65%]"
+                      options={userData}
+                      value={
+                        userData.find(
+                          (user) => user.emailAddress === formData.approver2
+                        ) || null
+                      }
+                      onChange={(e, newValue) =>
+                        handleAutoChange("approver2", newValue?.emailAddress)
+                      }
+                      getOptionLabel={(option) => option?.emailAddress || ""}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="standard"
+                          placeholder="Select Approver Level-2"
+                          inputProps={{
+                            ...params.inputProps,
+                            style: { fontSize: "0.8rem" },
+                          }}
+                        />
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex items-center w-[46%]">
+                    <label className="w-[28%] text-xs font-semibold text-slate-600">
+                      Approval (Level-3)
+                    </label>
+                    <Autocomplete
+                      className="w-[65%]"
+                      options={userData}
+                      value={
+                        userData.find(
+                          (user) => user.emailAddress === formData.approver3
+                        ) || null
+                      }
+                      onChange={(e, newValue) =>
+                        handleAutoChange("approver3", newValue?.emailAddress)
+                      }
+                      getOptionLabel={(option) => option?.emailAddress || ""}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="standard"
+                          placeholder="Select Approver Level-3"
+                          inputProps={{
+                            ...params.inputProps,
+                            style: { fontSize: "0.8rem" },
+                          }}
+                        />
+                      )}
+                    />
                   </div>
                 </>
               )}
@@ -778,7 +897,7 @@ function NewServiceRequest() {
                   onChange={(e) => setExcludeSLA(e.target.checked)}
                 />
               </div>
-              {excludeSLA && (
+              {!excludeSLA && (
                 <>
                   <div className="flex items-center w-[46%]">
                     <label className="w-[28%] text-xs font-semibold text-slate-600">
@@ -806,7 +925,7 @@ function NewServiceRequest() {
                     supportDepartmentData.find(
                       (dept) =>
                         dept.supportDepartmentName ===
-                        formData.supportDepartmentName
+                        formData.classificaton.supportDepartmentName
                     ) || null
                   }
                   onChange={(event, newValue) => {
@@ -845,7 +964,7 @@ function NewServiceRequest() {
                   value={
                     supportGroupData.find(
                       (group) =>
-                        group.supportGroupName === formData.supportGroups
+                        group.supportGroupName === formData.classificaton.supportGroupName
                     ) || null
                   }
                   onChange={(event, newValue) => {

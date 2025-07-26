@@ -123,6 +123,8 @@ function NewServiceReqest() {
     e.preventDefault();
     try {
       const formDatas = { ...formData, userId };
+      console.log(formDatas);
+      
       const response = await createServiceRequest(formDatas);
       if (response?.data?.success) {
         toast.success("Service Request created successfully");
@@ -319,6 +321,7 @@ function NewServiceReqest() {
               </div>
               {formData.approval && (
                 <>
+                
                   <div className="flex items-center w-[46%]">
                     <label className="w-[28%] text-xs font-semibold text-slate-600">
                       Approval (Level-1)

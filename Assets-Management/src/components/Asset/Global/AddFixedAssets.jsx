@@ -642,15 +642,15 @@ const AddFixedAssets = () => {
                 getOptionLabel={(option) => option.emailAddress}
                 value={
                   users.find(
-                    (user) => user.emailAddress === formData.assetState.user
+                    (user) => user._id === formData.assetState.user
                   ) || null
                 }
-                onChange={(event, newValue) => {
+                onChange={(event, newValue) => {                  
                   setFormData({
                     ...formData,
                     assetState: {
                       ...formData.assetState,
-                      user: newValue ? newValue.emailAddress : "",
+                      user: newValue ? newValue._id : "",
                     },
                   });
                 }}

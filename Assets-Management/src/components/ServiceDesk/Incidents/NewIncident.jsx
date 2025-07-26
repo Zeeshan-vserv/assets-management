@@ -841,7 +841,7 @@ const NewIncident = () => {
                   supportDepartmentData.find(
                     (dept) =>
                       dept.supportDepartmentName ===
-                      formData.supportDepartmentName
+                      formData.classificaton.supportDepartmentName
                   ) || null
                 }
                 onChange={(event, newValue) => {
@@ -882,7 +882,7 @@ const NewIncident = () => {
                 getOptionLabel={(option) => option.supportGroupName}
                 value={
                   supportGroupData.find(
-                    (group) => group.supportGroupName === formData.supportGroups
+                    (group) => group.supportGroupName === formData.classificaton.supportGroupName
                   ) || null
                 }
                 onChange={(event, newValue) => {

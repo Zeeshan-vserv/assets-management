@@ -125,23 +125,42 @@ export const getAllServiceSla = async (req, res) => {
       const latestStatus = timeline?.at(-1)?.status?.toLowerCase();
       let slaRemainingMinutes;
       if (latestStatus === "resolved") {
-        const resolvedEntry = [...timeline].reverse().find(
-          (t) => t.status?.toLowerCase() === "resolved"
-        );
-        const resolvedTime = resolvedEntry ? new Date(resolvedEntry.changedAt) : null;
+        const resolvedEntry = [...timeline]
+          .reverse()
+          .find((t) => t.status?.toLowerCase() === "resolved");
+        const resolvedTime = resolvedEntry
+          ? new Date(resolvedEntry.changedAt)
+          : null;
         if (resolvedTime) {
-          slaRemainingMinutes = resolvedTime < slaDeadline
-            ? getBusinessMinutesBetween(resolvedTime, slaDeadline, businessHours)
-            : -getBusinessMinutesBetween(slaDeadline, resolvedTime, businessHours);
+          slaRemainingMinutes =
+            resolvedTime < slaDeadline
+              ? getBusinessMinutesBetween(
+                  resolvedTime,
+                  slaDeadline,
+                  businessHours
+                )
+              : -getBusinessMinutesBetween(
+                  slaDeadline,
+                  resolvedTime,
+                  businessHours
+                );
         } else {
           slaRemainingMinutes = 0;
         }
       } else {
         const now = new Date();
         if (now < slaDeadline) {
-          slaRemainingMinutes = getBusinessMinutesBetween(now, slaDeadline, businessHours);
+          slaRemainingMinutes = getBusinessMinutesBetween(
+            now,
+            slaDeadline,
+            businessHours
+          );
         } else {
-          slaRemainingMinutes = -getBusinessMinutesBetween(slaDeadline, now, businessHours);
+          slaRemainingMinutes = -getBusinessMinutesBetween(
+            slaDeadline,
+            now,
+            businessHours
+          );
         }
       }
 
@@ -163,7 +182,12 @@ export const getAllServiceSla = async (req, res) => {
 
     res.json({ success: true, data: results });
   } catch (error) {
-    res.status(500).json({ message: "Error calculating SLA for all services", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error calculating SLA for all services",
+        error: error.message,
+      });
   }
 };
 
@@ -173,12 +197,12 @@ export const getAllServicesTat = async (req, res) => {
 
     const results = services.map((service) => {
       const timeline = service.statusTimeline || [];
-      const assignedEntry = [...timeline].reverse().find(
-        (t) => t.status?.toLowerCase() === "assigned"
-      );
-      const resolvedEntry = [...timeline].reverse().find(
-        (t) => t.status?.toLowerCase() === "resolved"
-      );
+      const assignedEntry = [...timeline]
+        .reverse()
+        .find((t) => t.status?.toLowerCase() === "assigned");
+      const resolvedEntry = [...timeline]
+        .reverse()
+        .find((t) => t.status?.toLowerCase() === "resolved");
       let tatMinutes = null;
       if (assignedEntry && resolvedEntry) {
         const assignedTime = new Date(assignedEntry.changedAt);
@@ -206,7 +230,12 @@ export const getAllServicesTat = async (req, res) => {
 
     res.json({ success: true, data: results });
   } catch (error) {
-    res.status(500).json({ message: "Error calculating TAT for all services", error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "Error calculating TAT for all services",
+        error: error.message,
+      });
   }
 };
 
@@ -402,10 +431,22 @@ export const createServiceRequest = async (req, res) => {
     const user = await AuthModel.findById(userId);
 
     // Parse possible JSON fields
-    let submitter = typeof serviceRequestData.submitter === "string" ? JSON.parse(serviceRequestData.submitter) : serviceRequestData.submitter;
-    let assetDetails = typeof serviceRequestData.assetDetails === "string" ? JSON.parse(serviceRequestData.assetDetails) : serviceRequestData.assetDetails;
-    let locationDetails = typeof serviceRequestData.locationDetails === "string" ? JSON.parse(serviceRequestData.locationDetails) : serviceRequestData.locationDetails;
-    let classificaton = typeof serviceRequestData.classificaton === "string" ? JSON.parse(serviceRequestData.classificaton) : serviceRequestData.classificaton;
+    let submitter =
+      typeof serviceRequestData.submitter === "string"
+        ? JSON.parse(serviceRequestData.submitter)
+        : serviceRequestData.submitter;
+    let assetDetails =
+      typeof serviceRequestData.assetDetails === "string"
+        ? JSON.parse(serviceRequestData.assetDetails)
+        : serviceRequestData.assetDetails;
+    let locationDetails =
+      typeof serviceRequestData.locationDetails === "string"
+        ? JSON.parse(serviceRequestData.locationDetails)
+        : serviceRequestData.locationDetails;
+    let classificaton =
+      typeof serviceRequestData.classificaton === "string"
+        ? JSON.parse(serviceRequestData.classificaton)
+        : serviceRequestData.classificaton;
 
     // Determine status based on technician field
     let status = "New";
@@ -439,7 +480,9 @@ export const createServiceRequest = async (req, res) => {
       userId: submitter?.userId || user?.userId || "",
       userEmail: submitter?.userEmail || user?.emailAddress || "",
       loggedBy: submitter?.loggedBy || user?.employeeName || "",
-      loggedInTime: submitter?.loggedInTime ? getISTDate(new Date(submitter.loggedInTime)) : now,
+      loggedInTime: submitter?.loggedInTime
+        ? getISTDate(new Date(submitter.loggedInTime))
+        : now,
     };
 
     // Fill location defaults
@@ -472,7 +515,12 @@ export const createServiceRequest = async (req, res) => {
       slaTimeline = slaConfig.slaTimeline || [];
     }
 
-    const slaDeadline = calculateSLADeadline(submitter.loggedInTime, resolutionHours, slaTimeline, serviceWindow);
+    const slaDeadline = calculateSLADeadline(
+      submitter.loggedInTime,
+      resolutionHours,
+      slaTimeline,
+      serviceWindow
+    );
 
     // Save Service Request
     const newServiceRequest = new ServiceRequestModel({
@@ -556,18 +604,23 @@ export const updateServiceRequest = async (req, res) => {
     const { status, changedBy, ...otherFields } = req.body;
 
     if (!status) {
-      return res.status(400).json({ message: 'status is required' });
+      return res.status(400).json({ message: "status is required" });
     }
 
     const serviceRequest = await ServiceRequestModel.findById(id);
     if (!serviceRequest) {
-      return res.status(404).json({ success: false, message: 'Service Request Id not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Service Request Id not found" });
     }
 
     // Track changes in other fields
     const fieldChanges = {};
     Object.keys(otherFields).forEach((key) => {
-      if (serviceRequest[key] !== undefined && serviceRequest[key] !== otherFields[key]) {
+      if (
+        serviceRequest[key] !== undefined &&
+        serviceRequest[key] !== otherFields[key]
+      ) {
         fieldChanges[key] = { from: serviceRequest[key], to: otherFields[key] };
         serviceRequest[key] = otherFields[key];
       }
@@ -577,7 +630,7 @@ export const updateServiceRequest = async (req, res) => {
     serviceRequest.statusTimeline.push({
       status,
       changedAt: getISTDate(),
-      changedBy
+      changedBy,
     });
     serviceRequest.status = status;
     let statusChanged = true;
@@ -585,10 +638,17 @@ export const updateServiceRequest = async (req, res) => {
     // ✅ TAT Calculation: If status is "Resolved", calculate TAT from latest "Assigned" to latest "Resolved"
     if (status.toLowerCase() === "resolved") {
       const timeline = serviceRequest.statusTimeline;
-      const assignedEntry = [...timeline].reverse().find(e => e.status?.toLowerCase() === "assigned");
-      const resolvedEntry = [...timeline].reverse().find(e => e.status?.toLowerCase() === "resolved");
+      const assignedEntry = [...timeline]
+        .reverse()
+        .find((e) => e.status?.toLowerCase() === "assigned");
+      const resolvedEntry = [...timeline]
+        .reverse()
+        .find((e) => e.status?.toLowerCase() === "resolved");
       if (assignedEntry && resolvedEntry) {
-        const tat = calculateTAT(assignedEntry.changedAt, resolvedEntry.changedAt);
+        const tat = calculateTAT(
+          assignedEntry.changedAt,
+          resolvedEntry.changedAt
+        );
         serviceRequest.tat = tat;
       } else {
         serviceRequest.tat = "N/A";
@@ -603,21 +663,34 @@ export const updateServiceRequest = async (req, res) => {
       serviceRequest.fieldChangeHistory.push({
         changes: fieldChanges,
         changedAt: getISTDate(),
-        changedBy
+        changedBy,
       });
     }
 
     await serviceRequest.save();
-    res.status(200).json({ success: true, data: serviceRequest, message: 'Service Request updated and lifecycle recorded' });
+    res
+      .status(200)
+      .json({
+        success: true,
+        data: serviceRequest,
+        message: "Service Request updated and lifecycle recorded",
+      });
   } catch (error) {
-    res.status(500).json({ message: 'An error occurred while updating service request', error: error.message });
+    res
+      .status(500)
+      .json({
+        message: "An error occurred while updating service request",
+        error: error.message,
+      });
   }
 };
 
 export const deleteServiceRequest = async (req, res) => {
   try {
     const { id } = req.params;
-    const deletedServiceRequest = await ServiceRequestModel.findByIdAndDelete(id);
+    const deletedServiceRequest = await ServiceRequestModel.findByIdAndDelete(
+      id
+    );
 
     if (!deletedServiceRequest) {
       return res
@@ -630,6 +703,9 @@ export const deleteServiceRequest = async (req, res) => {
   } catch (error) {
     res
       .status(500)
-      .json({ message: "An error occurred while deleting service request", error: error.message });
+      .json({
+        message: "An error occurred while deleting service request",
+        error: error.message,
+      });
   }
 };

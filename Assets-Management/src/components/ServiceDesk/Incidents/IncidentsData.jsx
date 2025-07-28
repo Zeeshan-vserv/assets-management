@@ -185,7 +185,7 @@ const IncidentsData = () => {
       { accessorKey: "subject", header: "Subject" },
       { accessorKey: "category", header: "Category" },
       { accessorKey: "subCategory", header: "Sub Category" },
-      { accessorKey: "submitter.user", header: "Submitter" },
+      { accessorKey: "userId", header: "Submitter" },
       { accessorKey: "assetDetails.asset", header: "Asset Id" },
       { accessorKey: "locationDetails.location", header: "Location" },
       { accessorKey: "locationDetails.subLocation", header: "Sub Location" },

@@ -2,7 +2,7 @@ import express from 'express'
 import multer from "multer";
 import path from "path";
 import authMiddleware from '../middleware/AuthMiddleware.js'
-import { createServiceRequest, deleteServiceRequest, getAllServiceRequests, getAllServiceSla, getAllServicesTat, getServiceRequestById, updateServiceRequest } from '../controllers/serviceRequestController.js';
+import { approveServiceRequest, createServiceRequest, deleteServiceRequest, getAllServiceRequests, getAllServiceSla, getAllServicesTat, getServiceRequestById, getServiceRequestStatusCounts, updateServiceRequest } from '../controllers/serviceRequestController.js';
 
 const router = express.Router()
 
@@ -22,10 +22,12 @@ const upload = multer({ storage });
 router.post('/', authMiddleware, upload.single('attachment'), createServiceRequest);
 router.get("/sla-all", getAllServiceSla);
 router.get("/tat-all", getAllServicesTat);
+router.get('/status-counts', authMiddleware, getServiceRequestStatusCounts);
 router.get('/', authMiddleware, getAllServiceRequests)
 router.get('/:id', authMiddleware, getServiceRequestById)
 router.put('/:id', authMiddleware, updateServiceRequest)
 router.delete('/:id', authMiddleware, deleteServiceRequest)
+router.post('/:id/approve', authMiddleware, approveServiceRequest)
 
 
 export default router

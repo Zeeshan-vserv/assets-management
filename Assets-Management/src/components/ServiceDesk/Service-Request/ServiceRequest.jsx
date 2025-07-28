@@ -469,7 +469,7 @@ function ServiceRequest() {
     {
       id: "12",
       totalCount: "0",
-      description: "Coverte to SR",
+      description: "Coverted to Incident",
     },
     {
       id: "13",

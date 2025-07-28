@@ -752,3 +752,53 @@ async function getBusinessMinutesBetweenWithHoliday(now, end, slaTimeline) {
   }
   return Math.round(minutes);
 }
+
+export const getIncidentStatusCounts = async (req, res) => {
+  try {
+    const statusList = [
+      "New",
+      "Approval Pending",
+      "Provisioning",
+      "Assigned",
+      "In-Progress",
+      "Hold",
+      "Cancelled",
+      "Rejected",
+      "Resolved",
+      "Closed",
+      "Waiting for Update",
+      "Coverte to SR"
+    ];
+
+    // Aggregate to get latest status from statusTimeline
+    const pipeline = [
+      {
+        $addFields: {
+          latestStatus: { $arrayElemAt: ["$statusTimeline.status", -1] }
+        }
+      },
+      {
+        $group: {
+          _id: "$latestStatus",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+
+    const results = await IncidentModel.aggregate(pipeline);
+
+    // Map results to statusList
+    const counts = {};
+    statusList.forEach(status => {
+      const found = results.find(r => r._id === status);
+      counts[status] = found ? found.count : 0;
+    });
+
+    // Total count
+    counts["Total"] = await IncidentModel.countDocuments();
+
+    res.json({ success: true, data: counts });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching status counts", error: error.message });
+  }
+};

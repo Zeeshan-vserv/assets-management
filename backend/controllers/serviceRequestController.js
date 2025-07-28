@@ -722,21 +722,22 @@ export const deleteServiceRequest = async (req, res) => {
 
 export const approveServiceRequest = async (req, res) => {
   try {
-    const { id } = req.params; // serviceRequestId
-    const { approver, action, remarks } = req.body; // action: "Approved" or "Rejected"
+    const { id } = req.params; // ServiceRequest ID
+    const { action, remarks } = req.body; // action: "Approved" or "Rejected"
+    const approver = req.user.emailAddress;
 
     const serviceRequest = await ServiceRequestModel.findById(id);
     if (!serviceRequest) {
       return res.status(404).json({ message: "Service Request not found" });
     }
 
-    // Find current pending approver
+    // Find current pending approval
     const currentApproval = serviceRequest.approvalStatus.find(a => a.status === "Pending");
     if (!currentApproval || currentApproval.approver !== approver) {
       return res.status(400).json({ message: "Not authorized or already acted" });
     }
 
-    // Update current approver status
+    // Update status
     currentApproval.status = action;
     currentApproval.actionAt = new Date();
     currentApproval.remarks = remarks;
@@ -814,5 +815,30 @@ export const getServiceRequestStatusCounts = async (req, res) => {
     res.json({ success: true, data: counts });
   } catch (error) {
     res.status(500).json({ message: "Error fetching status counts", error: error.message });
+  }
+};
+
+export const getMyPendingApprovals = async (req, res) => {
+  try {
+    const myEmail = req.user.emailAddress;
+
+    const requests = await ServiceRequestModel.aggregate([
+      {
+        $addFields: {
+          lastApproval: { $arrayElemAt: ["$approvalStatus", -1] }
+        }
+      },
+      {
+        $match: {
+          "lastApproval": { $ne: null },
+          "lastApproval.approver": myEmail,
+          "lastApproval.status": "Pending"
+        }
+      }
+    ]);
+
+    res.json({ success: true, data: requests });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching my pending approvals", error: error.message });
   }
 };

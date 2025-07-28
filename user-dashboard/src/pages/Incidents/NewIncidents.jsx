@@ -11,6 +11,7 @@ import { getAllAssets } from "../../api/AssetsRequest";
 import { createIncident } from "../../api/IncidentRequest";
 import { toast } from "react-toastify";
 import { getAllUsers } from "../../api/UserAuth";
+import ConfirmModal from "../../pages/ConfirmModal";
 
 function NewIncidents() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -21,6 +22,7 @@ function NewIncidents() {
   const [userData, setUserData] = useState({});
   const [subCategory, setSubCategory] = useState([]);
   const [assetData, setAssetData] = useState([]);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const [formData, setFormData] = useState({
     subject: "",
@@ -70,8 +72,8 @@ function NewIncidents() {
       const responseSubCategory = await getAllSubCategory();
       setSubCategory(responseSubCategory?.data?.data || []);
 
-         const responseReportingManager = await getAllUsers();
-            setUsers(responseReportingManager?.data || []);
+      const responseReportingManager = await getAllUsers();
+      setUsers(responseReportingManager?.data || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
@@ -123,7 +125,6 @@ function NewIncidents() {
     }
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -161,7 +162,6 @@ function NewIncidents() {
         };
       }
       const form = new FormData();
-
 
       // Append all fields to form data
       form.append("userId", user?.userId);
@@ -227,6 +227,7 @@ function NewIncidents() {
           technician: "",
         },
       });
+      setShowConfirm(false);
     } catch (err) {
       console.error(err);
       toast.error("Failed to add Incident");
@@ -252,7 +253,9 @@ function NewIncidents() {
               </div>
               <div className="my-2 flex gap-2">
                 <button
-                  type="submit"
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white cursor-pointer"
                 >
                   Submit
@@ -269,6 +272,12 @@ function NewIncidents() {
                     Cancel
                   </button>
                 </NavLink>
+                <ConfirmModal
+                  isOpen={showConfirm}
+                  message="Are you sure you want to create this incident?"
+                  onConfirm={handleSubmit}
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </div>
             <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-3">
@@ -463,7 +472,7 @@ function NewIncidents() {
                             user.employeeName === formData.submitter.user
                         ) || null
                       }
-                      onChange={(event, newValue) => {                                                
+                      onChange={(event, newValue) => {
                         setFormData({
                           ...formData,
                           submitter: {

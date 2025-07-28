@@ -3,7 +3,7 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Autocomplete,Box, Button, IconButton } from "@mui/material";
+import { Autocomplete, Box, Button, IconButton } from "@mui/material";
 import { AiOutlineFileExcel } from "react-icons/ai";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
@@ -18,6 +18,7 @@ import { IoMdCheckmark } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { getAllIncident } from "../../../api/IncidentRequest";
 import { getAllServiceRequests } from "../../../api/serviceRequest";
+import { useSelector } from "react-redux";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -25,15 +26,18 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true,
   filename: "Assets-Management-Department.csv",
 });
+const ticketOptions = ["All Tickets", "My Tickets"];
 
 function ServiceRequest() {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [changeStatus, setChangeStatus] = useState(false);
   const [seletecetdRowId, setSelectedRowId] = useState(null);
   const [selectDropDownValue, setSelectDropDownValue] = useState("");
+  const [ticketType, setTicketType] = useState(ticketOptions[0]);
 
   const fetchIncident = async () => {
     try {
@@ -52,6 +56,15 @@ function ServiceRequest() {
   }, []);
 
   // console.log("data", data);
+  //
+  const filteredData = useMemo(() => {
+    if (ticketType === "All Tickets") {
+      return data;
+    } else if (ticketType === "My Tickets") {
+      return data.filter((item) => item.submitter?.userId === user?.userId);
+    }
+    return data;
+  }, [data, ticketType, user?.userId]);
 
   //status
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
@@ -288,6 +301,44 @@ function ServiceRequest() {
           >
             New
           </Button>
+          <Autocomplete
+            className="w-[15%]"
+            sx={{
+              ml: 2,
+              mt: 1,
+              mb: 1,
+              "& .MuiInputBase-root": {
+                borderRadius: "0.35rem",
+                backgroundColor: "#f9fafb",
+                fontSize: "0.85rem",
+                border: "1px solid #e2e8f0",
+                transition: "all 0.3s ease",
+              },
+              "& .MuiInputBase-root:hover": {
+                borderColor: "#94a3b8",
+              },
+            }}
+            options={ticketOptions}
+            value={ticketType}
+            onChange={(_, newValue) =>
+              setTicketType(newValue || ticketOptions[0])
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                placeholder="Select"
+                InputProps={{
+                  ...params.InputProps,
+                  disableUnderline: true,
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  style: { fontSize: "0.85rem", padding: "8px" },
+                }}
+              />
+            )}
+          />
           <Button
             variant="contained"
             size="small"

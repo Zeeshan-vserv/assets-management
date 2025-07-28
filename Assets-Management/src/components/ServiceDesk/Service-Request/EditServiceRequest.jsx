@@ -256,7 +256,7 @@ function EditServiceRequest() {
         <h2 className="text-slate-700 font-semibold">NEW REQUEST</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
           <div className="w-full p-8 bg-white rounded-md shadow-md">
-            <div className="flex gap-3 justify-end">
+            <div className="flex gap-2 justify-end">
               <button
                 type="submit"
                 className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"

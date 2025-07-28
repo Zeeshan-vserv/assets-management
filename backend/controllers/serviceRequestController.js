@@ -781,7 +781,7 @@ export const getServiceRequestStatusCounts = async (req, res) => {
       "Resolved",
       "Closed",
       "Waiting for Update",
-      "Coverte to SR"
+      "Coverte to Incident"
     ];
 
     // Aggregate to get latest status from statusTimeline

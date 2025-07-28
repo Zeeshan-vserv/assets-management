@@ -777,13 +777,18 @@
 
 // export default SoftwareName;
 
-
 import React, { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Autocomplete, Box, Button, IconButton, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  IconButton,
+  TextField,
+} from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -801,6 +806,7 @@ import {
   updateSoftware,
 } from "../../../api/SoftwareCategoryRequest";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -827,6 +833,8 @@ function SoftwareName() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteSoftwareNameId, setDeleteSoftwareNameId] = useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch all software names
   const fetchSoftwareName = async () => {
@@ -992,6 +1000,7 @@ function SoftwareName() {
       if (updateSoftwareResponse?.data?.success) {
         toast.success("Software updated successfully");
         fetchSoftwareName();
+        setShowConfirm(true);
       }
       setEditSoftwareName(null);
       setOpenUpdateModal(false);
@@ -1067,7 +1076,7 @@ function SoftwareName() {
         </Button>
       </Box>
     ),
-      muiTableProps: {
+    muiTableProps: {
       sx: {
         border: "1px solid rgba(81, 81, 81, .5)",
         caption: {
@@ -1180,9 +1189,15 @@ function SoftwareName() {
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
-                    options={publishers.map((publisher) => publisher.publisherName)}
+                    options={publishers.map(
+                      (publisher) => publisher.publisherName
+                    )}
                     renderInput={(params) => (
-                      <TextField {...params} label="Select" variant="standard" />
+                      <TextField
+                        {...params}
+                        label="Select"
+                        variant="standard"
+                      />
                     )}
                     value={addNewSoftwareName.publisher || null}
                     onChange={(event, value) =>
@@ -1203,7 +1218,11 @@ function SoftwareName() {
                       (category) => category.softwareCategoryName
                     )}
                     renderInput={(params) => (
-                      <TextField {...params} label="Select" variant="standard" />
+                      <TextField
+                        {...params}
+                        label="Select"
+                        variant="standard"
+                      />
                     )}
                     value={addNewSoftwareName.softwareCategory || null}
                     onChange={(event, value) =>
@@ -1216,17 +1235,17 @@ function SoftwareName() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setAddSoftwareNameModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
                   </button>
                 </div>
               </form>
@@ -1261,9 +1280,16 @@ function SoftwareName() {
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
-                    options={publishers.map((publisher) => publisher.publisherName)}
+                    options={publishers.map(
+                      (publisher) => publisher.publisherName
+                    )}
                     renderInput={(params) => (
-                      <TextField {...params} label="Select" variant="standard" required />
+                      <TextField
+                        {...params}
+                        label="Select"
+                        variant="standard"
+                        required
+                      />
                     )}
                     value={editSoftwareName?.publisher || null}
                     onChange={(event, value) =>
@@ -1284,7 +1310,12 @@ function SoftwareName() {
                       (category) => category.softwareCategoryName
                     )}
                     renderInput={(params) => (
-                      <TextField {...params} label="Select" variant="standard" required />
+                      <TextField
+                        {...params}
+                        label="Select"
+                        variant="standard"
+                        required
+                      />
                     )}
                     value={editSoftwareName?.softwareCategory || null}
                     onChange={(event, value) =>
@@ -1297,18 +1328,26 @@ function SoftwareName() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    // type="submit"
+                    type="button"
+                    onClick={() => setShowConfirm(true)}
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenUpdateModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
+                  <ConfirmUpdateModal
+                    isOpen={showConfirm}
+                    onConfirm={updateSoftwareNameHandler}
+                    message="Are you sure you want to update this software?"
+                    onCancel={() => setShowConfirm(false)}
+                  />
                 </div>
               </form>
             </div>

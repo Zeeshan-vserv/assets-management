@@ -356,6 +356,7 @@ import {
   getAllPendingReasons,
   updatePendingReason,
 } from "../../../api/ConfigurationIncidentRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const PendingReason = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -373,6 +374,8 @@ const PendingReason = () => {
   // Delete Modal State
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch pending reasons
   const fetchPendingReasons = async () => {
@@ -527,6 +530,7 @@ const PendingReason = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchPendingReasons();
+        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update pending reason");
@@ -582,17 +586,17 @@ const PendingReason = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Add
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Add
                 </button>
               </div>
             </form>
@@ -630,18 +634,26 @@ const PendingReason = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  onConfirm={handleEditCategory}
+                  message="Are you sure you want to update this pending reason?"
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>

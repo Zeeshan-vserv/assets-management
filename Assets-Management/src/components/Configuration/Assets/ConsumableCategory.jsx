@@ -21,6 +21,7 @@ import {
 } from "../../../api/ConsumableRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -46,6 +47,8 @@ function ConsumableCategory() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteConsumableCategoryId, setDeleteConsumableCategoryId] =
     useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchConsumableCategory = async () => {
     try {
@@ -170,6 +173,7 @@ function ConsumableCategory() {
         fetchConsumableCategory();
         setOpenUpdateModal(false);
         setEditConsumableCategory(null);
+        setShowConfirm(false);
       } else {
         toast.error(res.data.message || "Failed to update category");
       }
@@ -429,17 +433,17 @@ function ConsumableCategory() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setAddConsumableCategoryModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
                   </button>
                 </div>
               </form>
@@ -475,18 +479,26 @@ function ConsumableCategory() {
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
                     <button
+                      // type="submit"
+                      type="button"
+                      onClick={() => setShowConfirm(true)}
+                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                    >
+                      Update
+                    </button>
+                    <button
                       type="button"
                       onClick={() => setOpenUpdateModal(false)}
                       className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                     >
                       Cancel
                     </button>
-                    <button
-                      type="submit"
-                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                    >
-                      Update
-                    </button>
+                    <ConfirmUpdateModal
+                      isOpen={showConfirm}
+                      onConfirm={updateConsumableCategoryHandler}
+                      message="Are you sure you want to update this consumable category?"
+                      onCancel={() => setShowConfirm(false)}
+                    />
                   </div>
                 </form>
               </div>

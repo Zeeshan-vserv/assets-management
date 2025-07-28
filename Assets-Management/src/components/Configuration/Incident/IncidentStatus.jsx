@@ -498,6 +498,7 @@ import {
   getAllIncidentStatus,
   updateIncidentStatus,
 } from "../../../api/IncidentStatusRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const IncidentStatus = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -520,6 +521,7 @@ const IncidentStatus = () => {
   // Delete Modal State
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch all incident statuses
   const fetchStatuses = async () => {
@@ -696,6 +698,7 @@ const IncidentStatus = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchStatuses();
+        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update incident status");
@@ -829,17 +832,17 @@ const IncidentStatus = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Add
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Add
                 </button>
               </div>
             </form>
@@ -934,18 +937,26 @@ const IncidentStatus = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  onConfirm={handleEditCategory}
+                  message="Are you sure you want to update this incident status?"
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>

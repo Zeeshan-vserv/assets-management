@@ -21,6 +21,7 @@ import {
 } from "../../../api/DepartmentRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -42,6 +43,7 @@ function Department() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteDepartmentId, setDeleteDepartmentId] = useState(null);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchDepartment = async () => {
     try {
@@ -140,6 +142,7 @@ function Department() {
       setOpenUpdateModal(false);
       toast.success("Department Updated successfully");
       setEditDepartment(null);
+      setShowConfirm(false);
     } catch (error) {
       console.error("Error updating department:", error);
     }
@@ -439,17 +442,17 @@ function Department() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Submit
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenAddDepartemntModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Submit
                   </button>
                 </div>
               </form>
@@ -535,17 +538,25 @@ function Department() {
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="button"
+                    // onClick={() => setOpenModal(false)}
+                    onClick={() => setShowConfirm(true)}
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setOpenUpdateModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
+                  <ConfirmUpdateModal
+                    isOpen={showConfirm}
+                    message="Are you sure you want to update Department?"
+                    onConfirm={updateNewDepartmentHandler}
+                    onCancel={() => setShowConfirm(false)}
+                  />
                 </div>
               </form>
             </div>

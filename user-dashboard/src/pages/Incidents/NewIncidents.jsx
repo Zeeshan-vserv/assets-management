@@ -102,8 +102,6 @@ function NewIncidents() {
     fetchUser();
   }, []);
 
-  // console.log(userData._id);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -124,6 +122,7 @@ function NewIncidents() {
       }));
     }
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

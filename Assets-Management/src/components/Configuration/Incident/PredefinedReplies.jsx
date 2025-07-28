@@ -21,6 +21,7 @@ import {
   getAllPredefinedResponses,
   updatePredefinedResponse,
 } from "../../../api/ConfigurationIncidentRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const PredefinedReplies = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -41,6 +42,8 @@ const PredefinedReplies = () => {
   // Delete Modal State
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch predefined replies
   const fetchReplies = async () => {
@@ -199,6 +202,7 @@ const PredefinedReplies = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchReplies();
+        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update predefined reply");
@@ -281,17 +285,17 @@ const PredefinedReplies = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Add
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Add
                 </button>
               </div>
             </form>
@@ -353,18 +357,26 @@ const PredefinedReplies = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  onConfirm={handleEditCategory}
+                  message="Are you sure you want to update this predefined reply?"
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>

@@ -3,7 +3,13 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton, Autocomplete, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Autocomplete,
+  TextField,
+} from "@mui/material";
 import { AiOutlineFileExcel, AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
@@ -15,6 +21,7 @@ import {
   getAllIncident,
   getAllIncidentsSla,
   getAllIncidentsTat,
+  getIncidentStatusCounts,
   updateIncident,
 } from "../../../api/IncidentRequest";
 import {
@@ -31,11 +38,13 @@ const csvConfig = mkConfig({
   filename: "Assets-Management-Department.csv",
 });
 
+const ticketOptions = ["All Tickets", "My Tickets"];
 const IncidentsData = () => {
   // Redux userId
   const currentUserId = useSelector(
     (state) => state.authReducer.authData?.userId
   );
+  const user = useSelector((state) => state.authReducer.authData);
 
   // State
   const [data, setData] = useState([]);
@@ -45,7 +54,8 @@ const IncidentsData = () => {
   const [assignedValue, setAssignedValue] = useState("");
   const [reopenValue, setReOpenValue] = useState("");
   const [inProgressValue, setInProgressValue] = useState("");
-  const [selectedSupportDepartment, setSelectedSupportDepartment] = useState(null);
+  const [selectedSupportDepartment, setSelectedSupportDepartment] =
+    useState(null);
   const [selectedSupportGroup, setSelectedSupportGroup] = useState(null);
   const [selectedTechnician, setSelectedTechnician] = useState(null);
   const [supportDepartment, setSupportDepartment] = useState([]);
@@ -53,20 +63,56 @@ const IncidentsData = () => {
   const [technician, setTechnician] = useState([]);
   const [allSla, setAllSla] = useState([]);
   const [allTat, setAllTat] = useState([]);
+  const [cardData, setCardData] = useState([]);
+  const [ticketType, setTicketType] = useState(ticketOptions[0]);
 
   // Fetch incidents
-  const fetchDepartment = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await getAllIncident();
-      setData(response?.data?.data || []);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // const fetchDepartment = useCallback(async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await getAllIncident();
+  //     setData(response?.data?.data || []);
+  //     const countResponse = await getIncidentStatusCounts();
+  //     // console.log("Status Counts:", countResponse?.data?.data);
+  //     setCardData(countResponse?.data?.data);
+      
+  //   } catch (error) {
+  //     console.error("Error fetching departments:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, []);
 
+
+  const fetchDepartment = useCallback(async () => {
+  setIsLoading(true);
+  try {
+    const response = await getAllIncident();
+    setData(response?.data?.data || []);
+    const countResponse = await getIncidentStatusCounts();
+    // Convert object to array if needed
+    let counts = countResponse?.data?.data;
+    if (counts && !Array.isArray(counts)) {
+      counts = [
+        { id: "1", count: counts["New"] || 0, description: "New" },
+        { id: "2", count: counts["Assigned"] || 0, description: "Assigned" },
+        { id: "3", count: counts["In-Progress"] || 0, description: "In-Progress" },
+        { id: "4", count: counts["Pause"] || 0, description: "Pause" },
+        { id: "5", count: counts["Resolved"] || 0, description: "Resolved" },
+        { id: "6", count: counts["Cancelled"] || counts["cancel"] || 0, description: "Cancelled" },
+        { id: "7", count: counts["Reopened"] || counts["reopen"] || 0, description: "Reopened" },
+        { id: "8", count: counts["Closed"] || 0, description: "Closed" },
+        { id: "9", count: counts["Converted to SR"] || 0, description: "Converted to SR" },
+        { id: "11", count: response?.data?.data?.length || 0, description: "Total" },
+      ];
+    }
+    setCardData(counts || []);
+  } catch (error) {
+    console.error("Error fetching departments:", error);
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
   // Fetch dropdowns
   const fetchDropdownData = useCallback(async () => {
     try {
@@ -81,7 +127,7 @@ const IncidentsData = () => {
     } catch (error) {
       console.error("Error fetching dropdown data:", error);
     }
-  }, []);  
+  }, []);
 
   // Fetch SLA/TAT
   const fetchSlaTat = useCallback(async () => {
@@ -98,9 +144,15 @@ const IncidentsData = () => {
   }, []);
 
   // Effects
-  useEffect(() => { fetchDepartment(); }, [fetchDepartment]);
-  useEffect(() => { fetchDropdownData(); }, [fetchDropdownData]);
-  useEffect(() => { fetchSlaTat(); }, [fetchSlaTat]);
+  useEffect(() => {
+    fetchDepartment();
+  }, [fetchDepartment]);
+  useEffect(() => {
+    fetchDropdownData();
+  }, [fetchDropdownData]);
+  useEffect(() => {
+    fetchSlaTat();
+  }, [fetchSlaTat]);
 
   // Update support group when department changes
   useEffect(() => {
@@ -128,7 +180,8 @@ const IncidentsData = () => {
         status: "Assigned",
         changedBy: currentUserId,
         classificaton: {
-          supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+          supportDepartmentName:
+            selectedSupportDepartment?.supportDepartmentName || "",
           supportGroupName: selectedSupportGroup?.supportGroupName || "",
           technician: selectedTechnician?.employeeName || "",
         },
@@ -141,7 +194,8 @@ const IncidentsData = () => {
         status: "Assigned",
         changedBy: currentUserId,
         classificaton: {
-          supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+          supportDepartmentName:
+            selectedSupportDepartment?.supportDepartmentName || "",
           supportGroupName: selectedSupportGroup?.supportGroupName || "",
           technician: selectedTechnician?.employeeName || "",
         },
@@ -157,7 +211,10 @@ const IncidentsData = () => {
         changedBy: currentUserId,
       };
     } else {
-      updateData = { status: assignedValue || inProgressValue || reopenValue || "", changedBy: currentUserId };
+      updateData = {
+        status: assignedValue || inProgressValue || reopenValue || "",
+        changedBy: currentUserId,
+      };
     }
 
     try {
@@ -169,6 +226,17 @@ const IncidentsData = () => {
     }
   };
 
+  // Filter data based on ticketType
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    if (ticketType === "All Tickets") {
+      return data;
+    } else if (ticketType === "My Tickets") {
+      return data.filter((item) => item.submitter?.userId === user?.userId);
+    }
+    return data;
+  }, [data, ticketType, user?.userId]);
+
   // Table columns
   const columns = useMemo(
     () => [
@@ -178,7 +246,8 @@ const IncidentsData = () => {
         accessorKey: "statusTimeline",
         Cell: ({ row }) => {
           const timeline = row.original.statusTimeline;
-          if (!Array.isArray(timeline) || timeline.length === 0) return "No Status";
+          if (!Array.isArray(timeline) || timeline.length === 0)
+            return "No Status";
           return timeline[timeline.length - 1]?.status || "No Status";
         },
       },
@@ -194,7 +263,9 @@ const IncidentsData = () => {
         header: "Logged Time",
         Cell: ({ cell }) =>
           cell.getValue()
-            ? new Date(cell.getValue()).toLocaleString("en-IN", { timeZone: "UTC" })
+            ? new Date(cell.getValue()).toLocaleString("en-IN", {
+                timeZone: "UTC",
+              })
             : "",
       },
       { accessorKey: "classificaton.severityLevel", header: "Severity" },
@@ -231,8 +302,14 @@ const IncidentsData = () => {
           );
         },
       },
-      { accessorKey: "classificaton.supportDepartmentName", header: "Support Department" },
-      { accessorKey: "classificaton.supportGroupName", header: "Support Group" },
+      {
+        accessorKey: "classificaton.supportDepartmentName",
+        header: "Support Department",
+      },
+      {
+        accessorKey: "classificaton.supportGroupName",
+        header: "Support Group",
+      },
       { accessorKey: "feedback", header: "Feedback Available" },
       {
         id: "edit",
@@ -317,7 +394,7 @@ const IncidentsData = () => {
 
   // Table instance
   const table = useMaterialReactTable({
-    data,
+    data: filteredData,
     columns,
     getRowId: (row) => row?._id?.toString(),
     enableRowSelection: true,
@@ -360,12 +437,11 @@ const IncidentsData = () => {
               borderColor: "#94a3b8",
             },
           }}
-          options={[
-            "My Tickets",
-            "Group Tickets",
-            "Department Tickets",
-            "All Tickets",
-          ]}
+          options={ticketOptions}
+          value={ticketType}
+          onChange={(_, newValue) =>
+            setTicketType(newValue || ticketOptions[0])
+          }
           renderInput={(params) => (
             <TextField
               {...params}
@@ -499,29 +575,46 @@ const IncidentsData = () => {
   });
 
   // Compute counts for each status from data
-const statusCounts = data.reduce((acc, incident) => {
-  const timeline = incident.statusTimeline;
-  let latestStatus = Array.isArray(timeline) && timeline.length > 0
-    ? timeline[timeline.length - 1].status
-    : "No Status";
-  // Normalize status for matching
-  latestStatus = latestStatus.trim().toLowerCase().replace(/[-_]/g, " ");
-  acc[latestStatus] = (acc[latestStatus] || 0) + 1;
-  return acc;
-}, {});
+  const statusCounts = data.reduce((acc, incident) => {
+    const timeline = incident.statusTimeline;
+    let latestStatus =
+      Array.isArray(timeline) && timeline.length > 0
+        ? timeline[timeline.length - 1].status
+        : "No Status";
+    // Normalize status for matching
+    latestStatus = latestStatus.trim().toLowerCase().replace(/[-_]/g, " ");
+    acc[latestStatus] = (acc[latestStatus] || 0) + 1;
+    return acc;
+  }, {});
 
-const cardData = [
-  { id: "1", count: statusCounts["new"] || 0, description: "New" },
-  { id: "2", count: statusCounts["assigned"] || 0, description: "Assigned" },
-  { id: "3", count: statusCounts["in progress"] || 0, description: "In-Progress" },
-  { id: "4", count: statusCounts["pause"] || 0, description: "Pause" },
-  { id: "5", count: statusCounts["resolved"] || 0, description: "Resolved" },
-  { id: "6", count: statusCounts["cancelled"] || statusCounts["cancel"] || 0, description: "Cancelled" },
-  { id: "7", count: statusCounts["reopened"] || statusCounts["reopen"] || 0, description: "Reopened" },
-  { id: "8", count: statusCounts["closed"] || 0, description: "Closed" },
-  { id: "9", count: statusCounts["converted to sr"] || 0, description: "Converted to SR" },
-  { id: "11", count: data.length, description: "Total" },
-];
+  // const cardData = [
+  //   { id: "1", count: statusCounts["new"] || 0, description: "New" },
+  //   { id: "2", count: statusCounts["assigned"] || 0, description: "Assigned" },
+  //   {
+  //     id: "3",
+  //     count: statusCounts["in progress"] || 0,
+  //     description: "In-Progress",
+  //   },
+  //   { id: "4", count: statusCounts["pause"] || 0, description: "Pause" },
+  //   { id: "5", count: statusCounts["resolved"] || 0, description: "Resolved" },
+  //   {
+  //     id: "6",
+  //     count: statusCounts["cancelled"] || statusCounts["cancel"] || 0,
+  //     description: "Cancelled",
+  //   },
+  //   {
+  //     id: "7",
+  //     count: statusCounts["reopened"] || statusCounts["reopen"] || 0,
+  //     description: "Reopened",
+  //   },
+  //   { id: "8", count: statusCounts["closed"] || 0, description: "Closed" },
+  //   {
+  //     id: "9",
+  //     count: statusCounts["converted to sr"] || 0,
+  //     description: "Converted to SR",
+  //   },
+  //   { id: "11", count: data.length, description: "Total" },
+  // ];
 
   // Render
   return (
@@ -529,7 +622,10 @@ const cardData = [
       <h2 className="text-lg font-semibold mb-6 text-start">INCIDENT DATA</h2>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
         {cardData.map((item) => (
-          <div key={item.id} className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition">
+          <div
+            key={item.id}
+            className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition"
+          >
             <h2 className="font-semibold text-xl text-blue-600 mb-1">
               {item.count}
             </h2>

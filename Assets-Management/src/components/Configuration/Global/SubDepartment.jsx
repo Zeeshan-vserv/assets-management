@@ -23,6 +23,7 @@ import {
 } from "../../../api/DepartmentRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -46,6 +47,7 @@ function SubDepartment() {
   const [deleteSubDepartmentId, setDeleteSubDepartmentId] = useState(null);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [editDepartment, setEditDepartment] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchDepartmentAndSubDepartemntData = async () => {
     try {
@@ -152,14 +154,14 @@ function SubDepartment() {
       // departmentName: addNewSubDepartment.departmentName,
       // subdepartments: [
       //   {
-          subdepartmentName: addNewSubDepartment.subdepartmentName,
+      subdepartmentName: addNewSubDepartment.subdepartmentName,
       //   },
       // ],
     };
 
     // console.log(selectedDepartment._id,formData);
-    
-    const response = await addSubDepartment(selectedDepartment._id,formData);
+
+    const response = await addSubDepartment(selectedDepartment._id, formData);
     if (response?.data?.success) {
       toast.success("Sub Department Added successfully");
       await fetchDepartmentAndSubDepartemntData();
@@ -212,13 +214,13 @@ function SubDepartment() {
 
   //Update
 
-const UpdateSubDepartmentChangeHandler = (e) => {
-  const { name, value } = e.target;
-  setEditDepartment((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
+  const UpdateSubDepartmentChangeHandler = (e) => {
+    const { name, value } = e.target;
+    setEditDepartment((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
 
   const handleUpdateSubDepartment = (subDepartment) => {
     setEditDepartment({
@@ -235,16 +237,17 @@ const UpdateSubDepartmentChangeHandler = (e) => {
     if (!editDepartment?._id) return;
     try {
       const formData = {
-            subdepartmentName: editDepartment.subdepartmentName,
+        subdepartmentName: editDepartment.subdepartmentName,
       };
       // console.log(editDepartment._id,formData);
-      
-      const response = await updateSubDepartment(editDepartment._id,formData);
+
+      const response = await updateSubDepartment(editDepartment._id, formData);
       if (response?.data?.success) {
         toast.success("Sub Department Updated successfully");
         await fetchDepartmentAndSubDepartemntData();
         setOpenUpdateModal(false);
         setEditDepartment(null);
+        setShowConfirm(false);
       } else {
         throw new Error(
           response?.data?.message || "Failed to update sub department"
@@ -509,17 +512,17 @@ const UpdateSubDepartmentChangeHandler = (e) => {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Submit
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenAddSubDepartemntModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Submit
                   </button>
                 </div>
               </form>
@@ -598,17 +601,25 @@ const UpdateSubDepartmentChangeHandler = (e) => {
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="button"
+                    onClick={() => setShowConfirm(true)}
+                    // onClick={() => setOpenUpdateModal(false)}
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => setOpenUpdateModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
+                  <ConfirmUpdateModal
+                    isOpen={showConfirm}
+                    message="Are you sure you want to update Sub Department?"
+                    onConfirm={updateSubDepartmentHandler}
+                    onCancel={() => setShowConfirm(false)}
+                  />
                 </div>
               </form>
             </div>

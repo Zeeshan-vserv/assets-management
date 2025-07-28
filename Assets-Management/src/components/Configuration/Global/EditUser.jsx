@@ -17,40 +17,41 @@ import {
   getAllSubDepartment,
 } from "../../../api/DepartmentRequest";
 import { Autocomplete, TextField } from "@mui/material";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 const EditUser = () => {
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
 
   const [formData, setFormData] = useState({
-           employeeName: "",
-        employeeCode: "",
-        emailAddress: "",
-        mobileNumber: "",
-        designation: "",
-        location: "",
-        subLocation: "",
-        department: "",
-        subDepartment: "",
-        reportingManager: "",
-        departmentHead: "",
-        businessHead: "",
-        isVip: false,
-        userRole: "",
-        supportDepartmentName: "",
-        supportGroups: "",
-        password: "",
-        confirmPassword: "",
-        users: { isView: false, isEdit: false, isDelete: false },
-        components: { isView: false, isEdit: false, isDelete: false },
-        departments: { isView: false, isEdit: false, isDelete: false },
-        subDepartments: { isView: false, isEdit: false, isDelete: false },
-        locations: { isView: false, isEdit: false, isDelete: false },
-        subLocations: { isView: false, isEdit: false, isDelete: false },
-        assets: { isView: false },
-        tickets: { isView: false },
-        showUsers: { isView: false },
-        summary: { isView: false },
-        importAsset: { isView: false },
+    employeeName: "",
+    employeeCode: "",
+    emailAddress: "",
+    mobileNumber: "",
+    designation: "",
+    location: "",
+    subLocation: "",
+    department: "",
+    subDepartment: "",
+    reportingManager: "",
+    departmentHead: "",
+    businessHead: "",
+    isVip: false,
+    userRole: "",
+    supportDepartmentName: "",
+    supportGroups: "",
+    password: "",
+    confirmPassword: "",
+    users: { isView: false, isEdit: false, isDelete: false },
+    components: { isView: false, isEdit: false, isDelete: false },
+    departments: { isView: false, isEdit: false, isDelete: false },
+    subDepartments: { isView: false, isEdit: false, isDelete: false },
+    locations: { isView: false, isEdit: false, isDelete: false },
+    subLocations: { isView: false, isEdit: false, isDelete: false },
+    assets: { isView: false },
+    tickets: { isView: false },
+    showUsers: { isView: false },
+    summary: { isView: false },
+    importAsset: { isView: false },
   });
   const [locationData, setLocationData] = useState([]);
   const [subLocationData, setSubLocationData] = useState([]);
@@ -59,6 +60,8 @@ const EditUser = () => {
   const [reportingManagerData, setReportingManagerData] = useState([]);
   const [supportDepartmentData, setSupportDepartmentData] = useState([]);
   const [supportGroupData, setSupportGroupData] = useState([]);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchUser = async () => {
     try {
@@ -117,6 +120,7 @@ const EditUser = () => {
     try {
       await updateUser(id, formData);
       toast.success("User Updated successfully");
+      setShowConfirm(false);
     } catch (error) {
       toast.error("Failed to Update user");
     }
@@ -1093,10 +1097,11 @@ const EditUser = () => {
         </div>
         <div className="my-2 flex gap-2 justify-end">
           <button
-            type="submit"
+            type="button"
+            onClick={() => setShowConfirm(true)}
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
           >
-            Submit
+            Update
           </button>
           <NavLink
             to="/main/configuration/Users"
@@ -1110,6 +1115,12 @@ const EditUser = () => {
               Cancel
             </button>
           </NavLink>
+          <ConfirmUpdateModal
+            isOpen={showConfirm}
+            message="Are you sure you want to update User?"
+            onConfirm={handleUpdate}
+            onCancel={() => setShowConfirm(false)}
+          />
         </div>
       </form>
     </div>

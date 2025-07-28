@@ -23,6 +23,7 @@ import {
   updateServiceSubCategory,
   deleteServiceSubCategory,
 } from "../../../api/globalServiceRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const ReqSubCategory = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -45,6 +46,8 @@ const ReqSubCategory = () => {
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteInfo, setDeleteInfo] = useState({});
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
   // Fetch categories and subcategories
   const fetchData = async () => {
     setIsLoading(true);
@@ -54,10 +57,10 @@ const ReqSubCategory = () => {
         getAllServiceSubCategory(),
       ]);
       console.log("Categories:", subRes);
-      
+
       setCategories(catRes?.data?.data || []);
       setData(
-        (subRes?.data?.data || []).map((sub) => {          
+        (subRes?.data?.data || []).map((sub) => {
           const parent = (catRes?.data?.data || []).find((c) =>
             c.subCategories.some((s) => s.subCategoryId === sub.subCategoryId)
           );
@@ -77,7 +80,6 @@ const ReqSubCategory = () => {
   };
 
   console.log(data);
-  
 
   useEffect(() => {
     fetchData();
@@ -226,6 +228,7 @@ const ReqSubCategory = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchData();
+        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update subcategory");
@@ -235,7 +238,10 @@ const ReqSubCategory = () => {
   // Delete SubCategory Handler
   const handleDeleteSubCategory = async () => {
     try {
-      await deleteServiceSubCategory(deleteInfo.categoryId, deleteInfo.subCategoryId);
+      await deleteServiceSubCategory(
+        deleteInfo.categoryId,
+        deleteInfo.subCategoryId
+      );
       toast.success("SubCategory deleted successfully");
       setDeleteModal(false);
       setDeleteInfo({});
@@ -311,17 +317,17 @@ const ReqSubCategory = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Add
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Add
                 </button>
               </div>
             </form>
@@ -359,18 +365,26 @@ const ReqSubCategory = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  onConfirm={handleEditSubCategory}
+                  message="Are you sure you want to update this subcategory?"
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>

@@ -66,6 +66,8 @@ const AssetData = () => {
     fetchAsset();
   }, []);
 
+  // console.log("data",data)
+
   // Extract unique categories from data
   const categories = useMemo(() => {
     const cats = data.map(
@@ -199,6 +201,11 @@ const AssetData = () => {
     ],
     [isLoading, userMap]
   );
+
+  // const handleAssignedUserClick = (user) => {
+  //   setAssignedUserDetails(user);
+  //   setAssignedUserModalOpen(true);
+  // };
 
   const handleExportRows = (rows) => {
     const visibleColumns = table

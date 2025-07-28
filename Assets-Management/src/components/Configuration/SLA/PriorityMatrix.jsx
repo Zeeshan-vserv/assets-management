@@ -16,6 +16,7 @@ import {
 } from "../../../api/slaRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const PriorityMatrix = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -33,6 +34,8 @@ const PriorityMatrix = () => {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deletePriorityMatrixId, setDeletePriorityMatrixId] = useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchPriorityMatrix = async () => {
     try {
@@ -176,6 +179,7 @@ const PriorityMatrix = () => {
         await fetchPriorityMatrix();
         setOpenUpdateModal(false);
         setEditPriorityMatrix(null);
+        setShowConfirm(false);
       }
     } catch (error) {
       console.error("Error updating priority matrix:", error);
@@ -340,17 +344,17 @@ const PriorityMatrix = () => {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Submit
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setAddPriorityMatrixModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Submit
                   </button>
                 </div>
               </form>
@@ -425,18 +429,26 @@ const PriorityMatrix = () => {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    // type="submit"
+                    type="button"
+                    onClick={() => setShowConfirm(true)}
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Submit
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenUpdateModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Submit
-                  </button>
+                  <ConfirmUpdateModal
+                    isOpen={showConfirm}
+                    onConfirm={updatePriorityMatrixHandler}
+                    message="Are you sure you want to update this priority matrix?"
+                    onCancel={() => setShowConfirm(false)}
+                  />
                 </div>
               </form>
             </div>

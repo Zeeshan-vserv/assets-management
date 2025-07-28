@@ -15,6 +15,7 @@ import {
   getAllServiceCategory,
   updateServiceCategory,
 } from "../../../api/globalServiceRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const ReqCategory = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -32,6 +33,8 @@ const ReqCategory = () => {
   // Delete Modal State
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -186,6 +189,7 @@ const ReqCategory = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchCategories();
+        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update category");
@@ -208,7 +212,9 @@ const ReqCategory = () => {
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-lg font-semibold mb-6 text-start">SERVICE CATEGORY</h2>
+        <h2 className="text-lg font-semibold mb-6 text-start">
+          SERVICE CATEGORY
+        </h2>
         <MaterialReactTable table={table} />
       </div>
 
@@ -216,10 +222,14 @@ const ReqCategory = () => {
       {openAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">Add Category</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-6">
+              Add Category
+            </h2>
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div className="flex items-center gap-2">
-                <label className="w-40 text-sm font-medium text-gray-500">Category Name*</label>
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Category Name*
+                </label>
                 <TextField
                   name="categoryName"
                   required
@@ -233,17 +243,17 @@ const ReqCategory = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Add
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Add
                 </button>
               </div>
             </form>
@@ -255,16 +265,25 @@ const ReqCategory = () => {
       {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">Edit Category</h2>
+            <h2 className="text-xl font-bold text-gray-800 mb-6">
+              Edit Category
+            </h2>
             <form onSubmit={handleEditCategory} className="space-y-4">
               <div className="flex items-center gap-2">
-                <label className="w-40 text-sm font-medium text-gray-500">Category Name*</label>
+                <label className="w-40 text-sm font-medium text-gray-500">
+                  Category Name*
+                </label>
                 <TextField
                   name="categoryName"
                   required
                   fullWidth
                   value={editForm.categoryName}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, categoryName: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      categoryName: e.target.value,
+                    }))
+                  }
                   placeholder="Enter Category Name"
                   variant="standard"
                   sx={{ width: 250 }}
@@ -272,18 +291,26 @@ const ReqCategory = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
+                  // type="submit"
+                  type="button"
+                  onClick={() => setShowConfirm(true)}
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                >
+                  Update
+                </button>
+                <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                >
-                  Update
-                </button>
+                <ConfirmUpdateModal
+                  isOpen={showConfirm}
+                  onConfirm={handleEditCategory}
+                  message="Are you sure you want to update this category?"
+                  onCancel={() => setShowConfirm(false)}
+                />
               </div>
             </form>
           </div>

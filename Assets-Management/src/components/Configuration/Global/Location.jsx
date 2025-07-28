@@ -21,6 +21,7 @@ import {
 } from "../../../api/LocationRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -39,6 +40,7 @@ function Location() {
   const [deleteLocationId, setDeleteLocationId] = useState(null);
   const [updateLocationModal, setUpdateLocationModal] = useState(false);
   const [editLocations, setEditLocations] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchLocation = async () => {
     try {
@@ -154,6 +156,7 @@ function Location() {
       await fetchLocation();
       setEditLocations(null);
       setUpdateLocationModal(false);
+      setShowConfirm(false);
     } catch (error) {
       console.error("Error updating locaction:", error);
     }
@@ -394,7 +397,7 @@ function Location() {
       },
     }),
   });
-  
+
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
@@ -456,18 +459,26 @@ function Location() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    // type="submit"
+                    type="button"
+                    onClick={() => setShowConfirm(true)}
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setUpdateLocationModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
+                  <ConfirmUpdateModal
+                    isOpen={showConfirm}
+                    message="Are you sure you want to update Location?"
+                    onConfirm={updateLocationHandler}
+                    onCancel={() => setShowConfirm(false)}
+                  />
                 </div>
               </form>
             </div>
@@ -500,17 +511,17 @@ function Location() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenAddLocationModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
                   </button>
                 </div>
               </form>

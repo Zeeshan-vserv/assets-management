@@ -733,6 +733,7 @@ import { RxCross2 } from "react-icons/rx";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { getGatePassById, updateGatePass } from "../../../api/GatePassRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 function EditGetPass() {
   const { id } = useParams();
@@ -773,7 +774,9 @@ function EditGetPass() {
     itemName: "",
     quantity: "",
     description: "",
-  });  
+  });
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch and map gate pass data
   const fetchGatePass = async () => {
@@ -785,7 +788,7 @@ function EditGetPass() {
       }
 
       console.log(response.data);
-      
+
       const data = response.data.data || {};
       setFormData({
         movementType: data.movementType || "",
@@ -844,7 +847,6 @@ function EditGetPass() {
       [name]: value,
     }));
   };
-
 
   const addItem = () => {
     if (newItem.itemName && newItem.quantity) {
@@ -913,6 +915,7 @@ function EditGetPass() {
       if (res.data.success) {
         toast.success("Gate Pass updated successfully!");
         // Optionally redirect or reset form here
+        setShowConfirm(false);
       } else {
         toast.error(res.data.message || "Failed to update gate pass");
       }
@@ -933,7 +936,9 @@ function EditGetPass() {
         >
           <div className="flex gap-3 justify-end">
             <button
-              type="submit"
+              // type="submit"
+              type="button"
+              onClick={() => setShowConfirm(true)}
               className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
             >
               Submit
@@ -950,6 +955,12 @@ function EditGetPass() {
                 Cancel
               </button>
             </NavLink>
+            <ConfirmUpdateModal
+              isOpen={showConfirm}
+              onConfirm={handleFormSubmitHandler}
+              message="Are you sure you want to update Get pass?"
+              onCancel={() => setShowConfirm(false)}
+            />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-4 mt-4 mb-8">
             <div className="flex flex-row gap-2">

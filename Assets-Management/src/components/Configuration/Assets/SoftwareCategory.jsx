@@ -588,6 +588,7 @@ import {
 } from "../../../api/SoftwareCategoryRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -601,7 +602,8 @@ function SoftwareCategory() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [addSoftwareCategoryModal, setAddSoftwareCategoryModal] = useState(false);
+  const [addSoftwareCategoryModal, setAddSoftwareCategoryModal] =
+    useState(false);
   const [addNewSoftwareCategory, setAddNewSoftwareCategory] = useState({
     softwareCategoryName: "",
   });
@@ -610,7 +612,10 @@ function SoftwareCategory() {
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-  const [deleteSoftwareCategoryId, setDeleteSoftwareCategoryId] = useState(null);
+  const [deleteSoftwareCategoryId, setDeleteSoftwareCategoryId] =
+    useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch all software categories
   const fetchSoftwareCategory = async () => {
@@ -692,7 +697,9 @@ function SoftwareCategory() {
       softwareCategoryName: addNewSoftwareCategory?.softwareCategoryName,
       userId: user?.userId, // If your backend expects userId
     };
-    const createSoftwareCategoryResponse = await createSoftwareCategory(formData);
+    const createSoftwareCategoryResponse = await createSoftwareCategory(
+      formData
+    );
     if (createSoftwareCategoryResponse?.data.success) {
       toast.success("Software Category created successfully");
       await fetchSoftwareCategory();
@@ -735,6 +742,7 @@ function SoftwareCategory() {
       if (updateSoftwareCategoryResponse?.data.success) {
         toast.success("Software category updated successfully");
         await fetchSoftwareCategory();
+        setShowConfirm(false);
       }
       setEditSoftwareCategory(null);
     } catch (error) {
@@ -815,7 +823,7 @@ function SoftwareCategory() {
       </Box>
     ),
 
-        muiTableProps: {
+    muiTableProps: {
       sx: {
         border: "1px solid rgba(81, 81, 81, .5)",
         caption: {
@@ -933,17 +941,17 @@ function SoftwareCategory() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setAddSoftwareCategoryModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
                   </button>
                 </div>
               </form>
@@ -979,18 +987,26 @@ function SoftwareCategory() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    // type="submit"
+                    type="button"
+                    onClick={() => setShowConfirm(true)}
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenUpdateModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
+                  <ConfirmUpdateModal
+                    isOpen={showConfirm}
+                    onConfirm={updateSoftwareCategoryHandler}
+                    message="Are you sure you want to update this software category?"
+                    onCancel={() => setShowConfirm(false)}
+                  />
                 </div>
               </form>
             </div>

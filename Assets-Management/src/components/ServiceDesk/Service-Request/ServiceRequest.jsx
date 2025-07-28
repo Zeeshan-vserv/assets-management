@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
   useMaterialReactTable,
@@ -17,7 +17,10 @@ import { FaDesktop } from "react-icons/fa";
 import { IoMdCheckmark } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { getAllIncident } from "../../../api/IncidentRequest";
-import { getAllServiceRequests } from "../../../api/serviceRequest";
+import {
+  getAllServiceRequests,
+  getServiceRequestStatusCounts,
+} from "../../../api/serviceRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -30,25 +33,75 @@ function ServiceRequest() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [cardData, setCardData] = useState([]);
   const [changeStatus, setChangeStatus] = useState(false);
   const [seletecetdRowId, setSelectedRowId] = useState(null);
   const [selectDropDownValue, setSelectDropDownValue] = useState("");
 
-  const fetchIncident = async () => {
+  // const fetchService = async () => {
+  //   try {
+  //     setIsLoading(true);
+  //     const response = await getAllServiceRequests();
+  //     setData(response?.data?.data || []);
+  //   } catch (error) {
+  //     console.error("Error fetching incidents:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+  const fetchService = useCallback(async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const response = await getAllServiceRequests();
       setData(response?.data?.data || []);
+      const countResponse = await getServiceRequestStatusCounts();
+      // Convert object to array if needed
+      let counts = countResponse?.data?.data;
+      if (counts && !Array.isArray(counts)) {
+        counts = [
+          { id: "1", count: counts["New"] || 0, description: "New" },
+          { id: "2", count: counts["Assigned"] || 0, description: "Assigned" },
+          {
+            id: "3",
+            count: counts["In-Progress"] || 0,
+            description: "In-Progress",
+          },
+          { id: "4", count: counts["Pause"] || 0, description: "Pause" },
+          { id: "5", count: counts["Resolved"] || 0, description: "Resolved" },
+          {
+            id: "6",
+            count: counts["Cancelled"] || counts["cancel"] || 0,
+            description: "Cancelled",
+          },
+          {
+            id: "7",
+            count: counts["Reopened"] || counts["reopen"] || 0,
+            description: "Reopened",
+          },
+          { id: "8", count: counts["Closed"] || 0, description: "Closed" },
+          {
+            id: "9",
+            count: counts["Converted to SR"] || 0,
+            description: "Converted to SR",
+          },
+          {
+            id: "11",
+            count: response?.data?.data?.length || 0,
+            description: "Total",
+          },
+        ];
+      }
+      setCardData(counts || []);
     } catch (error) {
-      console.error("Error fetching incidents:", error);
+      console.error("Error fetching departments:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchIncident();
+    fetchService();
   }, []);
 
   // console.log("data", data);
@@ -175,13 +228,13 @@ function ServiceRequest() {
   );
 
   //Approval
-  const handleAcceptServiceRequestApproval = (id) => {
-    console.log("Accept Id", id);
-  };
+  // const handleAcceptServiceRequestApproval = (id) => {
+  //   console.log("Accept Id", id);
+  // };
 
-  const handleRejectServiceRequestApproval = (id) => {
-    console.log("Reject Id", id);
-  };
+  // const handleRejectServiceRequestApproval = (id) => {
+  //   console.log("Reject Id", id);
+  // };
 
   //Exports
   const handleExportRows = (rows) => {
@@ -410,74 +463,6 @@ function ServiceRequest() {
     }),
   });
 
-  const cardData = [
-    {
-      id: "1",
-      totalCount: "0",
-      description: "New",
-    },
-    {
-      id: "2",
-      totalCount: "0",
-      description: "Approval Pending",
-    },
-    {
-      id: "3",
-      totalCount: "0",
-      description: "Provisioning",
-    },
-    {
-      id: "4",
-      totalCount: "0",
-      description: "Assigned",
-    },
-    {
-      id: "5",
-      totalCount: "0",
-      description: "In-Progress",
-    },
-    {
-      id: "6",
-      totalCount: "0",
-      description: "Hold",
-    },
-    {
-      id: "7",
-      totalCount: "0",
-      description: "Cancelled",
-    },
-    {
-      id: "8",
-      totalCount: "0",
-      description: "Rejected",
-    },
-    {
-      id: "9",
-      totalCount: "0",
-      description: "Resolved",
-    },
-    {
-      id: "10",
-      totalCount: "0",
-      description: "Closed",
-    },
-    {
-      id: "11",
-      totalCount: "0",
-      description: "Waiting for Update",
-    },
-    {
-      id: "12",
-      totalCount: "0",
-      description: "Coverted to Incident",
-    },
-    {
-      id: "13",
-      totalCount: "0",
-      description: "Total",
-    },
-  ];
-
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full  p-4 bg-slate-100">
@@ -496,24 +481,17 @@ function ServiceRequest() {
           </button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-          {cardData.map((item) => {
-            const countKey = Object.keys(item).find((key) =>
-              key.endsWith("Count")
-            );
-            const count = item[countKey];
-
-            return (
-              <div
-                key={item?.id}
-                className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition"
-              >
-                <h2 className="font-semibold text-xl text-blue-600 mb-1">
-                  {count}
-                </h2>
-                <span className="text-sm">{item.description}</span>
-              </div>
-            );
-          })}
+          {cardData.map((item) => (
+            <div
+              key={item?.id}
+              className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition"
+            >
+              <h2 className="font-semibold text-xl text-blue-600 mb-1">
+                {item.count}
+              </h2>
+              <span className="text-sm">{item.description}</span>
+            </div>
+          ))}
         </div>
         <MaterialReactTable table={table} />
         {changeStatus && (

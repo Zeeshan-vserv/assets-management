@@ -558,7 +558,6 @@
 
 // export default Publisher;
 
-
 import React, { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
@@ -581,6 +580,7 @@ import {
 } from "../../../api/SoftwareCategoryRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -604,6 +604,8 @@ function Publisher() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deletePublisherId, setDeletePublisherId] = useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch all publishers
   const fetchPublisher = async () => {
@@ -727,6 +729,7 @@ function Publisher() {
       if (updatePublisherResponse?.data.success) {
         toast.success("Publisher updated successfully");
         await fetchPublisher();
+        setShowConfirm(false);
       }
     } catch (error) {
       console.error("Error updating publisher:", error);
@@ -916,17 +919,17 @@ function Publisher() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setAddPublisherModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
                   </button>
                 </div>
               </form>
@@ -959,18 +962,26 @@ function Publisher() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    // type="submit"
+                    type="button"
+                    onClick={() => setShowConfirm(true)}
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setOpenUpdateModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
                   </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Update
-                  </button>
+                  <ConfirmUpdateModal
+                    isOpen={showConfirm}
+                    onConfirm={updatePublisherHandler}
+                    message="Are you sure you want to update this publisher?"
+                    onCancel={() => setShowConfirm(false)}
+                  />
                 </div>
               </form>
             </div>

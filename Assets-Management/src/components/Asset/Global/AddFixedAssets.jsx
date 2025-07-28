@@ -82,7 +82,6 @@ const AddFixedAssets = () => {
     );
     setFilteredSubLocations(selectedLocation?.subLocations || []);
   }, [formData.locationInformation.location, locationData]);
-  
 
   useEffect(() => {
     const selectedDepartment = departmentData.find(
@@ -145,8 +144,6 @@ const AddFixedAssets = () => {
         });
       }
     });
-
-    
 
     // Append userId if needed
     dataToSend.append("userId", user.userId);
@@ -639,7 +636,7 @@ const AddFixedAssets = () => {
               >
                 User
               </label>
-              <Autocomplete
+               <Autocomplete
                 className="w-[65%]"
                 options={users}
                 getOptionLabel={(option) => option.emailAddress}
@@ -669,7 +666,7 @@ const AddFixedAssets = () => {
                     }}
                   />
                 )}
-              />
+              /> 
             </div>
             <div className="flex items-center w-[46%] max-lg:w-full">
               <label

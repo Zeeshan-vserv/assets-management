@@ -50,7 +50,7 @@
 //       if (response.status !== 200) {
 //         throw new Error("Failed to fetch data");
 //       }
-      
+
 //       setFormData(response?.data?.data || []);
 //       // setData(response);
 //     } catch (error) {
@@ -63,7 +63,6 @@
 //   useEffect(() => {
 //     fetchData();
 //   }, []);
-
 
 //   useEffect(() => {
 //     const fetchDetails = async () => {
@@ -551,9 +550,10 @@ import { getAllAssets } from "../../../api/AssetsRequest";
 import { getAllLocation } from "../../../api/LocationRequest";
 import { getAllSubCategory } from "../../../api/IncidentCategoryRequest";
 import { NavLink, useParams } from "react-router-dom";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const EditRule = () => {
-   const { id } = useParams();
+  const { id } = useParams();
   const user = useSelector((state) => state.authReducer.authData);
   const [isLoading, setIsLoading] = useState(true);
   const [supportDepartment, setSupportDepartment] = useState([]);
@@ -583,6 +583,7 @@ const EditRule = () => {
       severityLevel: "",
     },
   });
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -606,17 +607,23 @@ const EditRule = () => {
     const fetchDetails = async () => {
       try {
         setIsLoading(true);
-        const [res, locationResponse, incidentSubCategoryResponse, assetResponse] =
-          await Promise.all([
-            getAllSupportDepartment(),
-            getAllLocation(),
-            getAllSubCategory(),
-            getAllAssets(),
-          ]);
+        const [
+          res,
+          locationResponse,
+          incidentSubCategoryResponse,
+          assetResponse,
+        ] = await Promise.all([
+          getAllSupportDepartment(),
+          getAllLocation(),
+          getAllSubCategory(),
+          getAllAssets(),
+        ]);
 
         setSupportDepartment(res?.data?.data || []);
         setLocationData(locationResponse?.data?.data || []);
-        setIncidentSubCategoryData(incidentSubCategoryResponse?.data?.data || []);
+        setIncidentSubCategoryData(
+          incidentSubCategoryResponse?.data?.data || []
+        );
         setAssetsData(assetResponse?.data?.data || []);
       } catch (error) {
         console.error("Error fetching dependencies:", error);
@@ -693,6 +700,7 @@ const EditRule = () => {
     try {
       await updateRule(id, finalData);
       toast.success("Rule updated successfully");
+      setShowConfirm(false);
     } catch (error) {
       console.error("Error updating rule:", error);
       toast.error(error?.response?.data?.message || "Failed to update rule");
@@ -717,19 +725,55 @@ const EditRule = () => {
       case "User Location":
         return locationData.map((loc) => ({ label: loc.locationName }));
       case "Incident SubCategory":
-        return incidentSubCategoryData.map((item) => ({ label: item.subCategoryName }));
+        return incidentSubCategoryData.map((item) => ({
+          label: item.subCategoryName,
+        }));
       case "Asset":
-        return assetsData.map((item) => ({ label: item.assetInformation.assetTag }));
+        return assetsData.map((item) => ({
+          label: item.assetInformation.assetTag,
+        }));
       case "Asset Category":
         return [
-          "IT Assets", "Laptop", "Monitor", "Printer", "Scanner", "Router",
-          "Furniture", "Vehicles", "Switch", "Machinery", "Others", "Electronics",
-          "Modem", "Keyboard", "Mouse", "Storage Devices", "MacBook", "Smart Tv",
-          "Mobile Phone", "UPS", "Desk", "File Cabinets", "Chairs", "Bookcases",
-          "Sofa Sets", "Conference Speakers", "Coffee Machine", "Bag Scanner",
-          "Desk Phones", "Fan", "Tool Kit", "Two Wheeler", "Four Wheeler",
-          "Barcode Printer", "Projector", "Apple", "Medical Desk", "Patient Bed",
-          "Printer + Scanner", "VC",
+          "IT Assets",
+          "Laptop",
+          "Monitor",
+          "Printer",
+          "Scanner",
+          "Router",
+          "Furniture",
+          "Vehicles",
+          "Switch",
+          "Machinery",
+          "Others",
+          "Electronics",
+          "Modem",
+          "Keyboard",
+          "Mouse",
+          "Storage Devices",
+          "MacBook",
+          "Smart Tv",
+          "Mobile Phone",
+          "UPS",
+          "Desk",
+          "File Cabinets",
+          "Chairs",
+          "Bookcases",
+          "Sofa Sets",
+          "Conference Speakers",
+          "Coffee Machine",
+          "Bag Scanner",
+          "Desk Phones",
+          "Fan",
+          "Tool Kit",
+          "Two Wheeler",
+          "Four Wheeler",
+          "Barcode Printer",
+          "Projector",
+          "Apple",
+          "Medical Desk",
+          "Patient Bed",
+          "Printer + Scanner",
+          "VC",
         ].map((label) => ({ label }));
       case "Asset Criticality":
         return ["Critical", "Non-Critical"].map((label) => ({ label }));
@@ -738,241 +782,291 @@ const EditRule = () => {
     }
   };
 
-
   return (
-   <div className="w-full h-[94vh] overflow-auto p-6 flex flex-col gap-5 bg-slate-200">
-  {isLoading ? (
-    <p className="text-center text-sm text-gray-500">Loading...</p>
-  ) : (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-10">
-      <div className="w-full p-8 bg-white rounded-md shadow-md pt-10">
-        <div className="flex gap-1 justify-end">
-          <button className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
-            Submit
-          </button>
-          <NavLink
-            to="/main/configuration/IncidentRules"
-            className={({ isActive }) =>
-              `hover:underline cursor-pointer ${isActive ? "text-blue-400" : ""}`
-            }
-          >
-            <button className="bg-[#F26E75] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
-              Cancel
-            </button>
-          </NavLink>
-        </div>
-
-        <div className="flex flex-wrap gap-6 justify-between mt-3">
-          {/* Rule Name */}
-          <div className="flex items-center w-[46%]">
-            <label className="w-[25%] text-xs font-semibold text-slate-600">Rule Name</label>
-            <input
-              className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-              type="text"
-              name="ruleName"
-              value={formData.ruleName}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Priority */}
-          <div className="flex items-center w-[46%]">
-            <label className="w-[25%] text-xs font-semibold text-slate-600">Priority</label>
-            <input
-              className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-              type="text"
-              name="priority"
-              value={formData.priority}
-              onChange={handleChange}
-            />
-          </div>
-
-          {/* Add Condition Button */}
-          <div className="w-full">
-            <button
-              type="button"
-              onClick={handleAddCondition}
-              className="flex items-center gap-2 bg-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white hover:bg-[#6c7bbf]"
-            >
-              <GoPlusCircle /> Add Condition
-            </button>
-          </div>
-
-          {/* Conditions List */}
-          {formData.addConditions.map((condition, index) => (
-            <div
-              key={index}
-              className="w-full flex items-center gap-6 border border-slate-200 p-3 rounded"
-            >
-              <div className="flex flex-wrap gap-6 w-full">
-                <div className="flex items-center min-w-[400px]">
-                  <label className="text-xs font-semibold w-32 text-slate-600">
-                    {condition.condition}
-                  </label>
-                  <select
-                    className="w-full text-xs border-b-2 border-slate-300 p-2 outline-none"
-                    value={condition.conditionValue}
-                    onChange={(e) =>
-                      handleConditionChange(index, "conditionValue", e.target.value)
-                    }
-                  >
-                    <option value="">Select</option>
-                    <option value="Asset Location">Asset Location</option>
-                    <option value="User Location">User Location</option>
-                    <option value="User is VIP">User is VIP</option>
-                    <option value="Asset Category">Asset Category</option>
-                    <option value="Asset">Asset</option>
-                    <option value="Asset Criticality">Asset Criticality</option>
-                    <option value="Incident SubCategory">Incident SubCategory</option>
-                  </select>
-                </div>
-
-                {condition.conditionValue !== "User is VIP" && condition.conditionValue && (
-                  <div className="flex items-center min-w-[400px]">
-                    <label className="text-xs font-semibold w-32 text-slate-600">
-                      {condition.conditionValue}
-                    </label>
-                    <Autocomplete
-                      className="w-[65%]"
-                      options={getOptions(condition.conditionValue)}
-                      getOptionLabel={(option) => option.label || ""}
-                      value={{ label: getConditionFieldValue(condition, condition.conditionValue) } || null}
-                      onChange={(e, newValue) =>
-                        setConditionFieldValue(index, condition.conditionValue, newValue?.label || "")
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="standard"
-                          placeholder={`Select ${condition.conditionValue}`}
-                          inputProps={{
-                            ...params.inputProps,
-                            style: { fontSize: "0.8rem" },
-                          }}
-                        />
-                      )}
-                    />
-                  </div>
-                )}
-              </div>
+    <div className="w-full h-[94vh] overflow-auto p-6 flex flex-col gap-5 bg-slate-200">
+      {isLoading ? (
+        <p className="text-center text-sm text-gray-500">Loading...</p>
+      ) : (
+        <form onSubmit={handleSubmit} className="flex flex-col gap-10">
+          <div className="w-full p-8 bg-white rounded-md shadow-md pt-10">
+            <div className="flex gap-2 justify-end">
               <button
                 type="button"
-                onClick={() => handleDeleteCondition(index)}
-                className="text-red-500 hover:text-red-700 ml-4"
-                title="Delete Condition"
+                onClick={() => setShowConfirm(true)}
+                className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
               >
-                <GoTrash size={18} />
+                Update
               </button>
-            </div>
-          ))}
-
-          {/* Assignment Section */}
-          <h3 className="text-sm text-[#303E67] font-semibold bg-[#F1F5FA] w-full p-2 mt-4">
-            Assign To
-          </h3>
-
-          {/* Support Department */}
-          <div className="flex items-center w-[46%]">
-            <label className="w-[25%] text-xs font-semibold text-slate-600">Support Department</label>
-            <Autocomplete
-              className="w-[65%]"
-              options={supportDepartment}
-              getOptionLabel={(option) => option.supportDepartmentName || ""}
-              value={
-                supportDepartment.find(
-                  (d) => d.supportDepartmentName === formData.assignTo.supportDepartment
-                ) || null
-              }
-              onChange={(event, newValue) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  assignTo: {
-                    ...prev.assignTo,
-                    supportDepartment: newValue?.supportDepartmentName || "",
-                    supportGroup: "",
-                  },
-                }));
-                setFilteredSupportGroup(newValue?.supportGroups || []);
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="standard"
-                  placeholder="Select Department"
-                  inputProps={{
-                    ...params.inputProps,
-                    style: { fontSize: "0.8rem" },
-                  }}
-                />
-              )}
-            />
-          </div>
-
-          {/* Support Group */}
-          <div className="flex items-center w-[46%] max-lg:w-full">
-            <label className="w-[25%] text-xs font-semibold text-slate-600">Support Group</label>
-            <Autocomplete
-              className="w-[65%]"
-              options={filteredSupportGroup}
-              getOptionLabel={(option) => option?.supportGroupName || ""}
-              value={
-                filteredSupportGroup.find(
-                  (subGroup) => subGroup.supportGroupName === formData.assignTo.supportGroup
-                ) || null
-              }
-              onChange={(event, newValue) => {
-                setFormData((prev) => ({
-                  ...prev,
-                  assignTo: {
-                    ...prev.assignTo,
-                    supportGroup: newValue?.supportGroupName || "",
-                  },
-                }));
-              }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  variant="standard"
-                  className="text-xs text-slate-600"
-                  placeholder="Select Support Group"
-                  inputProps={{
-                    ...params.inputProps,
-                    style: { fontSize: "0.8rem" },
-                  }}
-                />
-              )}
-            />
-          </div>
-
-          {/* Technician and Severity Level */}
-          {["technician", "severityLevel"].map((field) => (
-            <div className="flex items-center w-[46%]" key={field}>
-              <label className="w-[25%] text-xs font-semibold text-slate-600">
-                {field === "technician" ? "Technician" : "Severity Level"}
-              </label>
-              <select
-                className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                name={field}
-                value={formData.assignTo[field]}
-                onChange={handleAssignChange}
+              <NavLink
+                to="/main/configuration/IncidentRules"
+                className={({ isActive }) =>
+                  `hover:underline cursor-pointer ${
+                    isActive ? "text-blue-400" : ""
+                  }`
+                }
               >
-                <option value="">Select {field}</option>
-                {field === "severityLevel"
-                  ? ["Severity-1", "Severity-2", "Severity-3", "Severity-4"].map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))
-                  : null}
-              </select>
+                <button className="bg-[#F26E75] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
+                  Cancel
+                </button>
+              </NavLink>
+              <ConfirmUpdateModal
+                isOpen={showConfirm}
+                onConfirm={handleSubmit}
+                message="Are you sure you want to update this rule?"
+                onCancel={() => setShowConfirm(false)}
+              />
             </div>
-          ))}
-        </div>
-      </div>
-    </form>
-  )}
-</div>
 
+            <div className="flex flex-wrap gap-6 justify-between mt-3">
+              {/* Rule Name */}
+              <div className="flex items-center w-[46%]">
+                <label className="w-[25%] text-xs font-semibold text-slate-600">
+                  Rule Name
+                </label>
+                <input
+                  className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                  type="text"
+                  name="ruleName"
+                  value={formData.ruleName}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Priority */}
+              <div className="flex items-center w-[46%]">
+                <label className="w-[25%] text-xs font-semibold text-slate-600">
+                  Priority
+                </label>
+                <input
+                  className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                  type="text"
+                  name="priority"
+                  value={formData.priority}
+                  onChange={handleChange}
+                />
+              </div>
+
+              {/* Add Condition Button */}
+              <div className="w-full">
+                <button
+                  type="button"
+                  onClick={handleAddCondition}
+                  className="flex items-center gap-2 bg-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white hover:bg-[#6c7bbf]"
+                >
+                  <GoPlusCircle /> Add Condition
+                </button>
+              </div>
+
+              {/* Conditions List */}
+              {formData.addConditions.map((condition, index) => (
+                <div
+                  key={index}
+                  className="w-full flex items-center gap-6 border border-slate-200 p-3 rounded"
+                >
+                  <div className="flex flex-wrap gap-6 w-full">
+                    <div className="flex items-center min-w-[400px]">
+                      <label className="text-xs font-semibold w-32 text-slate-600">
+                        {condition.condition}
+                      </label>
+                      <select
+                        className="w-full text-xs border-b-2 border-slate-300 p-2 outline-none"
+                        value={condition.conditionValue}
+                        onChange={(e) =>
+                          handleConditionChange(
+                            index,
+                            "conditionValue",
+                            e.target.value
+                          )
+                        }
+                      >
+                        <option value="">Select</option>
+                        <option value="Asset Location">Asset Location</option>
+                        <option value="User Location">User Location</option>
+                        <option value="User is VIP">User is VIP</option>
+                        <option value="Asset Category">Asset Category</option>
+                        <option value="Asset">Asset</option>
+                        <option value="Asset Criticality">
+                          Asset Criticality
+                        </option>
+                        <option value="Incident SubCategory">
+                          Incident SubCategory
+                        </option>
+                      </select>
+                    </div>
+
+                    {condition.conditionValue !== "User is VIP" &&
+                      condition.conditionValue && (
+                        <div className="flex items-center min-w-[400px]">
+                          <label className="text-xs font-semibold w-32 text-slate-600">
+                            {condition.conditionValue}
+                          </label>
+                          <Autocomplete
+                            className="w-[65%]"
+                            options={getOptions(condition.conditionValue)}
+                            getOptionLabel={(option) => option.label || ""}
+                            value={
+                              {
+                                label: getConditionFieldValue(
+                                  condition,
+                                  condition.conditionValue
+                                ),
+                              } || null
+                            }
+                            onChange={(e, newValue) =>
+                              setConditionFieldValue(
+                                index,
+                                condition.conditionValue,
+                                newValue?.label || ""
+                              )
+                            }
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                variant="standard"
+                                placeholder={`Select ${condition.conditionValue}`}
+                                inputProps={{
+                                  ...params.inputProps,
+                                  style: { fontSize: "0.8rem" },
+                                }}
+                              />
+                            )}
+                          />
+                        </div>
+                      )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteCondition(index)}
+                    className="text-red-500 hover:text-red-700 ml-4"
+                    title="Delete Condition"
+                  >
+                    <GoTrash size={18} />
+                  </button>
+                </div>
+              ))}
+
+              {/* Assignment Section */}
+              <h3 className="text-sm text-[#303E67] font-semibold bg-[#F1F5FA] w-full p-2 mt-4">
+                Assign To
+              </h3>
+
+              {/* Support Department */}
+              <div className="flex items-center w-[46%]">
+                <label className="w-[25%] text-xs font-semibold text-slate-600">
+                  Support Department
+                </label>
+                <Autocomplete
+                  className="w-[65%]"
+                  options={supportDepartment}
+                  getOptionLabel={(option) =>
+                    option.supportDepartmentName || ""
+                  }
+                  value={
+                    supportDepartment.find(
+                      (d) =>
+                        d.supportDepartmentName ===
+                        formData.assignTo.supportDepartment
+                    ) || null
+                  }
+                  onChange={(event, newValue) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      assignTo: {
+                        ...prev.assignTo,
+                        supportDepartment:
+                          newValue?.supportDepartmentName || "",
+                        supportGroup: "",
+                      },
+                    }));
+                    setFilteredSupportGroup(newValue?.supportGroups || []);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="standard"
+                      placeholder="Select Department"
+                      inputProps={{
+                        ...params.inputProps,
+                        style: { fontSize: "0.8rem" },
+                      }}
+                    />
+                  )}
+                />
+              </div>
+
+              {/* Support Group */}
+              <div className="flex items-center w-[46%] max-lg:w-full">
+                <label className="w-[25%] text-xs font-semibold text-slate-600">
+                  Support Group
+                </label>
+                <Autocomplete
+                  className="w-[65%]"
+                  options={filteredSupportGroup}
+                  getOptionLabel={(option) => option?.supportGroupName || ""}
+                  value={
+                    filteredSupportGroup.find(
+                      (subGroup) =>
+                        subGroup.supportGroupName ===
+                        formData.assignTo.supportGroup
+                    ) || null
+                  }
+                  onChange={(event, newValue) => {
+                    setFormData((prev) => ({
+                      ...prev,
+                      assignTo: {
+                        ...prev.assignTo,
+                        supportGroup: newValue?.supportGroupName || "",
+                      },
+                    }));
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="standard"
+                      className="text-xs text-slate-600"
+                      placeholder="Select Support Group"
+                      inputProps={{
+                        ...params.inputProps,
+                        style: { fontSize: "0.8rem" },
+                      }}
+                    />
+                  )}
+                />
+              </div>
+
+              {/* Technician and Severity Level */}
+              {["technician", "severityLevel"].map((field) => (
+                <div className="flex items-center w-[46%]" key={field}>
+                  <label className="w-[25%] text-xs font-semibold text-slate-600">
+                    {field === "technician" ? "Technician" : "Severity Level"}
+                  </label>
+                  <select
+                    className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                    name={field}
+                    value={formData.assignTo[field]}
+                    onChange={handleAssignChange}
+                  >
+                    <option value="">Select {field}</option>
+                    {field === "severityLevel"
+                      ? [
+                          "Severity-1",
+                          "Severity-2",
+                          "Severity-3",
+                          "Severity-4",
+                        ].map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))
+                      : null}
+                  </select>
+                </div>
+              ))}
+            </div>
+          </div>
+        </form>
+      )}
+    </div>
   );
 };
 

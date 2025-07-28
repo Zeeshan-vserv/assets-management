@@ -18,6 +18,7 @@ import {
   getAllSubDepartment,
 } from "../../../api/DepartmentRequest";
 import { getAllUsers } from "../../../api/AuthRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 const EditAsset = () => {
   const { id } = useParams();
   const user = useSelector((state) => state.authReducer.authData);
@@ -80,6 +81,7 @@ const EditAsset = () => {
       istPmDate: "",
     },
   });
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchAsset = async () => {
     try {
@@ -171,6 +173,7 @@ const EditAsset = () => {
 
     updateAsset(id, dataToSend);
     toast.success("Asset updated Sucessfully");
+    setShowConfirm(false);
   };
 
   return (
@@ -181,7 +184,9 @@ const EditAsset = () => {
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex gap-1 justify-end">
             <button
-              type="submit"
+              // type="submit"
+              type="button"
+              onClick={() => setShowConfirm(true)}
               className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
             >
               Update
@@ -198,6 +203,12 @@ const EditAsset = () => {
                 Cancel
               </button>
             </NavLink>
+            <ConfirmUpdateModal
+              isOpen={showConfirm}
+              onConfirm={handleSubmit}
+              message="Are you sure you want to update asset?"
+              onCancel={() => setShowConfirm(false)}
+            />
           </div>
           <h3 className="text-slate-700">Asset Information</h3>
           <div className="flex flex-wrap gap-6 justify-between mt-3">

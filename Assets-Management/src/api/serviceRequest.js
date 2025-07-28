@@ -35,7 +35,9 @@ export const createAsset = (formData) =>
   });
 
 export const createServiceRequest = (formData) => API.post("/service", formData);
+export const approveServiceRequest = (id) => API.post(`/service/${id}/approve`);
 export const getAllServiceRequests = () => API.get("/service");
+export const getServiceRequestStatusCounts = () => API.get("/service/status-counts");
 export const getServiceRequestById = (id) => API.get(`/service/${id}`);
 export const updateServiceRequest = (id, updateData) =>
   API.put(`/service/${id}`, updateData);

@@ -21,6 +21,7 @@ import {
 } from "../../../api/VendorStatusCategoryRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -44,6 +45,8 @@ function Status() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteStatusId, setDeleteStatusId] = useState(null);
+
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchStatus = async () => {
     try {
@@ -167,6 +170,7 @@ function Status() {
       if (updateStatusResponse?.data?.success) {
         toast.success("Status updated successfully");
         fetchStatus();
+        setShowConfirm(false);
       }
       setOpenUpdateModal(false);
       setEditStatus(null);
@@ -420,17 +424,17 @@ function Status() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Add
+                  </button>
+                  <button
                     type="button"
                     onClick={() => setAddStatusModal(false)}
                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
                   </button>
                 </div>
               </form>
@@ -463,18 +467,26 @@ function Status() {
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
                     <button
+                      // type="submit"
+                      type="button"
+                      onClick={() => setShowConfirm(true)}
+                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                    >
+                      Update
+                    </button>
+                    <button
                       type="button"
                       onClick={() => setOpenUpdateModal(false)}
                       className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                     >
                       Cancel
                     </button>
-                    <button
-                      type="submit"
-                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                    >
-                      Update
-                    </button>
+                    <ConfirmUpdateModal
+                      isOpen={showConfirm}
+                      onConfirm={updateStatusHandler}
+                      message="Are you sure you want to update status?"
+                      onCancel={() => setShowConfirm(false)}
+                    />
                   </div>
                 </form>
               </div>

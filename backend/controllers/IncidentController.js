@@ -401,6 +401,7 @@ function calculateSLADeadline(
 export const createIncident = async (req, res) => {
   try {
     const { userId, ...incidentData } = req.body;
+    
     if (!userId) return res.status(404).json({ message: "User not found" });
 
     const user = await AuthModel.findById(userId);
@@ -442,7 +443,8 @@ export const createIncident = async (req, res) => {
       user: submitter?.user || user?.employeeName || "",
       userContactNumber:
         submitter?.userContactNumber || user?.mobileNumber || "",
-      userId: submitter?.userId || user?.userId || "",
+      // userId: submitter?.userId || user?.userId || "",
+      userId: submitter?.userId || user?.userId || user?._id.toString() || "",
       userEmail: submitter?.userEmail || user?.emailAddress || "",
       userDepartment: submitter?.userDepartment || user?.department || "",
       loggedBy: submitter?.loggedBy || user?.employeeName || "",
@@ -512,6 +514,8 @@ export const createIncident = async (req, res) => {
     });
 
     await newIncident.save();
+    
+    // console.log("newIncident", newIncident);
 
     res.status(201).json({
       success: true,

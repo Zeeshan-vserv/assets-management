@@ -2,7 +2,7 @@ import express from 'express'
 import multer from "multer";
 import path from "path";
 import authMiddleware from '../middleware/AuthMiddleware.js'
-import { approveServiceRequest, createServiceRequest, deleteServiceRequest, getAllServiceRequests, getAllServiceSla, getAllServicesTat, getServiceRequestById, getServiceRequestStatusCounts, updateServiceRequest } from '../controllers/serviceRequestController.js';
+import { approveServiceRequest, createServiceRequest, deleteServiceRequest, getAllServiceRequests, getAllServiceSla, getAllServicesTat, getMyPendingApprovals, getServiceRequestById, getServiceRequestStatusCounts, updateServiceRequest } from '../controllers/serviceRequestController.js';
 
 const router = express.Router()
 
@@ -23,6 +23,7 @@ router.post('/', authMiddleware, upload.single('attachment'), createServiceReque
 router.get("/sla-all", getAllServiceSla);
 router.get("/tat-all", getAllServicesTat);
 router.get('/status-counts', authMiddleware, getServiceRequestStatusCounts);
+router.get('/my-approvals', authMiddleware, getMyPendingApprovals);
 router.get('/', authMiddleware, getAllServiceRequests)
 router.get('/:id', authMiddleware, getServiceRequestById)
 router.put('/:id', authMiddleware, updateServiceRequest)

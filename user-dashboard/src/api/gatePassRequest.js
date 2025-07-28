@@ -28,10 +28,10 @@ API.interceptors.response.use(
   }
 );
 
-export const createServiceRequest = (formDatas) => API.post("/service/", formDatas);
-export const getMyPendingApprovals = () => API.get("/service/my-approvals");
-export const approveServiceRequest = (id, action, remarks) => API.post(`/service/${id}/approve`, { action, remarks });
-export const getAllServiceRequests = () => API.get("/service/");
-export const getServiceRequestById = (id) => API.get(`/service/${id}`);
-export const updateServiceRequest = (id, updateData) =>API.put(`/service/${id}`, updateData);
-export const deleteServiceRequest = (id) => API.delete(`/service/${id}`);
+// export const createGatePassRequest = (formDatas) => API.post("/gatepass/", formDatas);
+export const getMyPendingGatePassApprovals = () => API.get("/gatepass/my-approvals");
+// export const getAllGatePassRequests = () => API.get("/gatepass/");
+// export const getGatePassRequestById = (id) => API.get(`/gatepass/${id}`);
+// export const updateGatePassRequest = (id, updateData) => API.put(`/gatepass/${id}`, updateData);
+// export const deleteGatePassRequest = (id) => API.delete(`/gatepass/${id}`);
+

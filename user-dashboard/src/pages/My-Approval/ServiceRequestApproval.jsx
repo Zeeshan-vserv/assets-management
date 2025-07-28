@@ -3,7 +3,8 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton } from "@mui/material";
+import { useSelector } from "react-redux";
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, TextField } from "@mui/material";
 import { AiOutlineFileExcel } from "react-icons/ai";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
@@ -12,6 +13,9 @@ import { autoTable } from "jspdf-autotable";
 import axios from "axios";
 import CheckIcon from "@mui/icons-material/Check";
 import ClearIcon from "@mui/icons-material/Clear";
+import { approveServiceRequest, getMyPendingApprovals } from "../../api/ServiceRequest";
+import authReducer from "../../reducers2/AuthReducer2";
+import { getUserById } from "../../api/UserAuth";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -21,14 +25,43 @@ const csvConfig = mkConfig({
 });
 
 function ServiceRequestApproval() {
+  const user = useSelector((state) => state.authReducer.authData);
+  const [userData, setUserData] = useState({});
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [openModal, setOpenModal] = useState(false);
+  const [modalAction, setModalAction] = useState(""); // "Approved" or "Rejected"
+  const [selectedId, setSelectedId] = useState(null);
+  const [remarks, setRemarks] = useState("");
+
+  const fetchUser = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getUserById(user.userId);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setUserData(response?.data || []);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  // console.log(userData)
 
   const fetchServiceRequestApproval = async () => {
     try {
       setIsLoading(true);
-      //   const response = await axios.get("https://dummyjson.com/recipes");
-      setData(response?.data?.recipes || []);
+      const response = await getMyPendingApprovals();
+      console.log("API response:", response?.data?.data); // <-- Add this
+      setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching service request approval:", error);
     } finally {
@@ -41,48 +74,58 @@ function ServiceRequestApproval() {
   }, []);
   //   console.log("data", data);
 
+  const handleOpenModal = (id, action) => {
+    setSelectedId(id);
+    setModalAction(action);
+    setRemarks("");
+    setOpenModal(true);
+  };
+
+  const handleModalSubmit = async () => {
+    try {
+      await approveServiceRequest(selectedId, modalAction, remarks);
+      setOpenModal(false);
+      fetchServiceRequestApproval(); // Refresh list
+    } catch (error) {
+      console.error("Error submitting approval:", error);
+    }
+  };
+
   const columns = useMemo(
     () => [
+      { accessorKey: "serviceId", header: "Service Req Id" },
       {
-        accessorKey: "id",
-        header: "Service Req Id",
-      },
-      {
-        accessorKey: "cuisine",
         header: "Approval Level",
+        Cell: ({ row }) => row.original.approvalStatus?.at(-1)?.level,
       },
+      { accessorKey: "subject", header: "Subject" },
       {
-        accessorKey: "difficulty",
-        header: "Subject",
-      },
-      {
-        accessorKey: "caloriesPerServing",
         header: "Submitter",
+        Cell: ({ row }) => row.original.submitter?.user,
       },
       {
-        accessorKey: "reviewCount",
         header: "Approval Status",
+        Cell: ({ row }) => row.original.approvalStatus?.at(-1)?.status,
       },
       {
-        accessorKey: "servings",
         header: "Logged Time",
+        Cell: ({ row }) =>
+          row.original.submitter?.loggedInTime
+            ? new Date(row.original.submitter.loggedInTime).toLocaleString()
+            : "",
       },
-      {
+       {
         id: "accept",
         header: "Accept",
         size: 80,
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleAccept(row.original.id)}
+            onClick={() => handleOpenModal(row.original._id, "Approved")}
             color="success"
             aria-label="accept"
           >
-            <CheckIcon
-              sx={{
-                color: "#f44336",
-              }}
-            />
+            <CheckIcon sx={{ color: "#4caf50" }} />
           </IconButton>
         ),
       },
@@ -93,29 +136,17 @@ function ServiceRequestApproval() {
         enableSorting: false,
         Cell: ({ row }) => (
           <IconButton
-            onClick={() => handleReject(row.original.id)}
+            onClick={() => handleOpenModal(row.original._id, "Rejected")}
             color="error"
             aria-label="reject"
           >
-            <ClearIcon
-              sx={{
-                color: "#4caf50",
-              }}
-            />
+            <ClearIcon sx={{ color: "#f44336" }} />
           </IconButton>
         ),
       },
     ],
     [isLoading]
   );
-
-  const handleAccept = (id) => {
-    console.log("accept", id);
-  };
-
-  const handleReject = (id) => {
-    console.log("reject", id);
-  };
 
   //Exports
   const handleExportRows = (rows) => {
@@ -258,6 +289,32 @@ function ServiceRequestApproval() {
           >
             Export Selected Rows
           </Button>
+          <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+        <DialogTitle>
+          {modalAction === "Approved" ? "Approve Request" : "Reject Request"}
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Remarks"
+            fullWidth
+            multiline
+            minRows={2}
+            value={remarks}
+            onChange={(e) => setRemarks(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenModal(false)}>Cancel</Button>
+          <Button
+            onClick={handleModalSubmit}
+            variant="contained"
+            color={modalAction === "Approved" ? "success" : "error"}
+            disabled={!remarks.trim()}
+          >
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
         </Box>
       );
     },

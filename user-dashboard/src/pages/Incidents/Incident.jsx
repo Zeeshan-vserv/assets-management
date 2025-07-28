@@ -40,8 +40,8 @@ function Incident() {
   const [closedValue, setClosedValue] = useState("");
   const [reopenValue, setReOpenValue] = useState("");
   const [closingSummary, setClosingSummary] = useState("");
-const [closeRemarks, setCloseRemarks] = useState("");
-const [closureCategory, setClosureCategory] = useState("");
+  const [closeRemarks, setCloseRemarks] = useState("");
+  const [closureCategory, setClosureCategory] = useState("");
 
   const fetchIncident = async () => {
     try {
@@ -68,44 +68,44 @@ const [closureCategory, setClosureCategory] = useState("");
   // console.log("status", latestStatus);
 
   const technicianStatusSubmitHandler = async (e) => {
-  e.preventDefault();
-  if (!seletecetdRowId) return;
+    e.preventDefault();
+    if (!seletecetdRowId) return;
 
-  // Collect closure fields if status is resolved
-  let payload = {};
+    // Collect closure fields if status is resolved
+    let payload = {};
 
-  if (latestStatus === "Assigned") {
-    if (assignedValue === "resolved") {
-      // Get values from your form fields (add state for these fields)
+    if (latestStatus === "Assigned") {
+      if (assignedValue === "resolved") {
+        // Get values from your form fields (add state for these fields)
+        payload = {
+          status: "Resolved",
+          closingSummary, // from state
+          closeRemarks, // from state
+          closureCategory, // from state
+        };
+      } else {
+        payload = {
+          status: assignedValue,
+        };
+      }
+    } else if (latestStatus === "Resolved") {
       payload = {
-        status: "Resolved",
-        closingSummary, // from state
-        closeRemarks,   // from state
-        closureCategory, // from state
+        status: reopenValue === "reopen" ? "Reopened" : latestStatus,
       };
-    } else {
+    } else if (latestStatus === "Closed") {
       payload = {
-        status: assignedValue,
+        status: closedValue === "closed" ? "Cancelled" : latestStatus,
       };
     }
-  } else if (latestStatus === "Resolved") {
-    payload = {
-      status: reopenValue === "reopen" ? "Reopened" : latestStatus,
-    };
-  } else if (latestStatus === "Closed") {
-    payload = {
-      status: closedValue === "closed" ? "Cancelled" : latestStatus,
-    };
-  }
 
-  try {
-    await updateIncident(seletecetdRowId, payload);
-    setChangeStatus(false);
-    fetchIncident(); // Refresh the incident list
-  } catch (error) {
-    console.error("Error updating status:", error);
-  }
-};
+    try {
+      await updateIncident(seletecetdRowId, payload);
+      setChangeStatus(false);
+      fetchIncident(); // Refresh the incident list
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
+  };
 
   // Filter data based on ticketType
   const filteredData = useMemo(() => {
@@ -688,51 +688,65 @@ const [closureCategory, setClosureCategory] = useState("");
                           </select>
                         </div>
                         {assignedValue === "resolved" && (
-  <>
-    <div className="flex items-center gap-2">
-      <label className="w-[40%] text-sm font-medium text-gray-500">
-        Closing Summary <span className="text-red-500">*</span>
-      </label>
-      <textarea
-        className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
-        value={closingSummary}
-        onChange={(e) => setClosingSummary(e.target.value)}
-        required
-      />
-    </div>
-    <div className="flex items-center gap-2">
-      <label className="w-[40%] text-sm font-medium text-gray-500">
-        Close Remarks <span className="text-red-500">*</span>
-      </label>
-      <textarea
-        className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
-        value={closeRemarks}
-        onChange={(e) => setCloseRemarks(e.target.value)}
-        required
-      />
-    </div>
-    <div className="flex items-center gap-2">
-      <label className="w-[40%] text-sm font-medium text-gray-500">
-        Closure Category <span className="text-red-500">*</span>
-      </label>
-      <div className="w-[60%]">
-        <Autocomplete
-          options={["Hardware", "Software", "Network", "Other"]}
-          value={closureCategory}
-          onChange={(_, newValue) => setClosureCategory(newValue)}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Select"
-              variant="standard"
-              required
-            />
-          )}
-        />
-      </div>
-    </div>
-  </>
-)}
+                          <>
+                            <div className="flex items-center gap-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Closing Summary{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea
+                                className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                                value={closingSummary}
+                                onChange={(e) =>
+                                  setClosingSummary(e.target.value)
+                                }
+                                required
+                              />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Close Remarks{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <textarea
+                                className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                                value={closeRemarks}
+                                onChange={(e) =>
+                                  setCloseRemarks(e.target.value)
+                                }
+                                required
+                              />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="w-[40%] text-sm font-medium text-gray-500">
+                                Closure Category{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <div className="w-[60%]">
+                                <Autocomplete
+                                  options={[
+                                    "Hardware",
+                                    "Software",
+                                    "Network",
+                                    "Other",
+                                  ]}
+                                  value={closureCategory}
+                                  onChange={(_, newValue) =>
+                                    setClosureCategory(newValue)
+                                  }
+                                  renderInput={(params) => (
+                                    <TextField
+                                      {...params}
+                                      label="Select"
+                                      variant="standard"
+                                      required
+                                    />
+                                  )}
+                                />
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </>
                     )}
                     {latestStatus === "Resolved" && (
@@ -752,7 +766,6 @@ const [closureCategory, setClosureCategory] = useState("");
                             <option value="reopen" className="text-start">
                               Reopen
                             </option>
-
                           </select>
                         </div>
                       </>

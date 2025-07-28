@@ -45,6 +45,7 @@ const NewIncident = () => {
     description: "",
     submitter: {
       user: "",
+      userId: "",
       userContactNumber: "",
       userEmail: "",
       userDepartment: "",
@@ -160,6 +161,7 @@ const NewIncident = () => {
         description: "",
         submitter: {
           user: "",
+          userId: "",
           userContactNumber: "",
           userEmail: "",
           userDepartment: "",

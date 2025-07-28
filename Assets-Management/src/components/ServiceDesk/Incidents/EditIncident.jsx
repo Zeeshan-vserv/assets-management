@@ -22,6 +22,7 @@ import {
   getAllSupportGroup,
 } from "../../../api/SuportDepartmentRequest";
 import { NavLink, useParams } from "react-router-dom";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const EditIncident = () => {
   const { id } = useParams();
@@ -70,6 +71,7 @@ const EditIncident = () => {
       technician: "",
     },
   });
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch all dropdown data
   const fetchDetails = async () => {
@@ -171,11 +173,12 @@ const EditIncident = () => {
         ...formData,
         userId: user?.userId,
       });
-    //   await console.log(id, {
-    //     ...formData,
-    //     userId: user?.userId,
-    //   });
+      //   await console.log(id, {
+      //     ...formData,
+      //     userId: user?.userId,
+      //   });
       toast.success("Incident updated successfully");
+      setShowConfirm(false);
     } catch (error) {
       toast.error("Failed to update Incident");
     }
@@ -200,7 +203,9 @@ const EditIncident = () => {
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex gap-1 justify-end">
             <button
-              type="submit"
+              // type="submit"
+              type="button"
+              onClick={() => setShowConfirm(true)}
               className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
               disabled={isLoading}
             >
@@ -214,6 +219,12 @@ const EditIncident = () => {
                 Cancel
               </button>
             </NavLink>
+            <ConfirmUpdateModal
+              isOpen={showConfirm}
+              message="Are you sure you want to update Incident?"
+              onConfirm={handleSubmit}
+              onCancel={() => setShowConfirm(false)}
+            />
           </div>
           <div className="flex flex-wrap gap-6 justify-between mt-3">
             {/* Subject */}

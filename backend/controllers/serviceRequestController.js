@@ -522,6 +522,15 @@ export const createServiceRequest = async (req, res) => {
       serviceWindow
     );
 
+    const approvalStatusArr = [];
+    if (serviceRequestData.approver1) {
+      approvalStatusArr.push({
+        approver: serviceRequestData.approver1,
+        level: 1,
+        status: "Pending"
+      });
+    }
+
     // Save Service Request
     const newServiceRequest = new ServiceRequestModel({
       userId,
@@ -552,6 +561,7 @@ export const createServiceRequest = async (req, res) => {
           changedBy: userId,
         },
       ],
+      approvalStatus: approvalStatusArr,
     });
 
     await newServiceRequest.save();
@@ -707,5 +717,102 @@ export const deleteServiceRequest = async (req, res) => {
         message: "An error occurred while deleting service request",
         error: error.message,
       });
+  }
+};
+
+export const approveServiceRequest = async (req, res) => {
+  try {
+    const { id } = req.params; // serviceRequestId
+    const { approver, action, remarks } = req.body; // action: "Approved" or "Rejected"
+
+    const serviceRequest = await ServiceRequestModel.findById(id);
+    if (!serviceRequest) {
+      return res.status(404).json({ message: "Service Request not found" });
+    }
+
+    // Find current pending approver
+    const currentApproval = serviceRequest.approvalStatus.find(a => a.status === "Pending");
+    if (!currentApproval || currentApproval.approver !== approver) {
+      return res.status(400).json({ message: "Not authorized or already acted" });
+    }
+
+    // Update current approver status
+    currentApproval.status = action;
+    currentApproval.actionAt = new Date();
+    currentApproval.remarks = remarks;
+
+    // If approved and next approver exists, set next to Pending
+    if (action === "Approved") {
+      const nextLevel = currentApproval.level + 1;
+      const nextApproverField = `approver${nextLevel}`;
+      const nextApprover = serviceRequest[nextApproverField];
+      if (nextApprover) {
+        serviceRequest.approvalStatus.push({
+          approver: nextApprover,
+          level: nextLevel,
+          status: "Pending"
+        });
+      } else {
+        // All approvals done
+        serviceRequest.approval = true;
+      }
+    } else if (action === "Rejected") {
+      serviceRequest.approval = false;
+    }
+
+    await serviceRequest.save();
+    res.json({ success: true, data: serviceRequest });
+  } catch (error) {
+    res.status(500).json({ message: "Error in approval", error: error.message });
+  }
+};
+
+export const getServiceRequestStatusCounts = async (req, res) => {
+  try {
+    const statusList = [
+      "New",
+      "Approval Pending",
+      "Provisioning",
+      "Assigned",
+      "In-Progress",
+      "Hold",
+      "Cancelled",
+      "Rejected",
+      "Resolved",
+      "Closed",
+      "Waiting for Update",
+      "Coverte to SR"
+    ];
+
+    // Aggregate to get latest status from statusTimeline
+    const pipeline = [
+      {
+        $addFields: {
+          latestStatus: { $arrayElemAt: ["$statusTimeline.status", -1] }
+        }
+      },
+      {
+        $group: {
+          _id: "$latestStatus",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+
+    const results = await ServiceRequestModel.aggregate(pipeline);
+
+    // Map results to statusList
+    const counts = {};
+    statusList.forEach(status => {
+      const found = results.find(r => r._id === status);
+      counts[status] = found ? found.count : 0;
+    });
+
+    // Total count
+    counts["Total"] = await ServiceRequestModel.countDocuments();
+
+    res.json({ success: true, data: counts });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching status counts", error: error.message });
   }
 };

@@ -22,7 +22,7 @@ import { RxCross2 } from "react-icons/rx";
 import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
 import QRCodeGenerator from "qrcode";
 import { ImEye } from "react-icons/im";
-import { getUserById, getAllUsers } from "../../../api/AuthRequest"; // Import this
+import { getUserById, getAllUsers } from "../../../api/AuthRequest"; 
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -97,14 +97,6 @@ const AssetData = () => {
     counts["All"] = data.length;
     return counts;
   }, [data]);
-
-  // const fetchUsedData = async (id) => {
-  //   response = await getUserById(id);
-  //   console.log(response);
-  // };
-
-  // console.log(data);
-  // console.log(selectedRowsForQrCodes);
 
   const columns = useMemo(
     () => [

@@ -210,3 +210,44 @@ export const uploadAssetFromExcel = async (req, res) => {
         res.status(500).json({ success: false, message: 'Failed to upload assets', error: error.message });
     }
 }
+
+export const getAssetStatusCounts = async (req, res) => {
+  try {
+    const assetList = [
+      "Total",
+      "In Store",
+      "Allocated",
+      "In Repair",
+      "Theft/Lost",
+      "Discard/Replaced",
+      "Disposed/Scrapped",
+      "Sold"
+    ];
+
+    const pipeline = [
+      {
+        $group: {
+          _id: "$assetState.assetIsCurrently",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+
+    const results = await AssetModel.aggregate(pipeline);
+
+    const counts = {};
+    assetList.forEach(status => {
+      const found = results.find(r => r._id === status);
+      counts[status] = found ? found.count : 0;
+    });
+
+    // Total count
+    counts["Total"] = await AssetModel.countDocuments();
+
+    res.json({ success: true, data: counts });
+  } catch (error) {
+    console.error("Error fetching asset counts:", error);
+    res.status(500).json({ message: "Error fetching asset counts", error: error.message });
+  }
+};
+

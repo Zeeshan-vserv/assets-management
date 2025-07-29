@@ -9,7 +9,7 @@ import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { getAllAssets } from "../../../api/AssetsRequest";
+import { getAllAssets, getAssetStatusCounts } from "../../../api/AssetsRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -30,14 +30,30 @@ const assetStates = [
 
 function AssetsSummary() {
   const [data, setData] = useState([]);
-  const [stateData, setStateData] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [cardData, setCardData] = useState([]);
 
+  // Fetch asset counts for cards and all assets for table
   const fetchAssets = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllAssets();
-      setData(response?.data?.data || []);
+      // Fetch all assets for table
+      const allAssetsRes = await getAllAssets();
+      setData(allAssetsRes?.data?.data || []);
+      // Fetch counts for cards
+      const countsRes = await getAssetStatusCounts();
+      const counts = countsRes?.data?.data || {};
+      const cardArr = [
+        { id: "1", count: counts["Total"] || 0, description: "Total" },
+        { id: "2", count: counts["In Store"] || 0, description: "In-Store" },
+        { id: "3", count: counts["Allocated"] || 0, description: "Allocated" },
+        { id: "4", count: counts["In Repair"] || 0, description: "In-Repair" },
+        { id: "5", count: counts["Theft/Lost"] || 0, description: "Theft/Lost" },
+        { id: "6", count: counts["Discard/Replaced"] || 0, description: "Discard/Replaced" },
+        { id: "7", count: counts["Disposed/Scrapped"] || 0, description: "Disposed/Scrapped" },
+        { id: "8", count: counts["Sold"] || 0, description: "Sold" },
+      ];
+      setCardData(cardArr);
     } catch (error) {
       console.error("Error fetching assets:", error);
     } finally {
@@ -49,16 +65,19 @@ function AssetsSummary() {
     fetchAssets();
   }, []);
 
+  // Table summary by category
   const categorySummary = useMemo(() => {
     // Get all unique categories
     const allCategories = Array.from(
       new Set(
-        data.map((item) => item.assetInformation?.category || "Uncategorized")
+        (Array.isArray(data) ? data : []).map(
+          (item) => item.assetInformation?.category || "Uncategorized"
+        )
       )
     );
 
     return allCategories.map((category, idx) => {
-      const assetsInCategory = data.filter(
+      const assetsInCategory = (Array.isArray(data) ? data : []).filter(
         (item) =>
           (item.assetInformation?.category || "Uncategorized") === category
       );
@@ -84,16 +103,6 @@ function AssetsSummary() {
     });
   }, [data]);
 
-  useEffect(() => {
-    const groupedData = assetStates.reduce((acc, state) => {
-      acc[state] = data.filter(
-        (item) => item.assetState?.assetIsCurrently === state
-      );
-      return acc;
-    }, {});
-    setStateData(groupedData);
-  }, [data]);
-
   const columns = useMemo(
     () => [
       { accessorKey: "id", header: "Id" },
@@ -110,7 +119,7 @@ function AssetsSummary() {
     [isLoading]
   );
 
-  //Exports
+  // Export handlers
   const handleExportRows = (rows) => {
     const visibleColumns = table
       .getAllLeafColumns()
@@ -134,6 +143,7 @@ function AssetsSummary() {
     const csv = generateCsv(csvConfig)(rowData);
     download(csvConfig)(csv);
   };
+
   const handleExportData = () => {
     const visibleColumns = table
       .getAllLeafColumns()
@@ -145,7 +155,7 @@ function AssetsSummary() {
           col.id !== "delete"
       );
 
-    const exportData = data.map((item) => {
+    const exportData = categorySummary.map((item) => {
       const result = {};
       visibleColumns.forEach((col) => {
         const key = col.id || col.accessorKey;
@@ -169,7 +179,7 @@ function AssetsSummary() {
     const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
 
     // Prepare data rows for PDF
-    const exportData = data.map((item) =>
+    const exportData = categorySummary.map((item) =>
       visibleColumns.map((col) => {
         const key = col.id || col.accessorKey;
         let value = item[key];
@@ -191,11 +201,11 @@ function AssetsSummary() {
   const table = useMaterialReactTable({
     data: categorySummary,
     columns,
-    getRowId: (row) => row?._id?.toString(),
+    getRowId: (row) => row?.id?.toString(),
     enableRowSelection: true,
     initialState: {
       density: "compact",
-      pagination: { pageSize: 5 },
+      pagination: { pageSize: 10 },
     },
     renderTopToolbarCustomActions: ({ table }) => {
       return (
@@ -290,48 +300,6 @@ function AssetsSummary() {
     }),
   });
 
-  const cardData = [
-    {
-      id: "1",
-      totalCount: data.length,
-      description: "Total",
-    },
-    {
-      id: "2",
-      storeCount: stateData["In Store"]?.length || 0,
-      description: "In-Store",
-    },
-    {
-      id: "3",
-      allocatedCount: stateData["Allocated"]?.length || 0,
-      description: "Allocated",
-    },
-    {
-      id: "4",
-      inRepairCount: stateData["In Repair"]?.length || 0,
-      description: "In-Repair",
-    },
-    {
-      id: "5",
-      inTransitCount: stateData["Lost"]?.length || 0,
-      description: "Theft/Lost",
-    },
-    {
-      id: "6",
-      handOverCount: stateData["Discard"]?.length || 0,
-      description: "Discard/Replaced",
-    },
-    {
-      id: "7",
-      underRecoveryCount: stateData["Disposed"]?.length || 0,
-      description: "Disposed/Scrapped",
-    },
-    {
-      id: "8",
-      discardReplacedCount: stateData["Sold"]?.length || 0,
-      description: "Sold",
-    },
-  ];
   return (
     <>
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
@@ -340,24 +308,17 @@ function AssetsSummary() {
         </h2>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6">
-          {cardData.map((item) => {
-            const countKey = Object.keys(item).find((key) =>
-              key.endsWith("Count")
-            );
-            const count = item[countKey];
-
-            return (
-              <div
-                key={item?.id}
-                className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition"
-              >
-                <h2 className="font-semibold text-xl text-blue-600 mb-1">
-                  {count}
-                </h2>
-                <span className="text-sm">{item.description}</span>
-              </div>
-            );
-          })}
+          {cardData.map((item) => (
+            <div
+              key={item?.id}
+              className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition"
+            >
+              <h2 className="font-semibold text-xl text-blue-600 mb-1">
+                {item.count}
+              </h2>
+              <span className="text-sm">{item.description}</span>
+            </div>
+          ))}
         </div>
 
         <MaterialReactTable table={table} />

@@ -608,6 +608,29 @@ export const getServiceRequestById = async (req, res) => {
   }
 };
 
+export const getServiceRequestByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    // console.log("Incoming userId:", userId);
+
+    const services = await ServiceRequestModel.find({ userId });
+    // console.log("Query result:", incidents);
+
+    if (!services || services.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No service request related to this user" });
+    }
+
+    res.status(200).json({ success: true, data: services });
+  } catch (error) {
+    console.error("Error fetching services by userId:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching services" });
+  }
+};
+
 export const updateServiceRequest = async (req, res) => {
   try {
     const { id } = req.params;

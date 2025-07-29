@@ -21,10 +21,11 @@ const authMiddleware = async (req, res, next) => {
         }
 
         req.user = {
-            id: decoded.id,
+            id: user._id,
+            userRole: user.userRole,
             emailAddress: user.emailAddress,
-            isAdmin: decoded.isAdmin || false // set this if you have admin logic
-        }
+            ...user._doc
+        };
         next()
     } catch (err) {
         console.log(err)

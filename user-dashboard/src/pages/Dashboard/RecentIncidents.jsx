@@ -5,7 +5,7 @@ import {
 } from "material-react-table";
 import axios from "axios";
 import { useSelector } from "react-redux";
-import { getIncidentById } from "../../api/IncidentRequest";
+import { getIncidentById, getIncidentByUserId } from "../../api/IncidentRequest";
 
 
 function RecentIncidents() {
@@ -16,8 +16,8 @@ function RecentIncidents() {
   const fetchRecentIncidents = async () => {
     try {
       setIsLoading(true);      
-      const response = await  getIncidentById(user.userId);
-      setData(response?.data?.recipes || []);
+      const response = await  getIncidentByUserId(user.userId);      
+      setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching recent incidents:", error);
     } finally {
@@ -35,15 +35,15 @@ function RecentIncidents() {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
+        accessorKey: "incidentId",
         header: "Recent Incidents",
       },
       {
-        accessorKey: "cuisine",
+        accessorKey: "subject",
         header: "Subject",
       },
       {
-        accessorKey: "difficulty",
+        accessorKey: "status",
         header: "Status",
       },
     ],

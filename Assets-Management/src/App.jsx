@@ -3,6 +3,7 @@ import Main from "./pages/Main.jsx";
 import Login from "./pages/Login.jsx";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useSelector } from "react-redux";
+import NotAuthorized from "./pages/NotAuthorized.jsx";
 
 function App() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -19,6 +20,7 @@ function App() {
           element={user ? <Main /> : <Navigate to="/auth" />}
         />
         <Route path="/" element={<Navigate to="/auth" />} />
+        <Route path="/not-authorized" element={<NotAuthorized />} />
       </Routes>
     </>
   );

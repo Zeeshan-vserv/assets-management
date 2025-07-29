@@ -29,6 +29,7 @@ import globalIncident from './routes/globalIncidentRoute.js'
 import globalService from './routes/globalServiceRoute.js'
 import sla from './routes/slaRoute.js'
 import incidentStatus from './routes/incidentStatusRoute.js'
+import roleRoute from './routes/roleRoute.js';
 
 const app = express()
 
@@ -68,3 +69,4 @@ app.use('/globalIncident', globalIncident)
 app.use('/globalService', globalService)
 app.use('/sla', sla)
 app.use('/incidentStatus', incidentStatus)
+app.use('/role', roleRoute);

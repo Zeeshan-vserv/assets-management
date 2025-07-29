@@ -45,13 +45,23 @@ import IncidentStatus from "./Incident/IncidentStatus.jsx";
 import AutoClosedTime from "./Request/AutoClosedTime.jsx";
 import ReqCategory from "./Request/ReqCategory.jsx";
 import ReqSubCategory from "./Request/ReqSubCategory.jsx";
+import NotAuthorized from "../../pages/NotAuthorized.jsx";
+import ProtectedRoute from "../ProtectedRoute.jsx";
+
 function ConfigurationRoute() {
   return (
     <>
       <Routes>
         {/* Global Routes */}
         <Route path="components" element={<Components />} />
-        <Route path="Users" element={<Users />} />
+        <Route
+          path="Users"
+          element={
+            <ProtectedRoute page="users" permission="isView" allowedRoles={["Admin"]}>
+              <Users />
+            </ProtectedRoute>
+          }
+        />
         <Route path="AddUser" element={<AddUser />} />
         <Route path=":id" element={<EditUser />} />
         <Route path="department" element={<Department />} />
@@ -110,7 +120,7 @@ function ConfigurationRoute() {
         <Route path="ReqAutoClosedTime" element={<AutoClosedTime />} />
         <Route path="ReqCategory" element={<ReqCategory />} />
         <Route path="ReqSubCategory" element={<ReqSubCategory />} />
-
+        
         
       </Routes>
     </>

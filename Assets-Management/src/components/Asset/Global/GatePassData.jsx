@@ -450,7 +450,7 @@ function GatePassData() {
                 </p>
                 <form
                   onSubmit={deleteGetPassDeleteHandler}
-                  className="flex justify-end gap-3"
+                  className="flex justify-end gap-2"
                 >
                   <button
                     type="button"

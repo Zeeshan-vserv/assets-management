@@ -3,13 +3,13 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton } from "@mui/material";
+import { Autocomplete, Box, Button, IconButton } from "@mui/material";
 import { AiOutlineFileExcel } from "react-icons/ai";
 import { AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { Autocomplete, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
@@ -28,15 +28,18 @@ const csvConfig = mkConfig({
   useKeysAsHeaders: true,
   filename: "Assets-Management-Department.csv",
 });
+const ticketOptions = ["All Tickets", "My Tickets"];
 
 function ServiceRequest() {
   const navigate = useNavigate();
+  const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [cardData, setCardData] = useState([]);
   const [changeStatus, setChangeStatus] = useState(false);
   const [seletecetdRowId, setSelectedRowId] = useState(null);
   const [selectDropDownValue, setSelectDropDownValue] = useState("");
+  const [ticketType, setTicketType] = useState(ticketOptions[0]);
 
   // const fetchService = async () => {
   //   try {
@@ -105,6 +108,15 @@ function ServiceRequest() {
   }, []);
 
   // console.log("data", data);
+  //
+  const filteredData = useMemo(() => {
+    if (ticketType === "All Tickets") {
+      return data;
+    } else if (ticketType === "My Tickets") {
+      return data.filter((item) => item.submitter?.userId === user?.userId);
+    }
+    return data;
+  }, [data, ticketType, user?.userId]);
 
   //status
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
@@ -341,6 +353,44 @@ function ServiceRequest() {
           >
             New
           </Button>
+          <Autocomplete
+            className="w-[15%]"
+            sx={{
+              ml: 2,
+              mt: 1,
+              mb: 1,
+              "& .MuiInputBase-root": {
+                borderRadius: "0.35rem",
+                backgroundColor: "#f9fafb",
+                fontSize: "0.85rem",
+                border: "1px solid #e2e8f0",
+                transition: "all 0.3s ease",
+              },
+              "& .MuiInputBase-root:hover": {
+                borderColor: "#94a3b8",
+              },
+            }}
+            options={ticketOptions}
+            value={ticketType}
+            onChange={(_, newValue) =>
+              setTicketType(newValue || ticketOptions[0])
+            }
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                variant="standard"
+                placeholder="Select"
+                InputProps={{
+                  ...params.InputProps,
+                  disableUnderline: true,
+                }}
+                inputProps={{
+                  ...params.inputProps,
+                  style: { fontSize: "0.85rem", padding: "8px" },
+                }}
+              />
+            )}
+          />
           <Button
             variant="contained"
             size="small"
@@ -475,7 +525,7 @@ function ServiceRequest() {
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-2 py-2 rounded-md text-sm text-white transition-all"
           >
             <div className="flex flex-row justify-between items-center gap-1">
-              <FaDesktop size={13} />
+              <FaDesktop size={12} />
               <span> View Dashboard</span>
             </div>
           </button>
@@ -694,17 +744,17 @@ function ServiceRequest() {
                   </div>
                   <div className="flex justify-end gap-3 pt-4 mt-6">
                     <button
+                      type="submit"
+                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                    >
+                      Submit
+                    </button>
+                    <button
                       type="button"
                       onClick={() => setChangeStatus(false)}
                       className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                     >
                       Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                    >
-                      Submit
                     </button>
                   </div>
                 </form>

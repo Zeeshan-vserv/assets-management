@@ -201,7 +201,7 @@ const EditIncident = () => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-8">
         {/* Incident Details */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <div className="flex gap-1 justify-end">
+          <div className="flex gap-2 justify-end">
             <button
               // type="submit"
               type="button"

@@ -9,6 +9,7 @@ import {
   getAllServiceSubCategory,
 } from "../../api/globalServiceRequest";
 import { getAllUsers } from "../../api/UserAuth";
+import ConfirmModal from "../ConfirmModal";
 
 function NewServiceReqest() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -31,6 +32,7 @@ function NewServiceReqest() {
     approver2: "",
     approver3: "",
   });
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchServiceCategoryData = async () => {
     try {
@@ -123,8 +125,8 @@ function NewServiceReqest() {
     e.preventDefault();
     try {
       const formDatas = { ...formData, userId };
-      console.log(formDatas);
-      
+      // console.log(formDatas);
+
       const response = await createServiceRequest(formDatas);
       if (response?.data?.success) {
         toast.success("Service Request created successfully");
@@ -141,6 +143,7 @@ function NewServiceReqest() {
         approver2: "",
         approver3: "",
       });
+      setShowConfirm(false);
     } catch (error) {
       console.log("Error Creating in Service Request");
     }
@@ -285,7 +288,11 @@ function NewServiceReqest() {
                   Cost
                 </label>
                 <input
-                  className={`w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none ${purchaseRequired === "No"?"bg-gray-100 cursor-not-allowed" : "focus:border-blue-500"}`}
+                  className={`w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none ${
+                    purchaseRequired === "No"
+                      ? "bg-gray-100 cursor-not-allowed"
+                      : "focus:border-blue-500"
+                  }`}
                   type="number"
                   id="cost"
                   name="cost"
@@ -321,7 +328,6 @@ function NewServiceReqest() {
               </div>
               {formData.approval && (
                 <>
-                
                   <div className="flex items-center w-[46%]">
                     <label className="w-[28%] text-xs font-semibold text-slate-600">
                       Approval (Level-1)
@@ -416,7 +422,9 @@ function NewServiceReqest() {
             </div>
             <div className="my-2 flex justify-end gap-2 mt-6">
               <button
-                type="submit"
+                // type="submit"
+                type="button"
+                onClick={() => setShowConfirm(true)}
                 className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white cursor-pointer"
               >
                 Submit
@@ -433,6 +441,12 @@ function NewServiceReqest() {
                   Cancel
                 </button>
               </NavLink>
+              <ConfirmModal 
+                isOpen={showConfirm}
+                message="Are you sure you want to create this service request?"
+                onConfirm={handleSubmit}
+                onCancel={() => setShowConfirm(false)}
+              />
             </div>
           </div>
         </form>

@@ -20,7 +20,7 @@ function RequestDashboard() {
             className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-3 py-2 rounded-md text-sm text-white transition-all"
           >
             <div className="flex flex-row justify-between items-center gap-1">
-              <MdOutlineDashboard size={12} />
+              <MdOutlineDashboard size={13} />
               <span>Go To Module</span>
             </div>
           </button>

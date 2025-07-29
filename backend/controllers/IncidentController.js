@@ -532,7 +532,7 @@ export const createIncident = async (req, res) => {
 
 export const getAllIncident = async (req, res) => {
   try {
-    const incident = await IncidentModel.find();
+    const incident = await IncidentModel.find().sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: incident });
   } catch (error) {
     res
@@ -544,7 +544,7 @@ export const getAllIncident = async (req, res) => {
 export const getIncidentById = async (req, res) => {
   try {
     const { id } = req.params;
-    const incident = await IncidentModel.findById(id);
+    const incident = await IncidentModel.findById(id).sort({ createdAt: -1 });
 
     if (!incident) {
       return res
@@ -564,7 +564,7 @@ export const getIncidentByUserId = async (req, res) => {
     const { userId } = req.params;
     // console.log("Incoming userId:", userId);
 
-    const incidents = await IncidentModel.find({ userId });
+    const incidents = await IncidentModel.find({ userId }).sort({ createdAt: -1 });
     // console.log("Query result:", incidents);
 
     if (!incidents || incidents.length === 0) {
@@ -581,9 +581,6 @@ export const getIncidentByUserId = async (req, res) => {
       .json({ message: "An error occurred while fetching incidents" });
   }
 };
-
-
-
 
 export const updateIncident = async (req, res) => {
   try {

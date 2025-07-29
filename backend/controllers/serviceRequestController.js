@@ -581,7 +581,7 @@ export const createServiceRequest = async (req, res) => {
 
 export const getAllServiceRequests = async (req, res) => {
   try {
-    const serviceRequests = await ServiceRequestModel.find();
+    const serviceRequests = await ServiceRequestModel.find().sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: serviceRequests });
   } catch (error) {
     res
@@ -593,7 +593,7 @@ export const getAllServiceRequests = async (req, res) => {
 export const getServiceRequestById = async (req, res) => {
   try {
     const { id } = req.params;
-    const serviceRequest = await ServiceRequestModel.findById(id);
+    const serviceRequest = await ServiceRequestModel.findById(id).sort({ createdAt: -1 });
 
     if (!serviceRequest) {
       return res
@@ -613,7 +613,7 @@ export const getServiceRequestByUserId = async (req, res) => {
     const { userId } = req.params;
     // console.log("Incoming userId:", userId);
 
-    const services = await ServiceRequestModel.find({ userId });
+    const services = await ServiceRequestModel.find({ userId }).sort({ createdAt: -1 });
     // console.log("Query result:", incidents);
 
     if (!services || services.length === 0) {

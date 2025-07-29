@@ -2,7 +2,7 @@ import express from 'express'
 import multer from "multer";
 import path from "path";
 import authMiddleware from '../middleware/AuthMiddleware.js'
-import { createIncident, deleteIncident, getAllIncident, getAllIncidentsSla, getAllIncidentsTat, getIncidentById, getIncidentSla, getIncidentTat, updateIncident } from '../controllers/IncidentController.js'
+import { createIncident, deleteIncident, getAllIncident, getAllIncidentsSla, getAllIncidentsTat, getIncidentById, getIncidentByUserId, getIncidentSla, getIncidentStatusCounts, getIncidentTat, updateIncident } from '../controllers/IncidentController.js'
 
 const router = express.Router()
 
@@ -18,16 +18,16 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
-
 router.post('/', authMiddleware, upload.single('attachment'), createIncident);
 router.get("/sla-all", getAllIncidentsSla);
 router.get("/tat-all", getAllIncidentsTat);
+router.get('/status-counts', authMiddleware, getIncidentStatusCounts);
 router.get('/', authMiddleware, getAllIncident)
 router.get('/:id', authMiddleware, getIncidentById)
+router.get('/user/:userId', getIncidentByUserId)
 router.put('/:id', authMiddleware, updateIncident)
 router.delete('/:id', authMiddleware, deleteIncident)
 router.get("/sla/:id", getIncidentSla);
 router.get("/tat/:id", getIncidentTat);
-
 
 export default router

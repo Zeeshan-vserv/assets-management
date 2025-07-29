@@ -4,16 +4,23 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { getIncidentById, getIncidentByUserId } from "../../api/IncidentRequest";
+
 
 function RecentIncidents() {
+    const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  console.log(user.userId);
+  
+
   const fetchRecentIncidents = async () => {
     try {
-      setIsLoading(true);
-      const response = await axios.get("https://dummyjson.com/recipes");
-      setData(response?.data?.recipes || []);
+      setIsLoading(true);      
+      const response = await  getIncidentByUserId(user.userId);      
+      setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching recent incidents:", error);
     } finally {
@@ -25,18 +32,21 @@ function RecentIncidents() {
     fetchRecentIncidents();
   }, []);
 
+  // console.log(data);
+  
+
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
+        accessorKey: "incidentId",
         header: "Recent Incidents",
       },
       {
-        accessorKey: "cuisine",
+        accessorKey: "subject",
         header: "Subject",
       },
       {
-        accessorKey: "difficulty",
+        accessorKey: "status",
         header: "Status",
       },
     ],

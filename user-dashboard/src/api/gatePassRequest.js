@@ -28,15 +28,10 @@ API.interceptors.response.use(
   }
 );
 
-export const createAsset = (formData) =>
-  API.post("asset/", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+// export const createGatePassRequest = (formDatas) => API.post("/gatepass/", formDatas);
+export const getMyPendingGatePassApprovals = () => API.get("/gatepass/my-approvals");
+// export const getAllGatePassRequests = () => API.get("/gatepass/");
+// export const getGatePassRequestById = (id) => API.get(`/gatepass/${id}`);
+// export const updateGatePassRequest = (id, updateData) => API.put(`/gatepass/${id}`, updateData);
+// export const deleteGatePassRequest = (id) => API.delete(`/gatepass/${id}`);
 
-export const createIncident = (formData) => API.post("/incident", formData);
-export const getAllIncident = () => API.get("/incident");
-export const getIncidentById = (id) => API.get(`/incident/${id}`);
-export const getIncidentByUserId = (userId) => API.get(`/incident/user/${userId}`);
-export const updateIncident = (id, updateData) =>
-  API.put(`/incident/${id}`, updateData);
-export const deleteIncident = (id) => API.delete(`/incident/${id}`);

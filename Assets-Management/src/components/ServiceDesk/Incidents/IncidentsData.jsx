@@ -21,6 +21,7 @@ import {
   getAllIncident,
   getAllIncidentsSla,
   getAllIncidentsTat,
+  getIncidentStatusCounts,
   updateIncident,
 } from "../../../api/IncidentRequest";
 import {
@@ -62,21 +63,56 @@ const IncidentsData = () => {
   const [technician, setTechnician] = useState([]);
   const [allSla, setAllSla] = useState([]);
   const [allTat, setAllTat] = useState([]);
+  const [cardData, setCardData] = useState([]);
   const [ticketType, setTicketType] = useState(ticketOptions[0]);
 
   // Fetch incidents
-  const fetchDepartment = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await getAllIncident();
-      setData(response?.data?.data || []);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  // const fetchDepartment = useCallback(async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await getAllIncident();
+  //     setData(response?.data?.data || []);
+  //     const countResponse = await getIncidentStatusCounts();
+  //     // console.log("Status Counts:", countResponse?.data?.data);
+  //     setCardData(countResponse?.data?.data);
+      
+  //   } catch (error) {
+  //     console.error("Error fetching departments:", error);
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }, []);
 
+
+  const fetchDepartment = useCallback(async () => {
+  setIsLoading(true);
+  try {
+    const response = await getAllIncident();
+    setData(response?.data?.data || []);
+    const countResponse = await getIncidentStatusCounts();
+    // Convert object to array if needed
+    let counts = countResponse?.data?.data;
+    if (counts && !Array.isArray(counts)) {
+      counts = [
+        { id: "1", count: counts["New"] || 0, description: "New" },
+        { id: "2", count: counts["Assigned"] || 0, description: "Assigned" },
+        { id: "3", count: counts["In-Progress"] || 0, description: "In-Progress" },
+        { id: "4", count: counts["Pause"] || 0, description: "Pause" },
+        { id: "5", count: counts["Resolved"] || 0, description: "Resolved" },
+        { id: "6", count: counts["Cancelled"] || counts["cancel"] || 0, description: "Cancelled" },
+        { id: "7", count: counts["Reopened"] || counts["reopen"] || 0, description: "Reopened" },
+        { id: "8", count: counts["Closed"] || 0, description: "Closed" },
+        { id: "9", count: counts["Converted to SR"] || 0, description: "Converted to SR" },
+        { id: "11", count: response?.data?.data?.length || 0, description: "Total" },
+      ];
+    }
+    setCardData(counts || []);
+  } catch (error) {
+    console.error("Error fetching departments:", error);
+  } finally {
+    setIsLoading(false);
+  }
+}, []);
   // Fetch dropdowns
   const fetchDropdownData = useCallback(async () => {
     try {
@@ -218,7 +254,7 @@ const IncidentsData = () => {
       { accessorKey: "subject", header: "Subject" },
       { accessorKey: "category", header: "Category" },
       { accessorKey: "subCategory", header: "Sub Category" },
-      { accessorKey: "submitter.user", header: "Submitter" },
+      { accessorKey: "userId", header: "Submitter" },
       { accessorKey: "assetDetails.asset", header: "Asset Id" },
       { accessorKey: "locationDetails.location", header: "Location" },
       { accessorKey: "locationDetails.subLocation", header: "Sub Location" },
@@ -551,34 +587,34 @@ const IncidentsData = () => {
     return acc;
   }, {});
 
-  const cardData = [
-    { id: "1", count: statusCounts["new"] || 0, description: "New" },
-    { id: "2", count: statusCounts["assigned"] || 0, description: "Assigned" },
-    {
-      id: "3",
-      count: statusCounts["in progress"] || 0,
-      description: "In-Progress",
-    },
-    { id: "4", count: statusCounts["pause"] || 0, description: "Pause" },
-    { id: "5", count: statusCounts["resolved"] || 0, description: "Resolved" },
-    {
-      id: "6",
-      count: statusCounts["cancelled"] || statusCounts["cancel"] || 0,
-      description: "Cancelled",
-    },
-    {
-      id: "7",
-      count: statusCounts["reopened"] || statusCounts["reopen"] || 0,
-      description: "Reopened",
-    },
-    { id: "8", count: statusCounts["closed"] || 0, description: "Closed" },
-    {
-      id: "9",
-      count: statusCounts["converted to sr"] || 0,
-      description: "Converted to SR",
-    },
-    { id: "11", count: data.length, description: "Total" },
-  ];
+  // const cardData = [
+  //   { id: "1", count: statusCounts["new"] || 0, description: "New" },
+  //   { id: "2", count: statusCounts["assigned"] || 0, description: "Assigned" },
+  //   {
+  //     id: "3",
+  //     count: statusCounts["in progress"] || 0,
+  //     description: "In-Progress",
+  //   },
+  //   { id: "4", count: statusCounts["pause"] || 0, description: "Pause" },
+  //   { id: "5", count: statusCounts["resolved"] || 0, description: "Resolved" },
+  //   {
+  //     id: "6",
+  //     count: statusCounts["cancelled"] || statusCounts["cancel"] || 0,
+  //     description: "Cancelled",
+  //   },
+  //   {
+  //     id: "7",
+  //     count: statusCounts["reopened"] || statusCounts["reopen"] || 0,
+  //     description: "Reopened",
+  //   },
+  //   { id: "8", count: statusCounts["closed"] || 0, description: "Closed" },
+  //   {
+  //     id: "9",
+  //     count: statusCounts["converted to sr"] || 0,
+  //     description: "Converted to SR",
+  //   },
+  //   { id: "11", count: data.length, description: "Total" },
+  // ];
 
   // Render
   return (

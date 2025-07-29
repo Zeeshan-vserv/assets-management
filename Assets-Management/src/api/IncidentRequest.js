@@ -34,6 +34,7 @@ export const createAsset = (formData) =>
   });
 
 export const createIncident = (formData) => API.post("/incident", formData);
+export const getIncidentStatusCounts = () => API.get("/incident/status-counts");
 export const getAllIncident = () => API.get("/incident");
 export const getIncidentById = (id) => API.get(`/incident/${id}`);
 export const updateIncident = (id, updateData) =>

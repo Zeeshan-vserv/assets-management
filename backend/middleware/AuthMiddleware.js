@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import AuthModel from '../models/authModel.js'
 
 dotenv.config()
 const secret = process.env.JWT_KEY
@@ -12,10 +13,19 @@ const authMiddleware = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, secret)
-        req.user = {
-            id: decoded.id,
-            isAdmin: decoded.isAdmin || false // set this if you have admin logic
+
+        // Fetch user from DB using ID from JWT
+        const user = await AuthModel.findById(decoded.id);
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
         }
+
+        req.user = {
+            id: user._id,
+            userRole: user.userRole,
+            emailAddress: user.emailAddress,
+            ...user._doc
+        };
         next()
     } catch (err) {
         console.log(err)

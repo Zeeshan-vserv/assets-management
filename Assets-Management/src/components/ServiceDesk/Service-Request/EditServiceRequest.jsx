@@ -863,7 +863,7 @@ function EditServiceRequest() {
                     supportDepartmentData.find(
                       (dept) =>
                         dept.supportDepartmentName ===
-                        formData.supportDepartmentName
+                        formData.classificaton.supportDepartmentName
                     ) || null
                   }
                   onChange={(event, newValue) => {
@@ -902,7 +902,7 @@ function EditServiceRequest() {
                   value={
                     supportGroupData.find(
                       (group) =>
-                        group.supportGroupName === formData.supportGroups
+                        group.supportGroupName === formData.classificaton.supportGroupName 
                     ) || null
                   }
                   onChange={(event, newValue) => {

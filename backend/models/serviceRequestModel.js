@@ -15,6 +15,14 @@ const fieldChangeEntrySchema = new mongoose.Schema({
     changedBy: String
 }, { _id: false });
 
+const approvalEntrySchema = new mongoose.Schema({
+  approver: String, // email or userId
+  level: Number,
+  status: { type: String, default: "Pending" }, // Pending, Approved, Rejected
+  actionAt: Date,
+  remarks: String
+}, { _id: false });
+
 const serviceRequestSchema = new mongoose.Schema({
     userId: String,
     serviceId: String,
@@ -55,7 +63,8 @@ const serviceRequestSchema = new mongoose.Schema({
         technician: String
     },
     statusTimeline: [statusEntrySchema],
-    fieldChangeHistory: [fieldChangeEntrySchema]
+    fieldChangeHistory: [fieldChangeEntrySchema],
+    approvalStatus: [approvalEntrySchema]
 }, { timestamps: true})
 
 const ServiceRequestModel = mongoose.model('ServiceRequest', serviceRequestSchema)

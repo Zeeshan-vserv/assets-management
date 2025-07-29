@@ -532,7 +532,7 @@ export const createIncident = async (req, res) => {
 
 export const getAllIncident = async (req, res) => {
   try {
-    const incident = await IncidentModel.find();
+    const incident = await IncidentModel.find().sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: incident });
   } catch (error) {
     res
@@ -544,7 +544,7 @@ export const getAllIncident = async (req, res) => {
 export const getIncidentById = async (req, res) => {
   try {
     const { id } = req.params;
-    const incident = await IncidentModel.findById(id);
+    const incident = await IncidentModel.findById(id).sort({ createdAt: -1 });
 
     if (!incident) {
       return res
@@ -556,6 +556,29 @@ export const getIncidentById = async (req, res) => {
     res
       .status(500)
       .json({ message: "An error occurred while fetching incident" });
+  }
+};
+
+export const getIncidentByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    // console.log("Incoming userId:", userId);
+
+    const incidents = await IncidentModel.find({ userId }).sort({ createdAt: -1 });
+    // console.log("Query result:", incidents);
+
+    if (!incidents || incidents.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No incident related to this user" });
+    }
+
+    res.status(200).json({ success: true, data: incidents });
+  } catch (error) {
+    console.error("Error fetching incidents by userId:", error);
+    res
+      .status(500)
+      .json({ message: "An error occurred while fetching incidents" });
   }
 };
 
@@ -756,3 +779,53 @@ async function getBusinessMinutesBetweenWithHoliday(now, end, slaTimeline) {
   }
   return Math.round(minutes);
 }
+
+export const getIncidentStatusCounts = async (req, res) => {
+  try {
+    const statusList = [
+      "New",
+      "Approval Pending",
+      "Provisioning",
+      "Assigned",
+      "In-Progress",
+      "Hold",
+      "Cancelled",
+      "Rejected",
+      "Resolved",
+      "Closed",
+      "Waiting for Update",
+      "Coverte to SR"
+    ];
+
+    // Aggregate to get latest status from statusTimeline
+    const pipeline = [
+      {
+        $addFields: {
+          latestStatus: { $arrayElemAt: ["$statusTimeline.status", -1] }
+        }
+      },
+      {
+        $group: {
+          _id: "$latestStatus",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+
+    const results = await IncidentModel.aggregate(pipeline);
+
+    // Map results to statusList
+    const counts = {};
+    statusList.forEach(status => {
+      const found = results.find(r => r._id === status);
+      counts[status] = found ? found.count : 0;
+    });
+
+    // Total count
+    counts["Total"] = await IncidentModel.countDocuments();
+
+    res.json({ success: true, data: counts });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching status counts", error: error.message });
+  }
+};

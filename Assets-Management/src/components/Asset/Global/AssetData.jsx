@@ -22,7 +22,7 @@ import { RxCross2 } from "react-icons/rx";
 import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
 import QRCodeGenerator from "qrcode";
 import { ImEye } from "react-icons/im";
-import { getUserById } from "../../../api/AuthRequest";
+import { getUserById, getAllUsers } from "../../../api/AuthRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -41,9 +41,9 @@ const AssetData = () => {
 
   const [qrCodesModalOpen, setQrCodesModalOpen] = useState(false);
   const [selectedRowsForQrCodes, setSelectedRowsForQrCodes] = useState([]);
-
-  // const [assignedUserModalOpen, setAssignedUserModalOpen] = useState(false);
-  // const [assignedUserDetails, setAssignedUserDetails] = useState(null);
+  const [userMap, setUserMap] = useState({});
+  const [userModalOpen, setUserModalOpen] = useState(false);
+  const [userDetails, setUserDetails] = useState(null);
 
   // console.log(filteredData);
 
@@ -100,14 +100,6 @@ const AssetData = () => {
     return counts;
   }, [data]);
 
-  const fetchUsedData = async (id) => {
-    response = await getUserById(id);
-    console.log(response);
-  };
-
-  // console.log(data);
-  // console.log(selectedRowsForQrCodes);
-
   const columns = useMemo(
     () => [
       {
@@ -135,30 +127,21 @@ const AssetData = () => {
       {
         accessorKey: "assetState.user",
         header: "Assigned To",
-        Cell: ({ row }) => (
-          <div className="flex items-center gap-1">
-            {fetchUsedData(row.original.assetState?.user)}
-          </div>
-        ),
+        Cell: ({ row }) => {
+          const userId = row.original.assetState?.user;
+          const email = userMap[userId];
+          return email ? (
+            <span
+              className="text-blue-600 underline cursor-pointer"
+              onClick={() => handleUserEmailClick(userId)}
+            >
+              {email}
+            </span>
+          ) : (
+            userId || ""
+          );
+        },
       },
-      // {
-      //   accessorKey: "assetState.user",
-      //   header: "Assigned To",
-      //   Cell: ({ row }) => {
-      //     const user = row.original.assetState?.user;
-      //     const email = user?.emailAddress || "";
-      //     return (
-      //       <div className="flex items-center gap-1 cursor-pointer">
-      //         <ImEye
-      //           className="ml-1 text-slate-500 hover:text-slate-700"
-      //           size={14}
-      //           onClick={() => handleAssignedUserClick(user)}
-      //         />
-      //         {email}
-      //       </div>
-      //     );
-      //   },
-      // },
       {
         accessorKey: "assetInformation.model",
         header: "Model",
@@ -216,7 +199,7 @@ const AssetData = () => {
         ),
       },
     ],
-    [isLoading]
+    [isLoading, userMap]
   );
 
   // const handleAssignedUserClick = (user) => {
@@ -399,6 +382,43 @@ Location: ${row?.locationInformation?.location ?? ""}`;
         error.response?.data?.message || error.message
       );
     }
+  };
+
+  useEffect(() => {
+    // Fetch all users and create a map of userId to email
+    const fetchUsers = async () => {
+      try {
+        const res = await getAllUsers();
+        const users = res?.data || [];
+        const map = {};
+        users.forEach((u) => {
+          map[u._id] = u.emailAddress;
+        });
+        setUserMap(map);
+      } catch (err) {
+        setUserMap({});
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  // Handler to open modal and fetch user details
+  const handleUserEmailClick = async (userId) => {
+    try {
+      const res = await getUserById(userId);
+      console.log("User API response:", res); // <-- Add this line
+      // Try both options below, depending on your API response:
+      setUserDetails(res?.data?.data || res?.data || null);
+      setUserModalOpen(true);
+    } catch (err) {
+      setUserDetails(null);
+      setUserModalOpen(true);
+    }
+  };
+
+  const handleCloseUserModal = () => {
+    setUserModalOpen(false);
+    setUserDetails(null);
   };
 
   const table = useMaterialReactTable({
@@ -664,117 +684,50 @@ Location: ${row?.locationInformation?.location ?? ""}`;
             </div>
           </>
         )}
-        {/* {qrCodesModalOpen && (
-          <>
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
-              <div className="bg-white w-[90%] max-w-[650px] max-h-[90vh] overflow-y-auto p-6 rounded-2xl shadow-2xl relative">
-                <button
-                  onClick={qrCodesDownloadHandler}
-                  className="p-1 text-blue-800"
-                >
-                  <div className="flex flex-row items-center border border-gray-400 rounded-md p-1 text-sm hover:transition-all">
-                    <span>Download</span>
-                    <MdDownload size={18} />
+        {/* User Details Modal */}
+        {userModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm relative">
+              <button
+                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-xl"
+                onClick={handleCloseUserModal}
+              >
+                &times;
+              </button>
+              <h2 className="text-lg font-semibold mb-4 text-blue-700">
+                User Details
+              </h2>
+              {userDetails ? (
+                <div className="space-y-2">
+                  <div>
+                    <span className="font-medium">Name:</span>{" "}
+                    {userDetails.employeeName || "-"}
                   </div>
-                </button>
-                <button
-                  onClick={() => setQrCodesModalOpen(false)}
-                  className="absolute top-4 right-4 text-gray-500 hover:text-red-600 transition"
-                >
-                  <RxCross2 size={24} />
-                </button>
-                <h2 className="text-xl font-bold mb-6 text-center text-gray-800">
-                  Generated QR Codes
-                </h2>
-                <div
-                  className={`${
-                    selectedRowsForQrCodes.length === 1
-                      ? "flex justify-center"
-                      : "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center"
-                  }`}
-                >
-                  {selectedRowsForQrCodes.map((row) => (
-                    <div
-                      key={row?._id}
-                      className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow"
-                    >
-                      <QRCode
-                        size={200}
-                        value={[
-                          ` Asset ID:        ${row?.assetId ?? ""}`,
-                          ` RAM:             ${
-                            row?.assetInformation?.ram ?? ""
-                          }`,
-                          ` CPU:             ${
-                            row?.assetInformation?.cpu ?? ""
-                          }`,
-                          ` Hard Disk:       ${
-                            row?.assetInformation?.hardDisk ?? ""
-                          }`,
-                          ` Location:        ${
-                            row?.locationInformation?.location ?? ""
-                          }`,
-                          ` Asset Tag:       ${
-                            row?.assetInformation?.assetTag ?? ""
-                          }`,
-                          ` Model:           ${
-                            row?.assetInformation?.model ?? ""
-                          }`,
-                          ` Assigned To:     ${row?.assetState?.user ?? ""}`,
-                          ` Operating System:${
-                            row?.assetInformation?.operatingSystem ?? ""
-                          }`,
-                          ` Serial Number:   ${
-                            row?.assetInformation?.serialNumber ?? ""
-                          }`,
-                          ` Sub Location:    ${
-                            row?.locationInformation?.subLocation ?? ""
-                          }`,
-                          // ` Status:          ${row?.status ?? ""}`,
-                        ].join("\n")}
-                        level="M"
-                        includeMargin={true}
-                      />
-                      <span className="mt-2 text-xs text-gray-600 font-medium">
-                        Asset ID: {row?.assetId}
-                      </span>
-                    </div>
-                  ))}
+                  <div>
+                    <span className="font-medium">Employee Code:</span>{" "}
+                    {userDetails.employeeCode || "-"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Email:</span>{" "}
+                    {userDetails.emailAddress || "-"}
+                  </div>
+                  <div>
+                    <span className="font-medium">Mobile:</span>{" "}
+                    {userDetails.mobileNumber || "-"}
+                  </div>
                 </div>
-              </div>
-            </div>
-          </>
-        )} */}
-
-        {/* {assignedUserModalOpen && assignedUserDetails && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-6">
-                  Assigned User Details
-                </h2>
-                <button
-                  onClick={() => setAssignedUserModalOpen(false)}
-                  className="bg-[#df656b] shadow-[#F26E75] shadow-sm text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                >
-                  Close
-                </button>
-              </div>
-              <table>
-                <tbody>
-                  <tr>
-                    <td className="font-medium">Employee Name</td>
-                    <td className="font-medium">Email Address</td>
-                  </tr>
-                  <tr>
-                    <td>{assignedUserDetails.employeeName}</td>
-                    <td>{assignedUserDetails.emailAddress}</td>
-                  </tr>
-                </tbody>
-              </table>
+              ) : (
+                <div className="text-gray-500">No user details found.</div>
+              )}
+              <button
+                className="mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+                onClick={handleCloseUserModal}
+              >
+                Close
+              </button>
             </div>
           </div>
-        )} */}
+        )}
       </div>
     </>
   );

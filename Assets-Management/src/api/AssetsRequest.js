@@ -32,6 +32,8 @@ export const createAsset = (formData) =>
 
 export const getAllAssets = () => API.get('asset/');
 
+export const getAssetStatusCounts = () => API.get('asset/asset-counts');
+
 export const getAssetById = (id) => API.get(`asset/${id}`);
 
 export const updateAsset = (id, formData) => API.put(`asset/${id}`, formData);

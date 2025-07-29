@@ -22,7 +22,7 @@ import { RxCross2 } from "react-icons/rx";
 import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
 import QRCodeGenerator from "qrcode";
 import { ImEye } from "react-icons/im";
-import { getUserById, getAllUsers } from "../../../api/AuthRequest"; 
+import { getUserById, getAllUsers } from "../../../api/AuthRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",

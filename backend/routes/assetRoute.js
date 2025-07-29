@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAsset, deleteAsset, getAllAssets, getAssetById, updateAsset, uploadAssetFromExcel } from '../controllers/AssetController.js';
+import { createAsset, deleteAsset, getAllAssets, getAssetById, getAssetStatusCounts, updateAsset, uploadAssetFromExcel } from '../controllers/AssetController.js';
 import authMiddleware from '../middleware/AuthMiddleware.js';
 import multer from 'multer';
 
@@ -17,10 +17,10 @@ const upload = multer({ storage: storage });
 const router = express.Router()
 
 router.post('/', authMiddleware, upload.single('assetImage'), createAsset)
+router.get('/asset-counts', getAssetStatusCounts);
 router.get('/', authMiddleware, getAllAssets)
 router.get('/:id', authMiddleware, getAssetById)
 router.put('/:id', authMiddleware, upload.single('assetImage'), updateAsset)
-// router.put('/:id', authMiddleware, upload.single('assetImage'), updateAsset)
 router.delete('/:id', authMiddleware, deleteAsset)
 router.post('/upload-excel', authMiddleware, upload.single('file'), uploadAssetFromExcel)
 

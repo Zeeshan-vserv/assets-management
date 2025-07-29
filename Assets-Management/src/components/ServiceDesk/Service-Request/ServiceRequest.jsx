@@ -206,36 +206,6 @@ function ServiceRequest() {
           </IconButton>
         ),
       },
-      {
-        id: "accept",
-        header: "Accept",
-        size: 80,
-        enableSorting: false,
-        Cell: ({ row }) => (
-          <IconButton
-            onClick={() => handleAcceptServiceRequestApproval(row.original._id)}
-            color="primary"
-            aria-label="accept"
-          >
-            <IoMdCheckmark />
-          </IconButton>
-        ),
-      },
-      {
-        id: "reject",
-        header: "Reject",
-        size: 80,
-        enableSorting: false,
-        Cell: ({ row }) => (
-          <IconButton
-            onClick={() => handleRejectServiceRequestApproval(row.original._id)}
-            color="primary"
-            aria-label="reject"
-          >
-            <RxCross2 />
-          </IconButton>
-        ),
-      },
     ],
     [isLoading]
   );

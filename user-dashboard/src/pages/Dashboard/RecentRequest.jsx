@@ -4,16 +4,21 @@ import {
   useMaterialReactTable,
 } from "material-react-table";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { getServiceRequestByUserId } from "../../api/ServiceRequest";
 
 function RecentRequest() {
+      const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchRecentRequest = async () => {
     try {
       setIsLoading(true);
-      const response = await axios.get("https://dummyjson.com/recipes");
-      setData(response?.data?.recipes || []);
+      const response = await getServiceRequestByUserId(user.userId);
+      console.log(response.data.data);
+      
+      setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching recent requests:", error);
     } finally {
@@ -25,14 +30,15 @@ function RecentRequest() {
     fetchRecentRequest();
   }, []);
 
+
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
+        accessorKey: "serviceId",
         header: "Recent Requests",
       },
       {
-        accessorKey: "cuisine",
+        accessorKey: "subject",
         header: "Subject",
       },
       {

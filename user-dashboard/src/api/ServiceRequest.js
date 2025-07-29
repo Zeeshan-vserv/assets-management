@@ -33,5 +33,6 @@ export const getMyPendingApprovals = () => API.get("/service/my-approvals");
 export const approveServiceRequest = (id, action, remarks) => API.post(`/service/${id}/approve`, { action, remarks });
 export const getAllServiceRequests = () => API.get("/service/");
 export const getServiceRequestById = (id) => API.get(`/service/${id}`);
+export const getServiceRequestByUserId = (userId) => API.get(`/service/user/${userId}`);
 export const updateServiceRequest = (id, updateData) =>API.put(`/service/${id}`, updateData);
 export const deleteServiceRequest = (id) => API.delete(`/service/${id}`);

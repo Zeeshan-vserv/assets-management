@@ -15,7 +15,11 @@ import {
   getAllSupportDepartment,
   getAllSupportGroup,
 } from "../../../api/SuportDepartmentRequest";
-import { createServiceRequest, getServiceRequestById, updateServiceRequest } from "../../../api/serviceRequest";
+import {
+  createServiceRequest,
+  getServiceRequestById,
+  updateServiceRequest,
+} from "../../../api/serviceRequest";
 import {
   getAllServiceCategory,
   getAllServiceSubCategory,
@@ -38,7 +42,7 @@ function EditServiceRequest() {
   const [excludeSLA, setExcludeSLA] = useState(false);
   const [approvalRequired, setApprovalRequired] = useState("");
   const [formData, setFormData] = useState({
-    title: "",
+    subject: "",
     loggedVia: "",
     category: "",
     subCategory: "",
@@ -114,54 +118,56 @@ function EditServiceRequest() {
     fetchDetails();
   }, []);
 
-    // Fetch incident data
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await getServiceRequestById(id);
-        if (response?.data?.data) {
-          const data = response.data.data;
-          setFormData({
-            ...data,
-            asset: {
-              asset: "",
-              make: "",
-              model: "",
-              serialNo: "",
-              ...(data.asset || {}),
-            },
-            location: {
-              location: "",
-              subLocation: "",
-              ...(data.location || {}),
-            },
-            submitter: {
-              user: "",
-              userContactNumber: "",
-              userEmail: "",
-              userDepartment: "",
-              loggedBy: "",
-              ...(data.submitter || {}),
-            },
-            classificaton: {
-              excludeSLA: false,
-              severityLevel: "Severity-3",
-              priorityLevel: "Priority-3",
-              supportDepartmentName: "",
-              supportGroupName: "",
-              technician: "",
-              ...(data.classificaton || {}),
-            },
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching incident:", error);
-        toast.error("Failed to load incident data");
-      } finally {
-        setIsLoading(false);
+  // Fetch incident data
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getServiceRequestById(id);
+      if (response?.data?.data) {
+        const data = response.data.data;
+        console.log(data);
+
+        setFormData({
+          ...data,
+          asset: {
+            asset: "",
+            make: "",
+            model: "",
+            serialNo: "",
+            ...(data.asset || {}),
+          },
+          location: {
+            location: "",
+            subLocation: "",
+            ...(data.location || {}),
+          },
+          submitter: {
+            user: "",
+            userContactNumber: "",
+            userEmail: "",
+            userDepartment: "",
+            loggedBy: "",
+            ...(data.submitter || {}),
+          },
+          classificaton: {
+            excludeSLA: false,
+            severityLevel: "Severity-3",
+            priorityLevel: "Priority-3",
+            supportDepartmentName: "",
+            supportGroupName: "",
+            technician: "",
+            ...(data.classificaton || {}),
+          },
+        });
       }
-    };
-  
+    } catch (error) {
+      console.error("Error fetching incident:", error);
+      toast.error("Failed to load incident data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line
@@ -190,13 +196,13 @@ function EditServiceRequest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateServiceRequest(user?._id,{
+      await updateServiceRequest(user?._id, {
         ...formData,
         userId: user?.userId,
       });
       toast.success("Service Request Added Successfully");
       setFormData({
-        title: "",
+        subject: "",
         loggedVia: "",
         category: "",
         subCategory: "",
@@ -278,8 +284,8 @@ function EditServiceRequest() {
                 </label>
                 <input
                   type="text"
-                  name="title"
-                  value={formData.title}
+                  name="subject"
+                  value={formData.subject}
                   onChange={handleChange}
                   className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 />
@@ -418,7 +424,7 @@ function EditServiceRequest() {
                   />
                 </div>
               </div>
-
+              {console.log(formData.purchaseRequest)}
               <div className="flex items-center w-[46%]">
                 <label
                   htmlFor=""
@@ -427,6 +433,7 @@ function EditServiceRequest() {
                   Cost
                 </label>
                 <input
+                  disabled={formData.purchaseRequest === "false"}
                   type="text"
                   id=""
                   name=""
@@ -902,7 +909,8 @@ function EditServiceRequest() {
                   value={
                     supportGroupData.find(
                       (group) =>
-                        group.supportGroupName === formData.classificaton.supportGroupName 
+                        group.supportGroupName ===
+                        formData.classificaton.supportGroupName
                     ) || null
                   }
                   onChange={(event, newValue) => {

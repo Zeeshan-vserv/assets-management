@@ -38,7 +38,7 @@ function NewServiceRequest() {
   const [excludeSLA, setExcludeSLA] = useState(false);
   const [approvalRequired, setApprovalRequired] = useState("");
   const [formData, setFormData] = useState({
-    title: "",
+    subject: "",
     loggedVia: "",
     category: "",
     subCategory: "",
@@ -168,7 +168,7 @@ function NewServiceRequest() {
       });
       toast.success("Service Request Added Successfully");
       setFormData({
-        title: "",
+        subject: "",
         loggedVia: "",
         category: "",
         subCategory: "",
@@ -250,8 +250,8 @@ function NewServiceRequest() {
                 </label>
                 <input
                   type="text"
-                  name="title"
-                  value={formData.title}
+                  name="subject"
+                  value={formData.subject}
                   onChange={handleChange}
                   className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 />

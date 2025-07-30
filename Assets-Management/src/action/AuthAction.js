@@ -1,20 +1,42 @@
-import { useNavigate } from "react-router-dom";
 import * as AuthApi from '../api/AuthRequest.js'
+import axios from "axios";
 
-export const login = (formData) => async (dispatch) => {
+// Login action
+export const login = (formData, navigate) => async (dispatch) => {
   dispatch({ type: "AUTH_START" });
   try {
     const { data } = await AuthApi.login(formData);
-    dispatch({ type: "AUTH_SUCCESS", data: data });
-    const navigate = useNavigate();
-    navigate(data.redirectTo || "/dashboardAsset", { replace: true });
+    dispatch({
+      type: "AUTH_SUCCESS",
+      data: {
+        token: data.token,
+        userId: data.user._id,
+        userRole: data.user.userRole,
+        emailAddress: data.user.emailAddress,
+        // ...add other fields you need for permissions
+        ...data.user
+      }
+    });
+
+    // Fetch permissions after successful login
+    dispatch(fetchPermissions(data.token));
+
+    // Navigate in your component after dispatching login
+    if (navigate) navigate(data.redirectTo || "/dashboardAsset", { replace: true });
   } catch (error) {
-    // console.log(error);
     dispatch({
       type: "AUTH_FAIL",
       error: error.response ? error.response.data.message : "An error occurred",
     });
   }
+};
+
+// Fetch permissions from backend
+export const fetchPermissions = (token) => async (dispatch) => {
+  const { data } = await axios.get("/access/permissions", {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  dispatch({ type: "SET_PERMISSIONS", data: data.permissions });
 };
 
 export const logout = () => async(dispatch) => {

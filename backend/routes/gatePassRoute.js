@@ -2,6 +2,7 @@ import express from 'express'
 import authMiddleware from '../middleware/AuthMiddleware.js'
 import { createGatePass, deleteGatePass, getAllGatePass, getGatePassById, updateGatePass } from '../controllers/GatePassController.js'
 import multer from 'multer';
+import { requirePagePermission } from '../middleware/roleMiddleware.js';
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -15,10 +16,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 const router =  express.Router()
 
-router.post('/', authMiddleware, upload.single('attachment'), createGatePass)
-router.get('/', authMiddleware, getAllGatePass)
-router.get('/:id', authMiddleware, getGatePassById)
-router.put('/:id', authMiddleware, upload.single('attachment'), updateGatePass)
-router.delete('/:id', authMiddleware, deleteGatePass)
+router.post('/', authMiddleware, requirePagePermission('gatePass', 'isEdit'), upload.single('attachment'), createGatePass)
+router.get('/', authMiddleware, requirePagePermission('gatePass', 'isView'), getAllGatePass)
+router.get('/:id', authMiddleware, requirePagePermission('gatePass', 'isView'), getGatePassById)
+router.put('/:id', authMiddleware, requirePagePermission('gatePass', 'isEdit'), upload.single('attachment'), updateGatePass)
+router.delete('/:id', authMiddleware, requirePagePermission('gatePass', 'isDelete'), deleteGatePass)
 
 export default router

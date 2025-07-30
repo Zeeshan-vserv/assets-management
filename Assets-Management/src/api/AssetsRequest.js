@@ -17,9 +17,11 @@ API.interceptors.request.use((req) => {
 API.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+        if (error.response && error.response.status === 401) {
             store.dispatch(logout())
             window.location.href = '/auth' 
+        } else if (error.response && error.response.status === 403) {
+            window.location.href = '/not-authorized';
         }
         return Promise.reject(error)
     }

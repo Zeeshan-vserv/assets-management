@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import { IoMdMenu } from "react-icons/io";
 import { logout } from "../../../Assets-Management/src/action/AuthAction";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 const Header = ({ toggleNav }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
+  const user = useSelector((state) => state.authReducer.authData);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const handleLogout = () => {
@@ -30,7 +31,7 @@ const Header = ({ toggleNav }) => {
           onClick={toggleDropdown}
         >
           <img className="w-8 h-8 rounded-full" src="https://imgs.search.brave.com/YGdDkgr_LaGQTa619YI6vcuw_bxE0ruRdhvIFnL9D0o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4x/Lmljb25maW5kZXIu/Y29tL2RhdGEvaWNv/bnMvYmFzaWMtMjIv/NTEyLzEwNDFfYm95/X2MtMTI4LnBuZw" alt="" />
-          <h3 className="text-xs">VservInfosystems</h3>
+          <h3 className="text-xs">{user?.employeeName || "User"}</h3>
         </div>
         {dropdownVisible && (
           <div className="absolute z-50 right-0 mt-20 w-42 bg-white border rounded shadow-lg">

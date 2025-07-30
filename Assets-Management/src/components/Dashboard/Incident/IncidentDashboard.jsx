@@ -10,10 +10,56 @@ import ResponseSlaStatusPieChart from "./PieChart/ResponseSlaStatusPieChart";
 import ResolutionSlaStatusPieChart from "./PieChart/ResolutionSlaStatusPieChart";
 import BarGraphForIncident from "./BarGraph/BarGraphForIncident";
 import FeedbackForTicketClosedPieChart from "./PieChart/FeedbackForTicketClosedPieChart";
+import { getAllIncident } from "../../../api/IncidentRequest";
 
 function IncidentDashboard() {
   const navigate = useNavigate();
+  const [data, setData] = useState([]);
+  const [statusCounts, setStatusCounts] = useState({
+    New: 0,
+    Assigned: 0,
+    InProgress: 0,
+    Pause: 0,
+    Resolved: 0,
+    Cancelled: 0,
+    Closed: 0,
+    Total: 0,
+  });
+
   const [chartData, setChartData] = useState([]);
+
+  const fetchIncidentData = async () => {
+    try {
+      const response = await getAllIncident();
+      let incidents = response?.data.data || [];
+      setData(incidents);
+      const counts = {
+        New: 0,
+        Assigned: 0,
+        InProgress: 0,
+        Pause: 0,
+        Resolved: 0,
+        Cancelled: 0,
+        Closed: 0,
+        Total: incidents.length,
+      };
+
+      incidents.forEach((item) => {
+        const status = item.status;
+        if (counts[status] !== undefined) {
+          counts[status]++;
+        }
+      });
+
+      setStatusCounts(counts);
+    } catch (error) {
+      console.error("Error fetching incident data:", error);
+    }
+  };
+  useEffect(() => {
+    fetchIncidentData();
+  }, []);
+  console.log("data", data);
 
   const fetchChartData = async () => {
     try {
@@ -30,42 +76,42 @@ function IncidentDashboard() {
   const cardData = [
     {
       id: "1",
-      count: 0,
+      count: statusCounts.New,
       description: "New",
     },
     {
       id: "2",
-      count: 0,
+      count: statusCounts.Assigned,
       description: "Assigned",
     },
     {
       id: "3",
-      count: 0,
+      count: statusCounts.InProgress,
       description: "InProgress",
     },
     {
       id: "4",
-      count: 0,
+      count: statusCounts.Pause,
       description: "Pause",
     },
     {
       id: "5",
-      count: 0,
+      count: statusCounts.Resolved,
       description: "Resolved",
     },
     {
       id: "6",
-      count: 0,
+      count: statusCounts.Cancelled,
       description: "Cancelled",
     },
     {
       id: "7",
-      count: 0,
+      count: statusCounts.Closed,
       description: "Closed",
     },
     {
       id: "8",
-      count: 0,
+      count: statusCounts.Total,
       description: "Total",
     },
   ];

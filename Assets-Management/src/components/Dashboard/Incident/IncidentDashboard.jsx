@@ -71,7 +71,7 @@ function IncidentDashboard() {
   ];
   return (
     <>
-      <div className="flex flex-col w-full min-h-full p-4 bg-slate-100">
+      <div className="flex flex-col justify-center w-full min-h-full p-4 bg-slate-100">
         <div className="flex justify-between mb-4 p-2">
           <h2 className="text-lg font-semibold text-start">INCIDENT</h2>
           <button

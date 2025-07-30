@@ -8,8 +8,8 @@ import { AiOutlineFileExcel, AiOutlineFilePdf } from "react-icons/ai";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import { getAllIncident } from "../../../api/IncidentRequest";
 import { useSelector } from "react-redux";
+import { getAllServiceRequests } from "../../../api/serviceRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -18,74 +18,74 @@ const csvConfig = mkConfig({
   filename: "Assets-Management-Department.csv",
 });
 
-const IncidentDetails = () => {
+const RequestDetails = () => {
   const user = useSelector((state) => state.authReducer.authData);
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchIncidentData = async () => {
+  const fetchServiceRequestData = async () => {
     setIsLoading(true);
     try {
-      const response = await getAllIncident();
+      const response = await getAllServiceRequests();
       setData(response?.data?.data || []);
     } catch (error) {
-      console.error("Error fetching incident data:", error);
+      console.error("Error fetching service request data:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchIncidentData();
+    fetchServiceRequestData();
   }, []);
 
-  // console.log("Incident Data:", data);
+  // console.log("service request:", data);
 
   // Table columns
   const columns = useMemo(
     () => [
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Name",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Open",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Overdue",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Assigned",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "In Progress",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Paused",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Resolved",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Reopened",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Closed",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Cancelled",
       },
       {
-        accessorKey: "incidentId",
+        accessorKey: "serviceId",
         header: "Total",
       },
     ],
@@ -259,4 +259,4 @@ const IncidentDetails = () => {
   );
 };
 
-export default IncidentDetails;
+export default RequestDetails;

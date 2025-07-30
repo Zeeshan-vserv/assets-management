@@ -2,14 +2,18 @@ import axios from "axios";
 
 const API = axios.create({ baseURL: "http://localhost:5001" });
 
-
-API.interceptors.request.use((req) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-        req.headers.Authorization = `Bearer ${token}`
+API.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            store.dispatch(logout())
+            window.location.href = '/auth' 
+        } else if (error.response && error.response.status === 403) {
+            window.location.href = '/not-authorized';
+        }
+        return Promise.reject(error)
     }
-    return req
-})
+)
 
 
 export const createGatePassAddress = (formData) => API.post("/gatePassAddress", formData);

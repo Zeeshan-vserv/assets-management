@@ -15,18 +15,17 @@ API.interceptors.request.use((req) => {
 
 // Handle token expiry or invalid token
 API.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (
-      error.response &&
-      (error.response.status === 401 || error.response.status === 403)
-    ) {
-      store.dispatch(logout());
-      window.location.href = "/auth";
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            store.dispatch(logout())
+            window.location.href = '/auth' 
+        } else if (error.response && error.response.status === 403) {
+            window.location.href = '/not-authorized';
+        }
+        return Promise.reject(error)
     }
-    return Promise.reject(error);
-  }
-);
+)
 
 
 export const createAsset = (formData) =>

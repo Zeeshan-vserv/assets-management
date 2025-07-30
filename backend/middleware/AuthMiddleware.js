@@ -13,8 +13,6 @@ const authMiddleware = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, secret)
-
-        // Fetch user from DB using ID from JWT
         const user = await AuthModel.findById(decoded.id);
         if (!user) {
             return res.status(401).json({ message: 'User not found' });
@@ -29,7 +27,7 @@ const authMiddleware = async (req, res, next) => {
         next()
     } catch (err) {
         console.log(err)
-        return res.status(403).json({ message: 'Token is invalid' })
+        return res.status(401).json({ message: 'Token is invalid' }) 
     }
 }
 

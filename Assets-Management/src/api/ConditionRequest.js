@@ -5,13 +5,18 @@ import { logout } from "../action/AuthAction";
 const API = axios.create({ baseURL: "http://localhost:5001" });
 
 // Attach token to every request
-API.interceptors.request.use((req) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    req.headers.Authorization = `Bearer ${token}`;
-  }
-  return req;
-});
+API.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            store.dispatch(logout())
+            window.location.href = '/auth' 
+        } else if (error.response && error.response.status === 403) {
+            window.location.href = '/not-authorized';
+        }
+        return Promise.reject(error)
+    }
+)
 
 //condition
 export const createCondition = (formData) => API.post("/condition/", formData);

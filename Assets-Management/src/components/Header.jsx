@@ -1,19 +1,28 @@
-import React from "react";
+import React, { useEffect } from "react";
 import userImg from "../assets/user.jpg";
 import { IoMdMenu } from "react-icons/io";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../action/AuthAction";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { getUserById } from "../api/AuthRequest";
 
 const Header = ({ toggleNav }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
-  const user = useSelector((state) => state.authReducer.authData);
-
-  // console.log(user.user.isActive);
-
+  const [employeeName, setEmployeeName] = useState("User");
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      getUserById(userId)
+        .then((res) => {
+          setEmployeeName(res.data.employeeName || res.data.name || "User");
+        })
+        .catch(() => setEmployeeName("User"));
+    }
+  }, []);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -39,7 +48,7 @@ const Header = ({ toggleNav }) => {
           onClick={toggleDropdown}
         >
           <img className="w-8 h-8 rounded-full" src={userImg} alt="" />
-          <h3 className="text-xs">VservInfosystems</h3>
+          <h3 className="text-xs">{employeeName}</h3>
         </div>
         {dropdownVisible && (
           <div className="absolute z-50 right-0 mt-20 w-42 bg-white border rounded shadow-lg">

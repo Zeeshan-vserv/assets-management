@@ -11,6 +11,7 @@ import EditGetPass from "./Global/EditGetPass";
 import GatePassData from "./Global/GatePassData";
 import CreateGatePass from "./Global/CreateGatePass";
 import AssetDetails from "./Global/AssetDetails/AssetDetails";
+import PrintGatePass from "./Global/PrintGatePass";
 const AssetRoute = () => {
   return (
     <Routes>
@@ -22,6 +23,7 @@ const AssetRoute = () => {
       <Route path="assets-summary" element={<AssetsSummary />} />
       <Route path="GatePassData" element={<GatePassData />} />
       <Route path="EditGetPass/:id" element={<EditGetPass />} />
+      <Route path="GatePassPrint/:id" element={<PrintGatePass />} />
       <Route path="CreateGatePass" element={<CreateGatePass />} />
     </Routes>
   );

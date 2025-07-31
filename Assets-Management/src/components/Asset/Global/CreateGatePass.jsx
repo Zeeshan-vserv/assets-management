@@ -856,9 +856,10 @@ function CreateGatePass() {
       if (assetType === "Fixed Assets") {
         fd.append(
           "asset",
-          JSON.stringify(
-            formData.asset.map((a) => a.assetInformation.serialNumber)
-          )
+          // JSON.stringify(
+          //   formData.asset.map((a) => a.assetInformation.serialNumber)
+          // )
+          JSON.stringify(formData.asset.map((a) => a._id))
         );
       }
       if (assetType === "Asset Components") {

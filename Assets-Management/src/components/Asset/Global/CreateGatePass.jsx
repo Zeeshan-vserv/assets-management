@@ -115,7 +115,7 @@ function CreateGatePass() {
     fetchGetAllAssetData();
   }, []);
 
-  console.log("assetData", assetData);
+  // console.log("assetData", assetData);
 
   // console.log(gpAddress);
   // const fetchGatePass = async () => {
@@ -216,9 +216,10 @@ function CreateGatePass() {
       if (assetType === "Fixed Assets") {
         fd.append(
           "asset",
-          JSON.stringify(
-            formData.asset.map((a) => a.assetInformation.serialNumber)
-          )
+          // JSON.stringify(
+          //   formData.asset.map((a) => a.assetInformation.serialNumber)
+          // )
+          JSON.stringify(formData.asset.map((a) => a._id))
         );
       }
       if (assetType === "Asset Components") {

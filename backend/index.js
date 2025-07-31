@@ -31,6 +31,7 @@ import sla from './routes/slaRoute.js'
 import incidentStatus from './routes/incidentStatusRoute.js'
 import roleRoute from './routes/roleRoute.js';
 import acessRoute from './routes/acessRoute.js';
+import dashboardRoute from './routes/dashboardRoute.js'
 
 const app = express()
 
@@ -72,3 +73,4 @@ app.use('/sla', sla)
 app.use('/incidentStatus', incidentStatus)
 app.use('/role', roleRoute);
 app.use('/access', acessRoute);
+app.use('/dashboard', dashboardRoute)

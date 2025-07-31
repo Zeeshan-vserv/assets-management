@@ -207,22 +207,21 @@ const NewIncidentsAssigned = () => {
     e.preventDefault();
     try {
       const oldClassification = assignedId.classificaton || {};
-const updateData = {
-  status: "Task Assigned",
-  changedBy: user.userId,
-  role: newIncidentAssignedTo.role,
-  classificaton: {
-    ...oldClassification,
-    technician: newIncidentAssignedTo.technician,
-  },
-};
+      const updateData = {
+        status: "Task Assigned",
+        changedBy: user.userId,
+        role: newIncidentAssignedTo.role,
+        classificaton: {
+          ...oldClassification,
+          technician: newIncidentAssignedTo.technician,
+        },
+      };
 
       const response = await updateIncident(assignedId._id, updateData);
     } catch (error) {
       console.log("Error updating technicians", error);
     }
   };
-
 
   //Exports
   const handleExportRows = (rows) => {
@@ -455,8 +454,10 @@ const updateData = {
                     className="w-[70%] px-4 py-2 border border-gray-300 rounded-lg focus:outline-none transition-all cursor-pointer"
                   >
                     <option value=""></option>
-                    {filteredTechnicians.map((tech) => (
-                      <option key={tech._id}>{tech.emailAddress}</option>
+                    {filteredTechnicians.map((tech, idx) => (
+                      <option key={tech._id || tech.emailAddress || idx}>
+                        {tech.emailAddress}
+                      </option>
                     ))}
                   </select>
                 </div>

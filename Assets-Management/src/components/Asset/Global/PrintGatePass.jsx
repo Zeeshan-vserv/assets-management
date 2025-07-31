@@ -1,9 +1,36 @@
 import React, { useEffect, useRef, useState } from "react";
 import { IoMdPrint } from "react-icons/io";
+import { useParams } from "react-router-dom";
+import dayjs from "dayjs";
 import { useReactToPrint } from "react-to-print";
+import { getGatePassById } from "../../../api/GatePassRequest";
 
 const PrintGatePass = () => {
+  const { id } = useParams();
   const componentRef = React.useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState("");
+
+  const fetchGatePass = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getGatePassById(id);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setFormData(response?.data.data || {});
+    } catch (error) {
+      console.error("Error fetching gate pass:", error);
+      toast.error("Failed to fetch gate pass data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGatePass();
+    // eslint-disable-next-line
+  }, []);
 
   const handleAfterPrint = React.useCallback(() => {
     console.log("`onAfterPrint` called");
@@ -20,9 +47,12 @@ const PrintGatePass = () => {
     onAfterPrint: handleAfterPrint,
     onBeforePrint: handleBeforePrint,
   });
+
+  // console.log(formData);
+
   return (
     <div className="flex flex-col items-center w-screen">
-      <div className="flex justify-end px-[10vw] my-5">
+      <div className="flex justify-end my-5">
         <button
           className="flex items-center  gap-1 ml-3 bg-blue-400 text-white px-5 py-0.5 rounded-sm hover:scale-105"
           onClick={printFn}
@@ -30,8 +60,11 @@ const PrintGatePass = () => {
           Print <IoMdPrint />
         </button>
       </div>
-      <div className="flex justify-center items-center w-full"  ref={componentRef}>
-    <div className="bg-white shadow-md w-3/4 px-14 py-5 print-full-width">
+      <div
+        className="flex justify-center items-center w-full"
+        ref={componentRef}
+      >
+        <div className="bg-white shadow-md max-w-3xl px-14 py-5 print-full-width">
           {/* Company Logo and Name */}
           <div className="flex items-center justify-center">
             <img
@@ -48,27 +81,33 @@ const PrintGatePass = () => {
           <div className="mt-16">
             <div className="flex justify-between">
               <div className="flex gap-2 text-base">
-                <span className="font-bold">Gate Pass Id :</span> GTP00018
+                <span className="font-bold">Gate Pass Id :</span>
+                {formData?.gatePassId || ""}
               </div>
               <div className="flex gap-2 text-base">
-                <span className="font-bold">Dated :</span> 31-07-2025
+                <span className="font-bold">Dated :</span>
+                {formData?.createdAt
+                  ? dayjs(formData.createdAt).format("DD-MM-YYYY")
+                  : ""}{" "}
               </div>
             </div>
             <div className="flex justify-between">
               <div className="flex gap-2 text-base">
-                <span className="font-bold">Gate Pass Type :</span>{" "}
-                Non-Returnable
+                <span className="font-bold">Gate Pass Type :</span>
+                {formData?.gatePassType || ""}
               </div>
               <div className="flex gap-2 text-base">
-                <span className="font-bold">Expected Return :</span> N/A
+                <span className="font-bold">Expected Return :</span>{" "}
+                {formData?.expectedReturnDate === null
+                  ? "N/A"
+                  : dayjs(formData.expectedReturnDate).format("DD-MM-YYYY")}
               </div>
             </div>
 
             <div className="mt-10 text-justify">
-              Dear Security, <br /> Please allow following items to be sent from
-              ISPAT BHAWAN, 40 J.L NEHRU ROAD, KOLKATA-700071, LAND MARK- NEARBY
-              KOLKATA MAIDAN METRO STATION. to VSERV INFOSYSTEMS PVTLTD, B-135,
-              SECTOR-2,NOIDA, UTTARPRADESH, NOIDA-201301.
+              Dear Security, <br /> Please allow following items to be sent from{" "}
+              {formData?.fromAddress} to {formData?.toAddress} for the purpose
+              of {formData?.purpose || "N/A"}.
             </div>
           </div>
           {/* Asset Details */}
@@ -128,32 +167,20 @@ const PrintGatePass = () => {
             <div className="flex justify-between">
               <div className="w-[60%]">
                 <span className="font-bold">Destination: -</span>
-                <p>
-                  VSERV INFOSYSTEMS PVTLTD, B-135, SECTOR-2,NOIDA, UTTARPRADESH,
-                  NOIDA-201301
-                </p>
+                <p>{formData?.toAddress}</p>
               </div>
               <div className="flex flex-col items-end">
                 <span className="font-bold">Gate Pass Validity: -</span>
-                <p>05/08/2025</p>
+                <p>{dayjs(formData.gatePassValidity).format("DD-MM-YYYY")}</p>
               </div>
             </div>
             <div className="w-full flex ">
               <span className="font-bold min-w-[15%]">Reason: -</span>
-              <p>
-                Faulty spares have to despatch replacement of spares all ready
-                recieved.
-              </p>
+              <p>{formData?.reasonForGatePass}</p>
             </div>
             <div className="w-full flex">
               <span className="font-bold min-w-[15%]">Remark: -</span>
-              <p>
-                MBD(HP)-s/n:PCEYU0JCY0VDFD, PCEYU0JD60VKRM, SMPS-s/n:613752-001,
-                5bhtl0c8j, Adapter- p/n: 1650-72, fan-FCN-CQ- 2 NOS, Monitor-
-                4nos: P.N: LL574A, CNT128B3T1, CNT136B689, CNT136B66M, LOGIC
-                CARD-53DEA, PCB:71015101,HDD-WXG1A3834461, HDD-4 NOS: S/N:
-                5VVTTMZ0, 0F10381, 9VMX94PN, 6VV75H31
-              </p>
+              <p>{formData?.remarks}</p>
             </div>
 
             <div className="flex justify-between my-5">
@@ -165,12 +192,12 @@ const PrintGatePass = () => {
                 </p>
                 <p>
                   <span className="font-semibold">Contact No. - </span>{" "}
-                  99xxxxxxxx8
+                  {formData?.receiverNo}
                 </p>
               </div>
               <div className="flex flex-col items-end">
                 <span className="font-bold">Issued By:</span>
-                <p>Steel Authority of India Ltd.</p>
+                <p>Company Name Here</p>
               </div>
             </div>
 
@@ -178,8 +205,7 @@ const PrintGatePass = () => {
               <div className="w-[60%]">
                 <span className="font-bold">From: -</span>
                 <p>
-                  ISPAT BHAWAN, 40 J.L NEHRU ROAD, KOLKATA-700071, LAND MARK-
-                  NEARBY KOLKATA MAIDAN METRO STATION
+                   {formData?.fromAddress}
                 </p>
               </div>
               <div className="flex flex-col items-end">

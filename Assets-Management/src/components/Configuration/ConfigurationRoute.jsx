@@ -54,14 +54,15 @@ function ConfigurationRoute() {
       <Routes>
         {/* Global Routes */}
         <Route path="components" element={<Components />} />
-        <Route
+        {/* <Route
           path="Users"
           element={
             <ProtectedRoute page="users" permission="isView" allowedRoles={["Admin"]}>
               <Users />
             </ProtectedRoute>
           }
-        />
+        /> */}
+        <Route path="users" element={<Users />} />
         <Route path="AddUser" element={<AddUser />} />
         <Route path=":id" element={<EditUser />} />
         <Route path="department" element={<Department />} />
@@ -114,7 +115,6 @@ function ConfigurationRoute() {
         <Route path="priority-matrix" element={<PriorityMatrix />} />
         <Route path="holiday-calendar" element={<HolidayCalendar />} />
         <Route path="holiday-list" element={<HoliDayList />} />
-
 
         {/* Request */}
         <Route path="ReqAutoClosedTime" element={<AutoClosedTime />} />

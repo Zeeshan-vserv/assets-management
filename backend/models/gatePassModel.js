@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
-const gatePassSchema = mongoose.Schema({
+const gatePassSchema = mongoose.Schema(
+  {
     userId: String,
     gatePassId: String,
     movementType: String,
@@ -8,7 +9,7 @@ const gatePassSchema = mongoose.Schema({
     expectedReturnDate: Date,
     fromAddress: String,
     gatePassValidity: String,
-    approvalRequired:{type: Boolean, default: false},
+    approvalRequired: { type: Boolean, default: false },
     approverLevel1: String,
     approverLevel2: String,
     approverLevel3: String,
@@ -19,22 +20,26 @@ const gatePassSchema = mongoose.Schema({
     receiverNo: String,
     attachment: String,
     assetType: String,
-    asset: String,
+    // asset: String,
+    asset: [],
     assetComponent: String,
-    consumables: [ {
+    consumables: [
+      {
         sNo: Number,
         itemName: String,
         serialNo: String,
-        qty: Number
-    }],
+        qty: Number,
+      },
+    ],
     others: {
-        itemName: String,
-        quantity: String,
-        description: String
-    }
+      itemName: String,
+      quantity: String,
+      description: String,
+    },
+  },
+  { timestamps: true }
+);
 
-}, {timestamps: true})
+const GatePass = mongoose.model("GatePass", gatePassSchema);
 
-const GatePass = mongoose.model('GatePass', gatePassSchema)
-
-export default GatePass
+export default GatePass;

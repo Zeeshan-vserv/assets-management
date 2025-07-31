@@ -45,6 +45,9 @@ export const createGatePass = async (req, res) => {
         const newGatePassId = `GTP${String(nextNumber).padStart(4, '0')}`;
 
         // Parse JSON fields if they exist
+        if (gatePassData.asset && typeof gatePassData.asset === "string") {
+            gatePassData.asset = JSON.parse(gatePassData.asset);
+        }
         if (gatePassData.consumables && typeof gatePassData.consumables === "string") {
             gatePassData.consumables = JSON.parse(gatePassData.consumables);
         }

@@ -7,7 +7,7 @@ export const rolePermissions = {
     // ...add more as needed
   },
   "Employee": {
-    tickets: ["isView", "isEdit"],
+    incidents: ["isView", "isEdit"],
     // ...add more as needed
   },
   "GoCollect Support Department": {

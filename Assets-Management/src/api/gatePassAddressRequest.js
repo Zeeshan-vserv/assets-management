@@ -2,6 +2,16 @@ import axios from "axios";
 
 const API = axios.create({ baseURL: "http://localhost:5001" });
 
+// Attach token to every request
+API.interceptors.request.use((req) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+        req.headers.Authorization = `Bearer ${token}`
+    }
+    return req
+})
+
+// Handle token expiry or invalid token
 API.interceptors.response.use(
     (response) => response,
     (error) => {

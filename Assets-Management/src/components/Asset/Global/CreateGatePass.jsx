@@ -648,6 +648,8 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import { createGatePass } from "../../../api/GatePassRequest";
 import { getAllGatePassAddress } from "../../../api/gatePassAddressRequest";
+import { getAllUsers } from "../../../api/AuthRequest";
+import { getAllAssets } from "../../../api/AssetsRequest";
 
 function CreateGatePass() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -673,9 +675,9 @@ function CreateGatePass() {
     toAddress: "",
     gatePassValidity: "",
     approvalRequired: "",
-    approverOne: "",
-    approverTwo: "",
-    approverThree: "",
+    approverLevel1: "",
+    approverLevel2: "",
+    approverLevel3: "",
     remarks: `1. The above products are not part of any commercial sale.
 2. It is only an internal transfer.
 3. The tentative value of the above products for the purpose of insurance for transit period can be ascertained at Rs 5,000/-
@@ -683,14 +685,25 @@ function CreateGatePass() {
     reasonForGatePass: "",
     toReceiveBy: "",
     receiverNumber: "",
+    asset: "",
+    assetComponent: "",
+    others: {
+      itemName: "",
+      quantity: "",
+      description: "",
+    },
+    consumables: [
+      {
+        sNo: Number,
+        itemName: "",
+        serialNo: "",
+        qty: Number,
+      },
+    ],
   });
-  const [fixedAsset, setFixedAsset] = useState("");
   const [assetComponent, setAssetComponent] = useState("");
-  const [otherItem, setOtherItem] = useState({
-    itemName: "",
-    quantity: "",
-    description: "",
-  });
+  const [userData, setUserData] = useState([]);
+  const [assetData, setAssetData] = useState([]);
 
   const fetchDetails = async () => {
     try {
@@ -708,7 +721,41 @@ function CreateGatePass() {
     fetchDetails();
   }, []);
 
-  console.log(gpAddress);
+  const fetchGetAllUsersData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllUsers();
+      if (response?.data) {
+        setUserData(response?.data);
+      }
+    } catch (error) {
+      console.error("Error fetching service request:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchGetAllUsersData();
+  }, []);
+
+  const fetchGetAllAssetData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllAssets();
+      setAssetData(response?.data?.data);
+    } catch (error) {
+      console.error("Error fetching asset data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchGetAllAssetData();
+  }, []);
+
+  console.log("assetData", assetData);
+
+  // console.log(gpAddress);
   // const fetchGatePass = async () => {
   //   try {
   //     setIsLoading(true);
@@ -785,9 +832,9 @@ function CreateGatePass() {
       fd.append("toAddress", formData.toAddress);
       fd.append("gatePassValidity", formData.gatePassValidity);
       fd.append("approvalRequired", formData.approvalRequired);
-      fd.append("approverLevel1", formData.approverOne);
-      fd.append("approverLevel2", formData.approverTwo);
-      fd.append("approverLevel3", formData.approverThree);
+      fd.append("approverLevel1", formData.approverLevel1);
+      fd.append("approverLevel2", formData.approverLevel2);
+      fd.append("approverLevel3", formData.approverLevel3);
       fd.append("remarks", formData.remarks);
       fd.append("reasonForGatePass", formData.reasonForGatePass);
       fd.append("toBeReceivedBy", formData.toReceiveBy);
@@ -804,13 +851,13 @@ function CreateGatePass() {
         fd.append("consumables", JSON.stringify(items));
       }
       if (assetType === "Fixed Assets") {
-        fd.append("asset", fixedAsset);
+        fd.append("asset", formData.asset);
       }
       if (assetType === "Asset Components") {
-        fd.append("assetComponent", assetComponent);
+        fd.append("assetComponent", JSON.stringify(formData.assetComponent));
       }
       if (assetType === "Others") {
-        fd.append("others", JSON.stringify(otherItem));
+        fd.append("others", JSON.stringify(formData.others));
       }
 
       const res = await createGatePass(fd);
@@ -981,7 +1028,7 @@ function CreateGatePass() {
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, approvalRequired: value }))
                 }
-                options={[]}
+                options={["Yes", "No"]}
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField
@@ -997,45 +1044,106 @@ function CreateGatePass() {
                 )}
               />
             </div>
-            <div className="flex flex-row gap-2">
-              <label className="w-[25%] text-xs font-semibold text-slate-600">
-                Approver (Level 1)
-              </label>
-              <select
-                name="approverOne"
-                value={formData.approverOne}
-                onChange={handleChange}
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none"
-              >
-                <option value="">Select</option>
-              </select>
-            </div>
-            <div className="flex flex-row">
-              <label className="w-[25%] text-xs font-semibold text-slate-600">
-                Approver (Level 2)
-              </label>
-              <select
-                name="approverTwo"
-                value={formData.approverTwo}
-                onChange={handleChange}
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none"
-              >
-                <option value="">Select</option>
-              </select>
-            </div>
-            <div className="flex flex-row gap-2">
-              <label className="w-[25%] text-xs font-semibold text-slate-600">
-                Approver (Level 3)
-              </label>
-              <select
-                name="approverThree"
-                value={formData.approverThree}
-                onChange={handleChange}
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none"
-              >
-                <option value="">Select</option>
-              </select>
-            </div>
+            {formData.approvalRequired === "Yes" && (
+              <>
+                <div className="flex flex-row gap-2">
+                  <label className="w-[25%] text-xs font-semibold text-slate-600">
+                    Approver (Level 1)
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={userData}
+                    value={
+                      userData.find(
+                        (user) => user.emailAddress === formData.approverLevel1
+                      ) || null
+                    }
+                    onChange={(e, newValue) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        approverLevel1: newValue?.emailAddress || "",
+                      }))
+                    }
+                    getOptionLabel={(option) => option?.emailAddress || ""}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        placeholder="Select Approver Level-1"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex flex-row">
+                  <label className="w-[25%] text-xs font-semibold text-slate-600">
+                    Approver (Level 2)
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={userData}
+                    value={
+                      userData.find(
+                        (user) => user.emailAddress === formData.approverLevel2
+                      ) || null
+                    }
+                    onChange={(e, newValue) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        approverLevel2: newValue?.emailAddress || "",
+                      }))
+                    }
+                    getOptionLabel={(option) => option?.emailAddress || ""}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        placeholder="Select Approver Level-2"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex flex-row gap-2">
+                  <label className="w-[25%] text-xs font-semibold text-slate-600">
+                    Approver (Level 3)
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={userData}
+                    value={
+                      userData.find(
+                        (user) => user.emailAddress === formData.approverLevel3
+                      ) || null
+                    }
+                    onChange={(e, newValue) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        approverLevel3: newValue?.emailAddress || "",
+                      }))
+                    }
+                    getOptionLabel={(option) => option?.emailAddress || ""}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        placeholder="Select Approver Level-3"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </>
+            )}
             <div className="flex flex-row gap-2">
               <label className="w-[25%] text-xs font-semibold text-slate-600">
                 To Address
@@ -1045,7 +1153,7 @@ function CreateGatePass() {
                 name="toAddress"
                 value={formData.toAddress}
                 onChange={handleChange}
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none"
+                className="w-[65%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none"
               />
             </div>
             <div className="flex flex-row gap-2">
@@ -1175,10 +1283,22 @@ function CreateGatePass() {
                 </label>
                 <Autocomplete
                   className="w-[65%]"
-                  options={[]}
-                  value={fixedAsset}
-                  onChange={(e, value) => setFixedAsset(value || "")}
-                  getOptionLabel={(option) => option}
+                  options={assetData}
+                  value={
+                    assetData.find(
+                      (asset) =>
+                        asset?.assetInformation?.assetTag === formData.asset
+                    ) || null
+                  }
+                  onChange={(e, newValue) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      asset: newValue?.assetInformation?.assetTag || "",
+                    }))
+                  }
+                  getOptionLabel={(option) =>
+                    option?.assetInformation?.assetTag || ""
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -1194,6 +1314,7 @@ function CreateGatePass() {
                 />
               </div>
             )}
+
             {assetType === "Asset Components" && (
               <div className="flex flex-row gap-2">
                 <label className="w-[25%] text-xs font-semibold text-slate-600">
@@ -1201,10 +1322,35 @@ function CreateGatePass() {
                 </label>
                 <Autocomplete
                   className="w-[65%]"
-                  options={[]}
-                  value={assetComponent}
-                  onChange={(e, value) => setAssetComponent(value || "")}
-                  getOptionLabel={(option) => option}
+                  options={assetData}
+                  value={
+                    assetData.find(
+                      (asset) =>
+                        asset?.assetInformation?.assetTag ===
+                          formData.assetComponent?.assetTag &&
+                        asset?.assetInformation?.serialNumber ===
+                          formData.assetComponent?.serialNumber
+                    ) || null
+                  }
+                  onChange={(e, newValue) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      assetComponent: newValue
+                        ? {
+                            assetTag: newValue.assetInformation?.assetTag || "",
+                            serialNumber:
+                              newValue.assetInformation?.serialNumber || "",
+                          }
+                        : { assetTag: "", serialNumber: "" },
+                    }))
+                  }
+                  getOptionLabel={(option) =>
+                    option?.assetInformation
+                      ? `${option.assetInformation.assetTag || ""} / ${
+                          option.assetInformation.serialNumber || ""
+                        }`
+                      : ""
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -1222,7 +1368,7 @@ function CreateGatePass() {
             )}
           </div>
           {assetType === "Others" && (
-            <div className="flex flex-wrap gap-14 justify-between mt-3">
+            <div className="flex flex-wrap gap-14 justify-between mt-3">
               <div className="flex items-center w-[46%] max-md:w-[100%]">
                 <label className="w-[28%] text-xs font-semibold text-slate-600">
                   Item Name
@@ -1230,9 +1376,12 @@ function CreateGatePass() {
                 <input
                   type="text"
                   name="itemName"
-                  value={otherItem.itemName}
+                  value={formData.others.itemName}
                   onChange={(e) =>
-                    setOtherItem({ ...otherItem, itemName: e.target.value })
+                    setFormData((prev) => ({
+                      ...prev,
+                      others: { ...prev.others, itemName: e.target.value },
+                    }))
                   }
                   className="w-[70%] text-xs text-slate-600 border-b-2 border-slate-300 p-1 outline-none"
                 />
@@ -1244,25 +1393,28 @@ function CreateGatePass() {
                 <input
                   type="number"
                   name="quantity"
-                  value={otherItem.quantity}
+                  value={formData.others.quantity}
                   onChange={(e) =>
-                    setOtherItem({ ...otherItem, quantity: e.target.value })
+                    setFormData((prev) => ({
+                      ...prev,
+                      others: { ...prev.others, quantity: e.target.value },
+                    }))
                   }
                   className="w-[70%] text-xs text-slate-600 border-b-2 border-slate-300 p-1 outline-none"
                 />
               </div>
               <div className="flex flex-row flex-wrap gap-4 w-[100%]">
                 <label className="w-[25%] text-xs font-semibold text-slate-600">
-                  Decsription
+                  Description
                 </label>
                 <textarea
                   name="description"
-                  value={otherItem.description}
+                  value={formData.others.description}
                   onChange={(e) =>
-                    setOtherItem({
-                      ...otherItem,
-                      description: e.target.value,
-                    })
+                    setFormData((prev) => ({
+                      ...prev,
+                      others: { ...prev.others, description: e.target.value },
+                    }))
                   }
                   rows={4}
                   className="w-[97%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none"
@@ -1301,27 +1453,22 @@ function CreateGatePass() {
                     <tr>
                       <td className="p-2 border">1</td>
                       <td className="p-2 border">
-                        <select
+                        <input
+                          type="text"
                           name="itemName"
                           value={newItem.itemName}
                           onChange={handleNewItemChange}
                           className="w-full border-b outline-none text-xs"
-                        >
-                          <option value="">Select</option>
-                          <option value="Item 1">Item 1</option>
-                          <option value="Item 2">Item 2</option>
-                        </select>
+                        />
                       </td>
                       <td className="p-2 border">
-                        <select
+                        <input
                           type="text"
                           name="serialNo"
                           value={newItem.serialNo}
                           onChange={handleNewItemChange}
                           className="w-full border-b outline-none text-xs"
-                        >
-                          <option value="">Select</option>
-                        </select>
+                        />
                       </td>
                       <td className="p-2 border">
                         <input
@@ -1340,7 +1487,12 @@ function CreateGatePass() {
                             if (newItem.itemName && newItem.quantity) {
                               setItems([
                                 ...items,
-                                { ...newItem, id: Date.now() },
+                                {
+                                  ...newItem,
+                                  id: Date.now(),
+                                  sNo: items.length + 1,
+                                  qty: Number(newItem.quantity),
+                                },
                               ]);
                               setNewItem({
                                 itemName: "",
@@ -1366,10 +1518,10 @@ function CreateGatePass() {
                   )}
                   {items.map((item, idx) => (
                     <tr key={item.id}>
-                      <td className="p-2 border">{idx + 1}</td>
+                      <td className="p-2 border">{item.sNo}</td>
                       <td className="p-2 border">{item.itemName}</td>
                       <td className="p-2 border">{item.serialNo}</td>
-                      <td className="p-2 border">{item.quantity}</td>
+                      <td className="p-2 border">{item.qty}</td>
                       <td className="p-2 border">
                         <button
                           type="button"

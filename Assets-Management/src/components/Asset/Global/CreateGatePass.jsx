@@ -10,6 +10,7 @@ import { createGatePass } from "../../../api/GatePassRequest";
 import { getAllGatePassAddress } from "../../../api/gatePassAddressRequest";
 import { getAllUsers } from "../../../api/AuthRequest";
 import { getAllAssets } from "../../../api/AssetsRequest";
+import Chip from "@mui/material/Chip";
 
 function CreateGatePass() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -45,7 +46,8 @@ function CreateGatePass() {
     reasonForGatePass: "",
     toReceiveBy: "",
     receiverNumber: "",
-    asset: "",
+    // asset: "",
+    asset: [],
     assetComponent: "",
     others: {
       itemName: "",
@@ -210,8 +212,14 @@ function CreateGatePass() {
       if (assetType === "Consumables") {
         fd.append("consumables", JSON.stringify(items));
       }
+
       if (assetType === "Fixed Assets") {
-        fd.append("asset", formData.asset);
+        fd.append(
+          "asset",
+          JSON.stringify(
+            formData.asset.map((a) => a.assetInformation.serialNumber)
+          )
+        );
       }
       if (assetType === "Asset Components") {
         fd.append("assetComponent", JSON.stringify(formData.assetComponent));
@@ -649,21 +657,21 @@ function CreateGatePass() {
                 </label>
                 <Autocomplete
                   className="w-[65%]"
+                  multiple
                   options={assetData}
-                  value={
-                    assetData.find(
-                      (asset) =>
-                        asset?.assetInformation?.assetTag === formData.asset
-                    ) || null
-                  }
+                  value={formData.asset}
                   onChange={(e, newValue) =>
                     setFormData((prev) => ({
                       ...prev,
-                      asset: newValue?.assetInformation?.assetTag || "",
+                      asset: newValue,
                     }))
                   }
                   getOptionLabel={(option) =>
-                    option?.assetInformation?.assetTag || ""
+                    option?.assetInformation
+                      ? `${option.assetInformation.assetTag || ""} / ${
+                          option.assetInformation.serialNumber || ""
+                        }`
+                      : ""
                   }
                   renderInput={(params) => (
                     <TextField

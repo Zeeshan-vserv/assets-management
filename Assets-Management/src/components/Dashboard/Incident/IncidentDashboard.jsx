@@ -10,48 +10,71 @@ import ResponseSlaStatusPieChart from "./PieChart/ResponseSlaStatusPieChart";
 import ResolutionSlaStatusPieChart from "./PieChart/ResolutionSlaStatusPieChart";
 import BarGraphForIncident from "./BarGraph/BarGraphForIncident";
 import FeedbackForTicketClosedPieChart from "./PieChart/FeedbackForTicketClosedPieChart";
-import { getAllIncident } from "../../../api/IncidentRequest";
+import {
+  getAllIncident,
+  getIncidentStatusCounts,
+} from "../../../api/IncidentRequest";
+import {
+  getIncidentOpenClosedByField,
+  getTechnicianIncidentStatusSummary,
+} from "../../../api/DashboardRequest";
+import { getServiceRequestStatusCounts } from "../../../api/serviceRequest";
 
 function IncidentDashboard() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
-  const [statusCounts, setStatusCounts] = useState({
-    New: 0,
-    Assigned: 0,
-    InProgress: 0,
-    Pause: 0,
-    Resolved: 0,
-    Cancelled: 0,
-    Closed: 0,
-    Total: 0,
-  });
-
+  const [technicianIncidentData, setTechnicianIncidentData] = useState([]);
+  const [categoryData, setCategoryData] = useState([]);
+  const [subCategoryData, setSubCategoryData] = useState([]);
+  const [locationData, setLocationData] = useState([]);
+  const [subLocationData, setSubLocationData] = useState([]);
+  const [supportGroupData, setSupportGroupData] = useState([]);
+  const [supportDepartmentData, setSupportDepartmentData] = useState([]);
+  const [cardData, setCardData] = useState([]);
   const [chartData, setChartData] = useState([]);
 
   const fetchIncidentData = async () => {
     try {
       const response = await getAllIncident();
-      let incidents = response?.data.data || [];
-      setData(incidents);
-      const counts = {
-        New: 0,
-        Assigned: 0,
-        InProgress: 0,
-        Pause: 0,
-        Resolved: 0,
-        Cancelled: 0,
-        Closed: 0,
-        Total: incidents.length,
-      };
-
-      incidents.forEach((item) => {
-        const status = item.status;
-        if (counts[status] !== undefined) {
-          counts[status]++;
-        }
-      });
-
-      setStatusCounts(counts);
+      setData(response?.data?.data || []);
+      const countResponse = await getIncidentStatusCounts();
+      // Convert object to array if needed
+      let counts = countResponse?.data?.data;
+      if (counts && !Array.isArray(counts)) {
+        counts = [
+          { id: "1", count: counts["New"] || 0, description: "New" },
+          { id: "2", count: counts["Assigned"] || 0, description: "Assigned" },
+          {
+            id: "3",
+            count: counts["In-Progress"] || 0,
+            description: "In-Progress",
+          },
+          { id: "4", count: counts["Pause"] || 0, description: "Pause" },
+          { id: "5", count: counts["Resolved"] || 0, description: "Resolved" },
+          {
+            id: "6",
+            count: counts["Cancelled"] || counts["cancel"] || 0,
+            description: "Cancelled",
+          },
+          {
+            id: "7",
+            count: counts["Reopened"] || counts["reopen"] || 0,
+            description: "Reopened",
+          },
+          { id: "8", count: counts["Closed"] || 0, description: "Closed" },
+          {
+            id: "9",
+            count: counts["Converted to SR"] || 0,
+            description: "Converted to SR",
+          },
+          {
+            id: "11",
+            count: response?.data?.data?.length || 0,
+            description: "Total",
+          },
+        ];
+      }
+      setCardData(counts || []);
     } catch (error) {
       console.error("Error fetching incident data:", error);
     }
@@ -73,48 +96,56 @@ function IncidentDashboard() {
     fetchChartData();
   }, []);
 
-  const cardData = [
-    {
-      id: "1",
-      count: statusCounts.New,
-      description: "New",
-    },
-    {
-      id: "2",
-      count: statusCounts.Assigned,
-      description: "Assigned",
-    },
-    {
-      id: "3",
-      count: statusCounts.InProgress,
-      description: "InProgress",
-    },
-    {
-      id: "4",
-      count: statusCounts.Pause,
-      description: "Pause",
-    },
-    {
-      id: "5",
-      count: statusCounts.Resolved,
-      description: "Resolved",
-    },
-    {
-      id: "6",
-      count: statusCounts.Cancelled,
-      description: "Cancelled",
-    },
-    {
-      id: "7",
-      count: statusCounts.Closed,
-      description: "Closed",
-    },
-    {
-      id: "8",
-      count: statusCounts.Total,
-      description: "Total",
-    },
-  ];
+  const fetchTechnicianIncidentSummary = async () => {
+    try {
+      const res = await getTechnicianIncidentStatusSummary();
+      setTechnicianIncidentData(res.data.data || []);
+    } catch (error) {
+      setTechnicianIncidentData([]);
+      console.error("Error fetching technician incident summary:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTechnicianIncidentSummary();
+  }, []);
+
+  useEffect(() => {
+    const fetchGroupData = async () => {
+      const today = new Date();
+      const from = new Date(today);
+      from.setDate(today.getDate() - 30);
+      const fromStr = from.toISOString().slice(0, 10);
+      const toStr = today.toISOString().slice(0, 10);
+
+      try {
+        const [cat, subCat, loc, subLoc, group, dept] = await Promise.all([
+          getIncidentOpenClosedByField("category", fromStr, toStr),
+          getIncidentOpenClosedByField("subCategory", fromStr, toStr),
+          getIncidentOpenClosedByField("location", fromStr, toStr),
+          getIncidentOpenClosedByField("subLocation", fromStr, toStr),
+          getIncidentOpenClosedByField("supportGroup", fromStr, toStr),
+          getIncidentOpenClosedByField("supportDepartment", fromStr, toStr),
+        ]);
+        setCategoryData(cat.data.data || []);
+        setSubCategoryData(subCat.data.data || []);
+        setLocationData(loc.data.data || []);
+        setSubLocationData(subLoc.data.data || []);
+        setSupportGroupData(group.data.data || []);
+        setSupportDepartmentData(dept.data.data || []);
+      } catch (error) {
+        setCategoryData([]);
+        setSubCategoryData([]);
+        setLocationData([]);
+        setSubLocationData([]);
+        setSupportGroupData([]);
+        setSupportDepartmentData([]);
+        console.error("Error fetching group data:", error);
+      }
+    };
+    fetchGroupData();
+  }, []);
+
   return (
     <>
       <div className="flex flex-col justify-center w-full min-h-full p-4 bg-slate-100">
@@ -150,6 +181,10 @@ function IncidentDashboard() {
           <TotalIncidentBarChart
             title="Total Incidents"
             chartData={chartData}
+            min={0}
+            max={15}
+            stepSizes={3}
+            ticksArray={[0, 3, 6, 9, 12, 15]}
           />
         </Card>
         {/* Pie chart */}
@@ -170,24 +205,60 @@ function IncidentDashboard() {
         {/* Bar graph */}
         <div>
           <div className="mt-6 flex flex-wrap items-center gap-4">
-            <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            {/* <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={technicianIncidentData.map((t) => ({
+                  name: t.technician,
+                  value: t.Open,
+                }))}
+
                 title="Open Incidents By Technician"
                 min={0}
                 max={5}
                 stepSizes={1}
                 ticksArray={[0.0, 1.0, 2.0, 3.0, 4.0, 5.0]}
               />
+            </Card> */}
+            <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+              <BarGraphForIncident
+                chartData={technicianIncidentData.map((t) => ({
+                  name: t.technician,
+                  value: t.Open,
+                }))}
+                title="Open Incidents By Technician"
+                min={0}
+                max={
+                  technicianIncidentData.length > 0
+                    ? Math.max(...technicianIncidentData.map((t) => t.Open))
+                    : 1
+                }
+                stepSizes={1}
+                ticksArray={
+                  technicianIncidentData.length > 0
+                    ? Array.from(
+                        {
+                          length:
+                            Math.max(
+                              ...technicianIncidentData.map((t) => t.Open)
+                            ) + 1,
+                        },
+                        (_, i) => i
+                      )
+                    : [0, 1]
+                }
+              />
             </Card>
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={technicianIncidentData.map((t) => ({
+                  name: t.technician,
+                  value: t.Closed,
+                }))}
                 title="Closed Incidents By Technician"
                 min={0}
-                max={1200}
-                stepSizes={300}
-                ticksArray={[0, 300, 600, 900, 1200]}
+                max={4}
+                stepSizes={1}
+                ticksArray={[0, 1, 2, 3, 4]}
               />
             </Card>
           </div>
@@ -195,7 +266,10 @@ function IncidentDashboard() {
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={supportGroupData.map((d) => ({
+                  name: d.supportGroup,
+                  value: d.Open,
+                }))}
                 title="Open Incidents By Support Group"
                 min={0}
                 max={50}
@@ -205,7 +279,10 @@ function IncidentDashboard() {
             </Card>
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={supportGroupData.map((d) => ({
+                  name: d.supportGroup,
+                  value: d.Closed,
+                }))}
                 title="Closed Incidents By Support Group"
                 min={0}
                 max={6000}
@@ -217,7 +294,10 @@ function IncidentDashboard() {
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={categoryData.map((d) => ({
+                  name: d.category,
+                  value: d.Open,
+                }))}
                 title="Open Incidents By Category"
                 min={0}
                 max={6}
@@ -227,7 +307,10 @@ function IncidentDashboard() {
             </Card>
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={categoryData.map((d) => ({
+                  name: d.category,
+                  value: d.Closed,
+                }))}
                 title="Closed Incidents By Category"
                 min={0}
                 max={1000}
@@ -239,7 +322,10 @@ function IncidentDashboard() {
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={subCategoryData.map((d) => ({
+                  name: d.subCategory,
+                  value: d.Open,
+                }))}
                 title="Open Incidents By Sub Category"
                 min={0}
                 max={6}
@@ -249,7 +335,10 @@ function IncidentDashboard() {
             </Card>
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={subCategoryData.map((d) => ({
+                  name: d.subCategory,
+                  value: d.Closed,
+                }))}
                 title="Closed Incidents By Sub Category"
                 min={0}
                 max={1200}
@@ -261,7 +350,10 @@ function IncidentDashboard() {
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={locationData.map((d) => ({
+                  name: d.location,
+                  value: d.Open,
+                }))}
                 title="Open Incidents By Location"
                 min={0}
                 max={4}
@@ -271,7 +363,10 @@ function IncidentDashboard() {
             </Card>
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={locationData.map((d) => ({
+                  name: d.location,
+                  value: d.Close,
+                }))}
                 title="Closed Incidents By Location"
                 min={0}
                 max={360}
@@ -283,7 +378,10 @@ function IncidentDashboard() {
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={subLocationData.map((d) => ({
+                  name: d.subLocation,
+                  value: d.Open,
+                }))}
                 title="Open Incidents By Sub Location"
                 min={0}
                 max={4}
@@ -293,7 +391,10 @@ function IncidentDashboard() {
             </Card>
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={subLocationData.map((d) => ({
+                  name: d.subLocation,
+                  value: d.Close,
+                }))}
                 title="Closed Incidents By Sub Location"
                 min={0}
                 max={320}
@@ -305,7 +406,10 @@ function IncidentDashboard() {
           <div className="mt-6 flex flex-wrap items-center gap-4">
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
+                chartData={supportDepartmentData.map((d) => ({
+                  name: d.supportDepartment,
+                  value: d.Open,
+                }))}
                 title="Open Incidents By Support Department"
                 min={0}
                 max={50}
@@ -315,8 +419,11 @@ function IncidentDashboard() {
             </Card>
             <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
               <BarGraphForIncident
-                chartData={chartData}
-                title="Closed Incidents By Feedback Rating"
+                chartData={supportDepartmentData.map((d) => ({
+                  name: d.supportDepartment,
+                  value: d.Close,
+                }))}
+                title="Closed Incidents By Support Department"
                 min={0}
                 max={3}
                 stepSizes={1}
@@ -325,9 +432,9 @@ function IncidentDashboard() {
             </Card>
           </div>
         </div>
-        <div className="w-[23%] min-w-[250px] max-lg:w-[48%] max-md:w-full mt-4">
+        {/* <div className="w-[23%] min-w-[250px] max-lg:w-[48%] max-md:w-full mt-4">
           <FeedbackForTicketClosedPieChart />
-        </div>
+        </div> */}
       </div>
     </>
   );

@@ -1,4 +1,5 @@
 import IncidentModel from "../models/incidentModel.js";
+import ServiceRequestModel from "../models/serviceRequestModel.js";
 
 export const getTechnicianIncidentStatusSummary = async (req, res) => {
   try {
@@ -308,5 +309,320 @@ export const getResolutionSlaStatus = async (req, res) => {
     res.json({ data });
   } catch (error) {
     res.status(500).json({ message: "Error fetching resolution SLA status", error: error.message });
+  }
+};
+
+export const getIncidentOpenClosedByField = async (req, res) => {
+  try {
+    const { groupBy = "category", from, to } = req.query;
+    const allowedFields = [
+      "category",
+      "subCategory",
+      "location",
+      "subLocation",
+      "supportGroup",
+      "supportDepartment"
+    ];
+    const fieldMap = {
+      category: "$category",
+      subCategory: "$subCategory",
+      location: "$locationDetails.location",
+      subLocation: "$locationDetails.subLocation",
+      supportGroup: "$classificaton.supportGroupName",
+      supportDepartment: "$classificaton.supportDepartmentName"
+    };
+    if (!allowedFields.includes(groupBy)) {
+      return res.status(400).json({ message: "Invalid groupBy field" });
+    }
+
+    const startDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = to ? new Date(to) : new Date();
+
+    const pipeline = [
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            group: fieldMap[groupBy],
+            status: "$status"
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.group",
+          statuses: {
+            $push: { status: "$_id.status", count: "$count" }
+          },
+          total: { $sum: "$count" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          group: "$_id",
+          statuses: 1,
+          total: 1
+        }
+      }
+    ];
+
+    const aggregation = await IncidentModel.aggregate(pipeline);
+
+    // Format result: Open = New+Assigned+In Progress+Reopened+Overdue, Closed = Closed
+    const openStatuses = ["New", "Assigned", "In Progress", "Reopened", "Overdue"];
+    const closedStatuses = ["Closed"];
+    const result = aggregation.map((item) => {
+      let open = 0, closed = 0;
+      item.statuses.forEach(s => {
+        if (openStatuses.includes(s.status)) open += s.count;
+        if (closedStatuses.includes(s.status)) closed += s.count;
+      });
+      return {
+        [groupBy]: item.group,
+        Open: open,
+        Closed: closed,
+        total: item.total
+      };
+    });
+
+    res.json({ data: result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getServiceRequestStatusSummary = async (req, res) => {
+  try {
+    // List of statuses you want to count
+    const statusList = [
+      "Assigned",
+      "In Progress",
+      "Paused",
+      "Overdue",
+      "Resolved",
+      "Reopened",
+      "Closed",
+      "Cancelled"
+    ];
+
+    // Map status keys to your DB status values
+    const statusMap = {
+      Assigned: ["Assigned"],
+      "In Progress": ["In-Progress", "In Progress"],
+      Paused: ["Pause", "Paused", "Hold"],
+      Overdue: ["Overdue"],
+      Resolved: ["Resolved"],
+      Reopened: ["Reopened"],
+      Closed: ["Closed"],
+      Cancelled: ["Cancelled", "Rejected"]
+    };
+
+    // Aggregate by technician and status
+    const aggregation = await ServiceRequestModel.aggregate([
+      {
+        $addFields: {
+          latestStatus: { $arrayElemAt: ["$statusTimeline.status", -1] }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            name: "$classificaton.technician",
+            status: "$latestStatus"
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.name",
+          statuses: {
+            $push: { status: "$_id.status", count: "$count" }
+          },
+          total: { $sum: "$count" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          name: "$_id",
+          statuses: 1,
+          total: 1
+        }
+      }
+    ]);
+
+    // Format result for your table
+    const result = aggregation
+      .map((row) => {
+        const counts = {};
+        statusList.forEach((key) => {
+          counts[key] = row.statuses
+            .filter((s) => statusMap[key].includes(s.status))
+            .reduce((sum, s) => sum + s.count, 0);
+        });
+        // Open = Assigned + In Progress + Paused + Overdue
+        counts.Open =
+          (counts.Assigned || 0) +
+          (counts["In Progress"] || 0) +
+          (counts.Paused || 0) +
+          (counts.Overdue || 0);
+
+        return {
+          name: row.name || "Unassigned",
+          open: counts.Open,
+          assigned: counts.Assigned,
+          inProgress: counts["In Progress"],
+          paused: counts.Paused,
+          overdue: counts.Overdue,
+          resolved: counts.Resolved,
+          reopend: counts.Reopened,
+          closed: counts.Closed,
+          cancelled: counts.Cancelled,
+          total: row.total
+        };
+      })
+      // Only show rows with assigned > 0
+      .filter((row) => row.assigned > 0);
+
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching service request summary", error: error.message });
+  }
+};
+
+export const getTotalServicesByDateRange = async (req, res) => {
+  try {
+    // Parse query params
+    const { from, to, groupBy = "day" } = req.query;
+    const startDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // default 30 days ago
+    const endDate = to ? new Date(to) : new Date();
+
+    // Choose date format for grouping
+    let dateFormat;
+    if (groupBy === "month") dateFormat = "%Y-%m";
+    else if (groupBy === "year") dateFormat = "%Y";
+    else dateFormat = "%Y-%m-%d"; // default: day
+
+    const aggregation = await ServiceRequestModel.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: dateFormat, date: "$createdAt" } },
+          value: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { _id: 1 }
+      }
+    ]);
+
+    // Format for chart: [{ name: "2024-07-01", value: 5 }, ...]
+    const result = aggregation.map(item => ({
+      name: item._id,
+      value: item.value
+    }));
+
+    res.json({ data: result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const getServiceOpenByField = async (req, res) => {
+  try {
+    const { groupBy = "category", from, to } = req.query;
+    const allowedFields = [
+      "category",
+      "subCategory",
+      "location",
+      "subLocation",
+      "supportGroup",
+      "supportDepartment"
+    ];
+    const fieldMap = {
+      category: "$category",
+      subCategory: "$subCategory",
+      location: "$locationDetails.location",
+      subLocation: "$locationDetails.subLocation",
+      supportGroup: "$classificaton.supportGroupName",
+      supportDepartment: "$classificaton.supportDepartmentName"
+    };
+    if (!allowedFields.includes(groupBy)) {
+      return res.status(400).json({ message: "Invalid groupBy field" });
+    }
+
+    const startDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = to ? new Date(to) : new Date();
+
+    const pipeline = [
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: endDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            group: fieldMap[groupBy],
+            status: "$status"
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.group",
+          statuses: {
+            $push: { status: "$_id.status", count: "$count" }
+          },
+          total: { $sum: "$count" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          group: "$_id",
+          statuses: 1,
+          total: 1
+        }
+      }
+    ];
+
+    const aggregation = await IncidentModel.aggregate(pipeline);
+
+    // Format result: Open = New+Assigned+In Progress+Reopened+Overdue, Closed = Closed
+    const openStatuses = ["New", "Assigned", "In Progress", "Reopened", "Overdue"];
+    const closedStatuses = ["Closed"];
+    const result = aggregation.map((item) => {
+      let open = 0, closed = 0;
+      item.statuses.forEach(s => {
+        if (openStatuses.includes(s.status)) open += s.count;
+        if (closedStatuses.includes(s.status)) closed += s.count;
+      });
+      return {
+        [groupBy]: item.group,
+        Open: open,
+        Closed: closed,
+        total: item.total
+      };
+    });
+
+    res.json({ data: result });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
   }
 };

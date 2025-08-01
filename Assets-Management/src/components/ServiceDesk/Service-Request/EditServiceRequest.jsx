@@ -24,6 +24,7 @@ import {
   getAllServiceCategory,
   getAllServiceSubCategory,
 } from "../../../api/globalServiceRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 function EditServiceRequest() {
   const { id } = useParams();
@@ -82,6 +83,7 @@ function EditServiceRequest() {
   });
   const [userData, setUserData] = useState([]);
   const [statusData, setStatusData] = useState([]);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchGetAllUsersData = async () => {
     try {
@@ -223,7 +225,7 @@ function EditServiceRequest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateServiceRequest(formData?._id, {
+      await updateServiceRequest(id, {
         ...formData,
         userId: user?.userId,
         status: statusData,
@@ -268,6 +270,7 @@ function EditServiceRequest() {
           technician: "",
         },
       });
+      setShowConfirm(false);
       navigate("/main/ServiceDesk/service-request");
     } catch (error) {
       toast.error("Failed to add Service Request");
@@ -292,7 +295,9 @@ function EditServiceRequest() {
           <div className="w-full p-8 bg-white rounded-md shadow-md">
             <div className="flex gap-2 justify-end">
               <button
-                type="submit"
+                // type="submit"
+                type="button"
+                onClick={() => setShowConfirm(true)}
                 className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
               >
                 Update
@@ -303,6 +308,12 @@ function EditServiceRequest() {
               >
                 Cancel
               </button>
+              <ConfirmUpdateModal
+                isOpen={showConfirm}
+                message="Are you sure you want to update Service Request?"
+                onConfirm={handleSubmit}
+                onCancel={() => setShowConfirm(false)}
+              />
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-6 mt-6">

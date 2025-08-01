@@ -201,7 +201,7 @@ function AllVendors() {
     },
     renderTopToolbarCustomActions: ({ table }) => (
       <Box>
-        <NavLink to="/main/service-desk/new-vendor">
+        <NavLink to="/main/ServiceDesk/NewVendor">
           <Button
             variant="contained"
             size="small"

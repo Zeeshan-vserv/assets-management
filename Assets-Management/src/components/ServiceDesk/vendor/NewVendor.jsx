@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 
 function NewVendor() {
   const [formData, setFormData] = useState({
-    vendorCode: "VSERV123",
+    vendorCode: "",
     vendorName: "",
     contactPerson: "",
     contactNumber: "",
@@ -67,7 +67,7 @@ function NewVendor() {
                 name="vendorCode"
                 value={formData.vendorCode || ""}
                 onChange={handleChange}
-                readOnly
+                // readOnly
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none"
               />
             </div>

@@ -9,20 +9,20 @@ import {
   Legend,
 } from "chart.js";
 import { Card, CardContent, Typography, Box } from "@mui/material";
-import { getAssetsByCategory } from "../../../api/DashboardRequest";
+import { getAssetsByLocation } from "../../../api/DashboardRequest";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const AssetByCategoryBarChart = () => {
-  const [categoryData, setCategoryData] = useState([]);
+const AssetByLocationBarChart = () => {
+  const [locationData, setLocationData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await getAssetsByCategory();
-        setCategoryData(res?.data?.data || []);
+        const res = await getAssetsByLocation();
+        setLocationData(res?.data?.data || []);
       } catch {
-        setCategoryData([]);
+        setLocationData([]);
       }
     };
     fetchData();
@@ -30,12 +30,12 @@ const AssetByCategoryBarChart = () => {
 
   // Calculate dynamic max and ticks
   const maxValue = Math.max(
-    ...categoryData.map((item) => Number(item.value) || 0),
+    ...locationData.map((item) => Number(item.value) || 0),
     0
   );
   const stepSize =
-    maxValue > 0 ? Math.ceil((maxValue / 4) / 100) * 100 : 300; // round up to nearest 100
-  const dynamicMax = Math.ceil(maxValue / stepSize) * stepSize || 1200;
+    maxValue > 0 ? Math.ceil((maxValue / 4) / 100) * 100 : 100;
+  const dynamicMax = Math.ceil(maxValue / stepSize) * stepSize || 400;
   const ticksArray = Array.from(
     { length: Math.floor(dynamicMax / stepSize) + 1 },
     (_, i) => i * stepSize
@@ -78,11 +78,11 @@ const AssetByCategoryBarChart = () => {
   };
 
   const data = {
-    labels: categoryData.map((item) => item.label),
+    labels: locationData.map((item) => item.label),
     datasets: [
       {
         label: "Assets",
-        data: categoryData.map((item) => Number(item.value) || 0),
+        data: locationData.map((item) => Number(item.value) || 0),
         backgroundColor: "#2196f3",
         borderRadius: 4,
         barThickness: 30,
@@ -94,7 +94,7 @@ const AssetByCategoryBarChart = () => {
     <Card sx={{ maxWidth: "100%", mx: "auto", boxShadow: 3 }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          Assets By Category
+          Assets By Location
         </Typography>
         <Box sx={{ width: "100%", height: { xs: 300, sm: 400, md: 500 } }}>
           <Bar data={data} options={options} />
@@ -104,4 +104,4 @@ const AssetByCategoryBarChart = () => {
   );
 };
 
-export default AssetByCategoryBarChart;
+export default AssetByLocationBarChart;

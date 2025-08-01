@@ -27,6 +27,7 @@ API.interceptors.response.use(
     }
 )
 
+// Incident Dashboard Requests
 export const getTechnicianIncidentStatusSummary = () =>
   API.get('/dashboard/technician-incident-status-summary');
 
@@ -60,6 +61,7 @@ export const getResolutionSlaStatus = (from, to) =>
     params: { groupBy, from, to }
   });
 
+  // Service Request Dashboard Requests
   export const getServiceRequestStatusSummary = () =>
   API.get('/dashboard/service-request-status-summary');
 
@@ -67,3 +69,23 @@ export const getResolutionSlaStatus = (from, to) =>
   API.get('/dashboard/total-services-bar', {
     params: { from, to, groupBy }
   });
+
+  // Assets Dashboard Requests
+export const getAssetsByStatus = () =>
+  API.get('/dashboard/assets-by-status');
+
+export const getAssetsBySupportType = () =>
+  API.get('/dashboard/assets-by-support-type');
+
+export const getAssetsByWarrantyExpiry = () =>
+  API.get('/dashboard/assets-by-warranty-expiry');
+
+export const getAssetsByCategory = () =>  
+  API.get('/dashboard/assets-by-category');
+
+export const getAssetsByLocation = () =>
+  API.get('/dashboard/assets-by-location');
+
+export const getAssetsBySubLocation = () =>
+  API.get('/dashboard/assets-by-sub-location');
+

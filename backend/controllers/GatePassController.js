@@ -48,6 +48,9 @@ export const createGatePass = async (req, res) => {
         if (gatePassData.asset && typeof gatePassData.asset === "string") {
             gatePassData.asset = JSON.parse(gatePassData.asset);
         }
+         if (gatePassData.assetComponent && typeof gatePassData.assetComponent === "string") {
+            gatePassData.assetComponent = JSON.parse(gatePassData.assetComponent);
+        }
         if (gatePassData.consumables && typeof gatePassData.consumables === "string") {
             gatePassData.consumables = JSON.parse(gatePassData.consumables);
         }

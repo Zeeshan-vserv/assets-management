@@ -48,7 +48,8 @@ function CreateGatePass() {
     receiverNumber: "",
     // asset: "",
     asset: [],
-    assetComponent: "",
+    // assetComponent: "",
+    assetComponent: [],
     others: {
       itemName: "",
       quantity: "",
@@ -223,7 +224,11 @@ function CreateGatePass() {
         );
       }
       if (assetType === "Asset Components") {
-        fd.append("assetComponent", JSON.stringify(formData.assetComponent));
+        // fd.append("assetComponent", JSON.stringify(formData.assetComponent));
+        fd.append(
+          "assetComponent",
+          JSON.stringify(formData.assetComponent.map((a) => a._id))
+        );
       }
       if (assetType === "Others") {
         fd.append("others", JSON.stringify(formData.others));
@@ -690,7 +695,7 @@ function CreateGatePass() {
               </div>
             )}
 
-            {assetType === "Asset Components" && (
+            {/* {assetType === "Asset Components" && (
               <div className="flex flex-row gap-2">
                 <label className="w-[25%] text-xs font-semibold text-slate-600">
                   Asset Components
@@ -717,6 +722,44 @@ function CreateGatePass() {
                               newValue.assetInformation?.serialNumber || "",
                           }
                         : { assetTag: "", serialNumber: "" },
+                    }))
+                  }
+                  getOptionLabel={(option) =>
+                    option?.assetInformation
+                      ? `${option.assetInformation.assetTag || ""} / ${
+                          option.assetInformation.serialNumber || ""
+                        }`
+                      : ""
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      variant="standard"
+                      className="text-xs text-slate-600"
+                      placeholder="Select Asset Component"
+                      inputProps={{
+                        ...params.inputProps,
+                        style: { fontSize: "0.8rem" },
+                      }}
+                    />
+                  )}
+                />
+              </div>
+            )} */}
+            {assetType === "Asset Components" && (
+              <div className="flex flex-row gap-2">
+                <label className="w-[25%] text-xs font-semibold text-slate-600">
+                  Asset Components
+                </label>
+                <Autocomplete
+                  className="w-[65%]"
+                  multiple
+                  options={assetData}
+                  value={formData.assetComponent}
+                  onChange={(e, newValue) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      assetComponent: newValue,
                     }))
                   }
                   getOptionLabel={(option) =>

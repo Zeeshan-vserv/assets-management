@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -9,75 +9,89 @@ import {
   Legend,
 } from "chart.js";
 import { Card, CardContent, Typography, Box } from "@mui/material";
+import { getAssetsBySubLocation } from "../../../api/DashboardRequest";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
-const subLocationData = [
-  { name: "BSO Faridabad", value: 350 },
-  { name: "BSO PRAYAGRAJ", value: 115 },
-  { name: "BHOPAL CCO", value: 200 },
-  { name: "GO AHMEDABAD", value: 310 },
-  { name: "BSO Bokaro", value: 100 },
-  { name: "BSO Delhi", value: 50 },
-];
+const AssetBySubLocationBarChart = () => {
+  const [subLocationData, setSubLocationData] = useState([]);
 
-const data = {
-  labels: subLocationData.map((item) => item.name),
-  datasets: [
-    {
-      label: "Assets",
-      data: subLocationData.map((item) => item.value),
-      backgroundColor: "#2196f3",
-      borderRadius: 4,
-      barThickness: 30,
-    },
-  ],
-};
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getAssetsBySubLocation();
+        setSubLocationData(res?.data?.data || []);
+      } catch {
+        setSubLocationData([]);
+      }
+    };
+    fetchData();
+  }, []);
 
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  scales: {
-    y: {
-      min: 0,
-      max: 400,
-      ticks: {
-        stepSize: 100,
-        callback: function (value) {
-          return [0, 100, 200, 300, 400].includes(value) ? value : "";
+  // Dynamic Y axis calculation
+  const maxValue = Math.max(...subLocationData.map((item) => Number(item.value) || 0), 0);
+  const stepSize = maxValue > 0 ? Math.ceil(maxValue / 4 / 100) * 100 : 100;
+  const dynamicMax = Math.ceil(maxValue / stepSize) * stepSize || 400;
+  const ticksArray = Array.from(
+    { length: Math.floor(dynamicMax / stepSize) + 1 },
+    (_, i) => i * stepSize
+  );
+
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        min: 0,
+        max: dynamicMax,
+        ticks: {
+          stepSize: stepSize,
+          callback: function (value) {
+            return ticksArray.includes(value) ? value : "";
+          },
+        },
+        grid: {
+          drawBorder: false,
+          color: "#e0e0e0",
         },
       },
-      grid: {
-        drawBorder: false,
-        color: "#e0e0e0",
-      },
-    },
-    x: {
-      ticks: {
-        font: {
-          style: "italic",
+      x: {
+        ticks: {
+          font: {
+            style: "italic",
+          },
+        },
+        grid: {
+          display: false,
         },
       },
-      grid: {
+    },
+    plugins: {
+      legend: {
         display: false,
       },
     },
-  },
-  plugins: {
-    legend: {
-      display: false,
-    },
-  },
-};
+  };
 
-const AssetBySubLocationBarChart = () => {
+  const data = {
+    labels: subLocationData.map((item) => item.label),
+    datasets: [
+      {
+        label: "Assets",
+        data: subLocationData.map((item) => Number(item.value) || 0),
+        backgroundColor: "#2196f3",
+        borderRadius: 4,
+        barThickness: 30,
+      },
+    ],
+  };
+
   return (
     <Card sx={{ maxWidth: "100%", mx: "auto", boxShadow: 3 }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Assets By Sub Location
         </Typography>
-
         <Box sx={{ width: "100%", height: { xs: 300, sm: 400, md: 500 } }}>
           <Bar data={data} options={options} />
         </Box>

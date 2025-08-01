@@ -42,17 +42,6 @@ function ServiceRequest() {
   const [selectDropDownValue, setSelectDropDownValue] = useState("");
   const [ticketType, setTicketType] = useState(ticketOptions[0]);
 
-  // const fetchService = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await getAllServiceRequests();
-  //     setData(response?.data?.data || []);
-  //   } catch (error) {
-  //     console.error("Error fetching incidents:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
 
   const fetchService = useCallback(async () => {
     setIsLoading(true);
@@ -210,16 +199,6 @@ function ServiceRequest() {
     [isLoading]
   );
 
-  //Approval
-  // const handleAcceptServiceRequestApproval = (id) => {
-  //   console.log("Accept Id", id);
-  // };
-
-  // const handleRejectServiceRequestApproval = (id) => {
-  //   console.log("Reject Id", id);
-  // };
-
-  //Exports
   const handleExportRows = (rows) => {
     const visibleColumns = table
       .getAllLeafColumns()

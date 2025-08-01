@@ -7,10 +7,55 @@ import { Container } from "@mui/material";
 import AssetByCategoryBarChart from "./AssetByCategoryBarChart.jsx";
 import AssetBySubLocationBarChart from "./AssetBySubLocationBarChart.jsx";
 import AssetsByBusinessUnitBarChart from "./AssetsByBusinessUnitBarChart.jsx";
+import AssetByLocationBarChart from "./AssetByLocationBarChart.jsx";
+import { getAssetsByCategory, getAssetsByLocation, getAssetsByStatus, getAssetsBySubLocation, getAssetsBySupportType, getAssetsByWarrantyExpiry } from "../../../api/DashboardRequest.js";
 
 function DashboardAsset() {
   const navigate = useNavigate();
   const [data, setData] = useState([]);
+
+  const [assetsByStatus, setAssetsByStatus] = useState([]);
+const [assetsBySupportType, setAssetsBySupportType] = useState([]);
+const [assetsByWarrantyExpiry, setAssetsByWarrantyExpiry] = useState([]);
+const [assetsByCategory, setAssetsByCategory] = useState([]);
+const [assetsByLocation, setAssetsByLocation] = useState([]);
+const [assetsBySubLocation, setAssetsBySubLocation] = useState([]);
+
+useEffect(() => {
+  const fetchAll = async () => {
+    try {
+      const [
+        statusRes,
+        supportTypeRes,
+        warrantyRes,
+        categoryRes,
+        locationRes,
+        subLocationRes,
+      ] = await Promise.all([
+        getAssetsByStatus(),
+        getAssetsBySupportType(),
+        getAssetsByWarrantyExpiry(),
+        getAssetsByCategory(),
+        getAssetsByLocation(),
+        getAssetsBySubLocation(),
+      ]);
+      setAssetsByStatus(statusRes.data.data || []);
+      setAssetsBySupportType(supportTypeRes.data.data || []);
+      setAssetsByWarrantyExpiry(warrantyRes.data.data || []);
+      setAssetsByCategory(categoryRes.data.data || []);
+      setAssetsByLocation(locationRes.data.data || []);
+      setAssetsBySubLocation(subLocationRes.data.data || []);
+    } catch (error) {
+      setAssetsByStatus([]);
+      setAssetsBySupportType([]);
+      setAssetsByWarrantyExpiry([]);
+      setAssetsByCategory([]);
+      setAssetsByLocation([]);
+      setAssetsBySubLocation([]);
+    }
+  };
+  fetchAll();
+}, []);
 
   useEffect(() => {
     const fetchAssets = async () => {
@@ -93,38 +138,41 @@ function DashboardAsset() {
         </div>
 
         <div className="flex flex-wrap justify-center items-center gap-4">
-          <AssetPieChart title="Assets By Status" data={AssetsByStatus} />
+          <AssetPieChart title="Assets By Status" data={assetsByStatus} />
           <AssetPieChart
             title="Assets By Support Type"
-            data={AssetsBySupportType}
+            data={assetsBySupportType}
           />
           <AssetPieChart
             title="Assets By Warranty Expiry"
-            data={AssetsByWarrantyExpiry}
+            data={assetsByWarrantyExpiry}
           />
-          <AssetPieChart title=" Assets By Life(Expiry)" data={AssetsByLife} />
-          <AssetPieChart title="Assets By Life" data={AssetsByLifes} />
-          <AssetPieChart
+          {/* <AssetPieChart title=" Assets By Life(Expiry)" data={AssetsByLife} /> */}
+          {/* <AssetPieChart title="Assets By Life" data={AssetsByLifes} /> */}
+          {/* <AssetPieChart
             title="CMDB/Agent (Make, Model, S.No.)"
             data={CmdbAgent}
-          />
-          <AssetPieChart title="Patch Status" data={PatchStatus} />
-          <AssetPieChart
-            title="const Assets By AMC Expiry"
+          /> */}
+          {/* <AssetPieChart title="Patch Status" data={PatchStatus} /> */}
+          {/* <AssetPieChart
+            title="Assets By AMC Expiry"
             data={AssetsByAMCExpiry}
-          />
-          <AssetPieChart title="CMDB / Agent Mapping" data={CMDBAgentMapping} />
+          /> */}
+          {/* <AssetPieChart title="CMDB / Agent Mapping" data={CMDBAgentMapping} /> */}
         </div>
         <div>
           <Container sx={{ mt: 4 }}>
             <AssetByCategoryBarChart />
           </Container>
           <Container sx={{ mt: 4 }}>
-            <AssetBySubLocationBarChart />
+            <AssetByLocationBarChart />
           </Container>
           <Container sx={{ mt: 4 }}>
-            <AssetsByBusinessUnitBarChart />
+            <AssetBySubLocationBarChart />
           </Container>
+          {/* <Container sx={{ mt: 4 }}>
+            <AssetsByBusinessUnitBarChart />
+          </Container> */}
         </div>
       </div>
     </>

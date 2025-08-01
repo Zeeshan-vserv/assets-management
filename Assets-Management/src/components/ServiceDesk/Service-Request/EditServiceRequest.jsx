@@ -80,6 +80,26 @@ function EditServiceRequest() {
       technician: "",
     },
   });
+  const [userData, setUserData] = useState([]);
+  const [statusData, setStatusData] = useState([]);
+
+  const fetchGetAllUsersData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllUsers();
+      if (response?.data) {
+        setUserData(response?.data);
+      }
+    } catch (error) {
+      console.error("Error fetching service request:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGetAllUsersData();
+  }, []);
 
   const fetchDetails = async () => {
     try {
@@ -125,7 +145,14 @@ function EditServiceRequest() {
       const response = await getServiceRequestById(id);
       if (response?.data?.data) {
         const data = response.data.data;
-        console.log(data);
+        //Convert array status into string status
+        const approvalStatuses = Array.isArray(data.approvalStatus)
+          ? data.approvalStatus
+              .map((entry) => entry?.status?.toString?.().trim())
+              .filter((status) => status)
+              .join(", ")
+          : "";
+        setStatusData(approvalStatuses);
 
         setFormData({
           ...data,
@@ -196,9 +223,10 @@ function EditServiceRequest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateServiceRequest(user?._id, {
+      await updateServiceRequest(formData?._id, {
         ...formData,
         userId: user?.userId,
+        status: statusData,
       });
       toast.success("Service Request Added Successfully");
       setFormData({
@@ -267,7 +295,7 @@ function EditServiceRequest() {
                 type="submit"
                 className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
               >
-                Submit
+                Update
               </button>
               <button
                 onClick={() => navigate("/main/ServiceDesk/service-request")}
@@ -424,7 +452,7 @@ function EditServiceRequest() {
                   />
                 </div>
               </div>
-              {console.log(formData.purchaseRequest)}
+              {/* {console.log(formData.purchaseRequest)} */}
               <div className="flex items-center w-[46%]">
                 <label
                   htmlFor=""
@@ -487,7 +515,19 @@ function EditServiceRequest() {
                     </label>
                     <div className="w-[65%]">
                       <Autocomplete
-                        options={["", ""]}
+                        options={userData}
+                        value={
+                          userData.find(
+                            (user) => user.emailAddress === formData.approver1
+                          ) || null
+                        }
+                        onChange={(event, newValue) => {
+                          setFormData({
+                            ...formData,
+                            approver1: newValue?.emailAddress || "",
+                          });
+                        }}
+                        getOptionLabel={(option) => option?.emailAddress || ""}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -505,7 +545,19 @@ function EditServiceRequest() {
                     </label>
                     <div className="w-[65%]">
                       <Autocomplete
-                        options={["", ""]}
+                        options={userData}
+                        value={
+                          userData.find(
+                            (user) => user.emailAddress === formData.approver2
+                          ) || null
+                        }
+                        onChange={(event, newValue) => {
+                          setFormData({
+                            ...formData,
+                            approver2: newValue?.emailAddress || "",
+                          });
+                        }}
+                        getOptionLabel={(option) => option?.emailAddress || ""}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -523,7 +575,19 @@ function EditServiceRequest() {
                     </label>
                     <div className="w-[65%]">
                       <Autocomplete
-                        options={["", ""]}
+                        options={userData}
+                        value={
+                          userData.find(
+                            (user) => user.emailAddress === formData.approver3
+                          ) || null
+                        }
+                        onChange={(event, newValue) => {
+                          setFormData({
+                            ...formData,
+                            approver3: newValue?.emailAddress || "",
+                          });
+                        }}
+                        getOptionLabel={(option) => option?.emailAddress || ""}
                         renderInput={(params) => (
                           <TextField
                             {...params}

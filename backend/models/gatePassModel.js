@@ -22,7 +22,8 @@ const gatePassSchema = mongoose.Schema(
     assetType: String,
     // asset: String,
     asset: [],
-    assetComponent: String,
+    // assetComponent: String,
+    assetComponent: [],
     consumables: [
       {
         sNo: Number,

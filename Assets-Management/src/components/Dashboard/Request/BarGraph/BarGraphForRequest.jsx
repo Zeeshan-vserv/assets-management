@@ -10,40 +10,27 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import { CardContent, Typography, Box } from "@mui/material";
-import { getTotalIncidentsBar } from "../../../../api/DashboardRequest";
+import { Card, CardContent, Typography, Box } from "@mui/material";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const rangeToDays = {
-  "30 days": 30,
-  "90 days": 90,
+  "1 Week": 30,
+  "2 Weeks": 90,
+  "3 Month": 90,
   "6 Months": 180,
-  "1 Year": 365,
+  All: 365,
 };
 
-function getDateRange(days) {
-  const to = new Date();
-  const from = new Date();
-  from.setDate(to.getDate() - days + 1);
-  return {
-    from: from.toISOString().slice(0, 10),
-    to: to.toISOString().slice(0, 10),
-  };
-}
-
-const TotalIncidentBarChart = ({ title, min, max, stepSizes, ticksArray }) => {
-  const [selectedRange, setSelectedRange] = React.useState("30 days");
-  const [chartData, setChartData] = React.useState([]);
-
-  React.useEffect(() => {
-    const { from, to } = getDateRange(rangeToDays[selectedRange]);
-    getTotalIncidentsBar(from, to)
-      .then((res) =>
-        setChartData(Array.isArray(res.data.data) ? res.data.data : [])
-      )
-      .catch(() => setChartData([]));
-  }, [selectedRange]);
+const BarGraphForRequest = ({
+  title,
+  chartData,
+  min,
+  max,
+  stepSizes,
+  ticksArray,
+}) => {
+  const [selectedRange, setSelectedRange] = React.useState("All");
 
   const options = {
     responsive: true,
@@ -83,6 +70,7 @@ const TotalIncidentBarChart = ({ title, min, max, stepSizes, ticksArray }) => {
       },
     },
   };
+
   const data = {
     labels: chartData.map((item) => item.name),
     datasets: [
@@ -91,7 +79,7 @@ const TotalIncidentBarChart = ({ title, min, max, stepSizes, ticksArray }) => {
         data: chartData.map((item) => item.value),
         backgroundColor: "#2196f3",
         borderRadius: 4,
-        barThickness: 18,
+        barThickness: 1,
       },
     ],
   };
@@ -106,8 +94,8 @@ const TotalIncidentBarChart = ({ title, min, max, stepSizes, ticksArray }) => {
           mb: 2,
         }}
       >
-        <Typography variant="h6" gutterBottom>
-          {title || "Total Incidents"}
+        <Typography variant="h7" gutterBottom>
+          {title}
         </Typography>
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Typography variant="body2" gutterBottom>
@@ -117,7 +105,7 @@ const TotalIncidentBarChart = ({ title, min, max, stepSizes, ticksArray }) => {
             variant="standard"
             value={selectedRange}
             onChange={(e) => setSelectedRange(e.target.value)}
-            sx={{ minWidth: 120, fontSize: "0.875rem" }}
+            sx={{ minWidth: 100, fontSize: "0.875rem" }}
           >
             {Object.keys(rangeToDays).map((range) => (
               <MenuItem key={range} value={range}>
@@ -134,4 +122,4 @@ const TotalIncidentBarChart = ({ title, min, max, stepSizes, ticksArray }) => {
   );
 };
 
-export default TotalIncidentBarChart;
+export default BarGraphForRequest;

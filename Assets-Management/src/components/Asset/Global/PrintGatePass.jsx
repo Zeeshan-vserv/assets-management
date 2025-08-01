@@ -4,14 +4,15 @@ import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useReactToPrint } from "react-to-print";
 import { getGatePassById } from "../../../api/GatePassRequest";
-import { getAssetById } from "../../../api/AssetsRequest"; // <-- import this
+import { getAssetById } from "../../../api/AssetsRequest";
 
 const PrintGatePass = () => {
   const { id } = useParams();
   const componentRef = React.useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState("");
-  const [assetDetails, setAssetDetails] = useState([]); // <-- new state
+  const [assetDetails, setAssetDetails] = useState([]);
+  const [assetComponentDetails, setAssetComponentDetails] = useState([]); // <-- new state
 
   // Fetch Gate Pass
   const fetchGatePass = async () => {
@@ -32,8 +33,10 @@ const PrintGatePass = () => {
 
   // Fetch asset details after formData is loaded
   useEffect(() => {
+    // Fixed Assets
     if (
       formData &&
+      formData.assetType === "Fixed Assets" &&
       Array.isArray(formData.asset) &&
       formData.asset.length > 0
     ) {
@@ -57,6 +60,35 @@ const PrintGatePass = () => {
       fetchAssets();
     } else {
       setAssetDetails([]);
+    }
+
+    // Asset Components
+    if (
+      formData &&
+      formData.assetType === "Asset Components" &&
+      Array.isArray(formData.assetComponent) &&
+      formData.assetComponent.length > 0
+    ) {
+      const fetchAssetComponents = async () => {
+        try {
+          const details = await Promise.all(
+            formData.assetComponent.map(async (assetId) => {
+              try {
+                const res = await getAssetById(assetId);
+                return res.data.data;
+              } catch (e) {
+                return null;
+              }
+            })
+          );
+          setAssetComponentDetails(details.filter(Boolean));
+        } catch (e) {
+          setAssetComponentDetails([]);
+        }
+      };
+      fetchAssetComponents();
+    } else {
+      setAssetComponentDetails([]);
     }
   }, [formData]);
 
@@ -143,8 +175,9 @@ const PrintGatePass = () => {
           </div>
           {/* Asset Details */}
           <div className="mt-10">
+            {/* Fixed Assets Table */}
             {formData?.assetType === "Fixed Assets" && (
-              <table className="">
+              <table>
                 <thead>
                   <tr>
                     <th className="border px-4 py-2">S.No</th>
@@ -183,6 +216,49 @@ const PrintGatePass = () => {
                 </tbody>
               </table>
             )}
+
+            {/* Asset Components Table */}
+            {formData?.assetType === "Asset Components" && (
+              <table>
+                <thead>
+                  <tr>
+                    <th className="border px-4 py-2">S.No</th>
+                    <th className="border px-4 py-2">Component Type</th>
+                    <th className="border px-4 py-2">Make</th>
+                    <th className="border px-4 py-2">Model</th>
+                    <th className="border px-4 py-2">Serial Number</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assetComponentDetails.length > 0 ? (
+                    assetComponentDetails.map((asset, idx) => (
+                      <tr key={asset._id || idx}>
+                        <td className="border px-4 py-2">{idx + 1}</td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.category || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.make || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.model || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.serialNumber || ""}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="border px-4 py-2" colSpan={5}>
+                        No asset component details found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+
             {formData?.assetType === "Consumables" && (
               <table className="">
                 <thead>
@@ -217,7 +293,7 @@ const PrintGatePass = () => {
                 </tbody>
               </table>
             )}
-            {console.log(formData)}
+            {/* {console.log(formData)} */}
             {formData?.assetType === "Others" && (
               <table className="">
                 <thead>
@@ -228,15 +304,17 @@ const PrintGatePass = () => {
                   </tr>
                 </thead>
                 <tbody>
-                      <tr>
-                        <td className="border px-4 py-2">
-                          {formData?.others?.itemName || ""}
-                        </td>
-                        <td className="border px-4 py-2">
-                          {formData?.others?.quantity || ""}
-                        </td>
-                        <td className="border px-4 py-2">{formData?.others?.description || ""}</td>
-                      </tr>
+                  <tr>
+                    <td className="border px-4 py-2">
+                      {formData?.others?.itemName || ""}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {formData?.others?.quantity || ""}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {formData?.others?.description || ""}
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             )}

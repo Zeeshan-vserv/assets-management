@@ -21,45 +21,53 @@ const rangeToDays = {
   "1 Year": 365,
 };
 
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  scales: {
-    y: {
-      min: 0,
-      max: 15,
-      ticks: {
-        stepSize: 3,
-        callback: function (value) {
-          return [0, 3, 6, 9, 12, 15].includes(value) ? value : "";
+const TotalRequestBarChart = ({
+  title,
+  chartData,
+  min,
+  max,
+  stepSizes,
+  ticksArray,
+}) => {
+  const [selectedRange, setSelectedRange] = React.useState("30 days");
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        min: min,
+        max: max,
+        ticks: {
+          stepSize: stepSizes,
+          callback: function (value) {
+            if (!ticksArray || !Array.isArray(ticksArray)) return value;
+            return ticksArray.some((tick) => Math.abs(tick - value) < 0.001)
+              ? value
+              : "";
+          },
+        },
+        grid: {
+          drawBorder: false,
+          color: "#e0e0e0",
         },
       },
-      grid: {
-        drawBorder: false,
-        color: "#e0e0e0",
+      x: {
+        ticks: {
+          font: {
+            style: "italic",
+          },
+        },
+        grid: {
+          display: false,
+        },
       },
     },
-    x: {
-      ticks: {
-        font: {
-          style: "italic",
-        },
-      },
-      grid: {
+    plugins: {
+      legend: {
         display: false,
       },
     },
-  },
-  plugins: {
-    legend: {
-      display: false,
-    },
-  },
-};
-
-const TotalRequestBarChart = ({ title, chartData }) => {
-  const [selectedRange, setSelectedRange] = React.useState("30 days");
-
+  };
   const data = {
     labels: chartData.map((item) => item.name),
     datasets: [

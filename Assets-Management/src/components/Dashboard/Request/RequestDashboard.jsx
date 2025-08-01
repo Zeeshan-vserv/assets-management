@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { MdOutlineDashboard } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import RequestDetails from "./RequestDetails";
@@ -9,85 +9,64 @@ import OpenServiceBySeverity from "./PieChart/OpenServiceBySeverity";
 import ResponseSlaStatusPieChart from "../Incident/PieChart/ResponseSlaStatusPieChart";
 import ResolutionSlaStatusPieChart from "../Incident/PieChart/ResolutionSlaStatusPieChart";
 import BarGraphForIncident from "../Incident/BarGraph/BarGraphForIncident";
+import { getAllServiceRequests, getServiceRequestStatusCounts } from "../../../api/serviceRequest";
 
 function RequestDashboard() {
   const navigate = useNavigate();
   const [chartData, setChartData] = useState([]);
+  const [cardData, setCardData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); // <-- Add this line
 
-  const fetchChartData = async () => {
+  const fetchService = useCallback(async () => {
+    setIsLoading(true);
     try {
-      //api call
-      // setChartData()
+      const countResponse = await getServiceRequestStatusCounts();
+      // Convert object to array if needed
+      let counts = countResponse?.data?.data;
+      if (counts && !Array.isArray(counts)) {
+        counts = [
+          { id: "1", count: counts["New"] || 0, description: "New" },
+          { id: "2", count: counts["Assigned"] || 0, description: "Assigned" },
+          {
+            id: "3",
+            count: counts["In-Progress"] || 0,
+            description: "In-Progress",
+          },
+          { id: "4", count: counts["Pause"] || 0, description: "Pause" },
+          { id: "5", count: counts["Resolved"] || 0, description: "Resolved" },
+          {
+            id: "6",
+            count: counts["Cancelled"] || counts["cancel"] || 0,
+            description: "Cancelled",
+          },
+          {
+            id: "7",
+            count: counts["Reopened"] || counts["reopen"] || 0,
+            description: "Reopened",
+          },
+          { id: "8", count: counts["Closed"] || 0, description: "Closed" },
+          {
+            id: "9",
+            count: counts["Converted to SR"] || 0,
+            description: "Converted to SR",
+          },
+          // Add more statuses if needed
+        ];
+      }
+      setCardData(counts || []);
     } catch (error) {
-      console.error("Error fetching chart data:", error);
+      console.error("Error fetching departments:", error);
+    } finally {
+      setIsLoading(false);
     }
-  };
-  useEffect(() => {
-    fetchChartData();
   }, []);
 
-  const cardData = [
-    {
-      id: "1",
-      count: 0,
-      description: "New",
-    },
-    {
-      id: "2",
-      count: 0,
-      description: "Approval Pending",
-    },
-    {
-      id: "3",
-      count: 0,
-      description: "Provisioning",
-    },
-    {
-      id: "4",
-      count: 0,
-      description: "Assigned",
-    },
-    {
-      id: "5",
-      count: 0,
-      description: "In-Progress",
-    },
-    {
-      id: "6",
-      count: 0,
-      description: "On Hold",
-    },
-    {
-      id: "7",
-      count: 0,
-      description: "Cancelled",
-    },
-    {
-      id: "8",
-      count: 0,
-      description: "Rejected",
-    },
-    {
-      id: "9",
-      count: 0,
-      description: "Resolved",
-    },
-    {
-      id: "10",
-      count: 0,
-      description: "Closed",
-    },
-    {
-      id: "11",
-      count: 0,
-      description: "Wating for Update",
-    },
-    {
-      id: "12",
-      count: 0,
-      description: "Total",
-    },
-  ];
+  useEffect(() => {
+    fetchService();
+  }, [fetchService]);
+
+  // Calculate total count
+  const totalCount = cardData.reduce((sum, item) => sum + (Number(item.count) || 0), 0);
 
   return (
     <>
@@ -105,17 +84,33 @@ function RequestDashboard() {
           </button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6 p-2">
-          {cardData.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition"
-            >
-              <h2 className="font-semibold text-xl text-blue-600 mb-1">
-                {item.count}
-              </h2>
-              <p className="text-sm text-gray-600">{item.description}</p>
-            </div>
-          ))}
+          {isLoading ? (
+            <div className="col-span-full text-center text-gray-500">Loading...</div>
+          ) : cardData.length === 0 ? (
+            <div className="col-span-full text-center text-gray-500">No data available</div>
+          ) : (
+            <>
+              {/* Total Card */}
+              <div className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition">
+                <h2 className="font-semibold text-xl text-green-600 mb-1">
+                  {totalCount}
+                </h2>
+                <p className="text-sm text-gray-600">Total</p>
+              </div>
+              {/* Status Cards */}
+              {cardData.map((item) => (
+                <div
+                  key={item.id}
+                  className="bg-white rounded-xl shadow-sm p-3 border border-gray-200 text-gray-700 transition"
+                >
+                  <h2 className="font-semibold text-xl text-blue-600 mb-1">
+                    {item.count}
+                  </h2>
+                  <p className="text-sm text-gray-600">{item.description}</p>
+                </div>
+              ))}
+            </>
+          )}
         </div>
         {/* Request Details table */}
         <RequestDetails />

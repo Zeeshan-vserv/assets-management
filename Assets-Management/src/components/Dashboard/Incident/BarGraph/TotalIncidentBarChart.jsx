@@ -28,12 +28,9 @@ const options = {
   scales: {
     y: {
       min: 0,
-      max: 15,
+      // Optionally set max dynamically based on data
       ticks: {
-        stepSize: 3,
-        callback: function (value) {
-          return [0, 3, 6, 9, 12, 15].includes(value) ? value : "";
-        },
+        stepSize: 1,
       },
       grid: {
         drawBorder: false,
@@ -87,7 +84,7 @@ const TotalIncidentBarChart = ({ title }) => {
         data: chartData.map((item) => item.value),
         backgroundColor: "#2196f3",
         borderRadius: 4,
-        barThickness: 1,
+        barThickness: 18,
       },
     ],
   };
@@ -102,8 +99,8 @@ const TotalIncidentBarChart = ({ title }) => {
           mb: 2,
         }}
       >
-        <Typography variant="h7" gutterBottom>
-          {title}
+        <Typography variant="h6" gutterBottom>
+          {title || "Total Incidents"}
         </Typography>
         <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
           <Typography variant="body2" gutterBottom>
@@ -113,7 +110,7 @@ const TotalIncidentBarChart = ({ title }) => {
             variant="standard"
             value={selectedRange}
             onChange={(e) => setSelectedRange(e.target.value)}
-            sx={{ minWidth: 240, fontSize: "0.875rem" }}
+            sx={{ minWidth: 120, fontSize: "0.875rem" }}
           >
             {Object.keys(rangeToDays).map((range) => (
               <MenuItem key={range} value={range}>

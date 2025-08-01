@@ -10,6 +10,7 @@ import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { useSelector } from "react-redux";
 import { getAllServiceRequests } from "../../../api/serviceRequest";
+import { getServiceRequestStatusSummary } from "../../../api/DashboardRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -26,7 +27,7 @@ const RequestDetails = () => {
   const fetchServiceRequestData = async () => {
     setIsLoading(true);
     try {
-      const response = await getAllServiceRequests();
+      const response = await getServiceRequestStatusSummary();
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching service request data:", error);
@@ -38,54 +39,52 @@ const RequestDetails = () => {
   useEffect(() => {
     fetchServiceRequestData();
   }, []);
-
-  // console.log("service request:", data);
-
+  
   // Table columns
   const columns = useMemo(
     () => [
       {
-        accessorKey: "serviceId",
+        accessorKey: "name",
         header: "Name",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "open",
         header: "Open",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "overdue",
         header: "Overdue",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "assigned",
         header: "Assigned",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "inProgress",
         header: "In Progress",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "paused",
         header: "Paused",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "resolved",
         header: "Resolved",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "reopend",
         header: "Reopened",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "closed",
         header: "Closed",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "cancelled",
         header: "Cancelled",
       },
       {
-        accessorKey: "serviceId",
+        accessorKey: "total",
         header: "Total",
       },
     ],

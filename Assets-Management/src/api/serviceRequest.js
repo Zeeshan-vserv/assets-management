@@ -41,8 +41,8 @@ export const getServiceRequestById = (id) => API.get(`/service/${id}`);
 export const updateServiceRequest = (id, updateData) =>
   API.put(`/service/${id}`, updateData);
 export const deleteServiceRequest = (id) => API.delete(`/service/${id}`);
-export const getAllServiceSla = () =>
-  API.get(`/service/sla-all`);
+// export const getAllServiceSla = () =>
+//   API.get(`/service/sla-all`);
 
-export const getAllServicesTat = () =>
-  API.get(`/service/tat-all`);
+// export const getAllServicesTat = () =>
+//   API.get(`/service/tat-all`);

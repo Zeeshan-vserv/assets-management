@@ -1,4 +1,5 @@
 import AuthModel from "../models/authModel.js";
+import { ServiceAutoCloseModel } from "../models/globalServiceReqModel.js";
 import ServiceCounterModel from "../models/serviceCounterModel.js";
 import ServiceRequestModel from "../models/serviceRequestModel.js";
 import { SLACreationModel, SLATimelineModel, HolidayListModel, HolidayCalenderModel } from "../models/slaModel.js";
@@ -273,7 +274,7 @@ export const getIncidentSla = async (req, res) => {
     const loggedIn = new Date(
       incident?.createdAt || incident?.submitter?.loggedInTime
     );
-    const slaDeadline = addBusinessTime(loggedIn, totalHours, businessHours);
+    const slaDeadline = await addBusinessTimeWithHoliday(loggedIn, totalHours, businessHours);
 
     // SLA Remaining (stopped at resolved)
     const timeline = incident.statusTimeline || [];
@@ -367,69 +368,69 @@ function getISTDate(date = new Date()) {
   return new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
 }
 
-// ✅ Utility: Calculate TAT (Assigned to Resolved) in IST
-function calculateTAT(assignedAt, resolvedAt) {
-  const start = getISTDate(new Date(assignedAt));
-  const end = getISTDate(new Date(resolvedAt));
-  const diffMs = end - start;
+// // ✅ Utility: Calculate TAT (Assigned to Resolved) in IST
+// function calculateTAT(assignedAt, resolvedAt) {
+//   const start = getISTDate(new Date(assignedAt));
+//   const end = getISTDate(new Date(resolvedAt));
+//   const diffMs = end - start;
 
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const days = Math.floor(diffMins / (60 * 24));
-  const hours = Math.floor((diffMins % (60 * 24)) / 60);
-  const mins = diffMins % 60;
+//   const diffMins = Math.floor(diffMs / (1000 * 60));
+//   const days = Math.floor(diffMins / (60 * 24));
+//   const hours = Math.floor((diffMins % (60 * 24)) / 60);
+//   const mins = diffMins % 60;
 
-  return `${days} days ${hours} hours ${mins} mins`;
-}
+//   return `${days} days ${hours} hours ${mins} mins`;
+// }
 
 // Calculate SLA deadline
-function calculateSLADeadline(
-  loggedInTime,
-  slaHours,
-  slaTimeline = [],
-  serviceWindow = true
-) {
-  if (serviceWindow) {
-    return new Date(loggedInTime.getTime() + slaHours * 60 * 60 * 1000);
-  } else {
-    let remainingHours = slaHours;
-    let current = dayjs(loggedInTime);
-    let deadline = current;
+// function calculateSLADeadline(
+//   loggedInTime,
+//   slaHours,
+//   slaTimeline = [],
+//   serviceWindow = true
+// ) {
+//   if (serviceWindow) {
+//     return new Date(loggedInTime.getTime() + slaHours * 60 * 60 * 1000);
+//   } else {
+//     let remainingHours = slaHours;
+//     let current = dayjs(loggedInTime);
+//     let deadline = current;
 
-    while (remainingHours > 0) {
-      const weekday = deadline.format("dddd");
-      const slot = slaTimeline.find((s) => s.weekDay === weekday);
+//     while (remainingHours > 0) {
+//       const weekday = deadline.format("dddd");
+//       const slot = slaTimeline.find((s) => s.weekDay === weekday);
 
-      if (slot) {
-        const workStart = dayjs(
-          deadline.format("YYYY-MM-DD") +
-            "T" +
-            dayjs(slot.startTime).format("HH:mm")
-        );
-        const workEnd = dayjs(
-          deadline.format("YYYY-MM-DD") +
-            "T" +
-            dayjs(slot.endTime).format("HH:mm")
-        );
+//       if (slot) {
+//         const workStart = dayjs(
+//           deadline.format("YYYY-MM-DD") +
+//             "T" +
+//             dayjs(slot.startTime).format("HH:mm")
+//         );
+//         const workEnd = dayjs(
+//           deadline.format("YYYY-MM-DD") +
+//             "T" +
+//             dayjs(slot.endTime).format("HH:mm")
+//         );
 
-        if (deadline.isBefore(workEnd)) {
-          const available = Math.max(
-            0,
-            workEnd.diff(dayjs.max(deadline, workStart), "hour", true)
-          );
-          const used = Math.min(available, remainingHours);
-          remainingHours -= used;
-          deadline = deadline.add(used, "hour");
-        }
-      }
+//         if (deadline.isBefore(workEnd)) {
+//           const available = Math.max(
+//             0,
+//             workEnd.diff(dayjs.max(deadline, workStart), "hour", true)
+//           );
+//           const used = Math.min(available, remainingHours);
+//           remainingHours -= used;
+//           deadline = deadline.add(used, "hour");
+//         }
+//       }
 
-      if (remainingHours > 0) {
-        deadline = deadline.add(1, "day").startOf("day");
-      }
-    }
+//       if (remainingHours > 0) {
+//         deadline = deadline.add(1, "day").startOf("day");
+//       }
+//     }
 
-    return deadline.toDate();
-  }
-}
+//     return deadline.toDate();
+//   }
+// }
 
 export const createServiceRequest = async (req, res) => {
   try {
@@ -871,5 +872,45 @@ export const getMyPendingApprovals = async (req, res) => {
     res.json({ success: true, data: requests });
   } catch (error) {
     res.status(500).json({ message: "Error fetching my pending approvals", error: error.message });
+  }
+};
+
+export const autoCloseResolvedServiceRequests = async () => {
+  try {
+    // Fetch autoCloseTime from config model (default to 60 if not set)
+    const config = await ServiceAutoCloseModel.findOne();
+    // If autoCloseTime is stored as string, convert to number
+    const autoCloseTimeMinutes = config?.autoCloseTime
+      ? Number(config.autoCloseTime)
+      : 60;
+
+    const now = new Date();
+    // Find all service requests with status "Resolved"
+    const services = await ServiceRequestModel.find({ status: "Resolved" });
+
+    for (const service of services) {
+      // Find the last resolved time from statusTimeline
+      const resolvedEntry = [...service.statusTimeline].reverse().find(
+        (t) => t.status?.toLowerCase() === "resolved"
+      );
+      if (!resolvedEntry) continue;
+
+      const resolvedTime = new Date(resolvedEntry.changedAt);
+      const diffMinutes = Math.floor((now - resolvedTime) / (1000 * 60));
+
+      if (diffMinutes >= autoCloseTimeMinutes) {
+        // Add "Closed" status to timeline and update status
+        service.statusTimeline.push({
+          status: "Closed",
+          changedAt: now,
+          changedBy: "system", // or any system user id
+        });
+        service.status = "Closed";
+        await service.save();
+      }
+    }
+    return { success: true, message: "Auto-close job completed." };
+  } catch (error) {
+    return { success: false, message: "Error in auto-close job", error: error.message };
   }
 };

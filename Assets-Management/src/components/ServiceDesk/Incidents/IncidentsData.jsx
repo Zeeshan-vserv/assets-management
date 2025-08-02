@@ -19,11 +19,13 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { MdModeEdit } from "react-icons/md";
 import {
   getAllIncident,
-  getAllIncidentsSla,
-  getAllIncidentsTat,
   getIncidentStatusCounts,
   updateIncident,
 } from "../../../api/IncidentRequest";
+import {
+  getAllIncidentsSla,
+  getAllIncidentsTat,
+} from "../../../api/SLATATRequest";
 import {
   getAllSupportDepartment,
   getAllSupportGroup,
@@ -66,53 +68,55 @@ const IncidentsData = () => {
   const [cardData, setCardData] = useState([]);
   const [ticketType, setTicketType] = useState(ticketOptions[0]);
 
-  // Fetch incidents
-  // const fetchDepartment = useCallback(async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const response = await getAllIncident();
-  //     setData(response?.data?.data || []);
-  //     const countResponse = await getIncidentStatusCounts();
-  //     // console.log("Status Counts:", countResponse?.data?.data);
-  //     setCardData(countResponse?.data?.data);
-      
-  //   } catch (error) {
-  //     console.error("Error fetching departments:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }, []);
-
-
   const fetchDepartment = useCallback(async () => {
-  setIsLoading(true);
-  try {
-    const response = await getAllIncident();
-    setData(response?.data?.data || []);
-    const countResponse = await getIncidentStatusCounts();
-    // Convert object to array if needed
-    let counts = countResponse?.data?.data;
-    if (counts && !Array.isArray(counts)) {
-      counts = [
-        { id: "1", count: counts["New"] || 0, description: "New" },
-        { id: "2", count: counts["Assigned"] || 0, description: "Assigned" },
-        { id: "3", count: counts["In-Progress"] || 0, description: "In-Progress" },
-        { id: "4", count: counts["Pause"] || 0, description: "Pause" },
-        { id: "5", count: counts["Resolved"] || 0, description: "Resolved" },
-        { id: "6", count: counts["Cancelled"] || counts["cancel"] || 0, description: "Cancelled" },
-        { id: "7", count: counts["Reopened"] || counts["reopen"] || 0, description: "Reopened" },
-        { id: "8", count: counts["Closed"] || 0, description: "Closed" },
-        { id: "9", count: counts["Converted to SR"] || 0, description: "Converted to SR" },
-        { id: "11", count: response?.data?.data?.length || 0, description: "Total" },
-      ];
+    setIsLoading(true);
+    try {
+      const response = await getAllIncident();
+      setData(response?.data?.data || []);
+      const countResponse = await getIncidentStatusCounts();
+      // Convert object to array if needed
+      let counts = countResponse?.data?.data;
+      if (counts && !Array.isArray(counts)) {
+        counts = [
+          { id: "1", count: counts["New"] || 0, description: "New" },
+          { id: "2", count: counts["Assigned"] || 0, description: "Assigned" },
+          {
+            id: "3",
+            count: counts["In-Progress"] || 0,
+            description: "In-Progress",
+          },
+          { id: "4", count: counts["Pause"] || 0, description: "Pause" },
+          { id: "5", count: counts["Resolved"] || 0, description: "Resolved" },
+          {
+            id: "6",
+            count: counts["Cancelled"] || counts["cancel"] || 0,
+            description: "Cancelled",
+          },
+          {
+            id: "7",
+            count: counts["Reopened"] || counts["reopen"] || 0,
+            description: "Reopened",
+          },
+          { id: "8", count: counts["Closed"] || 0, description: "Closed" },
+          {
+            id: "9",
+            count: counts["Converted to SR"] || 0,
+            description: "Converted to SR",
+          },
+          {
+            id: "11",
+            count: response?.data?.data?.length || 0,
+            description: "Total",
+          },
+        ];
+      }
+      setCardData(counts || []);
+    } catch (error) {
+      console.error("Error fetching departments:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setCardData(counts || []);
-  } catch (error) {
-    console.error("Error fetching departments:", error);
-  } finally {
-    setIsLoading(false);
-  }
-}, []);
+  }, []);
   // Fetch dropdowns
   const fetchDropdownData = useCallback(async () => {
     try {

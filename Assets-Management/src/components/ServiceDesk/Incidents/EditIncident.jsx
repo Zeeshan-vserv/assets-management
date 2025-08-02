@@ -210,7 +210,7 @@ const EditIncident = () => {
               className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
               disabled={isLoading}
             >
-              Submit
+              Update
             </button>
             <NavLink to="/main/ServiceDesk/IndicentData">
               <button

@@ -3,33 +3,42 @@ import IncidentCounterModel from "../models/incidentCounterModel.js";
 import IncidentModel from "../models/incidentModel.js";
 import { HolidayListModel, SLACreationModel, SLATimelineModel } from "../models/slaModel.js";
 
-// Helper: Calculate SLA deadline (business hours logic)
-function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
+// Helper: Get all holiday dates from both HolidayList and HolidayCalender
+async function getAllHolidayDates() {
+  const holidayLists = await HolidayListModel.find();
+  const holidayCalendars = await HolidayCalenderModel.find();
+  const listDates = holidayLists.map(h => new Date(h.holidayDate).toISOString().slice(0, 10));
+  const calendarDates = holidayCalendars.map(h => new Date(h.holidayDate).toISOString().slice(0, 10));
+  return Array.from(new Set([...listDates, ...calendarDates]));
+}
+
+// Helper: Calculate SLA deadline (business hours logic) with holiday support
+async function addBusinessTimeWithHoliday(startDate, hoursToAdd, slaTimeline) {
+  const holidayDates = await getAllHolidayDates();
   let remainingMinutes = Math.round(hoursToAdd * 60);
   let current = new Date(startDate);
 
   function getBusinessWindow(date) {
     const weekDay = date.toLocaleString("en-US", { weekday: "long" });
     const slot = slaTimeline.find((s) => s.weekDay === weekDay);
-    if (!slot) return null;
+    if (!slot || !slot.startTime || !slot.endTime) return null;
+    const [startHour, startMinute] = slot.startTime.split(":").map(Number);
+    const [endHour, endMinute] = slot.endTime.split(":").map(Number);
     const start = new Date(date);
-    start.setHours(
-      new Date(slot.startTime).getUTCHours(),
-      new Date(slot.startTime).getUTCMinutes(),
-      0,
-      0
-    );
+    start.setHours(startHour, startMinute, 0, 0);
     const end = new Date(date);
-    end.setHours(
-      new Date(slot.endTime).getUTCHours(),
-      new Date(slot.endTime).getUTCMinutes(),
-      0,
-      0
-    );
+    end.setHours(endHour, endMinute, 0, 0);
     return { start, end };
   }
 
   while (remainingMinutes > 0) {
+    const dateStr = current.toISOString().slice(0, 10);
+    if (holidayDates.includes(dateStr)) {
+      // Skip holiday
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
     const window = getBusinessWindow(current);
     if (!window) {
       current.setDate(current.getDate() + 1);
@@ -54,32 +63,31 @@ function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
   return current;
 }
 
-// Helper: Get business minutes between two dates
-function getBusinessMinutesBetween(now, end, slaTimeline) {
+// Helper: Get business minutes between two dates with holiday support
+async function getBusinessMinutesBetweenWithHoliday(now, end, slaTimeline) {
+  const holidayDates = await getAllHolidayDates();
   let minutes = 0;
   let current = new Date(now);
   while (current < end) {
-    const weekDay = current.toLocaleString("en-US", { weekday: "long" });
-    const slot = slaTimeline.find((s) => s.weekDay === weekDay);
-    if (!slot) {
+    const dateStr = current.toISOString().slice(0, 10);
+    if (holidayDates.includes(dateStr)) {
       current.setDate(current.getDate() + 1);
       current.setHours(0, 0, 0, 0);
       continue;
     }
+    const weekDay = current.toLocaleString("en-US", { weekday: "long" });
+    const slot = slaTimeline.find((s) => s.weekDay === weekDay);
+    if (!slot || !slot.startTime || !slot.endTime) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    const [startHour, startMinute] = slot.startTime.split(":").map(Number);
+    const [endHour, endMinute] = slot.endTime.split(":").map(Number);
     const start = new Date(current);
-    start.setHours(
-      new Date(slot.startTime).getUTCHours(),
-      new Date(slot.startTime).getUTCMinutes(),
-      0,
-      0
-    );
+    start.setHours(startHour, startMinute, 0, 0);
     const endWindow = new Date(current);
-    endWindow.setHours(
-      new Date(slot.endTime).getUTCHours(),
-      new Date(slot.endTime).getUTCMinutes(),
-      0,
-      0
-    );
+    endWindow.setHours(endHour, endMinute, 0, 0);
     if (current >= endWindow) {
       current.setDate(current.getDate() + 1);
       current.setHours(0, 0, 0, 0);
@@ -672,8 +680,8 @@ async function getHolidayDates() {
   return holidayLists.map(h => new Date(h.holidayDate).toISOString().slice(0, 10));
 }
 
-async function addBusinessTimeWithHoliday(startDate, hoursToAdd, slaTimeline) {
-  const holidayDates = await getHolidayDates();
+// Helper: Calculate SLA deadline (business hours logic)
+function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
   let remainingMinutes = Math.round(hoursToAdd * 60);
   let current = new Date(startDate);
 
@@ -699,13 +707,6 @@ async function addBusinessTimeWithHoliday(startDate, hoursToAdd, slaTimeline) {
   }
 
   while (remainingMinutes > 0) {
-    const dateStr = current.toISOString().slice(0, 10);
-    if (holidayDates.includes(dateStr)) {
-      // Skip holiday
-      current.setDate(current.getDate() + 1);
-      current.setHours(0, 0, 0, 0);
-      continue;
-    }
     const window = getBusinessWindow(current);
     if (!window) {
       current.setDate(current.getDate() + 1);
@@ -730,17 +731,11 @@ async function addBusinessTimeWithHoliday(startDate, hoursToAdd, slaTimeline) {
   return current;
 }
 
-async function getBusinessMinutesBetweenWithHoliday(now, end, slaTimeline) {
-  const holidayDates = await getHolidayDates();
+// Helper: Get business minutes between two dates
+function getBusinessMinutesBetween(now, end, slaTimeline) {
   let minutes = 0;
   let current = new Date(now);
   while (current < end) {
-    const dateStr = current.toISOString().slice(0, 10);
-    if (holidayDates.includes(dateStr)) {
-      current.setDate(current.getDate() + 1);
-      current.setHours(0, 0, 0, 0);
-      continue;
-    }
     const weekDay = current.toLocaleString("en-US", { weekday: "long" });
     const slot = slaTimeline.find((s) => s.weekDay === weekDay);
     if (!slot) {

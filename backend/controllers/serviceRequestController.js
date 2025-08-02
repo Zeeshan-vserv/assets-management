@@ -1,35 +1,44 @@
 import AuthModel from "../models/authModel.js";
 import ServiceCounterModel from "../models/serviceCounterModel.js";
 import ServiceRequestModel from "../models/serviceRequestModel.js";
-import { SLACreationModel, SLATimelineModel } from "../models/slaModel.js";
+import { SLACreationModel, SLATimelineModel, HolidayListModel, HolidayCalenderModel } from "../models/slaModel.js";
 
-// Helper: Calculate SLA deadline (business hours logic)
-function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
+// Helper: Get all holiday dates from both HolidayList and HolidayCalender
+async function getAllHolidayDates() {
+  const holidayLists = await HolidayListModel.find();
+  const holidayCalendars = await HolidayCalenderModel.find();
+  const listDates = holidayLists.map(h => new Date(h.holidayDate).toISOString().slice(0, 10));
+  const calendarDates = holidayCalendars.map(h => new Date(h.holidayDate).toISOString().slice(0, 10));
+  return Array.from(new Set([...listDates, ...calendarDates]));
+}
+
+// Helper: Calculate SLA deadline (business hours logic) with holiday support
+async function addBusinessTimeWithHoliday(startDate, hoursToAdd, slaTimeline) {
+  const holidayDates = await getAllHolidayDates();
   let remainingMinutes = Math.round(hoursToAdd * 60);
   let current = new Date(startDate);
 
   function getBusinessWindow(date) {
     const weekDay = date.toLocaleString("en-US", { weekday: "long" });
     const slot = slaTimeline.find((s) => s.weekDay === weekDay);
-    if (!slot) return null;
+    if (!slot || !slot.startTime || !slot.endTime) return null;
+    const [startHour, startMinute] = slot.startTime.split(":").map(Number);
+    const [endHour, endMinute] = slot.endTime.split(":").map(Number);
     const start = new Date(date);
-    start.setHours(
-      new Date(slot.startTime).getUTCHours(),
-      new Date(slot.startTime).getUTCMinutes(),
-      0,
-      0
-    );
+    start.setHours(startHour, startMinute, 0, 0);
     const end = new Date(date);
-    end.setHours(
-      new Date(slot.endTime).getUTCHours(),
-      new Date(slot.endTime).getUTCMinutes(),
-      0,
-      0
-    );
+    end.setHours(endHour, endMinute, 0, 0);
     return { start, end };
   }
 
   while (remainingMinutes > 0) {
+    const dateStr = current.toISOString().slice(0, 10);
+    if (holidayDates.includes(dateStr)) {
+      // Skip holiday
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
     const window = getBusinessWindow(current);
     if (!window) {
       current.setDate(current.getDate() + 1);
@@ -54,32 +63,31 @@ function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
   return current;
 }
 
-// Helper: Get business minutes between two dates
-function getBusinessMinutesBetween(now, end, slaTimeline) {
+// Helper: Get business minutes between two dates with holiday support
+async function getBusinessMinutesBetweenWithHoliday(now, end, slaTimeline) {
+  const holidayDates = await getAllHolidayDates();
   let minutes = 0;
   let current = new Date(now);
   while (current < end) {
-    const weekDay = current.toLocaleString("en-US", { weekday: "long" });
-    const slot = slaTimeline.find((s) => s.weekDay === weekDay);
-    if (!slot) {
+    const dateStr = current.toISOString().slice(0, 10);
+    if (holidayDates.includes(dateStr)) {
       current.setDate(current.getDate() + 1);
       current.setHours(0, 0, 0, 0);
       continue;
     }
+    const weekDay = current.toLocaleString("en-US", { weekday: "long" });
+    const slot = slaTimeline.find((s) => s.weekDay === weekDay);
+    if (!slot || !slot.startTime || !slot.endTime) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    const [startHour, startMinute] = slot.startTime.split(":").map(Number);
+    const [endHour, endMinute] = slot.endTime.split(":").map(Number);
     const start = new Date(current);
-    start.setHours(
-      new Date(slot.startTime).getUTCHours(),
-      new Date(slot.startTime).getUTCMinutes(),
-      0,
-      0
-    );
+    start.setHours(startHour, startMinute, 0, 0);
     const endWindow = new Date(current);
-    endWindow.setHours(
-      new Date(slot.endTime).getUTCHours(),
-      new Date(slot.endTime).getUTCMinutes(),
-      0,
-      0
-    );
+    endWindow.setHours(endHour, endMinute, 0, 0);
     if (current >= endWindow) {
       current.setDate(current.getDate() + 1);
       current.setHours(0, 0, 0, 0);
@@ -239,119 +247,119 @@ export const getAllServicesTat = async (req, res) => {
   }
 };
 
-// export const getIncidentSla = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const incident = await IncidentModel.findById(id);
-//     if (!incident) return res.status(404).json({ message: "Incident not found" });
+export const getIncidentSla = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const incident = await IncidentModel.findById(id);
+    if (!incident) return res.status(404).json({ message: "Incident not found" });
 
-//     // ...SLA calculation logic (same as before, but only return SLA)...
+    // ...SLA calculation logic (same as before, but only return SLA)...
 
-//     // Get SLA config and timeline
-//     const slaConfig = await SLACreationModel.findOne({ default: true });
-//     const slaTimelineData = await SLATimelineModel.find();
-//     const businessHours = slaConfig?.slaTimeline || [];
-//     const severity = incident?.classificaton?.severityLevel;
-//     const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
-//     const matchedTimeline = slaTimelineData.find(
-//       (item) =>
-//         item.priority?.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
-//     );
-//     const resolution = matchedTimeline?.resolutionSLA || "00:30";
-//     const [slaHours, slaMinutes] = resolution.split(":").map(Number);
-//     const totalHours = slaHours + slaMinutes / 60;
+    // Get SLA config and timeline
+    const slaConfig = await SLACreationModel.findOne({ default: true });
+    const slaTimelineData = await SLATimelineModel.find();
+    const businessHours = slaConfig?.slaTimeline || [];
+    const severity = incident?.classificaton?.severityLevel;
+    const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
+    const matchedTimeline = slaTimelineData.find(
+      (item) =>
+        item.priority?.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
+    );
+    const resolution = matchedTimeline?.resolutionSLA || "00:30";
+    const [slaHours, slaMinutes] = resolution.split(":").map(Number);
+    const totalHours = slaHours + slaMinutes / 60;
 
-//     // SLA Deadline
-//     const loggedIn = new Date(
-//       incident?.createdAt || incident?.submitter?.loggedInTime
-//     );
-//     const slaDeadline = addBusinessTime(loggedIn, totalHours, businessHours);
+    // SLA Deadline
+    const loggedIn = new Date(
+      incident?.createdAt || incident?.submitter?.loggedInTime
+    );
+    const slaDeadline = addBusinessTime(loggedIn, totalHours, businessHours);
 
-//     // SLA Remaining (stopped at resolved)
-//     const timeline = incident.statusTimeline || [];
-//     const latestStatus = timeline?.at(-1)?.status?.toLowerCase();
-//     let slaRemainingMinutes;
-//     if (latestStatus === "resolved") {
-//       const resolvedEntry = [...timeline].reverse().find(
-//         (t) => t.status?.toLowerCase() === "resolved"
-//       );
-//       const resolvedTime = resolvedEntry ? new Date(resolvedEntry.changedAt) : null;
-//       if (resolvedTime) {
-//         slaRemainingMinutes = resolvedTime < slaDeadline
-//           ? getBusinessMinutesBetween(resolvedTime, slaDeadline, businessHours)
-//           : -getBusinessMinutesBetween(slaDeadline, resolvedTime, businessHours);
-//       } else {
-//         slaRemainingMinutes = 0;
-//       }
-//     } else {
-//       const now = new Date();
-//       if (now < slaDeadline) {
-//         slaRemainingMinutes = getBusinessMinutesBetween(now, slaDeadline, businessHours);
-//       } else {
-//         slaRemainingMinutes = -getBusinessMinutesBetween(slaDeadline, now, businessHours);
-//       }
-//     }
+    // SLA Remaining (stopped at resolved)
+    const timeline = incident.statusTimeline || [];
+    const latestStatus = timeline?.at(-1)?.status?.toLowerCase();
+    let slaRemainingMinutes;
+    if (latestStatus === "resolved") {
+      const resolvedEntry = [...timeline].reverse().find(
+        (t) => t.status?.toLowerCase() === "resolved"
+      );
+      const resolvedTime = resolvedEntry ? new Date(resolvedEntry.changedAt) : null;
+      if (resolvedTime) {
+        slaRemainingMinutes = resolvedTime < slaDeadline
+          ? getBusinessMinutesBetween(resolvedTime, slaDeadline, businessHours)
+          : -getBusinessMinutesBetween(slaDeadline, resolvedTime, businessHours);
+      } else {
+        slaRemainingMinutes = 0;
+      }
+    } else {
+      const now = new Date();
+      if (now < slaDeadline) {
+        slaRemainingMinutes = getBusinessMinutesBetween(now, slaDeadline, businessHours);
+      } else {
+        slaRemainingMinutes = -getBusinessMinutesBetween(slaDeadline, now, businessHours);
+      }
+    }
 
-//     // Format output
-//     const formatMinutes = (minutes) => {
-//       if (minutes == null) return "N/A";
-//       const abs = Math.abs(minutes);
-//       const hr = Math.floor(abs / 60);
-//       const min = abs % 60;
-//       return `${hr} hr ${min} min`;
-//     };
+    // Format output
+    const formatMinutes = (minutes) => {
+      if (minutes == null) return "N/A";
+      const abs = Math.abs(minutes);
+      const hr = Math.floor(abs / 60);
+      const min = abs % 60;
+      return `${hr} hr ${min} min`;
+    };
 
-//     res.json({
-//       success: true,
-//       sla: formatMinutes(slaRemainingMinutes),
-//       slaRawMinutes: slaRemainingMinutes,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error calculating SLA", error: error.message });
-//   }
-// };
+    res.json({
+      success: true,
+      sla: formatMinutes(slaRemainingMinutes),
+      slaRawMinutes: slaRemainingMinutes,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error calculating SLA", error: error.message });
+  }
+};
 
-// export const getIncidentTat = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const incident = await IncidentModel.findById(id);
-//     if (!incident) return res.status(404).json({ message: "Incident not found" });
+export const getIncidentTat = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const incident = await IncidentModel.findById(id);
+    if (!incident) return res.status(404).json({ message: "Incident not found" });
 
-//     // TAT Calculation (assigned to resolved)
-//     const timeline = incident.statusTimeline || [];
-//     const assignedEntry = [...timeline].reverse().find(
-//       (t) => t.status?.toLowerCase() === "assigned"
-//     );
-//     const resolvedEntry = [...timeline].reverse().find(
-//       (t) => t.status?.toLowerCase() === "resolved"
-//     );
-//     let tatMinutes = null;
-//     if (assignedEntry && resolvedEntry) {
-//       const assignedTime = new Date(assignedEntry.changedAt);
-//       const resolvedTime = new Date(resolvedEntry.changedAt);
-//       if (resolvedTime > assignedTime) {
-//         tatMinutes = Math.floor((resolvedTime - assignedTime) / 60000);
-//       }
-//     }
+    // TAT Calculation (assigned to resolved)
+    const timeline = incident.statusTimeline || [];
+    const assignedEntry = [...timeline].reverse().find(
+      (t) => t.status?.toLowerCase() === "assigned"
+    );
+    const resolvedEntry = [...timeline].reverse().find(
+      (t) => t.status?.toLowerCase() === "resolved"
+    );
+    let tatMinutes = null;
+    if (assignedEntry && resolvedEntry) {
+      const assignedTime = new Date(assignedEntry.changedAt);
+      const resolvedTime = new Date(resolvedEntry.changedAt);
+      if (resolvedTime > assignedTime) {
+        tatMinutes = Math.floor((resolvedTime - assignedTime) / 60000);
+      }
+    }
 
-//     // Format output
-//     const formatMinutes = (minutes) => {
-//       if (minutes == null) return "N/A";
-//       const abs = Math.abs(minutes);
-//       const hr = Math.floor(abs / 60);
-//       const min = abs % 60;
-//       return `${hr} hr ${min} min`;
-//     };
+    // Format output
+    const formatMinutes = (minutes) => {
+      if (minutes == null) return "N/A";
+      const abs = Math.abs(minutes);
+      const hr = Math.floor(abs / 60);
+      const min = abs % 60;
+      return `${hr} hr ${min} min`;
+    };
 
-//     res.json({
-//       success: true,
-//       tat: formatMinutes(tatMinutes),
-//       tatRawMinutes: tatMinutes,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error calculating TAT", error: error.message });
-//   }
-// };
+    res.json({
+      success: true,
+      tat: formatMinutes(tatMinutes),
+      tatRawMinutes: tatMinutes,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error calculating TAT", error: error.message });
+  }
+};
 
 // ✅ Utility: Get IST Time
 // Convert date to IST

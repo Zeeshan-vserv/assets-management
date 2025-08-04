@@ -55,7 +55,7 @@ function GatePassData() {
 
   const columns = useMemo(
     () => [
-         {
+      {
         id: "print",
         header: "Print",
         size: 80,
@@ -161,7 +161,7 @@ function GatePassData() {
           </IconButton>
         ),
       },
-   
+
       {
         id: "delete",
         header: "Delete",
@@ -353,9 +353,9 @@ function GatePassData() {
             Action
           </Button>
           <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-            <MenuItem onClick={printGetPassHandler} sx={{ fontSize: "0.8rem" }}>
+            {/* <MenuItem onClick={printGetPassHandler} sx={{ fontSize: "0.8rem" }}>
               Print Get Pass
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem onClick={closeGetPassHandler} sx={{ fontSize: "0.8rem" }}>
               Close Get Pass
             </MenuItem>

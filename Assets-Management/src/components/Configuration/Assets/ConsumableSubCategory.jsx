@@ -744,7 +744,7 @@ function ConsumableSubCategory() {
       },
       {
         accessorKey: "subConsumableName",
-        header: "Sub Consumable Name",
+        header: "Sub Category",
       },
       {
         id: "edit",

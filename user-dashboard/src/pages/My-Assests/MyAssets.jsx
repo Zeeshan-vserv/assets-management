@@ -2,6 +2,7 @@ import React from "react";
 import AllocatedAsset from "./AllocatedAsset.jsx";
 import AllocatedConsumables from "./AllocatedConsumables.jsx";
 import AllocatedComponent from "./AllocatedComponent.jsx";
+
 function MyAssets() {
   return (
     <>

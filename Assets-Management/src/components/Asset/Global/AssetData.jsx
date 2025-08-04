@@ -16,7 +16,7 @@ import { NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllAssets, deleteAsset } from "../../../api/AssetsRequest";
 import { MdDownload } from "react-icons/md";
-
+import { RxCross1 } from "react-icons/rx";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import { RxCross2 } from "react-icons/rx";
 import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
@@ -688,15 +688,14 @@ Location: ${row?.locationInformation?.location ?? ""}`;
         {userModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm relative">
-              <button
-                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-xl"
-                onClick={handleCloseUserModal}
-              >
-                &times;
-              </button>
               <h2 className="text-lg font-semibold mb-4 text-blue-700">
                 User Details
               </h2>
+              <RxCross1
+                size={24}
+                onClick={handleCloseUserModal}
+                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl cursor-pointer border-2 rounded-full"
+              />
               {userDetails ? (
                 <div className="space-y-2">
                   <div>
@@ -719,12 +718,12 @@ Location: ${row?.locationInformation?.location ?? ""}`;
               ) : (
                 <div className="text-gray-500">No user details found.</div>
               )}
-              <button
+              {/* <button
                 className="mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
                 onClick={handleCloseUserModal}
               >
                 Close
-              </button>
+              </button> */}
             </div>
           </div>
         )}

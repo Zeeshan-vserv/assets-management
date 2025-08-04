@@ -8,6 +8,8 @@ export const rolePermissions = {
   },
   "Employee": {
     incidents: ["isView", "isEdit"],
+    dashboard: ["isView"],
+    component: ["isView", "isDelete"],
     // ...add more as needed
   },
   "GoCollect Support Department": {
@@ -20,7 +22,9 @@ export const rolePermissions = {
   },
   "L1 Technician": {
     tickets: ["isView", "isEdit"],
-    // ...add more as needed
+    incidents: ["isView", "isEdit"],
+    dashboard: ["isView"], // <-- Add this line
+    component: ["isView", "isEdit"],
   },
   "L2 Technician": {
     tickets: ["isView", "isEdit"],

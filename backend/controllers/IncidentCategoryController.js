@@ -174,24 +174,34 @@ export const deleteCategory = async (req, res) => {
     }
 }
 
-export const deleteSubCategory = async ( req, res) => {
+export const deleteSubCategory = async (req, res) => {
     try {
-        const { categoryId, subCategoryId } = req.params
-        const category = await IncidentCategoryModel.findById(categoryId)
-        if(!category){
-            return res.status(404).json({ success: false, message: 'Category Id not found'})
+        const { categoryId, subCategoryId } = req.params;
+        const category = await IncidentCategoryModel.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ success: false, message: 'Category Id not found' });
         }
-        const subIndex = category.subCategories.findIndex(
-            (sub) => sub._id.toString() === subCategoryId
-        )
-        if(subIndex === -1){
-            return res.status(404).json({ success: false, message: 'SubCategory not found'})
-        }
-        category.subCategories.splice(subIndex, 1)
-        await category.save()
-        res.status(200).json({ success: true, data: category, message: 'Subcategory deleted successfully'})
-    } catch (error) {
-        res.status(500).json({ message: 'An error occurred while deleting subcategory' });
 
+        // Try to match by MongoDB _id first
+        let subIndex = category.subCategories.findIndex(
+            (sub) => sub._id.toString() === subCategoryId
+        );
+
+        // If not found, try to match by custom subCategoryId (number)
+        if (subIndex === -1) {
+            subIndex = category.subCategories.findIndex(
+                (sub) => sub.subCategoryId?.toString() === subCategoryId
+            );
+        }
+
+        if (subIndex === -1) {
+            return res.status(404).json({ success: false, message: 'SubCategory not found' });
+        }
+
+        category.subCategories.splice(subIndex, 1);
+        await category.save();
+        res.status(200).json({ success: true, data: category, message: 'Subcategory deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred while deleting subcategory', error: error.message });
     }
-}
+};

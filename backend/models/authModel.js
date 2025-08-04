@@ -25,6 +25,11 @@ const authSchema = mongoose.Schema(
       isEdit: { type: Boolean, default: false },
       isDelete: { type: Boolean, default: false },
     },
+    dashboard: {
+      isView: { type: Boolean, default: false },
+      isEdit: { type: Boolean, default: false },
+      isDelete: { type: Boolean, default: false },
+    },
     components: {
       isView: { type: Boolean, default: false },
       isEdit: { type: Boolean, default: false },

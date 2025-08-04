@@ -78,9 +78,25 @@ export const updateAsset = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = { ...req.body };
-        const updatedBy = updateData.updatedBy; // Extract before deleting
+        const updatedBy = updateData.updatedBy;
         delete updateData.updatedBy;
         delete updateData.updateHistory;
+
+        // Sanitize date fields
+        const dateFields = [
+          "financeInformation.poDate",
+          "financeInformation.invoiceDate",
+          "preventiveMaintenance.istPmDate"
+        ];
+        dateFields.forEach(field => {
+          const [parent, child] = field.split(".");
+          if (
+            updateData[parent] &&
+            (updateData[parent][child] === "" || updateData[parent][child] === "null")
+          ) {
+            updateData[parent][child] = null;
+          }
+        });
 
         const asset = await AssetModel.findById(id);
         if (!asset) {

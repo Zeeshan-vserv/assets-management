@@ -1,3 +1,4 @@
+import AssetModel from "../models/assetModel.js";
 import IncidentModel from "../models/incidentModel.js";
 import ServiceRequestModel from "../models/serviceRequestModel.js";
 
@@ -502,7 +503,7 @@ export const getTotalServicesByDateRange = async (req, res) => {
   try {
     // Parse query params
     const { from, to, groupBy = "day" } = req.query;
-    const startDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // default 30 days ago
+    const startDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); 
     const endDate = to ? new Date(to) : new Date();
 
     // Choose date format for grouping
@@ -626,3 +627,169 @@ export const getServiceOpenByField = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+// Asset Dashboard Controller
+export const getAssetsByStatus = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $group: {
+          _id: "$assetState.assetIsCurrently",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+    const results = await AssetModel.aggregate(pipeline);
+    const data = results.map((r, i) => ({
+      id: i,
+      label: r._id || "Unknown",
+      value: r.count
+    }));
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assets by status", error: error.message });
+  }
+};
+
+export const getAssetsBySupportType = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $group: {
+          _id: "$warrantyInformation.supportType",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+    const results = await AssetModel.aggregate(pipeline);
+    const data = results.map((r, i) => ({
+      id: i,
+      label: r._id || "Unknown",
+      value: r.count
+    }));
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assets by support type", error: error.message });
+  }
+};
+
+export const getAssetsByWarrantyExpiry = async (req, res) => {
+  try {
+    const now = new Date();
+    const pipeline = [
+      {
+        $addFields: {
+          daysLeft: {
+            $divide: [
+              { $subtract: ["$warrantyInformation.warrantyEndDate", now] },
+              1000 * 60 * 60 * 24
+            ]
+          }
+        }
+      },
+      {
+        $bucket: {
+          groupBy: "$daysLeft",
+          boundaries: [0, 7, 15, 30, 90, 10000],
+          default: "Expired",
+          output: { count: { $sum: 1 } }
+        }
+      }
+    ];
+    const results = await AssetModel.aggregate(pipeline);
+    // Map bucket labels as needed
+    res.json({ success: true, data: results });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assets by warranty expiry", error: error.message });
+  }
+};
+
+export const getAssetsByCategory = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $group: {
+          _id: "$assetInformation.category",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+    const results = await AssetModel.aggregate(pipeline);
+    const data = results.map((r, i) => ({
+      id: i,
+      label: r._id || "Uncategorized",
+      value: r.count
+    }));
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assets by category", error: error.message });
+  }
+};
+
+export const getAssetsByLocation = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $group: {
+          _id: "$locationInformation.location",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+    const results = await AssetModel.aggregate(pipeline);
+    const data = results.map((r, i) => ({
+      id: i,
+      label: r._id || "Unknown",
+      value: r.count
+    }));
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assets by location", error: error.message });
+  }
+};
+
+export const getAssetsBySubLocation = async (req, res) => {
+  try {
+    const pipeline = [
+      {
+        $group: {
+          _id: "$locationInformation.subLocation",
+          count: { $sum: 1 }
+        }
+      }
+    ];
+    const results = await AssetModel.aggregate(pipeline);
+    const data = results.map((r, i) => ({
+      id: i,
+      label: r._id || "Unknown",
+      value: r.count
+    }));
+    res.json({ success: true, data });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching assets by sub location", error: error.message });
+  }
+};
+
+// export const getAssetsByBusinessUnit = async (req, res) => {
+//   try {
+//     const pipeline = [
+//       {
+//         $group: {
+//           _id: "$assetState.department",
+//           count: { $sum: 1 }
+//         }
+//       }
+//     ];
+//     const results = await AssetModel.aggregate(pipeline);
+//     const data = results.map((r, i) => ({
+//       id: i,
+//       label: r._id || "Unknown",
+//       value: r.count
+//     }));
+//     res.json({ success: true, data });
+//   } catch (error) {
+//     res.status(500).json({ message: "Error fetching assets by business unit", error: error.message });
+//   }
+// };
+
+

@@ -1,13 +1,14 @@
 import express from 'express';
 import authMiddleware from '../middleware/AuthMiddleware.js';
+import { requirePagePermission } from '../middleware/roleMiddleware.js';
 import { createVendor, deleteVendor, getAllVendors, getVendorById, updateVendor } from '../controllers/VendorController.js';
 
 const router = express.Router();
 
-router.post('/', createVendor);
-router.get('/', getAllVendors);
-router.get('/:id', getVendorById);
-router.put('/:id', updateVendor);
-router.delete('/:id', deleteVendor);
+router.post('/', authMiddleware, requirePagePermission('vendor', 'isEdit'), createVendor);
+router.get('/', authMiddleware, requirePagePermission('vendor', 'isView'), getAllVendors);
+router.get('/:id', authMiddleware, requirePagePermission('vendor', 'isView'), getVendorById);
+router.put('/:id', authMiddleware, requirePagePermission('vendor', 'isEdit'), updateVendor);
+router.delete('/:id', authMiddleware, requirePagePermission('vendor', 'isDelete'), deleteVendor);
 
-export default router
+export default router;

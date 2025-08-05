@@ -521,7 +521,7 @@ function Components() {
                 </div>
               </form>
             </div>
-              
+
           </div>
         )}
         {deleteConfirmationModal && (
@@ -560,3 +560,5 @@ function Components() {
 }
 
 export default Components;
+
+

@@ -249,126 +249,86 @@ function SlaMapping() {
         {addSlaMappingModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-medium mb-4 text-start">
                 Create SLA Mapping
               </h2>
-              <form onSubmit={addNewSlaMappingHandler} className="space-y-2">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Support Orgnization
-                    </label>
-                    {console.log(supportDepartment)}
-                    {/* <Autocomplete
-                      className="w-[65%]"
-                      options={supportDepartment}
-                      value={
-                        supportDepartment.find(
-                          (dept) =>
-                            dept.supportDepartmentName ===
-                            addNewSlaMapping.supportDepartment
-                        ) || null
-                      }
-                      onChange={(_, newValue) =>
-                        setAddNewSlaMapping((prev) => ({
-                          ...prev,
-                          supportDepartment: newValue
-                            ? newValue.subdepartmentName
-                            : "",
-                        }))
-                      }
-                      getOptionLabel={(option) =>
-                        option.subdepartmentName || ""
-                      }
-                      isOptionEqualToValue={(option, value) =>
-                        option.subdepartmentName === value.subdepartmentName
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="standard"
-                          className="text-xs text-slate-600"
-                          placeholder="Select Support Department"
-                          inputProps={{
-                            ...params.inputProps,
-                            style: { fontSize: "0.8rem" },
-                          }}
-                        />
-                      )}
-                    /> */}
-                    <Autocomplete
-                      className="w-[65%]"
-                      options={supportDepartment}
-                      value={
-                        supportDepartment.find(
-                          (dept) =>
-                            dept.supportDepartmentName ===
-                            addNewSlaMapping.supportDepartment
-                        ) || null
-                      }
-                      onChange={(_, newValue) =>
-                        setAddNewSlaMapping((prev) => ({
-                          ...prev,
-                          supportDepartment: newValue
-                            ? newValue.supportDepartmentName
-                            : "",
-                        }))
-                      }
-                      getOptionLabel={(option) =>
-                        option.supportDepartmentName || ""
-                      }
-                      isOptionEqualToValue={(option, value) =>
-                        option.supportDepartmentName ===
-                        value.supportDepartmentName
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="standard"
-                          className="text-xs text-slate-600"
-                          placeholder="Select Support Department"
-                          inputProps={{
-                            ...params.inputProps,
-                            style: { fontSize: "0.8rem" },
-                          }}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      SLA Name
-                    </label>
-                    <Autocomplete
-                      className="w-[65%]"
-                      options={getSlaName}
-                      value={
-                        getSlaName.find(
-                          (sla) => sla.slaName === addNewSlaMapping?.slaName
-                        ) || null
-                      }
-                      getOptionLabel={(option) => option.slaName || ""}
-                      onChange={(_, newValue) =>
-                        setAddNewSlaMapping((prev) => ({
-                          ...prev,
-                          slaName: newValue ? newValue.slaName : "",
-                        }))
-                      }
-                      required
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          variant="standard"
-                          className="text-xs text-slate-600"
-                          placeholder="Select SLA"
-                          inputProps={{
-                            ...params.inputProps,
-                            style: { fontSize: "0.8rem" },
-                          }}
-                        />
-                      )}
-                    />
-                  </div>
+              <form onSubmit={addNewSlaMappingHandler} className="space-y-4">
+                <div className="flex items-center gap-2 mt-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Support Orgnization
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={supportDepartment}
+                    value={
+                      supportDepartment.find(
+                        (dept) =>
+                          dept.supportDepartmentName ===
+                          addNewSlaMapping.supportDepartment
+                      ) || null
+                    }
+                    onChange={(_, newValue) =>
+                      setAddNewSlaMapping((prev) => ({
+                        ...prev,
+                        supportDepartment: newValue
+                          ? newValue.supportDepartmentName
+                          : "",
+                      }))
+                    }
+                    getOptionLabel={(option) =>
+                      option.supportDepartmentName || ""
+                    }
+                    isOptionEqualToValue={(option, value) =>
+                      option.supportDepartmentName ===
+                      value.supportDepartmentName
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select Support Department"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    SLA Name
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={getSlaName}
+                    value={
+                      getSlaName.find(
+                        (sla) => sla.slaName === addNewSlaMapping?.slaName
+                      ) || null
+                    }
+                    getOptionLabel={(option) => option.slaName || ""}
+                    onChange={(_, newValue) =>
+                      setAddNewSlaMapping((prev) => ({
+                        ...prev,
+                        slaName: newValue ? newValue.slaName : "",
+                      }))
+                    }
+                    required
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select SLA"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button

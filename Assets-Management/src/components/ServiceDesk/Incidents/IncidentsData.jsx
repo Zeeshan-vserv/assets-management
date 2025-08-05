@@ -42,13 +42,10 @@ const csvConfig = mkConfig({
 
 const ticketOptions = ["All Tickets", "My Tickets"];
 const IncidentsData = () => {
-  // Redux userId
   const currentUserId = useSelector(
     (state) => state.authReducer.authData?.userId
   );
   const user = useSelector((state) => state.authReducer.authData);
-
-  // State
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [changeStatus, setChangeStatus] = useState(false);
@@ -590,35 +587,6 @@ const IncidentsData = () => {
     acc[latestStatus] = (acc[latestStatus] || 0) + 1;
     return acc;
   }, {});
-
-  // const cardData = [
-  //   { id: "1", count: statusCounts["new"] || 0, description: "New" },
-  //   { id: "2", count: statusCounts["assigned"] || 0, description: "Assigned" },
-  //   {
-  //     id: "3",
-  //     count: statusCounts["in progress"] || 0,
-  //     description: "In-Progress",
-  //   },
-  //   { id: "4", count: statusCounts["pause"] || 0, description: "Pause" },
-  //   { id: "5", count: statusCounts["resolved"] || 0, description: "Resolved" },
-  //   {
-  //     id: "6",
-  //     count: statusCounts["cancelled"] || statusCounts["cancel"] || 0,
-  //     description: "Cancelled",
-  //   },
-  //   {
-  //     id: "7",
-  //     count: statusCounts["reopened"] || statusCounts["reopen"] || 0,
-  //     description: "Reopened",
-  //   },
-  //   { id: "8", count: statusCounts["closed"] || 0, description: "Closed" },
-  //   {
-  //     id: "9",
-  //     count: statusCounts["converted to sr"] || 0,
-  //     description: "Converted to SR",
-  //   },
-  //   { id: "11", count: data.length, description: "Total" },
-  // ];
 
   // Render
   return (

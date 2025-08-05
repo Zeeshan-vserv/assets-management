@@ -164,8 +164,6 @@ const EditIncident = () => {
       }));
     }
   };
-  // console.log("id", id);
-  // console.log("Form Data:", formData?._id);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -204,7 +202,6 @@ const EditIncident = () => {
         <div className="w-full p-8 bg-white rounded-md shadow-md">
           <div className="flex gap-2 justify-end">
             <button
-              // type="submit"
               type="button"
               onClick={() => setShowConfirm(true)}
               className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"

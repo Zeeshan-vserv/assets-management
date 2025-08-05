@@ -807,14 +807,14 @@ const Navigation = ({ nav, setNav }) => {
                     rules
                   </NavLink>
                 </li>
-                <li
+                {/* <li
                   className="text-[11px] hover:underline"
                   onClick={() => {
                     setNav(false);
                   }}
                 >
                   escalatio level
-                </li>
+                </li> */}
               </ul>
             )}
 
@@ -1135,7 +1135,7 @@ const Navigation = ({ nav, setNav }) => {
                     Consumable SubCategory
                   </NavLink>
                 </li>
-                <li
+                {/* <li
                   className="text-[11px] hover:underline"
                   onClick={() => {
                     setNav(false);
@@ -1151,7 +1151,7 @@ const Navigation = ({ nav, setNav }) => {
                   >
                     Asset Tag
                   </NavLink>
-                </li>
+                </li> */}
               </ul>
             )}
             <h3

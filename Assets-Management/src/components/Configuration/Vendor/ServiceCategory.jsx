@@ -21,7 +21,6 @@ import {
   updateVendorServiceCategory,
 } from "../../../api/VendorStatusCategoryRequest";
 import { toast } from "react-toastify";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -45,7 +44,6 @@ function ServiceCategory() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteServiceCategoryId, setDeleteServiceCategoryId] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchVendorServiceCategory = async () => {
     try {
@@ -172,7 +170,6 @@ function ServiceCategory() {
       if (response?.data.success) {
         toast.success("Vendor service category updated successfully");
         fetchVendorServiceCategory();
-        setShowConfirm(false);
       }
       setEditServiceCategory(null);
       setOpenUpdateModal(false);
@@ -407,37 +404,35 @@ function ServiceCategory() {
         {addServiceCategoryModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-semibold mb-4 text-start">
                 Add Vendor Service Category
               </h2>
               <form
                 onSubmit={addNewServiceCategoryHandler}
-                className="space-y-2"
+                className="space-y-4"
               >
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Category
-                    </label>
-                    <TextField
-                      name="vendorServiceCategoryName"
-                      required
-                      fullWidth
-                      value={
-                        addNewServiceCategory?.vendorServiceCategoryName || ""
-                      }
-                      onChange={addNewServiceCategoryChangeHandler}
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Category
+                  </label>
+                  <TextField
+                    name="vendorServiceCategoryName"
+                    required
+                    fullWidth
+                    value={
+                      addNewServiceCategory?.vendorServiceCategoryName || ""
+                    }
+                    onChange={addNewServiceCategoryChangeHandler}
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
-                    Add
+                    Submit
                   </button>
                   <button
                     type="button"
@@ -455,36 +450,32 @@ function ServiceCategory() {
           <>
             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-                <h2 className="text-md font-semibold mb-6 text-start">
+                <h2 className="text-lg font-semibold mb-4 text-start">
                   Edit Vendor Category
                 </h2>
                 <form
                   onSubmit={updateServiceCategoryHandler}
-                  className="space-y-2"
+                  className="space-y-4"
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Category *
-                      </label>
-                      <TextField
-                        name="vendorServiceCategoryName"
-                        required
-                        fullWidth
-                        value={
-                          editServiceCategory?.vendorServiceCategoryName || ""
-                        }
-                        onChange={updateServiceCategoryChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Category *
+                    </label>
+                    <TextField
+                      name="vendorServiceCategoryName"
+                      required
+                      fullWidth
+                      value={
+                        editServiceCategory?.vendorServiceCategoryName || ""
+                      }
+                      onChange={updateServiceCategoryChangeHandler}
+                      variant="standard"
+                      sx={{ width: 250 }}
+                    />
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
                     <button
-                      // type="submit"
-                      type="button"
-                      onClick={() => setShowConfirm(true)}
+                      type="submit"
                       className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                     >
                       Update
@@ -496,12 +487,6 @@ function ServiceCategory() {
                     >
                       Cancel
                     </button>
-                    <ConfirmUpdateModal
-                      isOpen={showConfirm}
-                      onConfirm={updateServiceCategoryHandler}
-                      message="Are you sure you want to update vendor service category?"
-                      onCancel={() => setShowConfirm(false)}
-                    />
                   </div>
                 </form>
               </div>

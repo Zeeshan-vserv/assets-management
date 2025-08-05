@@ -1,563 +1,3 @@
-// import React, { useEffect, useMemo, useState } from "react";
-// import {
-//   MaterialReactTable,
-//   useMaterialReactTable,
-// } from "material-react-table";
-// import { Autocomplete, Box, Button, IconButton } from "@mui/material";
-// import { MdModeEdit } from "react-icons/md";
-// import DeleteIcon from "@mui/icons-material/Delete";
-// import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-// import { AiOutlineFileExcel } from "react-icons/ai";
-// import { AiOutlineFilePdf } from "react-icons/ai";
-// import { mkConfig, generateCsv, download } from "export-to-csv";
-// import { jsPDF } from "jspdf";
-// import { autoTable } from "jspdf-autotable";
-// import { TextField } from "@mui/material";
-// import {
-//   createPublisher,
-//   deletePublisher,
-//   getAllPublisher,
-//   getAllSoftware,
-//   updatePublisher,
-// } from "../../../api/SoftwareCategoryRequest";
-// import { toast } from "react-toastify";
-
-// const csvConfig = mkConfig({
-//   fieldSeparator: ",",
-//   decimalSeparator: ".",
-//   useKeysAsHeaders: true,
-//   filename: "Assets-Management-Department.csv",
-// });
-
-// function Publisher() {
-//   const [data, setData] = useState([]);
-//   const [softwareData, setSoftwareData] = useState([]);
-//   const [SelectedSoftwareId, setSelectedSoftwareId] = useState(null);
-//   const [isLoading, setIsLoading] = useState(true);
-
-//   const [addPublisherModal, setAddPublisherModal] = useState(false);
-//   const [addNewPublisher, setAddNewPublisher] = useState({
-//     publisherName: "",
-//   });
-
-//   const [editPublisher, setEditPublisher] = useState(null);
-//   const [openUpdateModal, setOpenUpdateModal] = useState(false);
-
-//   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
-//   const [deletePublisherId, setDeletePublisherId] = useState(null);
-//   const [deleteSoftwareId, setDeleteSoftwareId] = useState(null);
-
-//   const fetchPublisher = async () => {
-//     try {
-//       setIsLoading(true);
-//       const getAllPublisherResponse = await getAllPublisher();
-//       setData(getAllPublisherResponse?.data?.data || []);
-//     } catch (error) {
-//       console.error("Error fetching software Name:", error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchPublisher();
-//   }, []);
-
-//   const fetchgetAllSoftware = async () => {
-//     try {
-//       setIsLoading(true);
-//       const getAllSoftwareResponse = await getAllSoftware();
-//       setSoftwareData(getAllSoftwareResponse?.data?.data || []);
-//     } catch (error) {
-//       console.error("Error fetching software Name:", error);
-//     } finally {
-//       setIsLoading(false);
-//     }
-//   };
-//   useEffect(() => {
-//     fetchgetAllSoftware();
-//   }, []);
-
-//   // console.log("softwareData", softwareData?.length);
-//   const columns = useMemo(
-//     () => [
-//       {
-//         accessorKey: "publisherId",
-//         header: "Publisher Id",
-//       },
-//       {
-//         accessorKey: "publisherName",
-//         header: "Publisher Name",
-//       },
-
-//       {
-//         id: "edit",
-//         header: "Edit",
-//         size: 80,
-//         enableSorting: false,
-//         Cell: ({ row }) => (
-//           <IconButton
-//             onClick={() => handleUpdatePublisher(row.original._id)}
-//             color="primary"
-//             aria-label="edit"
-//           >
-//             <MdModeEdit />
-//           </IconButton>
-//         ),
-//       },
-//       {
-//         id: "delete",
-//         header: "Delete",
-//         size: 80,
-//         enableSorting: false,
-//         Cell: ({ row }) => (
-//           <IconButton
-//             onClick={() =>
-//               handleDeletePublisher(row.original._id, softwareData)
-//             }
-//             color="error"
-//             aria-label="delete"
-//           >
-//             <DeleteIcon />
-//           </IconButton>
-//         ),
-//       },
-//     ],
-//     [isLoading]
-//   );
-
-//   //Add
-//   const openAddPublisherModal = (softwareId) => {
-//     setSelectedSoftwareId(softwareId);
-//     setAddPublisherModal(true);
-//   };
-
-//   const addNewPublisherChangeHandler = (e) => {
-//     const { name, value } = e.target;
-//     setAddNewPublisher((prev) => ({
-//       ...prev,
-//       [name]: value,
-//     }));
-//   };
-
-//   const addNewPublisherHandler = async (e) => {
-//     e.preventDefault();
-//     const formData = {
-//       publisherName: addNewPublisher.publisherName,
-//     };
-
-//     const createPublisherResponse = await createPublisher(
-//       SelectedSoftwareId,
-//       formData
-//     );
-//     if (createPublisherResponse?.data?.success) {
-//       toast.success("Publisher created successfullly");
-//       await fetchPublisher();
-//       await fetchgetAllSoftware();
-//     }
-//     setAddPublisherModal(false);
-//   };
-
-//   //update
-//   const handleUpdatePublisher = (id) => {
-//     const publisherToEdit = data?.find((d) => d._id === id);
-//     if (publisherToEdit) {
-//       setEditPublisher({
-//         _id: publisherToEdit._id,
-//         publisherName: publisherToEdit.publisherName,
-//       });
-//       setOpenUpdateModal(true);
-//     }
-//   };
-
-//   const updatePublisherChangeHandler = (e) => {
-//     const { name, value } = e.target;
-//     setEditPublisher((prev) => ({
-//       ...prev,
-//       [name]: value,
-//     }));
-//   };
-//   const updatePublisherHandler = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const updatedData = {
-//         publisherName: editPublisher?.publisherName,
-//       };
-//       const updatePublisherResponse = await updatePublisher(
-//         editPublisher._id,
-//         updatedData
-//       );
-//       if (updatePublisherResponse?.data.success) {
-//         toast.success("Publisher updated successfully");
-//         await fetchPublisher();
-//         await fetchgetAllSoftware();
-//       }
-//     } catch (error) {
-//       console.error("Error updating publisher:", error);
-//     } finally {
-//       setOpenUpdateModal(false);
-//     }
-//   };
-
-//   //delete
-//   const handleDeletePublisher = (publisherId, softwareDatas) => {
-//     const softwareWithPublisher = softwareDatas.find((software) =>
-//       software.publishers.some((pub) => pub._id === publisherId)
-//     );
-//     if (softwareWithPublisher) {
-//       setDeleteSoftwareId(softwareWithPublisher._id);
-//       setDeletePublisherId(publisherId);
-//       setDeleteConfirmationModal(true);
-//     }
-//   };
-
-//   const deletePublisherHandler = async (e) => {
-//     e.preventDefault();
-//     try {
-//       const deletePublisherResponse = await deletePublisher(
-//         deleteSoftwareId,
-//         deletePublisherId
-//       );
-//       console.log("deletePublisherResponse", deletePublisherResponse);
-//       if (deletePublisherResponse?.data.success) {
-//         toast.success("Publisher deleted successfully");
-//         await fetchPublisher();
-//         await fetchgetAllSoftware();
-//       }
-//     } catch (error) {
-//       console.error("Error deleting publisher:", error);
-//     } finally {
-//       setDeleteConfirmationModal(false);
-//       setDeletePublisherId(null);
-//       setDeleteSoftwareId(null);
-//     }
-//   };
-
-//   //Exports
-//   const handleExportRows = (rows) => {
-//     const visibleColumns = table
-//       .getAllLeafColumns()
-//       .filter(
-//         (col) =>
-//           col.getIsVisible() &&
-//           col.id !== "mrt-row-select" &&
-//           col.id !== "edit" &&
-//           col.id !== "delete"
-//       );
-
-//     const rowData = rows.map((row) => {
-//       const result = {};
-//       visibleColumns.forEach((col) => {
-//         const key = col.id || col.accessorKey;
-//         result[key] = row.original[key];
-//       });
-//       return result;
-//     });
-
-//     const csv = generateCsv(csvConfig)(rowData);
-//     download(csvConfig)(csv);
-//   };
-//   const handleExportData = () => {
-//     const visibleColumns = table
-//       .getAllLeafColumns()
-//       .filter(
-//         (col) =>
-//           col.getIsVisible() &&
-//           col.id !== "mrt-row-select" &&
-//           col.id !== "edit" &&
-//           col.id !== "delete"
-//       );
-
-//     const exportData = data.map((item) => {
-//       const result = {};
-//       visibleColumns.forEach((col) => {
-//         const key = col.id || col.accessorKey;
-//         result[key] = item[key];
-//       });
-//       return result;
-//     });
-
-//     const csv = generateCsv(csvConfig)(exportData);
-//     download(csvConfig)(csv);
-//   };
-//   const handlePdfData = () => {
-//     const excludedColumns = ["mrt-row-select", "edit", "delete"];
-
-//     const visibleColumns = table
-//       .getAllLeafColumns()
-//       .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
-
-//     // Prepare headers for PDF
-//     const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
-
-//     // Prepare data rows for PDF
-//     const exportData = data.map((item) =>
-//       visibleColumns.map((col) => {
-//         const key = col.id || col.accessorKey;
-//         let value = item[key];
-//         return value ?? "";
-//       })
-//     );
-
-//     const doc = new jsPDF({});
-//     autoTable(doc, {
-//       head: [headers],
-//       body: exportData,
-//       styles: { fontSize: 8 },
-//       headStyles: { fillColor: [66, 139, 202] },
-//       margin: { top: 20 },
-//     });
-//     doc.save("Assets-Management-Components.pdf");
-//   };
-
-//   const table = useMaterialReactTable({
-//     data,
-//     columns,
-//     getRowId: (row) => row?._id?.toString(),
-//     enableRowSelection: true,
-//     initialState: {
-//       density: "compact",
-//       pagination: { pageSize: 5 },
-//     },
-//     renderTopToolbarCustomActions: ({ table }) => {
-//       return (
-//         <Box>
-//           {softwareData.map((software) => (
-//             <Button
-//               key={software?._id}
-//               onClick={() => openAddPublisherModal(software?._id)}
-//               variant="contained"
-//               size="small"
-//               startIcon={<AddCircleOutlineIcon />}
-//               sx={{
-//                 backgroundColor: "#2563eb",
-//                 color: "#fff",
-//                 textTransform: "none",
-//                 mt: 1,
-//                 mb: 1,
-//               }}
-//             >
-//               New
-//             </Button>
-//           ))}
-//           <Button
-//             onClick={handlePdfData}
-//             startIcon={<AiOutlineFilePdf />}
-//             size="small"
-//             variant="outlined"
-//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-//           >
-//             Export as PDF
-//           </Button>
-//           <Button
-//             onClick={handleExportData}
-//             startIcon={<AiOutlineFileExcel />}
-//             size="small"
-//             variant="outlined"
-//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-//           >
-//             Export All Data
-//           </Button>
-//           <Button
-//             disabled={table.getPrePaginationRowModel().rows.length === 0}
-//             onClick={() =>
-//               handleExportRows(table.getPrePaginationRowModel().rows)
-//             }
-//             startIcon={<AiOutlineFileExcel />}
-//             size="small"
-//             variant="outlined"
-//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-//           >
-//             Export All Rows
-//           </Button>
-//           <Button
-//             disabled={table.getRowModel().rows.length === 0}
-//             onClick={() => handleExportRows(table.getRowModel().rows)}
-//             startIcon={<AiOutlineFileExcel />}
-//             size="small"
-//             variant="outlined"
-//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-//           >
-//             Export Page Rows
-//           </Button>
-//           <Button
-//             disabled={
-//               !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
-//             }
-//             onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
-//             startIcon={<AiOutlineFileExcel />}
-//             size="small"
-//             variant="outlined"
-//             sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-//           >
-//             Export Selected Rows
-//           </Button>
-//         </Box>
-//       );
-//     },
-
-//     muiTableProps: {
-//       sx: {
-//         border: "1px solid rgba(81, 81, 81, .5)",
-//         caption: {
-//           captionSide: "top",
-//         },
-//       },
-//     },
-
-//     paginationDisplayMode: "pages",
-//     positionToolbarAlertBanner: "bottom",
-//     muiPaginationProps: {
-//       color: "secondary",
-//       rowsPerPageOptions: [10, 15, 20],
-//       shape: "rounded",
-//       variant: "outlined",
-//     },
-//     enablePagination: true,
-
-//     muiTableHeadCellProps: {
-//       sx: {
-//         backgroundColor: "#f1f5fa",
-//         color: "#303E67",
-//         fontSize: "14px",
-//         fontWeight: "500",
-//       },
-//     },
-//     muiTableBodyRowProps: ({ row }) => ({
-//       sx: {
-//         backgroundColor: row.index % 2 === 1 ? "#f1f5fa" : "inherit",
-//       },
-//     }),
-//   });
-
-//   return (
-//     <>
-//       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
-//         <h2 className="text-lg font-semibold mb-6 text-start">PUBLISHER</h2>
-//         <MaterialReactTable table={table} />
-//         {addPublisherModal && (
-//           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-//             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-//               <h2 className="text-md font-semibold mb-6 text-start">
-//                 Add Publisher
-//               </h2>
-//               <form onSubmit={addNewPublisherHandler} className="space-y-2">
-//                 <div className="space-y-4">
-//                   <div className="flex items-center gap-2">
-//                     <label className="w-40 text-sm font-medium text-gray-500">
-//                       Publisher *
-//                     </label>
-//                     <TextField
-//                       name="publisherName"
-//                       required
-//                       fullWidth
-//                       value={addNewPublisher?.publisherName || ""}
-//                       onChange={addNewPublisherChangeHandler}
-//                       variant="standard"
-//                       sx={{ width: 250 }}
-//                     />
-//                   </div>
-//                 </div>
-//                 <div className="flex justify-end gap-3 pt-4">
-//                   <button
-//                     type="button"
-//                     onClick={() => setAddPublisherModal(false)}
-//                     className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-//                   >
-//                     Cancel
-//                   </button>
-//                   <button
-//                     type="submit"
-//                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-//                   >
-//                     Add
-//                   </button>
-//                 </div>
-//               </form>
-//             </div>
-//           </div>
-//         )}
-//         {openUpdateModal && (
-//           <>
-//             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-//               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-//                 <h2 className="text-md font-semibold mb-6 text-start">
-//                   Edit Publisher
-//                 </h2>
-//                 <form onSubmit={updatePublisherHandler} className="space-y-2">
-//                   <div className="space-y-2">
-//                     <div className="flex items-center gap-2">
-//                       <label className="w-40 text-sm font-medium text-gray-500">
-//                         Publisher *
-//                       </label>
-//                       <TextField
-//                         name="publisherName"
-//                         required
-//                         fullWidth
-//                         value={editPublisher?.publisherName || ""}
-//                         onChange={updatePublisherChangeHandler}
-//                         variant="standard"
-//                         sx={{ width: 250 }}
-//                       />
-//                     </div>
-//                   </div>
-//                   <div className="flex justify-end gap-3 pt-4">
-//                     <button
-//                       type="button"
-//                       onClick={() => setOpenUpdateModal(false)}
-//                       className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-//                     >
-//                       Cancel
-//                     </button>
-//                     <button
-//                       type="submit"
-//                       className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-//                     >
-//                       Update
-//                     </button>
-//                   </div>
-//                 </form>
-//               </div>
-//             </div>
-//           </>
-//         )}
-//         {deleteConfirmationModal && (
-//           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-//             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">
-//               <h2 className="text-xl font-semibold text-red-600 mb-3">
-//                 Are you sure?
-//               </h2>
-//               <p className="text-gray-700 mb-6">
-//                 This action will permanently delete the department.
-//               </p>
-//               <form
-//                 onSubmit={deletePublisherHandler}
-//                 className="flex justify-end gap-3"
-//               >
-//                 <button
-//                   type="button"
-//                   onClick={() => setDeleteConfirmationModal(false)}
-//                   className="shadow-md px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:border-gray-500 transition-all"
-//                 >
-//                   Cancel
-//                 </button>
-//                 <button
-//                   type="submit"
-//                   className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-//                 >
-//                   Delete
-//                 </button>
-//               </form>
-//             </div>
-//           </div>
-//         )}
-//       </div>
-//     </>
-//   );
-// }
-
-// export default Publisher;
-
 import React, { useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
@@ -580,7 +20,6 @@ import {
 } from "../../../api/SoftwareCategoryRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -604,8 +43,6 @@ function Publisher() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deletePublisherId, setDeletePublisherId] = useState(null);
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch all publishers
   const fetchPublisher = async () => {
@@ -729,7 +166,6 @@ function Publisher() {
       if (updatePublisherResponse?.data.success) {
         toast.success("Publisher updated successfully");
         await fetchPublisher();
-        setShowConfirm(false);
       }
     } catch (error) {
       console.error("Error updating publisher:", error);
@@ -893,36 +329,34 @@ function Publisher() {
       <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
         <h2 className="text-lg font-semibold mb-6 text-start">PUBLISHER</h2>
         <MaterialReactTable table={table} />
-        {/* Add Modal */}
         {addPublisherModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-medium mb-4 text-start">
                 Add Publisher
               </h2>
-              <form onSubmit={addNewPublisherHandler} className="space-y-2">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Publisher *
-                    </label>
-                    <TextField
-                      name="publisherName"
-                      required
-                      fullWidth
-                      value={addNewPublisher?.publisherName || ""}
-                      onChange={addNewPublisherChangeHandler}
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
-                  </div>
+              <form onSubmit={addNewPublisherHandler} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Publisher *
+                  </label>
+                  <TextField
+                    name="publisherName"
+                    required
+                    fullWidth
+                    value={addNewPublisher?.publisherName || ""}
+                    onChange={addNewPublisherChangeHandler}
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
                 </div>
+
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
-                    Add
+                    Submit
                   </button>
                   <button
                     type="button"
@@ -936,35 +370,31 @@ function Publisher() {
             </div>
           </div>
         )}
-        {/* Edit Modal */}
+
         {openUpdateModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-medium mb-4 text-start">
                 Edit Publisher
               </h2>
-              <form onSubmit={updatePublisherHandler} className="space-y-2">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Publisher *
-                    </label>
-                    <TextField
-                      name="publisherName"
-                      required
-                      fullWidth
-                      value={editPublisher?.publisherName || ""}
-                      onChange={updatePublisherChangeHandler}
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
-                  </div>
+              <form onSubmit={updatePublisherHandler} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Publisher *
+                  </label>
+                  <TextField
+                    name="publisherName"
+                    required
+                    fullWidth
+                    value={editPublisher?.publisherName || ""}
+                    onChange={updatePublisherChangeHandler}
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
-                    // type="submit"
-                    type="button"
-                    onClick={() => setShowConfirm(true)}
+                    type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
                     Update
@@ -976,12 +406,6 @@ function Publisher() {
                   >
                     Cancel
                   </button>
-                  <ConfirmUpdateModal
-                    isOpen={showConfirm}
-                    onConfirm={updatePublisherHandler}
-                    message="Are you sure you want to update this publisher?"
-                    onCancel={() => setShowConfirm(false)}
-                  />
                 </div>
               </form>
             </div>

@@ -40,7 +40,7 @@ function AllVendors() {
   const fetchAllVendors = async () => {
     try {
       setIsLoading(true);
-      const response = await getAllAssets();
+      const response = await getAllAssets(); //later change
       if (response.status !== 200) {
         throw new Error("Failed to fetch data");
       }
@@ -201,7 +201,7 @@ function AllVendors() {
     },
     renderTopToolbarCustomActions: ({ table }) => (
       <Box>
-        <NavLink to="/main/service-desk/new-vendor">
+        <NavLink to="/main/ServiceDesk/NewVendor">
           <Button
             variant="contained"
             size="small"

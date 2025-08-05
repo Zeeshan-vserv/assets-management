@@ -15,7 +15,6 @@ import {
   getAllClosureCodes,
   updateClosureCode,
 } from "../../../api/ConfigurationIncidentRequest";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const CloserCode = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -30,8 +29,6 @@ const CloserCode = () => {
 
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchCategories = async () => {
     setIsLoading(true);
@@ -192,7 +189,6 @@ const CloserCode = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchCategories();
-        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update closure code");
@@ -222,7 +218,7 @@ const CloserCode = () => {
       {openAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Add Closure Code
             </h2>
             <form onSubmit={handleAddCategory} className="space-y-4">
@@ -246,14 +242,14 @@ const CloserCode = () => {
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="submit"
-                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
-                  Add
+                  Submit
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpenAddModal(false)}
-                  className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
@@ -267,7 +263,7 @@ const CloserCode = () => {
       {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Edit Closure Code
             </h2>
             <form onSubmit={handleEditCategory} className="space-y-4">
@@ -293,26 +289,18 @@ const CloserCode = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  // type="submit"
-                  type="button"
-                  onClick={() => setShowConfirm(true)}
-                  className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
+                  type="submit"
+                  className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
                   Update
                 </button>
                 <button
                   type="button"
                   onClick={() => setOpenEditModal(false)}
-                  className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm font-medium"
+                  className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
                 >
                   Cancel
                 </button>
-                <ConfirmUpdateModal
-                  isOpen={showConfirm}
-                  onConfirm={handleEditCategory}
-                  message="Are you sure you want to update this closure code?"
-                  onCancel={() => setShowConfirm(false)}
-                />
               </div>
             </form>
           </div>
@@ -333,14 +321,14 @@ const CloserCode = () => {
               <button
                 type="button"
                 onClick={() => setDeleteModal(false)}
-                className="border px-4 py-2 rounded-lg text-sm"
+                className="shadow-md px-4 py-2 rounded-lg border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:border-gray-500 transition-all"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleDeleteCategory}
-                className="bg-[#df656b] text-white px-4 py-2 rounded-lg text-sm"
+                className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
               >
                 Delete
               </button>

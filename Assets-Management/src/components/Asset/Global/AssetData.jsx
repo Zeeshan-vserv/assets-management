@@ -45,8 +45,6 @@ const AssetData = () => {
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
 
-  // console.log(filteredData);
-
   const fetchAsset = async () => {
     try {
       setIsLoading(true);
@@ -65,8 +63,6 @@ const AssetData = () => {
   useEffect(() => {
     fetchAsset();
   }, []);
-
-  // console.log("data",data)
 
   // Extract unique categories from data
   const categories = useMemo(() => {
@@ -269,7 +265,6 @@ const AssetData = () => {
       visibleColumns.map((col) => {
         const key = col.id || col.accessorKey;
         let value = item[key];
-        // Format date fields if needed
         return value ?? "";
       })
     );
@@ -406,7 +401,7 @@ Location: ${row?.locationInformation?.location ?? ""}`;
   const handleUserEmailClick = async (userId) => {
     try {
       const res = await getUserById(userId);
-      console.log("User API response:", res); // <-- Add this line
+      console.log("User API response:", res); 
       // Try both options below, depending on your API response:
       setUserDetails(res?.data?.data || res?.data || null);
       setUserModalOpen(true);
@@ -422,7 +417,7 @@ Location: ${row?.locationInformation?.location ?? ""}`;
   };
 
   const table = useMaterialReactTable({
-    data: filteredData, // Use filteredData here
+    data: filteredData, 
     columns,
     getRowId: (row) => row?._id?.toString(),
     enableRowSelection: true,
@@ -431,7 +426,6 @@ Location: ${row?.locationInformation?.location ?? ""}`;
     },
     renderTopToolbarCustomActions: ({ table }) => (
       <Box>
-        {/* Uncomment if you want to add new asset functionality */}
         <NavLink to="/main/Asset/AddFixedAssets">
           <Button
             variant="contained"
@@ -550,7 +544,6 @@ Location: ${row?.locationInformation?.location ?? ""}`;
     <>
       <div className="flex flex-col w-[100%] min-h-full  p-4 bg-slate-100">
         <h2 className="text-lg font-semibold mb-6 text-start">ALL ASSETS</h2>
-        {/* Category Filter Buttons */}
         <div>
           <div className="flex flex-wrap gap-2 mb-4">
             {categories.map((cat) => (

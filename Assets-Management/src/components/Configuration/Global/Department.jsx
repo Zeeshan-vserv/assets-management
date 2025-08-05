@@ -21,7 +21,6 @@ import {
 } from "../../../api/DepartmentRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -43,7 +42,6 @@ function Department() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteDepartmentId, setDeleteDepartmentId] = useState(null);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchDepartment = async () => {
     try {
@@ -142,7 +140,6 @@ function Department() {
       setOpenUpdateModal(false);
       toast.success("Department Updated successfully");
       setEditDepartment(null);
-      setShowConfirm(false);
     } catch (error) {
       console.error("Error updating department:", error);
     }
@@ -395,51 +392,53 @@ function Department() {
         {openAddDepartemntModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <form onSubmit={addNewDepartmentHandler} className="space-y-4">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Department Name
-                    </label>
-                    <TextField
-                      name="departmentName"
-                      required
-                      fullWidth
-                      value={addNewDepartment?.departmentName || ""}
-                      onChange={addNewDepartmentChangeHandler}
-                      placeholder="Enter Department Name"
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 mt-4">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Department Head
-                    </label>
-                    <Autocomplete
-                      sx={{ width: 250 }}
-                      options={[
-                        "bittu.kumar@vservit.com",
-                        "zeeshan.ahmed@vservit.com",
-                      ]}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Select"
-                          variant="standard"
-                          required
-                        />
-                      )}
-                      value={addNewDepartment.departmentHead || null}
-                      onChange={(event, value) =>
-                        setNewDepartment((prev) => ({
-                          ...prev,
-                          departmentHead: value,
-                        }))
-                      }
-                    />
-                  </div>
+              <h2 className="text-lg font-medium text-gray-800 mb-4">
+                Add Department
+              </h2>
+              <form onSubmit={addNewDepartmentHandler} className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Department Name
+                  </label>
+                  <TextField
+                    name="departmentName"
+                    required
+                    fullWidth
+                    value={addNewDepartment?.departmentName || ""}
+                    onChange={addNewDepartmentChangeHandler}
+                    placeholder="Enter Department Name"
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
                 </div>
+                <div className="flex items-center gap-2 mt-4">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Department Head
+                  </label>
+                  <Autocomplete
+                    sx={{ width: 250 }}
+                    options={[
+                      "bittu.kumar@vservit.com",
+                      "zeeshan.ahmed@vservit.com",
+                    ]}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Select"
+                        variant="standard"
+                        required
+                      />
+                    )}
+                    value={addNewDepartment.departmentHead || null}
+                    onChange={(event, value) =>
+                      setNewDepartment((prev) => ({
+                        ...prev,
+                        departmentHead: value,
+                      }))
+                    }
+                  />
+                </div>
+
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="submit"
@@ -492,6 +491,9 @@ function Department() {
         {openUpdateModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <h2 className="text-lg font-medium text-gray-800 mb-4">
+                Edit Department
+              </h2>
               <form onSubmit={updateNewDepartmentHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
@@ -537,9 +539,7 @@ function Department() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
-                    type="button"
-                    // onClick={() => setOpenModal(false)}
-                    onClick={() => setShowConfirm(true)}
+                    type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
                     Update
@@ -551,12 +551,6 @@ function Department() {
                   >
                     Cancel
                   </button>
-                  <ConfirmUpdateModal
-                    isOpen={showConfirm}
-                    message="Are you sure you want to update Department?"
-                    onConfirm={updateNewDepartmentHandler}
-                    onCancel={() => setShowConfirm(false)}
-                  />
                 </div>
               </form>
             </div>

@@ -77,7 +77,7 @@ function NewServiceRequest() {
     },
   });
 
-    const fetchGetAllUsersData = async () => {
+  const fetchGetAllUsersData = async () => {
     try {
       setIsLoading(true);
       const response = await getAllUsers();
@@ -152,7 +152,7 @@ function NewServiceRequest() {
     }
   };
 
-    const handleAutoChange = (name, value) => {
+  const handleAutoChange = (name, value) => {
     setFormData((prev) => ({
       ...prev,
       [name]: value || "",
@@ -428,79 +428,6 @@ function NewServiceRequest() {
               </div>
               {approvalRequired === "Yes" && (
                 <>
-                  {/* <div className="flex items-center w-[46%]">
-                    <label className="w-[28%] text-xs font-semibold text-slate-600">
-                      Approval Type<span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-[65%]">
-                      <Autocomplete
-                        options={["Hierarchical", "Custom"]}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Select"
-                            variant="standard"
-                            required
-                          />
-                        )}
-                      />
-                    </div>
-                  </div> */}
-                  {/* <div className="flex items-center w-[46%]">
-                    <label className="w-[28%] text-xs font-semibold text-slate-600">
-                      Approver (Level 1)<span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-[65%]">
-                      <Autocomplete
-                        options={["", ""]}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Select"
-                            variant="standard"
-                            required
-                          />
-                        )}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center w-[46%]">
-                    <label className="w-[28%] text-xs font-semibold text-slate-600">
-                      Approver (Level 2)<span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-[65%]">
-                      <Autocomplete
-                        options={["", ""]}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Select"
-                            variant="standard"
-                            required
-                          />
-                        )}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex items-center w-[46%]">
-                    <label className="w-[28%] text-xs font-semibold text-slate-600">
-                      Approver (Level 3)<span className="text-red-500">*</span>
-                    </label>
-                    <div className="w-[65%]">
-                      <Autocomplete
-                        options={["", ""]}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Select"
-                            variant="standard"
-                            required
-                          />
-                        )}
-                      />
-                    </div>
-                  </div> */}
-
                   <div className="flex items-center w-[46%]">
                     <label className="w-[28%] text-xs font-semibold text-slate-600">
                       Approval (Level-1)
@@ -594,7 +521,6 @@ function NewServiceRequest() {
               )}
             </div>
           </div>
-
           <div className="w-full p-8 bg-white rounded-md shadow-md">
             <h2 className="text-slate-700 font-semibold">Submitter</h2>
             <div className="flex flex-wrap items-center justify-between gap-6 mt-6">
@@ -669,7 +595,6 @@ function NewServiceRequest() {
               </div>
             </div>
           </div>
-
           <div className="w-full p-8 bg-white rounded-md shadow-md">
             <h2 className="text-slate-700 font-semibold">Asset</h2>
             <div className="flex flex-wrap items-center justify-between gap-6 mt-6">
@@ -693,7 +618,6 @@ function NewServiceRequest() {
                     ) || null
                   }
                   onChange={(event, newValue) => {
-                    // console.log(newValue);
                     setFormData({
                       ...formData,
                       asset: {
@@ -820,7 +744,7 @@ function NewServiceRequest() {
                       location: {
                         ...formData.location,
                         location: newValue ? newValue.locationName : "",
-                        subLocation: "", // Reset subLocation when location changes
+                        subLocation: "", 
                       },
                     });
                     setFilteredSubLocations(newValue?.subLocations || []);
@@ -964,7 +888,8 @@ function NewServiceRequest() {
                   value={
                     supportGroupData.find(
                       (group) =>
-                        group.supportGroupName === formData.classificaton.supportGroupName
+                        group.supportGroupName ===
+                        formData.classificaton.supportGroupName
                     ) || null
                   }
                   onChange={(event, newValue) => {

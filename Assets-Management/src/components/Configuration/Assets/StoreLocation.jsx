@@ -27,7 +27,6 @@ import {
 import { getAllLocation } from "../../../api/LocationRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -52,8 +51,6 @@ function StoreLocation() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteStoreLocationId, setDeleteStoreLocationId] = useState(null);
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const user = useSelector((state) => state.authReducer.authData);
 
@@ -198,7 +195,6 @@ function StoreLocation() {
         fetchStoreLocation();
         setOpenUpdateModal(false);
         setEditStoreLocation(null);
-        setShowConfirm(false);
       } else {
         toast.error(res.data.message || "Failed to update store location");
       }
@@ -434,53 +430,41 @@ function StoreLocation() {
         {addStoreLocationModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-medium mb-4 text-start">
                 Add Store Location
               </h2>
-              <form onSubmit={addNewStoreLocationHandler} className="space-y-2">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Location
-                    </label>
-                    {/* <TextField
-                      name="location"
-                      required
-                      fullWidth
-                      value={addNewStoreLocation?.location || ""}
-                      onChange={addNewStoreLocationChangeHandler}
-                      variant="standard"
-                      label="Location"
-                      sx={{ width: 250 }}
-                    /> */}
-                    <Autocomplete
-                      options={locations}
-                      getOptionLabel={(option) => option.locationName || ""}
-                      value={
-                        locations.find(
-                          (loc) =>
-                            loc.locationName === addNewStoreLocation.location
-                        ) || null
-                      }
-                      onChange={(_, newValue) =>
-                        setAddNewStoreLocation((prev) => ({
-                          ...prev,
-                          location: newValue ? newValue.locationName : "",
-                        }))
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Location"
-                          variant="standard"
-                          required
-                          sx={{ width: 230 }}
-                        />
-                      )}
-                    />
-                  </div>
+              <form onSubmit={addNewStoreLocationHandler} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Location
+                  </label>
+                  <Autocomplete
+                    options={locations}
+                    getOptionLabel={(option) => option.locationName || ""}
+                    value={
+                      locations.find(
+                        (loc) =>
+                          loc.locationName === addNewStoreLocation.location
+                      ) || null
+                    }
+                    onChange={(_, newValue) =>
+                      setAddNewStoreLocation((prev) => ({
+                        ...prev,
+                        location: newValue ? newValue.locationName : "",
+                      }))
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Location"
+                        variant="standard"
+                        required
+                        sx={{ width: 230 }}
+                      />
+                    )}
+                  />
                 </div>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
                     Store Location*
                   </label>
@@ -500,7 +484,7 @@ function StoreLocation() {
                     type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
-                    Add
+                    Submit
                   </button>
                   <button
                     type="button"
@@ -517,52 +501,41 @@ function StoreLocation() {
         {openUpdateModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-semibold mb-4 text-start">
                 Edit Store Location
               </h2>
-              <form onSubmit={updateStoreLocationHandler} className="space-y-2">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Location
-                    </label>
-                    {/* <TextField
-                      name="location"
-                      required
-                      fullWidth
-                      value={editStoreLocation?.location || ""}
-                      onChange={updateStoreLocationChangeHandler}
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    /> */}
-                    <Autocomplete
-                      options={locations}
-                      getOptionLabel={(option) => option.locationName || ""}
-                      value={
-                        locations.find(
-                          (loc) =>
-                            loc.locationName === editStoreLocation?.location
-                        ) || null
-                      }
-                      onChange={(_, newValue) =>
-                        setEditStoreLocation((prev) => ({
-                          ...prev,
-                          location: newValue ? newValue.locationName : "",
-                        }))
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Location"
-                          variant="standard"
-                          required
-                          sx={{ width: 230 }}
-                        />
-                      )}
-                    />
-                  </div>
+              <form onSubmit={updateStoreLocationHandler} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Location
+                  </label>
+                  <Autocomplete
+                    options={locations}
+                    getOptionLabel={(option) => option.locationName || ""}
+                    value={
+                      locations.find(
+                        (loc) =>
+                          loc.locationName === editStoreLocation?.location
+                      ) || null
+                    }
+                    onChange={(_, newValue) =>
+                      setEditStoreLocation((prev) => ({
+                        ...prev,
+                        location: newValue ? newValue.locationName : "",
+                      }))
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Location"
+                        variant="standard"
+                        required
+                        sx={{ width: 230 }}
+                      />
+                    )}
+                  />
                 </div>
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
                     Store Location*
                   </label>
@@ -579,9 +552,7 @@ function StoreLocation() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
-                    // type="submit"
-                    type="button"
-                    onClick={() => setShowConfirm(true)}
+                    type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
                     Update
@@ -593,12 +564,6 @@ function StoreLocation() {
                   >
                     Cancel
                   </button>
-                  <ConfirmUpdateModal
-                    isOpen={showConfirm}
-                    onConfirm={updateStoreLocationHandler}
-                    message="Are you sure you want to update this store location?"
-                    onCancel={() => setShowConfirm(false)}
-                  />
                 </div>
               </form>
             </div>

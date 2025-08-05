@@ -62,8 +62,6 @@ function GatePassData() {
     fetchGetPass();
   }, []);
 
-  // console.log(data);
-
   const columns = useMemo(
     () => [
       {
@@ -151,7 +149,7 @@ function GatePassData() {
               href={`http://localhost:5001/${cell.getValue()}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-slate-400 px-6 py-2 rounded-lg border-2 border-slate-600"
+              className="bg-slate-500 px-6 py-2 rounded-lg border-2 border-slate-600 text-white"
             >
               View
             </a>
@@ -203,13 +201,11 @@ function GatePassData() {
       await deleteGatePass(deleteGetPassId);
       setOpenGetPassDeleteModal(false);
       setDeleteGetPassId(null);
-      fetchGetPass(); // Refresh data after delete
+      fetchGetPass();
     } catch (error) {
       console.log("Delete Get pass error", error);
     }
   };
-
-  // ... rest of your code (export, PDF, actions, table config) remains unchanged
 
   const handleExportRows = (rows) => {
     const visibleColumns = table
@@ -503,7 +499,7 @@ function GatePassData() {
                 Close GatePass
               </h2>
               <form onSubmit={closeGatePassSubmitHandler} className="space-y-4">
-                <div className="flex items-center gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-2">
                   <label className="w-[30%] mt-1 text-sm text-slate-700">
                     Status <span className="text-red-500 text-md">*</span>
                   </label>
@@ -531,7 +527,7 @@ function GatePassData() {
                 </div>
                 {closeStatus === "This item is received" && (
                   <>
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       <div className="flex items-center gap-2 mt-1">
                         <label className="w-[30%] mt-1 text-xs font-semibold text-slate-600">
                           Assets Received{" "}
@@ -587,15 +583,15 @@ function GatePassData() {
                           Remarks(Contact No.){" "}
                           <span className="text-red-500 text-md">*</span>
                         </label>
-                        <textarea className="w-[65%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none rounded-sm focus:border-blue-400"></textarea>
+                        <textarea className="w-[65%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none rounded-md focus:border-blue-400"></textarea>
                       </div>
                     </div>
                   </>
                 )}
                 {closeStatus === "Other Reason/Partial Received" && (
                   <>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 mt-1">
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 mt-2">
                         <label className="w-[30%] text-sm text-slate-700">
                           Assets Received{" "}
                           <span className="text-red-500 text-md">*</span>
@@ -621,12 +617,12 @@ function GatePassData() {
                           )}
                         />
                       </div>
-                      <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-2 mt-2">
                         <label className="w-[30%] text-sm text-slate-700">
                           Remarks(Contact No.){" "}
                           <span className="text-red-500 text-md">*</span>
                         </label>
-                        <textarea className="w-[65%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none rounded-sm focus:border-blue-500"></textarea>
+                        <textarea className="w-[65%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none rounded-md focus:border-blue-500"></textarea>
                       </div>
                     </div>
                   </>

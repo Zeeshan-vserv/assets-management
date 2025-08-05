@@ -44,8 +44,6 @@ function Condition() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteConditionId, setDeleteConditionId] = useState(null);
 
-  const [showConfirm, setShowConfirm] = useState(false);
-
   const fetchCondition = async () => {
     try {
       setIsLoading(true);
@@ -164,7 +162,6 @@ function Condition() {
       if (response?.data?.success) {
         toast.success("Condition updated successfully");
         fetchCondition();
-        setShowConfirm(false);
       }
       setEditCondition(null);
       setOpenUpdateModal(false);
@@ -396,32 +393,31 @@ function Condition() {
         {addConditionModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-medium mb-4 text-start">
                 Add Condition
               </h2>
               <form onSubmit={addNewConditionHandler} className="space-y-2">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Condition *
-                    </label>
-                    <TextField
-                      name="conditionName"
-                      required
-                      fullWidth
-                      value={addNewCondition?.conditionName || ""}
-                      onChange={addNewConditionChangeHandler}
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Condition *
+                  </label>
+                  <TextField
+                    name="conditionName"
+                    required
+                    fullWidth
+                    value={addNewCondition?.conditionName || ""}
+                    onChange={addNewConditionChangeHandler}
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
                 </div>
+
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
-                    Add
+                    Submit
                   </button>
                   <button
                     type="button"
@@ -439,31 +435,28 @@ function Condition() {
           <>
             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-                <h2 className="text-md font-semibold mb-6 text-start">
+                <h2 className="text-lg font-medium mb-4 text-start">
                   Edit Condition
                 </h2>
-                <form onSubmit={updateConditionHandler} className="space-y-2">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Condition *
-                      </label>
-                      <TextField
-                        name="conditionName"
-                        required
-                        fullWidth
-                        value={editCondition?.conditionName || ""}
-                        onChange={updateConditionChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
+                <form onSubmit={updateConditionHandler} className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Condition *
+                    </label>
+                    <TextField
+                      name="conditionName"
+                      required
+                      fullWidth
+                      value={editCondition?.conditionName || ""}
+                      onChange={updateConditionChangeHandler}
+                      variant="standard"
+                      sx={{ width: 250 }}
+                    />
                   </div>
+
                   <div className="flex justify-end gap-3 pt-4">
                     <button
-                      // type="submit"
-                      type="button"
-                      onClick={() => setShowConfirm(true)}
+                      type="submit"
                       className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                     >
                       Update
@@ -475,12 +468,6 @@ function Condition() {
                     >
                       Cancel
                     </button>
-                    <ConfirmUpdateModal
-                      isOpen={showConfirm}
-                      onConfirm={updateConditionHandler}
-                      message="Are you sure you want to update this condition?"
-                      onCancel={() => setShowConfirm(false)}
-                    />
                   </div>
                 </form>
               </div>

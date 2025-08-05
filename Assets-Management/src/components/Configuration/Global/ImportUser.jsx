@@ -38,7 +38,7 @@ function ImportUser() {
   return (
     <>
       <div className="flex flex-col gap-8 w-[100%] min-h-full p-4 bg-slate-100">
-        <h2 className="text-md font-semibold mb-6 text-start">IMPORT USER</h2>
+        <h2 className="text-lg font-semibold mb-6 text-start">IMPORT USER</h2>
         <div>
           <form
             onSubmit={importUserHandler}
@@ -71,7 +71,7 @@ function ImportUser() {
                 >
                   <div className="flex justify-center items-center gap-1">
                     <span className="text-green-500">Upload</span>
-                    <IoCloudUploadOutline size={22} />
+                    <IoCloudUploadOutline size={20} />
                   </div>
                 </button>
                 <ConfirmUpdateModal
@@ -92,7 +92,7 @@ function ImportUser() {
                 >
                   <div className="flex items-center justify-center">
                     <span className="text-blue-500">Download Template</span>
-                    <IoMdDownload size={22} />
+                    <IoMdDownload size={20} />
                   </div>
                 </a>
               </div>

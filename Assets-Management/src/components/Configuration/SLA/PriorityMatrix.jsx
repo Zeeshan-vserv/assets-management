@@ -16,7 +16,6 @@ import {
 } from "../../../api/slaRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const PriorityMatrix = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -34,8 +33,6 @@ const PriorityMatrix = () => {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deletePriorityMatrixId, setDeletePriorityMatrixId] = useState(null);
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchPriorityMatrix = async () => {
     try {
@@ -55,8 +52,6 @@ const PriorityMatrix = () => {
   useEffect(() => {
     fetchPriorityMatrix();
   }, []);
-
-  // console.log(data);
 
   const columns = useMemo(
     () => [
@@ -179,7 +174,6 @@ const PriorityMatrix = () => {
         await fetchPriorityMatrix();
         setOpenUpdateModal(false);
         setEditPriorityMatrix(null);
-        setShowConfirm(false);
       }
     } catch (error) {
       console.error("Error updating priority matrix:", error);
@@ -279,68 +273,66 @@ const PriorityMatrix = () => {
         {addPriorityMatrixModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-medium mb-4 text-start">
                 Add Priority Matrix
               </h2>
               <form
                 onSubmit={addNewPriorityMatrixHandler}
-                className="space-y-2"
+                className="space-y-4"
               >
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Urgency
-                    </label>
-                    <select
-                      name="urgency"
-                      value={addNewPriorityMatrix?.urgency || ""}
-                      onChange={addNewPriorityMatrixChangeHandler}
-                      placeholder="Enter Urgency"
-                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
-                    >
-                      <option value="">Select</option>
-                      <option value="Critical">Critical</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                      <option value="Low">Low</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Impact
-                    </label>
-                    <select
-                      name="impact"
-                      value={addNewPriorityMatrix?.impact || ""}
-                      onChange={addNewPriorityMatrixChangeHandler}
-                      placeholder="Enter Urgency"
-                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
-                    >
-                      <option value="">Select</option>
-                      <option value="Critical">Critical</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                      <option value="Low">Low</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Priority
-                    </label>
-                    <select
-                      name="priority"
-                      value={addNewPriorityMatrix?.priority || ""}
-                      onChange={addNewPriorityMatrixChangeHandler}
-                      placeholder="Enter Urgency"
-                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
-                    >
-                      <option value="">Select</option>
-                      <option value="Severity - 1">Severity - 1</option>
-                      <option value="Severity - 2">Severity - 2</option>
-                      <option value="Severity - 3">Severity - 3</option>
-                      <option value="Severity - 4">Severity - 4</option>
-                    </select>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Urgency
+                  </label>
+                  <select
+                    name="urgency"
+                    value={addNewPriorityMatrix?.urgency || ""}
+                    onChange={addNewPriorityMatrixChangeHandler}
+                    placeholder="Enter Urgency"
+                    className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="Critical">Critical</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Impact
+                  </label>
+                  <select
+                    name="impact"
+                    value={addNewPriorityMatrix?.impact || ""}
+                    onChange={addNewPriorityMatrixChangeHandler}
+                    placeholder="Enter Urgency"
+                    className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="Critical">Critical</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Priority
+                  </label>
+                  <select
+                    name="priority"
+                    value={addNewPriorityMatrix?.priority || ""}
+                    onChange={addNewPriorityMatrixChangeHandler}
+                    placeholder="Enter Urgency"
+                    className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="Severity - 1">Severity - 1</option>
+                    <option value="Severity - 2">Severity - 2</option>
+                    <option value="Severity - 3">Severity - 3</option>
+                    <option value="Severity - 4">Severity - 4</option>
+                  </select>
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
@@ -364,74 +356,70 @@ const PriorityMatrix = () => {
         {openUpdateModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-medium mb-4 text-start">
                 Edit Priority Matrix
               </h2>
               <form
                 onSubmit={updatePriorityMatrixHandler}
-                className="space-y-2"
+                className="space-y-4"
               >
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Urgency
-                    </label>
-                    <select
-                      name="urgency"
-                      value={editPriorityMatrix?.urgency || ""}
-                      onChange={updatePriorityMatrixChangeHandler}
-                      placeholder="Enter Urgency"
-                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
-                    >
-                      <option value="">Select</option>
-                      <option value="Critical">Critical</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                      <option value="Low">Low</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Impact
-                    </label>
-                    <select
-                      name="impact"
-                      value={editPriorityMatrix?.impact || ""}
-                      onChange={updatePriorityMatrixChangeHandler}
-                      placeholder="Enter Urgency"
-                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
-                    >
-                      <option value="">Select</option>
-                      <option value="Critical">Critical</option>
-                      <option value="Medium">Medium</option>
-                      <option value="High">High</option>
-                      <option value="Low">Low</option>
-                    </select>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Priority
-                    </label>
-                    <select
-                      name="priority"
-                      value={editPriorityMatrix?.priority || ""}
-                      onChange={updatePriorityMatrixChangeHandler}
-                      placeholder="Enter Urgency"
-                      className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
-                    >
-                      <option value="">Select</option>
-                      <option value="Severity - 1">Severity - 1</option>
-                      <option value="Severity - 2">Severity - 2</option>
-                      <option value="Severity - 3">Severity - 3</option>
-                      <option value="Severity - 4">Severity - 4</option>
-                    </select>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Urgency
+                  </label>
+                  <select
+                    name="urgency"
+                    value={editPriorityMatrix?.urgency || ""}
+                    onChange={updatePriorityMatrixChangeHandler}
+                    placeholder="Enter Urgency"
+                    className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="Critical">Critical</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Impact
+                  </label>
+                  <select
+                    name="impact"
+                    value={editPriorityMatrix?.impact || ""}
+                    onChange={updatePriorityMatrixChangeHandler}
+                    placeholder="Enter Urgency"
+                    className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="Critical">Critical</option>
+                    <option value="Medium">Medium</option>
+                    <option value="High">High</option>
+                    <option value="Low">Low</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Priority
+                  </label>
+                  <select
+                    name="priority"
+                    value={editPriorityMatrix?.priority || ""}
+                    onChange={updatePriorityMatrixChangeHandler}
+                    placeholder="Enter Urgency"
+                    className="border border-gray-400 px-2 py-1 rounded w-[65%] cursor-pointer outline-none"
+                  >
+                    <option value="">Select</option>
+                    <option value="Severity - 1">Severity - 1</option>
+                    <option value="Severity - 2">Severity - 2</option>
+                    <option value="Severity - 3">Severity - 3</option>
+                    <option value="Severity - 4">Severity - 4</option>
+                  </select>
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
-                    // type="submit"
-                    type="button"
-                    onClick={() => setShowConfirm(true)}
+                    type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
                     Submit
@@ -443,12 +431,6 @@ const PriorityMatrix = () => {
                   >
                     Cancel
                   </button>
-                  <ConfirmUpdateModal
-                    isOpen={showConfirm}
-                    onConfirm={updatePriorityMatrixHandler}
-                    message="Are you sure you want to update this priority matrix?"
-                    onCancel={() => setShowConfirm(false)}
-                  />
                 </div>
               </form>
             </div>

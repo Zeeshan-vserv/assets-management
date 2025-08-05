@@ -42,18 +42,6 @@ function ServiceRequest() {
   const [selectDropDownValue, setSelectDropDownValue] = useState("");
   const [ticketType, setTicketType] = useState(ticketOptions[0]);
 
-  // const fetchService = async () => {
-  //   try {
-  //     setIsLoading(true);
-  //     const response = await getAllServiceRequests();
-  //     setData(response?.data?.data || []);
-  //   } catch (error) {
-  //     console.error("Error fetching incidents:", error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // };
-
   const fetchService = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -108,8 +96,6 @@ function ServiceRequest() {
     fetchService();
   }, []);
 
-  // console.log("data", data);
-  //
   const filteredData = useMemo(() => {
     if (ticketType === "All Tickets") {
       return data;
@@ -121,7 +107,6 @@ function ServiceRequest() {
 
   //status
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
-  // console.log("selectedRow", selectedRow?._id); //use later
 
   const statusSubmitHandler = (e) => {
     e.preventDefault();

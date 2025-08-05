@@ -2,6 +2,7 @@ import AuthModel from "../models/authModel.js";
 import { ServiceAutoCloseModel } from "../models/globalServiceReqModel.js";
 import ServiceCounterModel from "../models/serviceCounterModel.js";
 import ServiceRequestModel from "../models/serviceRequestModel.js";
+import { addServiceRequestToUserHistory } from "./AuthController.js";
 import { SLACreationModel, SLATimelineModel, HolidayListModel, HolidayCalenderModel } from "../models/slaModel.js";
 
 // Helper: Get all holiday dates from both HolidayList and HolidayCalender
@@ -574,6 +575,8 @@ export const createServiceRequest = async (req, res) => {
     });
 
     await newServiceRequest.save();
+
+    await addServiceRequestToUserHistory(userId, newServiceRequest._id, newServiceRequest.status);
 
     res.status(201).json({
       success: true,

@@ -11,8 +11,8 @@ export const requireRole = (roles = []) => {
 
 export const requirePagePermission = (pageKey, action = "isView") => {
   return (req, res, next) => {
-    console.log("User role:", req.user.userRole);
-    console.log("Role permissions:", rolePermissions[req.user.userRole]);
+    // console.log("User role:", req.user.userRole);
+    // console.log("Role permissions:", rolePermissions[req.user.userRole]);
 
     // 1. Allow Admin/Super Admin
     if (req.user.userRole === "Admin" || req.user.userRole === "Super Admin") return next();

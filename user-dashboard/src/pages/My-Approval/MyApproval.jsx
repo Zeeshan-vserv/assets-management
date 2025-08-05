@@ -7,7 +7,7 @@ function MyApproval() {
   return (
     <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
       <ServiceRequestApproval />
-      {/* <GatePassApproval /> */}
+      <GatePassApproval />
       {/* <PurchaseOrderApproval /> */}
     </div>
   );

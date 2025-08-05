@@ -3,6 +3,7 @@ import { IncidentAutoCloseModel } from "../models/globalIncidentModels.js";
 import IncidentCounterModel from "../models/incidentCounterModel.js";
 import IncidentModel from "../models/incidentModel.js";
 import { HolidayListModel, SLACreationModel, SLATimelineModel } from "../models/slaModel.js";
+import { addIncidentToUserHistory } from "./AuthController.js";
 
 // Helper: Get all holiday dates from both HolidayList and HolidayCalender
 async function getAllHolidayDates() {
@@ -432,6 +433,7 @@ export const createIncident = async (req, res) => {
     });
 
     await newIncident.save();
+    await addIncidentToUserHistory(userId, newIncident._id, newIncident.status);
 
     res.status(201).json({
       success: true,

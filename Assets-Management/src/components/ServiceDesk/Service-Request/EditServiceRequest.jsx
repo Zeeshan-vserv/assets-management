@@ -15,11 +15,16 @@ import {
   getAllSupportDepartment,
   getAllSupportGroup,
 } from "../../../api/SuportDepartmentRequest";
-import { createServiceRequest, getServiceRequestById, updateServiceRequest } from "../../../api/serviceRequest";
+import {
+  createServiceRequest,
+  getServiceRequestById,
+  updateServiceRequest,
+} from "../../../api/serviceRequest";
 import {
   getAllServiceCategory,
   getAllServiceSubCategory,
 } from "../../../api/globalServiceRequest";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 function EditServiceRequest() {
   const { id } = useParams();
@@ -38,7 +43,7 @@ function EditServiceRequest() {
   const [excludeSLA, setExcludeSLA] = useState(false);
   const [approvalRequired, setApprovalRequired] = useState("");
   const [formData, setFormData] = useState({
-    title: "",
+    subject: "",
     loggedVia: "",
     category: "",
     subCategory: "",
@@ -76,6 +81,27 @@ function EditServiceRequest() {
       technician: "",
     },
   });
+  const [userData, setUserData] = useState([]);
+  const [statusData, setStatusData] = useState([]);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const fetchGetAllUsersData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getAllUsers();
+      if (response?.data) {
+        setUserData(response?.data);
+      }
+    } catch (error) {
+      console.error("Error fetching service request:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGetAllUsersData();
+  }, []);
 
   const fetchDetails = async () => {
     try {
@@ -114,54 +140,63 @@ function EditServiceRequest() {
     fetchDetails();
   }, []);
 
-    // Fetch incident data
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await getServiceRequestById(id);
-        if (response?.data?.data) {
-          const data = response.data.data;
-          setFormData({
-            ...data,
-            asset: {
-              asset: "",
-              make: "",
-              model: "",
-              serialNo: "",
-              ...(data.asset || {}),
-            },
-            location: {
-              location: "",
-              subLocation: "",
-              ...(data.location || {}),
-            },
-            submitter: {
-              user: "",
-              userContactNumber: "",
-              userEmail: "",
-              userDepartment: "",
-              loggedBy: "",
-              ...(data.submitter || {}),
-            },
-            classificaton: {
-              excludeSLA: false,
-              severityLevel: "Severity-3",
-              priorityLevel: "Priority-3",
-              supportDepartmentName: "",
-              supportGroupName: "",
-              technician: "",
-              ...(data.classificaton || {}),
-            },
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching incident:", error);
-        toast.error("Failed to load incident data");
-      } finally {
-        setIsLoading(false);
+  // Fetch incident data
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getServiceRequestById(id);
+      if (response?.data?.data) {
+        const data = response.data.data;
+        //Convert array status into string status
+        const approvalStatuses = Array.isArray(data.approvalStatus)
+          ? data.approvalStatus
+              .map((entry) => entry?.status?.toString?.().trim())
+              .filter((status) => status)
+              .join(", ")
+          : "";
+        setStatusData(approvalStatuses);
+
+        setFormData({
+          ...data,
+          asset: {
+            asset: "",
+            make: "",
+            model: "",
+            serialNo: "",
+            ...(data.asset || {}),
+          },
+          location: {
+            location: "",
+            subLocation: "",
+            ...(data.location || {}),
+          },
+          submitter: {
+            user: "",
+            userContactNumber: "",
+            userEmail: "",
+            userDepartment: "",
+            loggedBy: "",
+            ...(data.submitter || {}),
+          },
+          classificaton: {
+            excludeSLA: false,
+            severityLevel: "Severity-3",
+            priorityLevel: "Priority-3",
+            supportDepartmentName: "",
+            supportGroupName: "",
+            technician: "",
+            ...(data.classificaton || {}),
+          },
+        });
       }
-    };
-  
+    } catch (error) {
+      console.error("Error fetching incident:", error);
+      toast.error("Failed to load incident data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line
@@ -190,13 +225,14 @@ function EditServiceRequest() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateServiceRequest(user?._id,{
+      await updateServiceRequest(id, {
         ...formData,
         userId: user?.userId,
+        status: statusData,
       });
       toast.success("Service Request Added Successfully");
       setFormData({
-        title: "",
+        subject: "",
         loggedVia: "",
         category: "",
         subCategory: "",
@@ -234,6 +270,7 @@ function EditServiceRequest() {
           technician: "",
         },
       });
+      setShowConfirm(false);
       navigate("/main/ServiceDesk/service-request");
     } catch (error) {
       toast.error("Failed to add Service Request");
@@ -258,10 +295,12 @@ function EditServiceRequest() {
           <div className="w-full p-8 bg-white rounded-md shadow-md">
             <div className="flex gap-2 justify-end">
               <button
-                type="submit"
+                // type="submit"
+                type="button"
+                onClick={() => setShowConfirm(true)}
                 className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
               >
-                Submit
+                Update
               </button>
               <button
                 onClick={() => navigate("/main/ServiceDesk/service-request")}
@@ -269,6 +308,12 @@ function EditServiceRequest() {
               >
                 Cancel
               </button>
+              <ConfirmUpdateModal
+                isOpen={showConfirm}
+                message="Are you sure you want to update Service Request?"
+                onConfirm={handleSubmit}
+                onCancel={() => setShowConfirm(false)}
+              />
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-6 mt-6">
@@ -278,8 +323,8 @@ function EditServiceRequest() {
                 </label>
                 <input
                   type="text"
-                  name="title"
-                  value={formData.title}
+                  name="subject"
+                  value={formData.subject}
                   onChange={handleChange}
                   className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 />
@@ -418,7 +463,7 @@ function EditServiceRequest() {
                   />
                 </div>
               </div>
-
+              {/* {console.log(formData.purchaseRequest)} */}
               <div className="flex items-center w-[46%]">
                 <label
                   htmlFor=""
@@ -427,6 +472,7 @@ function EditServiceRequest() {
                   Cost
                 </label>
                 <input
+                  disabled={formData.purchaseRequest === "false"}
                   type="text"
                   id=""
                   name=""
@@ -480,7 +526,19 @@ function EditServiceRequest() {
                     </label>
                     <div className="w-[65%]">
                       <Autocomplete
-                        options={["", ""]}
+                        options={userData}
+                        value={
+                          userData.find(
+                            (user) => user.emailAddress === formData.approver1
+                          ) || null
+                        }
+                        onChange={(event, newValue) => {
+                          setFormData({
+                            ...formData,
+                            approver1: newValue?.emailAddress || "",
+                          });
+                        }}
+                        getOptionLabel={(option) => option?.emailAddress || ""}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -498,7 +556,19 @@ function EditServiceRequest() {
                     </label>
                     <div className="w-[65%]">
                       <Autocomplete
-                        options={["", ""]}
+                        options={userData}
+                        value={
+                          userData.find(
+                            (user) => user.emailAddress === formData.approver2
+                          ) || null
+                        }
+                        onChange={(event, newValue) => {
+                          setFormData({
+                            ...formData,
+                            approver2: newValue?.emailAddress || "",
+                          });
+                        }}
+                        getOptionLabel={(option) => option?.emailAddress || ""}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -516,7 +586,19 @@ function EditServiceRequest() {
                     </label>
                     <div className="w-[65%]">
                       <Autocomplete
-                        options={["", ""]}
+                        options={userData}
+                        value={
+                          userData.find(
+                            (user) => user.emailAddress === formData.approver3
+                          ) || null
+                        }
+                        onChange={(event, newValue) => {
+                          setFormData({
+                            ...formData,
+                            approver3: newValue?.emailAddress || "",
+                          });
+                        }}
+                        getOptionLabel={(option) => option?.emailAddress || ""}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -902,7 +984,8 @@ function EditServiceRequest() {
                   value={
                     supportGroupData.find(
                       (group) =>
-                        group.supportGroupName === formData.classificaton.supportGroupName 
+                        group.supportGroupName ===
+                        formData.classificaton.supportGroupName
                     ) || null
                   }
                   onChange={(event, newValue) => {

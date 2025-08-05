@@ -9,7 +9,11 @@ import OpenServiceBySeverity from "./PieChart/OpenServiceBySeverity";
 import ResponseSlaStatusPieChart from "../Incident/PieChart/ResponseSlaStatusPieChart";
 import ResolutionSlaStatusPieChart from "../Incident/PieChart/ResolutionSlaStatusPieChart";
 import BarGraphForIncident from "../Incident/BarGraph/BarGraphForIncident";
-import { getAllServiceRequests, getServiceRequestStatusCounts } from "../../../api/serviceRequest";
+import {
+  getAllServiceRequests,
+  getServiceRequestStatusCounts,
+} from "../../../api/serviceRequest";
+import BarGraphForRequest from "./BarGraph/BarGraphForRequest";
 
 function RequestDashboard() {
   const navigate = useNavigate();
@@ -66,7 +70,10 @@ function RequestDashboard() {
   }, [fetchService]);
 
   // Calculate total count
-  const totalCount = cardData.reduce((sum, item) => sum + (Number(item.count) || 0), 0);
+  const totalCount = cardData.reduce(
+    (sum, item) => sum + (Number(item.count) || 0),
+    0
+  );
 
   return (
     <>
@@ -85,9 +92,13 @@ function RequestDashboard() {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-6 p-2">
           {isLoading ? (
-            <div className="col-span-full text-center text-gray-500">Loading...</div>
+            <div className="col-span-full text-center text-gray-500">
+              Loading...
+            </div>
           ) : cardData.length === 0 ? (
-            <div className="col-span-full text-center text-gray-500">No data available</div>
+            <div className="col-span-full text-center text-gray-500">
+              No data available
+            </div>
           ) : (
             <>
               {/* Total Card */}
@@ -116,7 +127,14 @@ function RequestDashboard() {
         <RequestDetails />
         {/* Bar graph */}
         <Card className="mt-6 p-4 bg-white shadow-md rounded-lg">
-          <TotalRequestBarChart title="Total Requests" chartData={chartData} />
+          <TotalRequestBarChart
+            title="Total Requests"
+            chartData={chartData}
+            min={0}
+            max={1}
+            stepSizes={0.2}
+            ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+          />
         </Card>
         {/*Request Pie chart */}
         <div className="flex flex-wrap justify-center items-center gap-4 mt-8">
@@ -136,9 +154,9 @@ function RequestDashboard() {
         {/* Bar graph */}
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
-            <BarGraphForIncident
+            <BarGraphForRequest
               chartData={chartData}
-              title="Open Service By Support Group"
+              title="Open Requests By Technician"
               min={0}
               max={1}
               stepSizes={0.2}
@@ -146,9 +164,9 @@ function RequestDashboard() {
             />
           </Card>
           <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
-            <BarGraphForIncident
+            <BarGraphForRequest
               chartData={chartData}
-              title="Open Service By Sub Category"
+              title="Open Requests By Technician"
               min={0}
               max={1}
               stepSizes={0.2}
@@ -156,16 +174,138 @@ function RequestDashboard() {
             />
           </Card>
         </div>
-        <Card className="mt-6 p-4 bg-white shadow-md rounded-lg">
-          <BarGraphForIncident
-            chartData={chartData}
-            title="Open Service By Support Department"
-            min={0}
-            max={1}
-            stepSizes={0.2}
-            ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
-          />
-        </Card>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Closed Requests By Support Group"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Closed Requests By Support Group"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+        </div>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Open Requests By Category"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Closed Requests By Category"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+        </div>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Open Requests By Sub Category"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Closed Requests By Sub Category"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+        </div>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Open Requests By Location"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Closed Requests By Location"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+        </div>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Open Requests By Sub Location"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Closed Requests By Sub Location"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+        </div>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Open Requests By Support Department"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+          <Card className="flex-1 min-w-[300px] p-4 bg-white shadow-md rounded-lg">
+            <BarGraphForRequest
+              chartData={chartData}
+              title="Closed Requests By Support Department"
+              min={0}
+              max={1}
+              stepSizes={0.2}
+              ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1]}
+            />
+          </Card>
+        </div>
       </div>
     </>
   );

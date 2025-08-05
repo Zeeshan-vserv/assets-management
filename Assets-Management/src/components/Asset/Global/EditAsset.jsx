@@ -19,6 +19,7 @@ import {
 } from "../../../api/DepartmentRequest";
 import { getAllUsers } from "../../../api/AuthRequest";
 import ConfirmUpdateModal from "../../ConfirmUpdateModal";
+import { getAllStoreLocations } from "../../../api/StoreLocationRequest";
 const EditAsset = () => {
   const { id } = useParams();
   const user = useSelector((state) => state.authReducer.authData);
@@ -27,6 +28,7 @@ const EditAsset = () => {
   const [subLocationData, setSubLocationData] = useState([]);
   const [departmentData, setDepartmentData] = useState([]);
   const [subDepartmentData, setSubDepartmentData] = useState([]);
+  const [storeLocation, setstoreLocation] = useState([]);
   const [filteredSubLocations, setFilteredSubLocations] = useState([]);
   const [filteredSubDepartments, setFilteredSubDepartments] = useState([]);
   const [users, setUsers] = useState([]);
@@ -131,6 +133,9 @@ const EditAsset = () => {
 
       const responseSubDepartment = await getAllSubDepartment();
       setSubDepartmentData(responseSubDepartment?.data?.data || []);
+
+      const responseStoreLocation = await getAllStoreLocations();
+      setstoreLocation(responseStoreLocation?.data?.data || []);
 
       const responseReportingManager = await getAllUsers();
       setUsers(responseReportingManager?.data || []);
@@ -853,7 +858,7 @@ const EditAsset = () => {
               >
                 Store Location
               </label>
-              <input
+              {/* <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="storeLocation"
@@ -868,6 +873,39 @@ const EditAsset = () => {
                     },
                   })
                 }
+              /> */}
+              <Autocomplete
+                className="w-[65%]"
+                options={storeLocation}
+                getOptionLabel={(option) => option?.storeLocationName || ""}
+                value={
+                  storeLocation.find(
+                    (loc) =>
+                      loc.storeLocationName ===
+                      formData.locationInformation.storeLocation
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    locationInformation: {
+                      ...formData.locationInformation,
+                      storeLocation: newValue ? newValue.storeLocationName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Store Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
           </div>

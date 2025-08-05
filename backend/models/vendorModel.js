@@ -10,7 +10,7 @@ const vendorSchema = new mongoose.Schema({
     city: String,
     address: String,
     vendorCategory: String,
-    vendorStatus: { default: "active", type: String},
+    vendorStatus: {type: String},
     serviceCategory: String,
     notes: String
 }, {timestamps: true})

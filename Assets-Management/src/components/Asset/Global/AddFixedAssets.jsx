@@ -13,6 +13,7 @@ import {
 } from "../../../api/DepartmentRequest";
 import { getAllUsers } from "../../../api/AuthRequest";
 import { Autocomplete, TextField } from "@mui/material";
+import { getAllStoreLocations } from "../../../api/StoreLocationRequest";
 
 const AddFixedAssets = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -23,6 +24,7 @@ const AddFixedAssets = () => {
   const [subDepartmentData, setSubDepartmentData] = useState([]);
   const [filteredSubLocations, setFilteredSubLocations] = useState([]);
   const [filteredSubDepartments, setFilteredSubDepartments] = useState([]);
+  const [storeLocation, setstoreLocation] = useState([]);
   const [users, setUsers] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -98,17 +100,15 @@ const AddFixedAssets = () => {
 
       setLocationData(responseLocation?.data?.data || []);
 
-      // const responseSubLocation = await getAllSubLocation();
-      // setSubLocationData(responseSubLocation?.data?.data || []);
-
       const responseDepartment = await getAllDepartment();
       // console.log(responseDepartment?.data?.data);
       setDepartmentData(responseDepartment?.data?.data || []);
 
       const responseSubDepartment = await getAllSubDepartment();
-      // console.log(responseSubDepartment?.data?.data);
-
       setSubDepartmentData(responseSubDepartment?.data?.data || []);
+
+      const responseStoreLocation = await getAllStoreLocations();
+      setstoreLocation(responseStoreLocation?.data?.data || []);
 
       const responseReportingManager = await getAllUsers();
       setUsers(responseReportingManager?.data || []);
@@ -636,16 +636,15 @@ const AddFixedAssets = () => {
               >
                 User
               </label>
-               <Autocomplete
+              <Autocomplete
                 className="w-[65%]"
                 options={users}
                 getOptionLabel={(option) => option.emailAddress}
                 value={
-                  users.find(
-                    (user) => user._id === formData.assetState.user
-                  ) || null
+                  users.find((user) => user._id === formData.assetState.user) ||
+                  null
                 }
-                onChange={(event, newValue) => {                  
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     assetState: {
@@ -666,7 +665,7 @@ const AddFixedAssets = () => {
                     }}
                   />
                 )}
-              /> 
+              />
             </div>
             <div className="flex items-center w-[46%] max-lg:w-full">
               <label
@@ -709,38 +708,6 @@ const AddFixedAssets = () => {
                   />
                 )}
               />
-              {/* <Autocomplete
-                className="w-[65%]"
-                options={departmentData}
-                getOptionLabel={(option) => option.departmentName}
-                value={
-                  departmentData.find(
-                    (dept) =>
-                      dept.departmentName === formData.assetState.department
-                  ) || null
-                }
-                onChange={(event, newValue) => {
-                  setFormData({
-                    ...formData,
-                    assetState: {
-                      ...formData.assetState,
-                      department: newValue ? newValue.departmentName : "",
-                    },
-                  });
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="standard"
-                    className="text-xs text-slate-600"
-                    placeholder="Select Department"
-                    inputProps={{
-                      ...params.inputProps,
-                      style: { fontSize: "0.8rem" },
-                    }}
-                  />
-                )}
-              /> */}
             </div>
             <div className="flex items-center w-[46%] max-lg:w-full">
               <label
@@ -782,39 +749,6 @@ const AddFixedAssets = () => {
                   />
                 )}
               />
-              {/* <Autocomplete
-                className="w-[65%]"
-                options={subDepartmentData}
-                getOptionLabel={(option) => option.subDepartmentName}
-                value={
-                  subDepartmentData.find(
-                    (subDept) =>
-                      subDept.subDepartmentName ===
-                      formData.assetState.subDepartment
-                  ) || null
-                }
-                onChange={(event, newValue) => {
-                  setFormData({
-                    ...formData,
-                    assetState: {
-                      ...formData.assetState,
-                      subDepartment: newValue ? newValue.subDepartmentName : "",
-                    },
-                  });
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="standard"
-                    className="text-xs text-slate-600"
-                    placeholder="Select Sub Department"
-                    inputProps={{
-                      ...params.inputProps,
-                      style: { fontSize: "0.8rem" },
-                    }}
-                  />
-                )}
-              /> */}
             </div>
             <div className="flex items-center w-[46%] max-lg:w-full">
               <label
@@ -890,38 +824,6 @@ const AddFixedAssets = () => {
                   />
                 )}
               />
-              {/* <Autocomplete
-                className="w-[65%]"
-                options={locationData}
-                getOptionLabel={(option) => option.locationName}
-                value={
-                  locationData.find(
-                    (loc) =>
-                      loc.locationName === formData.locationInformation.location
-                  ) || null
-                }
-                onChange={(event, newValue) => {
-                  setFormData({
-                    ...formData,
-                    locationInformation: {
-                      ...formData.locationInformation,
-                      location: newValue ? newValue.locationName : "",
-                    },
-                  });
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="standard"
-                    className="text-xs text-slate-600"
-                    placeholder="Select Location"
-                    inputProps={{
-                      ...params.inputProps,
-                      style: { fontSize: "0.8rem" },
-                    }}
-                  />
-                )}
-              /> */}
             </div>
             <div className="flex items-center w-[46%] max-lg:w-full">
               <label
@@ -963,39 +865,6 @@ const AddFixedAssets = () => {
                   />
                 )}
               />
-              {/* <Autocomplete
-                className="w-[65%]"
-                options={subLocationData}
-                getOptionLabel={(option) => option.subLocationName}
-                value={
-                  subLocationData.find(
-                    (subLoc) =>
-                      subLoc.subLocationName ===
-                      formData.locationInformation.subLocation
-                  ) || null
-                }
-                onChange={(event, newValue) => {
-                  setFormData({
-                    ...formData,
-                    locationInformation: {
-                      ...formData.locationInformation,
-                      subLocation: newValue ? newValue.subLocationName : "",
-                    },
-                  });
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    variant="standard"
-                    className="text-xs text-slate-600"
-                    placeholder="Select Sub Location"
-                    inputProps={{
-                      ...params.inputProps,
-                      style: { fontSize: "0.8rem" },
-                    }}
-                  />
-                )}
-              /> */}
             </div>
             <div className="flex items-center w-[46%] max-lg:w-full">
               <label
@@ -1004,21 +873,38 @@ const AddFixedAssets = () => {
               >
                 Store Location
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="storeLocation"
-                name="storeLocation"
-                value={formData.locationInformation.storeLocation}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={storeLocation}
+                getOptionLabel={(option) => option?.storeLocationName || ""}
+                value={
+                  storeLocation.find(
+                    (loc) =>
+                      loc.storeLocationName ===
+                      formData.locationInformation.storeLocation
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     locationInformation: {
                       ...formData.locationInformation,
-                      storeLocation: e.target.value,
+                      storeLocation: newValue ? newValue.storeLocationName : "",
                     },
-                  })
-                }
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Store Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
           </div>

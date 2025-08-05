@@ -15,6 +15,7 @@ import { autoTable } from "jspdf-autotable";
 import { NavLink } from "react-router-dom";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 import { getAllGatePass, deleteGatePass } from "../../../api/GatePassRequest";
+import { IoMdPrint } from "react-icons/io";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -50,10 +51,23 @@ function GatePassData() {
     fetchGetPass();
   }, []);
 
-  console.log(data);
+  // console.log(data);
 
   const columns = useMemo(
     () => [
+         {
+        id: "print",
+        header: "Print",
+        size: 80,
+        enableSorting: false,
+        Cell: ({ row }) => (
+          <IconButton color="primary" aria-label="edit">
+            <NavLink to={`/main/Asset/GatePassPrint/${row.original._id}`}>
+              <IoMdPrint />
+            </NavLink>
+          </IconButton>
+        ),
+      },
       { accessorKey: "gatePassId", header: "ID" },
       { accessorKey: "movementType", header: "Movement Type" },
       { accessorKey: "gatePassType", header: "Gate Pass Type" },
@@ -147,6 +161,7 @@ function GatePassData() {
           </IconButton>
         ),
       },
+   
       {
         id: "delete",
         header: "Delete",

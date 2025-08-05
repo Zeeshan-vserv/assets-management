@@ -9,6 +9,7 @@ import NewIncidentsAssigned from "./Incidents/NewIncidentsAssigned.jsx";
 import ServiceRequest from "./Service-Request/ServiceRequest.jsx";
 import NewServiceRequest from "./Service-Request/NewServiceRequest.jsx";
 import EditServiceRequest from "./Service-Request/EditServiceRequest.jsx";
+import EditVendor from "./vendor/EditVendor.jsx";
 function ServiceDeskRoute() {
   return (
     <>
@@ -23,6 +24,7 @@ function ServiceDeskRoute() {
         <Route path="IndicentData" element={<IncidentsData />} />
         <Route path="AllVendors" element={<AllVendors />} />
         <Route path="NewVendor" element={<NewVendor />} />
+        <Route path="EditVendor/:id" element={<EditVendor />} />
         {/* service-request route */}
         <Route path="service-request" element={<ServiceRequest />} />
         <Route path="new-service-request" element={<NewServiceRequest />} />

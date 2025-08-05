@@ -302,7 +302,7 @@ const AssetData = () => {
     doc.setFontSize(16);
     doc.text("Asset QR Codes", 105, 15, { align: "center" });
 
-    const qrSize = 60;
+    const qrSize = 50;
     const margin = 15;
     const startX = 15;
     let xPosition = startX;
@@ -638,7 +638,7 @@ Location: ${row?.locationInformation?.location ?? ""}`;
                       className="flex flex-col items-center bg-gray-50 p-4 rounded-lg shadow"
                     >
                       <QRCodeComponent
-                        size={200}
+                        size={170}
                         value={[
                           ` Asset ID:        ${row?.assetId ?? ""}`,
                           ` RAM:             ${

@@ -164,7 +164,8 @@ const EditIncident = () => {
       }));
     }
   };
-  // console.log("Form Data:", formData);
+  // console.log("id", id);
+  // console.log("Form Data:", formData?._id);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

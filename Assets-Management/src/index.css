@@ -5,3 +5,15 @@
 ::-webkit-scrollbar {
   display: none;
 }
+
+/* Make PrintGatePass full width only when printing */
+@media print {
+  .print-full-width {
+    width: 85% !important;
+    min-width: 0 !important;
+    max-width: 100vw !important;
+    box-shadow: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}

@@ -181,6 +181,10 @@ function IncidentDashboard() {
           <TotalIncidentBarChart
             title="Total Incidents"
             chartData={chartData}
+            min={0}
+            max={15}
+            stepSizes={3}
+            ticksArray={[0, 3, 6, 9, 12, 15]}
           />
         </Card>
         {/* Pie chart */}

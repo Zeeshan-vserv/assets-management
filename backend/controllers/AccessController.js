@@ -4,48 +4,58 @@ export const rolePermissions = {
   "Asset Management": {
     assets: ["isView", "isEdit"],
     users: ["isView"],
-    // ...add more as needed
   },
   "Employee": {
-    incidents: ["isView", "isEdit"],
+    incident: ["isView", "isEdit"],
     dashboard: ["isView"],
-    component: ["isView", "isDelete"],
-    // ...add more as needed
+    serviceRequest: ["isView", "isEdit"],
+    gatePass: ["isView", "isEdit"],
+    globalIncident: ["isView", "isEdit"],
+    incidentCategory: ["isView", "isEdit"],
+    incidentStatus: ["isView", "isEdit"],
+    location: ["isView", "isEdit"],
+    sla: ["isView", "isEdit"],
+    department: ["isView", "isEdit"],
+    // component: ["isView", "isEdit"],
+    softwareCategory: ["isView", "isEdit"],
+    status: ["isView", "isEdit"],
+    // storeLocation: ["isView", "isEdit"],
+    supportDepartment: ["isView", "isEdit"],
+    // vendorCategory: ["isView", "isEdit"],
+    // vendor: ["isView", "isEdit"],
+    // vendorServiceCategory: ["isView", "isEdit"],
+    globalService: ["isView", "isEdit"],
+    serviceRequest: ["isView", "isEdit"],
+    assets: ["isView", "isEdit"],
   },
   "GoCollect Support Department": {
     supportDepartment: ["isView"],
-    // ...add more as needed
   },
   "Grievance Support Team": {
     grievance: ["isView"],
-    // ...add more as needed
   },
   "L1 Technician": {
     tickets: ["isView", "isEdit"],
-    incidents: ["isView", "isEdit"],
-    dashboard: ["isView"], // <-- Add this line
+    incident: ["isView", "isEdit"],
+    dashboard: ["isView"], 
     component: ["isView", "isEdit"],
   },
   "L2 Technician": {
     tickets: ["isView", "isEdit"],
-    // ...add more as needed
+
   },
   "L3 Technician": {
     tickets: ["isView", "isEdit"],
-    // ...add more as needed
   },
   "Application Support Team": {
     application: ["isView"],
-    // ...add more as needed
   }
-  // Add more roles/modules as needed
 };
 
 export const getPermissions = async (req, res) => {
   const { userRole } = req.user;
   let permissions = rolePermissions[userRole] || {};
 
-  // If Admin or Super Admin, allow all pages
   if (userRole === "Admin" || userRole === "Super Admin") {
     permissions = { "*": ["isView", "isEdit", "isDelete"] };
   }

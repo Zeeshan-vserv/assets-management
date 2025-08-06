@@ -228,9 +228,9 @@ function EditServiceRequest() {
       await updateServiceRequest(id, {
         ...formData,
         userId: user?.userId,
-        status: statusData,
+        status: formData.status,
       });
-      toast.success("Service Request Added Successfully");
+      toast.success("Service Request Updated Successfully");
       setFormData({
         subject: "",
         loggedVia: "",

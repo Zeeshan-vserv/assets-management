@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import xlsx from "xlsx";
 import fs from "fs";
 import nodemailer from "nodemailer";
+import { getISTDate } from "../utils/dateUtils.js";
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
@@ -249,5 +250,123 @@ export const uploadUsersFromExcel = async (req, res) => {
       message: "Failed to upload users",
       error: error.message,
     });
+  }
+};
+
+// Add incident to user's history
+export const addIncidentToUserHistory = async (userId, incidentId, status) => {
+  const user = await AuthModel.findById(userId);
+  if (user) {
+    user.incidentHistory.push({
+      incidentId,
+      reportedAt: getISTDate(),
+      status,
+    });
+    await user.save();
+  }
+};
+
+// Add service request to user's history
+export const addServiceRequestToUserHistory = async (userId, requestId, status) => {
+  const user = await AuthModel.findById(userId);
+  if (user) {
+    user.serviceRequestHistory.push({
+      requestId,
+      requestedAt: getISTDate(),
+      status,
+    });
+    await user.save();
+  }
+};
+
+// When allocating an asset to a user
+export const allocateAssetToUser = async (req, res) => {
+  try {
+    const { userId, assetId } = req.body;
+    const user = await AuthModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.assetAllocationHistory.push({
+      assetId,
+      allocatedAt: getISTDate(),
+      status: "Allocated",
+    });
+    await user.save();
+    res
+      .status(200)
+      .json({ success: true, message: "Asset allocated and history updated" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error allocating asset", error: error.message });
+  }
+};
+
+// When deallocating an asset from a user
+export const deallocateAssetFromUser = async (req, res) => {
+  try {
+    const { userId, assetId } = req.body;
+    const user = await AuthModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const history = user.assetAllocationHistory.find(
+      (h) => h.assetId.toString() === assetId && !h.deallocatedAt
+    );
+    if (history) {
+      history.deallocatedAt = getISTDate();
+      history.status = "Deallocated";
+      await user.save();
+      res
+        .status(200)
+        .json({ success: true, message: "Asset deallocated and history updated" });
+    } else {
+      res.status(404).json({ message: "Allocation record not found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deallocating asset", error: error.message });
+  }
+};
+
+// Get allocated asset history by user ID
+export const getAssetAllocationHistoryByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await AuthModel.findById(id).select('assetAllocationHistory');
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    res.status(200).json({ success: true, data: user.assetAllocationHistory });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching asset allocation history", error: error.message });
+  }
+};
+
+// Get incident history by user ID
+export const getIncidentHistoryByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await AuthModel.findById(id).select('incidentHistory');
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    res.status(200).json({ success: true, data: user.incidentHistory });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching incident history", error: error.message });
+  }
+};
+
+// Get service request history by user ID
+export const getServiceRequestHistoryByUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const user = await AuthModel.findById(id).select('serviceRequestHistory');
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    res.status(200).json({ success: true, data: user.serviceRequestHistory });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Error fetching service request history", error: error.message });
   }
 };

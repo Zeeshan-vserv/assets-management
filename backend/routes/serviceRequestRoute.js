@@ -2,7 +2,7 @@ import express from 'express'
 import multer from "multer";
 import path from "path";
 import authMiddleware from '../middleware/AuthMiddleware.js'
-import { approveServiceRequest, createServiceRequest, deleteServiceRequest, getAllServiceRequests, getAllServiceSla, getAllServicesTat, getMyPendingApprovals, getServiceRequestById, getServiceRequestByUserId, getServiceRequestStatusCounts, updateServiceRequest } from '../controllers/serviceRequestController.js';
+import { approveServiceRequest, createServiceRequest, deleteServiceRequest, getAllIncidentsSla, getAllIncidentsTat, getAllServiceRequests, getIncidentSla, getIncidentTat, getMyPendingApprovals, getServiceRequestById, getServiceRequestByUserId, getServiceRequestStatusCounts, updateServiceRequest } from '../controllers/serviceRequestController.js';
 import { requirePagePermission } from '../middleware/roleMiddleware.js';
 
 const router = express.Router()
@@ -21,8 +21,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post('/', authMiddleware, requirePagePermission('serviceRequest', 'isEdit'), upload.single('attachment'), createServiceRequest);
-router.get("/sla-all", authMiddleware, requirePagePermission('serviceRequest', 'isView'), getAllServiceSla);
-router.get("/tat-all", authMiddleware, requirePagePermission('serviceRequest', 'isView'), getAllServicesTat);
+router.get('/sla', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getAllIncidentsSla);
+router.get('/tat', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getAllIncidentsTat);
+router.get('/sla/:id', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getIncidentSla);
+router.get('/tat/:id', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getIncidentTat);
 router.get('/status-counts', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getServiceRequestStatusCounts);
 router.get('/my-approvals', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getMyPendingApprovals);
 router.get('/', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getAllServiceRequests);

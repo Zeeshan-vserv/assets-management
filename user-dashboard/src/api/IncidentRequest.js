@@ -1,10 +1,9 @@
 import axios from "axios";
 import store from "../store2/ReduxStore2";
-import { UserLogout } from "../action2/AuthAction2";
+import { logout } from "../action2/AuthAction2";
 
-const API = axios.create({ baseURL: "http://localhost:5001" });
+const API = axios.create({ baseURL: 'http://localhost:5001' })
 
-// Attach token to every request
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -13,7 +12,6 @@ API.interceptors.request.use((req) => {
   return req;
 });
 
-// Handle token expiry or invalid token
 API.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -21,19 +19,22 @@ API.interceptors.response.use(
       error.response &&
       (error.response.status === 401 || error.response.status === 403)
     ) {
-      store.dispatch(UserLogout());
+      store.dispatch(logout());
       window.location.href = "/auth";
     }
     return Promise.reject(error);
   }
 );
 
-export const createAsset = (formData) =>
-  API.post("asset/", formData, {
+// export const createAsset = (formData) =>
+//   API.post("asset/", formData, {
+//     headers: { "Content-Type": "multipart/form-data" },
+//   });
+
+export const createIncident = (formData) =>
+  API.post("/incident", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-
-export const createIncident = (formData) => API.post("/incident", formData);
 export const getAllIncident = () => API.get("/incident");
 export const getIncidentById = (id) => API.get(`/incident/${id}`);
 export const getIncidentByUserId = (userId) => API.get(`/incident/user/${userId}`);

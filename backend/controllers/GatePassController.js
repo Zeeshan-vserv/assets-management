@@ -1,29 +1,5 @@
 import GatePass from "../models/gatePassModel.js";
 
-// export const createGatePass = async (req, res) => {
-//     try {
-//         const { userId, ...gatePassData } = req.body
-
-//         if(!userId){
-//             return res.status(404).json({message:'User not found'})
-//         }
-
-//         if (req.file) {
-//             gatePassData.attachment = req.file.path;
-//         }
-
-//         const newGatePass = new GatePass({
-//             userId,
-//             ...gatePassData
-//         })
-//         await newGatePass.save()
-
-//         res.status(201).json({success:true, data:newGatePass, message:'Gate Pass created successfully'})
-//     } catch (error) {
-//         res.status(500).json({message:'An error occurred while crearig gate pass'})
-//     }
-// }
-
 export const createGatePass = async (req, res) => {
     try {
         const { userId, ...gatePassData } = req.body
@@ -147,3 +123,56 @@ export const deleteGatePass = async (req, res) => {
         res.status(500).json({ message: 'An error occurred while deleting gate pass' })
     }
 }
+
+export const approveGatePass = async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const { action, remarks } = req.body; 
+    const approver = req.user.emailAddress;
+
+    const gatePass = await GatePass.findById(id);
+    if (!gatePass) {
+      return res.status(404).json({ message: "Gate Pass not found" });
+    }
+
+    // Ensure approvalStatus exists
+    if (!Array.isArray(gatePass.approvalStatus)) {
+      gatePass.approvalStatus = [];
+    }
+
+    // Find current pending approval
+    const currentApproval = gatePass.approvalStatus.find(a => a.status === "Pending");
+    if (!currentApproval || currentApproval.approver !== approver) {
+      return res.status(403).json({ message: "Not authorized or already acted" });
+    }
+
+    // Update status
+    currentApproval.status = action;
+    currentApproval.actionAt = new Date();
+    currentApproval.remarks = remarks;
+
+    // If approved and next approver exists, set next to Pending
+    if (action === "Approved") {
+      const nextLevel = currentApproval.level + 1;
+      const nextApproverField = `approverLevel${nextLevel}`;
+      const nextApprover = gatePass[nextApproverField];
+      if (nextApprover) {
+        gatePass.approvalStatus.push({
+          approver: nextApprover,
+          level: nextLevel,
+          status: "Pending"
+        });
+      } else {
+        // All approvals done
+        gatePass.approval = true;
+      }
+    } else if (action === "Rejected") {
+      gatePass.approval = false;
+    }
+
+    await gatePass.save();
+    res.json({ success: true, data: gatePass });
+  } catch (error) {
+    res.status(500).json({ message: "Error in approval", error: error.message });
+  }
+};

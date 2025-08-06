@@ -70,6 +70,31 @@ const authSchema = mongoose.Schema(
     importAsset: {
       isView: { type: Boolean, default: false },
     },
+    // Asset allocation history
+    assetAllocationHistory: [
+      {
+        assetId: { type: mongoose.Schema.Types.ObjectId, ref: "Asset" },
+        allocatedAt: { type: Date },
+        deallocatedAt: { type: Date }, // null if still allocated
+        status: { type: String }, // "Allocated" or "Deallocated"
+      }
+    ],
+    // Incident history
+    incidentHistory: [
+      {
+        incidentId: { type: mongoose.Schema.Types.ObjectId, ref: "Incident" },
+        reportedAt: { type: Date },
+        status: { type: String },
+      }
+    ],
+    // Service request history
+    serviceRequestHistory: [
+      {
+        requestId: { type: mongoose.Schema.Types.ObjectId, ref: "ServiceRequest" },
+        requestedAt: { type: Date },
+        status: { type: String },
+      }
+    ],
     isAdmin: {
       type: Boolean,
       default: false,

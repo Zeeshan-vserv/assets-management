@@ -20,8 +20,14 @@ import { getAllIncident } from "../../../api/IncidentRequest";
 import {
   getAllServiceRequests,
   getServiceRequestStatusCounts,
+  updateServiceRequest,
 } from "../../../api/serviceRequest";
 import { useSelector } from "react-redux";
+import {
+  getAllSupportDepartment,
+  getAllSupportGroup,
+} from "../../../api/SuportDepartmentRequest";
+import { getAllUsers } from "../../../api/AuthRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -41,7 +47,18 @@ function ServiceRequest() {
   const [seletecetdRowId, setSelectedRowId] = useState(null);
   const [selectDropDownValue, setSelectDropDownValue] = useState("");
   const [ticketType, setTicketType] = useState(ticketOptions[0]);
-
+  const [selectedSupportDepartment, setSelectedSupportDepartment] =
+    useState(null);
+  const [selectedSupportGroup, setSelectedSupportGroup] = useState(null);
+  const [selectedTechnician, setSelectedTechnician] = useState(null);
+  const [supportDepartment, setSupportDepartment] = useState([]);
+  const [supportGroup, setSupportGroup] = useState([]);
+  const [technician, setTechnician] = useState([]);
+  const [onHoldComments, setOnHoldComments] = useState("");
+  const [onHoldDept, setOnHoldDept] = useState("");
+  const [onHoldRemarks, setOnHoldRemarks] = useState("");
+  const [resolvedComments, setResolvedComments] = useState("");
+  const [closureCode, setClosureCode] = useState("");
 
   const fetchService = useCallback(async () => {
     setIsLoading(true);
@@ -97,6 +114,27 @@ function ServiceRequest() {
     fetchService();
   }, []);
 
+  const fetchDropdownData = useCallback(async () => {
+    try {
+      const [deptRes, groupRes, techRes] = await Promise.all([
+        getAllSupportDepartment(),
+        getAllSupportGroup(),
+        getAllUsers(),
+      ]);
+      setSupportDepartment(deptRes?.data?.data || []);
+      setSupportGroup(groupRes?.data?.data || []);
+      setTechnician(Array.isArray(techRes?.data) ? techRes.data : []);
+    } catch (error) {
+      console.error("Error fetching dropdown data:", error);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchDropdownData();
+  }, [fetchDropdownData]);
+
+  // console.log("data", data);
+  //
   const filteredData = useMemo(() => {
     if (ticketType === "All Tickets") {
       return data;
@@ -108,9 +146,66 @@ function ServiceRequest() {
 
   //status
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
+  // console.log("selectedRow", selectedRow?._id); //use later
 
-  const statusSubmitHandler = (e) => {
+  // Helper to map select value to backend status
+  const statusMap = {
+    new: "New",
+    approvalPending: "Approval Pending",
+    provisioning: "Provisioning",
+    assigned: "Assigned",
+    inProgress: "In Progress",
+    onHold: "On Hold",
+    cancelled: "Cancelled",
+    rejected: "Rejected",
+    resolved: "Resolved",
+    closed: "Closed",
+    serviceToIncident: "Service To Incident",
+    waitingForUpdate: "Waiting For Update",
+  };
+
+  const statusSubmitHandler = async (e) => {
     e.preventDefault();
+    if (!seletecetdRowId || !selectDropDownValue) return;
+
+    let updateData = {
+      status: statusMap[selectDropDownValue] || selectDropDownValue,
+      changedBy: user?.userId,
+    };
+
+    if (selectDropDownValue === "assigned") {
+      updateData.classificaton = {
+        supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+        supportGroupName: selectedSupportGroup?.supportGroupName || "",
+        technician: selectedTechnician?._id || "",
+      };
+    }
+    if (selectDropDownValue === "onHold") {
+      updateData.comments = onHoldComments;
+      updateData.onHoldDept = onHoldDept;
+      updateData.remarks = onHoldRemarks;
+    }
+    if (selectDropDownValue === "resolved") {
+      updateData.comments = resolvedComments;
+      updateData.closureCode = closureCode;
+    }
+
+    try {
+      await updateServiceRequest(seletecetdRowId, updateData);
+      setChangeStatus(false);
+      setSelectDropDownValue("");
+      setSelectedSupportDepartment(null);
+      setSelectedSupportGroup(null);
+      setSelectedTechnician(null);
+      setOnHoldComments("");
+      setOnHoldDept("");
+      setOnHoldRemarks("");
+      setResolvedComments("");
+      setClosureCode("");
+      fetchService();
+    } catch (error) {
+      console.error("Error updating status:", error);
+    }
   };
 
   const columns = useMemo(
@@ -509,105 +604,83 @@ function ServiceRequest() {
                         onChange={(e) => setSelectDropDownValue(e.target.value)}
                         className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
                       >
-                        <option value="" className="text-start">
-                          Select
-                        </option>
-                        <option value="new" className="text-start">
-                          New
-                        </option>
-                        <option value="approvalPending" className="text-start">
-                          Approval Pending
-                        </option>
-                        <option value="provisioning" className="text-start">
-                          Provisioning
-                        </option>
-                        <option value="assigned" className="text-start">
-                          Assigned
-                        </option>
-                        <option value="inProgress" className="text-start">
-                          In Progress
-                        </option>
-                        <option value="onHold" className="text-start">
-                          On Hold
-                        </option>
-                        <option value="cancelled" className="text-start">
-                          Cancelled
-                        </option>
-                        <option value="rejected" className="text-start">
-                          Rejected
-                        </option>
-                        <option value="resolved" className="text-start">
-                          Resolved
-                        </option>
-                        <option value="closed" className="text-start">
-                          Closed
-                        </option>
-                        <option
-                          value="serviceToIncident"
-                          className="text-start"
-                        >
-                          Service To Incident
-                        </option>
-                        <option value="waitingForUpdate" className="text-start">
-                          Waiting For Update
-                        </option>
+                        <option value="">Select</option>
+                        <option value="new">New</option>
+                        <option value="approvalPending">Approval Pending</option>
+                        <option value="provisioning">Provisioning</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="inProgress">In Progress</option>
+                        <option value="onHold">On Hold</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                        <option value="serviceToIncident">Service To Incident</option>
+                        <option value="waitingForUpdate">Waiting For Update</option>
                       </select>
                     </div>
                     {selectDropDownValue === "assigned" && (
                       <>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Support Department
-                            <span className="text-red-500">*</span>
+                            Support Department<span className="text-red-500">*</span>
                           </label>
                           <div className="w-[60%]">
                             <Autocomplete
-                              options={["IT Support"]}
+                              options={supportDepartment}
+                              getOptionLabel={(option) =>
+                                option?.supportDepartmentName || ""
+                              }
+                              value={selectedSupportDepartment}
+                              onChange={(_, newValue) =>
+                                setSelectedSupportDepartment(newValue)
+                              }
                               renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label="Select"
-                                  variant="standard"
-                                  required
-                                />
+                                <TextField {...params} label="Select" variant="standard" required />
                               )}
                             />
                           </div>
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Support Group
-                            <span className="text-red-500">*</span>
+                            Support Group<span className="text-red-500">*</span>
                           </label>
                           <div className="w-[60%]">
                             <Autocomplete
-                              options={["", ""]}
+                              options={supportGroup}
+                              getOptionLabel={(option) =>
+                                option?.supportGroupName || ""
+                              }
+                              value={selectedSupportGroup}
+                              onChange={(_, newValue) =>
+                                setSelectedSupportGroup(newValue)
+                              }
                               renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label="Select"
-                                  variant="standard"
-                                  required
-                                />
+                                <TextField {...params} label="Select" variant="standard" required />
                               )}
                             />
                           </div>
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Technician
-                            <span className="text-red-500">*</span>
+                            Technician<span className="text-red-500">*</span>
                           </label>
                           <div className="w-[60%]">
                             <Autocomplete
-                              options={["", ""]}
+                              options={technician.filter(
+                                (t) => typeof t.emailAddress === "string"
+                              )}
+                              getOptionLabel={(option) =>
+                                option?.employeeName && option?.emailAddress
+                                  ? `${option.employeeName} (${option.emailAddress})`
+                                  : option?.emailAddress || ""
+                              }
+                              value={selectedTechnician}
+                              onChange={(_, newValue) =>
+                                setSelectedTechnician(newValue)
+                              }
                               renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label="Select"
-                                  variant="standard"
-                                  required
-                                />
+                                <TextField {...params} label="Select" variant="standard" required />
                               )}
                             />
                           </div>
@@ -618,15 +691,18 @@ function ServiceRequest() {
                       <>
                         <div className="flex items-center gap-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Enter Comments
-                            <span className="text-red-500">*</span>
+                            Enter Comments<span className="text-red-500">*</span>
                           </label>
-                          <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                          <textarea
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                            value={onHoldComments}
+                            onChange={(e) => setOnHoldComments(e.target.value)}
+                            required
+                          />
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Support Department
-                            <span className="text-red-500">*</span>
+                            Support Department<span className="text-red-500">*</span>
                           </label>
                           <div className="w-[60%]">
                             <Autocomplete
@@ -635,23 +711,24 @@ function ServiceRequest() {
                                 "Pause With Other Reason",
                                 "Standby Provided",
                               ]}
+                              value={onHoldDept}
+                              onChange={(_, newValue) => setOnHoldDept(newValue)}
                               renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label="Select"
-                                  variant="standard"
-                                  required
-                                />
+                                <TextField {...params} label="Select" variant="standard" required />
                               )}
                             />
                           </div>
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Enter Remarks
-                            <span className="text-red-500">*</span>
+                            Enter Remarks<span className="text-red-500">*</span>
                           </label>
-                          <textarea className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"></textarea>
+                          <textarea
+                            className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
+                            value={onHoldRemarks}
+                            onChange={(e) => setOnHoldRemarks(e.target.value)}
+                            required
+                          />
                         </div>
                       </>
                     )}
@@ -659,29 +736,27 @@ function ServiceRequest() {
                       <>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Enter Comments
-                            <span className="text-red-500">*</span>
+                            Enter Comments<span className="text-red-500">*</span>
                           </label>
                           <textarea
                             rows={2}
                             className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
-                          ></textarea>
+                            value={resolvedComments}
+                            onChange={(e) => setResolvedComments(e.target.value)}
+                            required
+                          />
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Closure Code
-                            <span className="text-red-500">*</span>
+                            Closure Code<span className="text-red-500">*</span>
                           </label>
                           <div className="w-[60%]">
                             <Autocomplete
                               options={[""]}
+                              value={closureCode}
+                              onChange={(_, newValue) => setClosureCode(newValue)}
                               renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label="Select"
-                                  variant="standard"
-                                  required
-                                />
+                                <TextField {...params} label="Select" variant="standard" required />
                               )}
                             />
                           </div>

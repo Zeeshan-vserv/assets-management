@@ -181,6 +181,23 @@ const Navigation = ({ nav, setNav }) => {
               }}
             >
               <NavLink
+                to="/main/ServiceDesk/TaskAssigned"
+                className={({ isActive }) =>
+                  `hover:underline cursor-pointer ${
+                    isActive ? "text-blue-400" : ""
+                  }`
+                }
+              >
+                Task Assigned
+              </NavLink>
+            </h3>
+            <h3
+              className="flex items-center justify-between hover:underline cursor-pointer"
+              onClick={() => {
+                setNav(false);
+              }}
+            >
+              <NavLink
                 to="/main/ServiceDesk/new-incidents-assigned"
                 className={({ isActive }) =>
                   `hover:underline cursor-pointer ${

@@ -188,7 +188,7 @@ const TaskAssigned = () => {
       },
       {
         header: "Ticket ID",
-        accessorKey: "ticketId", // Not used for display, just for key
+        accessorKey: "ticketId", 
         Cell: ({ row }) => {
           const incidentId = row.original.incidentId;
           const serviceId = row.original.serviceId;
@@ -438,7 +438,7 @@ const TaskAssigned = () => {
     },
     renderTopToolbarCustomActions: ({ table }) => (
       <Box className="flex flex-wrap w-full">
-        <NavLink to="/main/ServiceDesk/NewIncident">
+        {/* <NavLink to="/main/ServiceDesk/NewIncident">
           <Button
             variant="contained"
             size="small"
@@ -453,7 +453,7 @@ const TaskAssigned = () => {
           >
             New Incident
           </Button>
-        </NavLink>
+        </NavLink> */}
         <Autocomplete
           className="w-[15%]"
           sx={{

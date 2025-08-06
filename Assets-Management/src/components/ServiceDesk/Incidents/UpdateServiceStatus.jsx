@@ -1,18 +1,16 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router";
 import {
   MdOutlineReply,
   MdOutlineSystemSecurityUpdateGood,
 } from "react-icons/md";
-import { FaPlus, FaMinus } from "react-icons/fa";
 import { useEffect } from "react";
 import dayjs from "dayjs";
-import { getIncidentById } from "../../../api/IncidentRequest";
 import { getUserById } from "../../../api/AuthRequest";
- 
-const UpdateServiceStatus = () =>  {
+import { getServiceRequestById } from "../../../api/serviceRequest";
+
+const UpdateServiceStatus = () => {
   const { id } = useParams();
-  const [openIndex, setOpenIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [userDets, setUserDets] = useState("");
   const [formData, setFormData] = useState({
@@ -51,7 +49,7 @@ const UpdateServiceStatus = () =>  {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await getIncidentById(id);
+      const response = await getServiceRequestById(id);
       if (response?.data?.data) {
         setFormData(response.data.data);
       }
@@ -89,42 +87,50 @@ const UpdateServiceStatus = () =>  {
     }
   }, [formData.userId]);
 
+  const getLatestStatus = (timeline) => {
+    if (!Array.isArray(timeline) || timeline.length === 0) return "No Status";
+    return timeline[timeline.length - 1]?.status || "No Status";
+  };
+
   const incidentDetails = [
-    { label: "Status", value: formData.status || "" },
-    { label: "Priority", value: formData.classificaton.priorityLevel || "" },
-    { label: "Subject", value: formData.subject || "" },
+    {
+      label: "Status",
+      value: getLatestStatus(formData?.statusTimeline),
+    },
+    { label: "Priority", value: formData?.classificaton?.priorityLevel || "" },
+    { label: "Subject", value: formData?.subject || "" },
     {
       label: "Support Dept.",
-      value: formData.classificaton.supportDepartmentName || "",
+      value: formData?.classificaton?.supportDepartmentName || "",
     },
     {
       label: "Support Group",
-      value: formData.classificaton.supportGroupName || "",
+      value: formData?.classificaton?.supportGroupName || "",
     },
     {
       label: "Logged Time",
-      value: formData.createdAt
+      value: formData?.createdAt
         ? dayjs(formData.createdAt).format("DD MMM YYYY, hh:mm A")
         : "",
     },
-    { label: "Email", value: formData.submitter.userEmail || "" },
-    { label: "Asset", value: formData.assetDetails.asset || "" },
-    { label: "Asset S.No.", value: formData.assetDetails.serialNo || "" },
-    { label: "User", value: formData.submitter.user || "" },
+    { label: "Email", value: formData?.submitter?.userEmail || "" },
+    { label: "Asset", value: formData?.assetDetails?.asset || "" },
+    { label: "Asset S.No.", value: formData?.assetDetails?.serialNo || "" },
+    { label: "User", value: formData?.submitter?.user || "" },
     { label: "VIP User", value: userDets?.isVip ? "Yes" : "No" },
-    { label: "Assigned To", value: formData.classificaton.technician || "" },
+    { label: "Assigned To", value: formData?.classificaton?.technician || "" },
     {
       label: "Contact No.",
-      value: formData.submitter.userContactNumber || "",
+      value: formData?.submitter?.userContactNumber || "",
     },
-    { label: "Category", value: formData.category || "" },
+    { label: "Category", value: formData?.category || "" },
   ];
-  
+
   return (
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
         <h2 className="text-md font-semibold mb-4 text-start">
-          INCIDENT ID - {id}
+          Service Request ID - {id}
         </h2>
         <div className="flex flex-wrap justify-center gap-4">
           <div className="flex flex-col gap-3 flex-1 h-full min-w-[600px]">
@@ -156,7 +162,9 @@ const UpdateServiceStatus = () =>  {
                 >
                   <option value="">Select Status</option>
                   <option value="Work On Process">Work On Process</option>
-                  <option value="Person Not Available">Person Not Available</option>
+                  <option value="Person Not Available">
+                    Person Not Available
+                  </option>
                   <option value="Part Not Avaitable">Part Not Avaitable</option>
                   <option value="Work Done">Work Done</option>
                 </select>
@@ -202,48 +210,6 @@ const UpdateServiceStatus = () =>  {
                 </div>
               </button>
             </div>
-            {/* <div  className="bg-white p-6 rounded-lg shadow-md">
-              <h3 className="text-base text-gray-800 font-semibold mb-4">
-                Work Status History
-              </h3>
-              <div className="w-full mx-auto p-4">
-                {messages.map((item, index) => (
-                  <div
-                    key={item.id}
-                    className={`border rounded-md my-3 ${
-                      index === 1 ? "bg-green-100" : "bg-gray-100"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between px-4 py-1">
-                      <div className="text-sm font-medium">
-                        {item.sender} ({item.timestamp})
-                      </div>
-                      <button
-                        onClick={() => toggleDropdown(index)}
-                        className="text-gray-600 cursor-pointer"
-                      >
-                        {openIndex === index ? <FaMinus /> : <FaPlus />}
-                      </button>
-                    </div>
-                    {openIndex === index && (
-                      <div className="bg-white px-4 py-3 text-sm space-y-1 border-t">
-                        {item.to && (
-                          <p>
-                            <strong>To:</strong> {item.to}
-                          </p>
-                        )}
-                        {item.cc && (
-                          <p>
-                            <strong>CC:</strong> {item.cc}
-                          </p>
-                        )}
-                        {item.message && <p className="pt-2">{item.message}</p>}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div> */}
           </div>
           <div className="w-full lg:max-w-[500px] bg-white p-4 rounded-md shadow-md overflow-x-auto">
             <table className="w-full text-sm border border-gray-300 rounded-md">
@@ -268,5 +234,5 @@ const UpdateServiceStatus = () =>  {
       </div>
     </>
   );
-}
-export default UpdateServiceStatus
+};
+export default UpdateServiceStatus;

@@ -225,14 +225,14 @@ const Navigation = ({ nav, setNav }) => {
                 service request
               </NavLink>
             </h3>
-            <h3
+            {/* <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {
                 setNav(false);
               }}
             >
               tasks
-            </h3>
+            </h3> */}
             <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {

@@ -30,9 +30,8 @@ import {
   getAllSupportDepartment,
   getAllSupportGroup,
 } from "../../../api/SuportDepartmentRequest";
-import { getAllUsers } from "../../../api/AuthRequest";
+import { getAllUsers, getUserById } from "../../../api/AuthRequest";
 import { useSelector } from "react-redux";
-
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
@@ -66,6 +65,9 @@ const IncidentsData = () => {
   const [allSla, setAllSla] = useState([]);
   const [allTat, setAllTat] = useState([]);
   const [cardData, setCardData] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showUserModal, setShowUserModal] = useState(false);
   const [ticketType, setTicketType] = useState(ticketOptions[0]);
 
   const fetchDepartment = useCallback(async () => {
@@ -117,6 +119,7 @@ const IncidentsData = () => {
       setIsLoading(false);
     }
   }, []);
+
   // Fetch dropdowns
   const fetchDropdownData = useCallback(async () => {
     try {
@@ -148,6 +151,12 @@ const IncidentsData = () => {
   }, []);
 
   // Effects
+
+  useEffect(() => {
+    getAllUsers().then((res) => {
+      setAllUsers(res?.data?.data || []);
+    });
+  }, []);
   useEffect(() => {
     fetchDepartment();
   }, [fetchDepartment]);
@@ -173,6 +182,8 @@ const IncidentsData = () => {
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
   const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
 
+  console.log(selectedTechnician);
+
   // Status update handler
   const handleStatusUpdate = async (e) => {
     e.preventDefault();
@@ -187,7 +198,7 @@ const IncidentsData = () => {
           supportDepartmentName:
             selectedSupportDepartment?.supportDepartmentName || "",
           supportGroupName: selectedSupportGroup?.supportGroupName || "",
-          technician: selectedTechnician?.employeeName || "",
+          technician: selectedTechnician?._id || "",
         },
       };
     } else if (
@@ -201,7 +212,7 @@ const IncidentsData = () => {
           supportDepartmentName:
             selectedSupportDepartment?.supportDepartmentName || "",
           supportGroupName: selectedSupportGroup?.supportGroupName || "",
-          technician: selectedTechnician?.employeeName || "",
+          technician: selectedTechnician?._id || "",
         },
       };
     } else if (latestStatus === "In Progress" && inProgressValue) {
@@ -258,7 +269,53 @@ const IncidentsData = () => {
       { accessorKey: "subject", header: "Subject" },
       { accessorKey: "category", header: "Category" },
       { accessorKey: "subCategory", header: "Sub Category" },
-      { accessorKey: "userId", header: "Submitter" },
+      {
+        accessorKey: "userId",
+        header: "Submitter",
+        Cell: ({ cell }) => {
+          const userId = cell.getValue();
+          const [email, setEmail] = React.useState(null);
+
+          React.useEffect(() => {
+            let isMounted = true;
+            if (userId) {
+              getUserById(userId)
+                .then((res) => {
+                  if (isMounted) setEmail(res?.data?.emailAddress || userId);
+                })
+                .catch(() => {
+                  if (isMounted) setEmail(userId);
+                });
+            }
+            return () => {
+              isMounted = false;
+            };
+          }, [userId]);
+
+          return (
+            <span
+              style={{
+                color: "#2563eb",
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  const res = await getUserById(userId);
+                  setSelectedUser(res?.data);
+                  setShowUserModal(true);
+                } catch {
+                  setSelectedUser(null);
+                  setShowUserModal(false);
+                }
+              }}
+            >
+              {email || userId}
+            </span>
+          );
+        },
+      },
       { accessorKey: "assetDetails.asset", header: "Asset Id" },
       { accessorKey: "locationDetails.location", header: "Location" },
       { accessorKey: "locationDetails.subLocation", header: "Sub Location" },
@@ -273,7 +330,87 @@ const IncidentsData = () => {
             : "",
       },
       { accessorKey: "classificaton.severityLevel", header: "Severity" },
-      { accessorKey: "classificaton.technician", header: "Assigned To" },
+      // { accessorKey: "classificaton.technician", header: "Assigned To" },
+      // {
+      //   accessorKey: "classificaton.technician",
+      //   header: "Assigned To",
+      //   Cell: ({ cell }) => {
+      //     const technicianId = cell.getValue();
+      //     const technicianUser = allUsers.find((u) => u._id === technicianId);
+      //     return (
+      //       <span
+      //         style={{
+      //           color: "#2563eb",
+      //           cursor: "pointer",
+      //           textDecoration: "underline",
+      //         }}
+      //         onClick={async (e) => {
+      //           e.stopPropagation();
+      //           try {
+      //             const res = await getUserById(technicianId);
+      //             setSelectedUser(res?.data);
+      //             setShowUserModal(true);
+      //           } catch {
+      //             setSelectedUser(null);
+      //             setShowUserModal(false);
+      //           }
+      //         }}
+      //       >
+      //         {technicianUser
+      //           ? technicianUser.employeeName || technicianUser.emailAddress
+      //           : technicianId}
+      //       </span>
+      //     );
+      //   },
+      // },
+      {
+        accessorKey: "classificaton.technician",
+        header: "Assigned To",
+        Cell: ({ cell }) => {
+          const technicianId = cell.getValue();
+          const [email, setEmail] = React.useState(null);
+
+          React.useEffect(() => {
+            let isMounted = true;
+            if (technicianId) {
+              getUserById(technicianId)
+                .then((res) => {
+                  if (isMounted)
+                    setEmail(res?.data?.emailAddress || technicianId);
+                })
+                .catch(() => {
+                  if (isMounted) setEmail(technicianId);
+                });
+            }
+            return () => {
+              isMounted = false;
+            };
+          }, [technicianId]);
+
+          return (
+            <span
+              style={{
+                color: "#2563eb",
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  const res = await getUserById(technicianId);
+                  setSelectedUser(res?.data);
+                  setShowUserModal(true);
+                } catch {
+                  setSelectedUser(null);
+                  setShowUserModal(false);
+                }
+              }}
+            >
+              {email || technicianId}
+            </span>
+          );
+        },
+      },
       {
         accessorKey: "sla",
         header: "SLA",
@@ -457,7 +594,7 @@ const IncidentsData = () => {
               }}
               inputProps={{
                 ...params.inputProps,
-                style: { fontSize: "0.85rem", padding: "8px" },
+                style: { fontSize: "0.85rem", padding: "6px" },
               }}
             />
           )}
@@ -578,49 +715,6 @@ const IncidentsData = () => {
     }),
   });
 
-  // Compute counts for each status from data
-  const statusCounts = data.reduce((acc, incident) => {
-    const timeline = incident.statusTimeline;
-    let latestStatus =
-      Array.isArray(timeline) && timeline.length > 0
-        ? timeline[timeline.length - 1].status
-        : "No Status";
-    // Normalize status for matching
-    latestStatus = latestStatus.trim().toLowerCase().replace(/[-_]/g, " ");
-    acc[latestStatus] = (acc[latestStatus] || 0) + 1;
-    return acc;
-  }, {});
-
-  // const cardData = [
-  //   { id: "1", count: statusCounts["new"] || 0, description: "New" },
-  //   { id: "2", count: statusCounts["assigned"] || 0, description: "Assigned" },
-  //   {
-  //     id: "3",
-  //     count: statusCounts["in progress"] || 0,
-  //     description: "In-Progress",
-  //   },
-  //   { id: "4", count: statusCounts["pause"] || 0, description: "Pause" },
-  //   { id: "5", count: statusCounts["resolved"] || 0, description: "Resolved" },
-  //   {
-  //     id: "6",
-  //     count: statusCounts["cancelled"] || statusCounts["cancel"] || 0,
-  //     description: "Cancelled",
-  //   },
-  //   {
-  //     id: "7",
-  //     count: statusCounts["reopened"] || statusCounts["reopen"] || 0,
-  //     description: "Reopened",
-  //   },
-  //   { id: "8", count: statusCounts["closed"] || 0, description: "Closed" },
-  //   {
-  //     id: "9",
-  //     count: statusCounts["converted to sr"] || 0,
-  //     description: "Converted to SR",
-  //   },
-  //   { id: "11", count: data.length, description: "Total" },
-  // ];
-
-  // Render
   return (
     <div className="flex flex-col w-[100%] min-h-full p-4 bg-slate-100">
       <h2 className="text-lg font-semibold mb-6 text-start">INCIDENT DATA</h2>
@@ -638,6 +732,61 @@ const IncidentsData = () => {
         ))}
       </div>
       <MaterialReactTable table={table} />
+      {showUserModal && selectedUser && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 animate-fade-in transition-all duration-300">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">
+              User Details
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+              <div>
+                <p className="font-medium">Name</p>
+                <p className="text-gray-600">
+                  {selectedUser.employeeName || "-"}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">Email</p>
+                <p className="text-gray-600 break-all">
+                  {selectedUser.emailAddress || "-"}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">Role</p>
+                <p className="text-gray-600">{selectedUser.userRole || "-"}</p>
+              </div>
+              <div>
+                <p className="font-medium">Employee Code</p>
+                <p className="text-gray-600">
+                  {selectedUser.employeeCode || "-"}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">Contact Number</p>
+                <p className="text-gray-600">
+                  {selectedUser.mobileNumber || "-"}
+                </p>
+              </div>
+              <div>
+                <p className="font-medium">Designation</p>
+                <p className="text-gray-600">
+                  {selectedUser.designation || "-"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setShowUserModal(false)}
+                className="px-5 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {changeStatus && (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
@@ -970,6 +1119,7 @@ const IncidentsData = () => {
                   </>
                 )}
               </div>
+
               <div className="flex justify-end gap-3 pt-4 mt-6">
                 <button
                   type="submit"
@@ -994,163 +1144,3 @@ const IncidentsData = () => {
 };
 
 export default IncidentsData;
-
-// import React, { useEffect, useMemo, useState } from "react";
-// import { MaterialReactTable, useMaterialReactTable } from "material-react-table";
-// import { Box, CircularProgress } from "@mui/material";
-// import { getAllIncident } from "../../../api/IncidentRequest";
-// import { getAllSLAs } from "../../../api/slaRequest";
-
-// const getSLAWorkingMinutes = (createdAtStr, slaTimeline, now = new Date()) => {
-//   const slaHoursByDay = {};
-
-//   // Parse SLA timings into minutes in IST
-//   slaTimeline.forEach(({ weekDay, startTime, endTime }) => {
-//     const start = new Date(startTime);
-//     const end = new Date(endTime);
-
-//     slaHoursByDay[weekDay] = {
-//       startMinutes: start.getHours() * 60 + start.getMinutes(),
-//       endMinutes: end.getHours() * 60 + end.getMinutes(),
-//     };
-//   });
-
-//   let totalMinutes = 0;
-//   let current = new Date(createdAtStr);
-
-//   while (current < now) {
-//     const dayName = current.toLocaleDateString("en-US", { weekday: "long" });
-//     const sla = slaHoursByDay[dayName];
-
-//     if (sla) {
-//       const { startMinutes, endMinutes } = sla;
-
-//       const workStart = new Date(
-//         current.getFullYear(),
-//         current.getMonth(),
-//         current.getDate(),
-//         Math.floor(startMinutes / 60),
-//         startMinutes % 60,
-//         0
-//       );
-
-//       let workEnd = new Date(
-//         current.getFullYear(),
-//         current.getMonth(),
-//         current.getDate(),
-//         Math.floor(endMinutes / 60),
-//         endMinutes % 60,
-//         0
-//       );
-
-//       if (endMinutes <= startMinutes) {
-//         workEnd.setDate(workEnd.getDate() + 1);
-//       }
-
-//       const effectiveStart = current > workStart ? current : workStart;
-//       const effectiveEnd = now < workEnd ? now : workEnd;
-
-//       if (effectiveStart < effectiveEnd) {
-//         const diff = Math.floor((effectiveEnd - effectiveStart) / (1000 * 60));
-//         totalMinutes += diff;
-//       }
-//     }
-
-//     // Move to next day
-//     current.setDate(current.getDate() + 1);
-//     current.setHours(0, 0, 0, 0);
-//   }
-
-//   return totalMinutes;
-// };
-
-// const IncidentSLAView = () => {
-//   const [data, setData] = useState([]);
-//   const [slaData, setSlaData] = useState(null);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [currentTime, setCurrentTime] = useState(new Date());
-
-//   useEffect(() => {
-//     const interval = setInterval(() => setCurrentTime(new Date()), 60000);
-//     return () => clearInterval(interval);
-//   }, []);
-
-//   useEffect(() => {
-//     const fetchData = async () => {
-//       try {
-//         setIsLoading(true);
-//         const incidentsRes = await getAllIncident();
-//         const slaRes = await getAllSLAs();
-
-//         setData(incidentsRes?.data?.data || []);
-//         setSlaData(slaRes?.data?.data?.[0] || null);
-//       } catch (error) {
-//         console.error("Fetch error:", error);
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
-
-//     fetchData();
-//   }, []);
-
-//   const columns = useMemo(() => [
-//     {
-//       accessorKey: "incidentId",
-//       header: "Incident ID",
-//     },
-//     {
-//       accessorKey: "subject",
-//       header: "Subject",
-//     },
-//     {
-//       accessorKey: "category",
-//       header: "Category",
-//     },
-//     {
-//       accessorKey: "createdAt",
-//       header: "Created At",
-//       Cell: ({ cell }) =>
-//         new Date(cell.getValue()).toLocaleString("en-IN", {
-//           timeZone: "Asia/Kolkata",
-//         }),
-//     },
-//     {
-//       id: "slaTime",
-//       header: "SLA Time (IST)",
-//       Cell: ({ row }) => {
-//         const createdAt = row.original.createdAt;
-//         if (!createdAt || !slaData?.slaTimeline) return "-";
-
-//         const totalMinutes = getSLAWorkingMinutes(createdAt, slaData.slaTimeline, currentTime);
-//         const hours = Math.floor(totalMinutes / 60);
-//         const minutes = totalMinutes % 60;
-
-//         return `${hours}h ${minutes}m`;
-//       },
-//     },
-//   ], [slaData, currentTime]);
-
-//   const table = useMaterialReactTable({
-//     data,
-//     columns,
-//     getRowId: (row) => row._id,
-//     initialState: {
-//       pagination: { pageSize: 5 },
-//     },
-//     enablePagination: true,
-//   });
-
-//   return (
-//     <Box p={2}>
-//       <h2 style={{ fontSize: "1.2rem", marginBottom: "1rem" }}>Incident SLA Tracker</h2>
-//       {isLoading ? (
-//         <CircularProgress />
-//       ) : (
-//         <MaterialReactTable table={table} />
-//       )}
-//     </Box>
-//   );
-// };
-
-// export default IncidentSLAView;

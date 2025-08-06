@@ -3,6 +3,7 @@ import { IncidentAutoCloseModel } from "../models/globalIncidentModels.js";
 import IncidentCounterModel from "../models/incidentCounterModel.js";
 import IncidentModel from "../models/incidentModel.js";
 import { HolidayListModel, SLACreationModel, SLATimelineModel } from "../models/slaModel.js";
+import { getEmailById, getEmailsByRole, sendAssignedIncidentMail, sendNewIncidentMail } from "../utils/mailSystem.js";
 import { addIncidentToUserHistory } from "./AuthController.js";
 
 // Helper: Get all holiday dates from both HolidayList and HolidayCalender
@@ -435,6 +436,32 @@ export const createIncident = async (req, res) => {
     await newIncident.save();
     await addIncidentToUserHistory(userId, newIncident._id, newIncident.status);
 
+    // ...after saving newIncident and updating user history...
+    const adminEmails = await getEmailsByRole("Admin");
+    const superAdminEmails = await getEmailsByRole("SuperAdmin");
+    let technicianEmail = "";
+    if (classificaton?.technician && classificaton.technician.trim() !== "") {
+      technicianEmail = await getEmailById(classificaton.technician);
+    }
+
+    // Always send "New Incident" mail
+    await sendNewIncidentMail({
+      incident: newIncident,
+      adminEmails,
+      superAdminEmails,
+      technicianEmail,
+    });
+
+    // If technician assigned, also send "Assigned" mail
+    if (technicianEmail) {
+      await sendAssignedIncidentMail({
+        incident: newIncident,
+        adminEmails,
+        superAdminEmails,
+        technicianEmail,
+      });
+    }
+
     res.status(201).json({
       success: true,
       data: newIncident,
@@ -510,6 +537,9 @@ export const updateIncident = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Incident Id not found' });
     }
 
+    // Store previous technician for comparison
+    const previousTechnician = incident.classificaton?.technician;
+
     // Track changes in other fields
     const fieldChanges = {};
     Object.keys(otherFields).forEach((key) => {
@@ -537,6 +567,26 @@ export const updateIncident = async (req, res) => {
     }
 
     await incident.save();
+
+    // Get emails
+    const adminEmails = await getEmailsByRole("Admin");
+    const superAdminEmails = await getEmailsByRole("SuperAdmin");
+    const currentTechnician = incident.classificaton?.technician;
+    let technicianEmail = "";
+    if (currentTechnician && currentTechnician.trim() !== "") {
+      technicianEmail = await getEmailById(currentTechnician);
+
+      // Only send mail if technician is newly assigned or changed
+      if (currentTechnician !== previousTechnician) {
+        await sendAssignedIncidentMail({
+          incident,
+          adminEmails,
+          superAdminEmails,
+          technicianEmail,
+        });
+      }
+    }
+
     res.status(200).json({ success: true, data: incident, message: 'Incident updated and lifecycle recorded' });
   } catch (error) {
     res.status(500).json({ message: 'An error occurred while updating incident', error: error.message });

@@ -228,7 +228,7 @@ function EditServiceRequest() {
       await updateServiceRequest(id, {
         ...formData,
         userId: user?.userId,
-        status: statusData,
+        status: formData.status,
       });
       toast.success("Service Request Added Successfully");
       setFormData({

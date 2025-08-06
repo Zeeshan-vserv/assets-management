@@ -67,12 +67,11 @@ const TaskAssigned = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [ticketType, setTicketType] = useState(ticketOptions[0]);
-  
 
   const fetchDepartment = useCallback(async () => {
     setIsLoading(true);
-    try {      
-      const response = await getAllByTechnician(user?.userId);      
+    try {
+      const response = await getAllByTechnician(user?.userId);
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching departments:", error);
@@ -82,7 +81,6 @@ const TaskAssigned = () => {
   }, []);
 
   // console.log(data);
-  
 
   // Fetch dropdowns
   const fetchDropdownData = useCallback(async () => {
@@ -146,63 +144,7 @@ const TaskAssigned = () => {
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
   const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
 
-
   // Status update handler
-  const handleStatusUpdate = async (e) => {
-    e.preventDefault();
-    if (!seletecetdRowId) return;
-
-    let updateData = {};
-    if (latestStatus === "New" && assignedValue === "Assigned") {
-      updateData = {
-        status: "Assigned",
-        changedBy: currentUserId,
-        classificaton: {
-          supportDepartmentName:
-            selectedSupportDepartment?.supportDepartmentName || "",
-          supportGroupName: selectedSupportGroup?.supportGroupName || "",
-          technician: selectedTechnician?._id || "",
-        },
-      };
-    } else if (
-      latestStatus === "In Progress" &&
-      inProgressValue === "Assigned"
-    ) {
-      updateData = {
-        status: "Assigned",
-        changedBy: currentUserId,
-        classificaton: {
-          supportDepartmentName:
-            selectedSupportDepartment?.supportDepartmentName || "",
-          supportGroupName: selectedSupportGroup?.supportGroupName || "",
-          technician: selectedTechnician?._id || "",
-        },
-      };
-    } else if (latestStatus === "In Progress" && inProgressValue) {
-      updateData = {
-        status: inProgressValue,
-        changedBy: currentUserId,
-      };
-    } else if (latestStatus === "Resolved" && reopenValue) {
-      updateData = {
-        status: reopenValue,
-        changedBy: currentUserId,
-      };
-    } else {
-      updateData = {
-        status: assignedValue || inProgressValue || reopenValue || "",
-        changedBy: currentUserId,
-      };
-    }
-
-    try {
-      await updateIncident(seletecetdRowId, updateData);
-      setChangeStatus(false);
-      fetchDepartment();
-    } catch (error) {
-      console.error("Error updating status:", error);
-    }
-  };
 
   // Filter data based on ticketType
   const filteredData = useMemo(() => {
@@ -215,27 +157,44 @@ const TaskAssigned = () => {
     return data;
   }, [data, ticketType, user?.userId]);
 
+  console.log(data);
+
   // Table columns
   const columns = useMemo(
     () => [
       {
         id: "edit",
-        header: "Upadte Status",
+        header: "Update Status",
         size: 80,
         enableSorting: false,
-        Cell: ({ row }) => (
-          <div className="flex justify-center items-center">
-            <IconButton color="primary" aria-label="edit">
-              <NavLink
-                to={`/main/ServiceDesk/UpdateStatus/${row.original._id}`}
-              >
-                <BiTask />
-              </NavLink>
-            </IconButton>
-          </div>
-        ),
+        Cell: ({ row }) => {
+          const incidentId = row.original.incidentId;
+          const serviceId = row.original.serviceId;
+          const link = incidentId
+            ? `/main/ServiceDesk/UpdateStatus/${row.original._id}`
+            : serviceId
+            ? `/main/ServiceDesk/UpdateServiceStatus/${row.original._id}`
+            : "#";
+          return (
+            <div className="flex justify-center items-center">
+              <IconButton color="primary" aria-label="edit">
+                <NavLink to={link}>
+                  <BiTask />
+                </NavLink>
+              </IconButton>
+            </div>
+          );
+        },
       },
-      { accessorKey: "incidentId", header: "Incident ID" },
+      {
+        header: "Ticket ID",
+        accessorKey: "ticketId", // Not used for display, just for key
+        Cell: ({ row }) => {
+          const incidentId = row.original.incidentId;
+          const serviceId = row.original.serviceId;
+          return incidentId ? incidentId : serviceId ? serviceId : "-";
+        },
+      },
       {
         header: "Status",
         accessorKey: "statusTimeline",

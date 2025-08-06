@@ -549,45 +549,45 @@ export const createServiceRequest = async (req, res) => {
     await newServiceRequest.save();
 
     // Send notification emails
-const adminEmails = await getEmailsByRole("Admin");
-const superAdminEmails = await getEmailsByRole("SuperAdmin");
-let technicianEmail = "";
-if (classificaton?.technician && classificaton.technician.trim() !== "") {
-  technicianEmail = await getEmailById(classificaton.technician);
-}
-const approverEmails = [];
-if (newServiceRequest.approver1) approverEmails.push(newServiceRequest.approver1);
-if (newServiceRequest.approver2) approverEmails.push(newServiceRequest.approver2);
-if (newServiceRequest.approver3) approverEmails.push(newServiceRequest.approver3);
+    const adminEmails = await getEmailsByRole("Admin");
+    const superAdminEmails = await getEmailsByRole("SuperAdmin");
+    let technicianEmail = "";
+    if (classificaton?.technician && classificaton.technician.trim() !== "") {
+      technicianEmail = await getEmailById(classificaton.technician);
+    }
+    const approverEmails = [];
+    if (newServiceRequest.approver1) approverEmails.push(newServiceRequest.approver1);
+    if (newServiceRequest.approver2) approverEmails.push(newServiceRequest.approver2);
+    if (newServiceRequest.approver3) approverEmails.push(newServiceRequest.approver3);
 
-// Send "New Service Request" mail
-await sendNewServiceRequestMail({
-  serviceRequest: newServiceRequest,
-  adminEmails,
-  superAdminEmails,
-  technicianEmail,
-  approverEmails,
-});
+    // Send "New Service Request" mail
+    await sendNewServiceRequestMail({
+      serviceRequest: newServiceRequest,
+      adminEmails,
+      superAdminEmails,
+      technicianEmail,
+      approverEmails,
+    });
 
-// Optionally, send assigned mail if technician assigned
-if (technicianEmail) {
-  await sendAssignedServiceRequestMail({
-    serviceRequest: newServiceRequest,
-    adminEmails,
-    superAdminEmails,
-    technicianEmail,
-    approverEmails,
-  });
-}
+    // Optionally, send assigned mail if technician assigned
+    if (technicianEmail) {
+      await sendAssignedServiceRequestMail({
+        serviceRequest: newServiceRequest,
+        adminEmails,
+        superAdminEmails,
+        technicianEmail,
+        approverEmails,
+      });
+    }
 
-// Optionally, send approval mail to first approver
-if (newServiceRequest.approver1) {
-  await sendApprovalMail({
-    serviceRequest: newServiceRequest,
-    approverEmail: newServiceRequest.approver1,
-    level: 1,
-  });
-}
+    // Optionally, send approval mail to first approver
+    if (newServiceRequest.approver1) {
+      await sendApprovalMail({
+        serviceRequest: newServiceRequest,
+        approverEmail: newServiceRequest.approver1,
+        level: 1,
+      });
+    }
 
     res.status(201).json({
       success: true,
@@ -748,34 +748,52 @@ export const updateServiceRequest = async (req, res) => {
 
     await serviceRequest.save();
 
-    const adminEmails = await getEmailsByRole("Admin");
-    const superAdminEmails = await getEmailsByRole("SuperAdmin");
+    // Prepare emails (do not await, send in background)
+    const adminEmailsPromise = getEmailsByRole("Admin");
+    const superAdminEmailsPromise = getEmailsByRole("SuperAdmin");
     const approverEmails = [];
     if (serviceRequest.approver1) approverEmails.push(serviceRequest.approver1);
     if (serviceRequest.approver2) approverEmails.push(serviceRequest.approver2);
     if (serviceRequest.approver3) approverEmails.push(serviceRequest.approver3);
 
-    // Send mail only if technician is newly assigned
-    if (
-      technicianJustAssigned &&
-      currentTechnician &&
-      currentTechnician.trim() !== ""
-    ) {
-      const technicianEmail = await getEmailById(currentTechnician);
-      await sendAssignedServiceRequestMail({
-        serviceRequest,
-        adminEmails,
-        superAdminEmails,
-        technicianEmail,
-        approverEmails,
-      });
-    }
-
+    // Respond to client immediately
     res.status(200).json({
       success: true,
       data: serviceRequest,
       message: "Service Request updated and lifecycle recorded",
     });
+
+    // Send emails in background
+    (async () => {
+      try {
+        const adminEmails = await adminEmailsPromise;
+        const superAdminEmails = await superAdminEmailsPromise;
+
+        // Send mail only if technician is newly assigned
+        if (
+          technicianJustAssigned &&
+          currentTechnician &&
+          currentTechnician.trim() !== ""
+        ) {
+          const technicianEmail = await getEmailById(currentTechnician);
+          await sendAssignedServiceRequestMail({
+            serviceRequest,
+            adminEmails,
+            superAdminEmails,
+            technicianEmail,
+            approverEmails,
+          });
+        }
+
+        await sendStatusChangeMail({
+          serviceRequest,
+          adminEmails,
+          superAdminEmails,
+        });
+      } catch (mailError) {
+        console.error("Mail sending failed:", mailError);
+      }
+    })();
   } catch (error) {
     res.status(500).json({
       message: "An error occurred while updating service request",

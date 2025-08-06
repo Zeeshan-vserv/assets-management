@@ -218,3 +218,71 @@ export async function sendRequesterNotificationMail({ serviceRequest, requesterE
     });
   }
 }
+
+export async function sendServiceStatusChangeMail({ serviceRequest, adminEmails, superAdminEmails }) {
+  const subject = `Status Changed: ${serviceRequest.serviceId}`;
+  const latestStatus = serviceRequest.statusTimeline?.at(-1);
+  const html = `
+    <b>Service Request Status Changed</b><br>
+    <b>Service Request ID:</b> ${serviceRequest.serviceId}<br>
+    <b>Subject:</b> ${serviceRequest.subject}<br>
+    <b>Category:</b> ${serviceRequest.category}<br>
+    <b>New Status:</b> ${serviceRequest.status}<br>
+    <b>Changed By:</b> ${latestStatus?.changedBy || ""}<br>
+    <b>Change Time:</b> ${latestStatus ? new Date(latestStatus.changedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : ""}<br>
+    <b>Description:</b> ${serviceRequest.description}
+  `;
+  const toList = [...adminEmails, ...superAdminEmails].filter(Boolean).join(",");
+  if (toList) {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: toList,
+      subject,
+      html,
+    });
+  }
+  // Notify the user who logged the ticket
+  const userEmail = serviceRequest.submitter?.userEmail;
+  if (userEmail) {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: userEmail,
+      subject,
+      html,
+    });
+  }
+}
+
+export async function sendIncidentStatusChangeMail({ incident, adminEmails, superAdminEmails }) {
+  const subject = `Status Changed: ${incident.incidentId}`;
+  const latestStatus = incident.statusTimeline?.at(-1);
+  const html = `
+    <b>Incident Status Changed</b><br>
+    <b>Incident ID:</b> ${incident.incidentId}<br>
+    <b>Subject:</b> ${incident.subject}<br>
+    <b>Category:</b> ${incident.category}<br>
+    <b>New Status:</b> ${incident.status}<br>
+    <b>Changed By:</b> ${latestStatus?.changedBy || ""}<br>
+    <b>Change Time:</b> ${latestStatus ? new Date(latestStatus.changedAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : ""}<br>
+    <b>Description:</b> ${incident.description}
+  `;
+  const toList = [...adminEmails, ...superAdminEmails].filter(Boolean).join(",");
+  if (toList) {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: toList,
+      subject,
+      html,
+    });
+  }
+  // Notify the user who logged the ticket
+  const userEmail = incident.submitter?.userEmail;
+  if (userEmail) {
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: userEmail,
+      subject,
+      html,
+    });
+  }
+}

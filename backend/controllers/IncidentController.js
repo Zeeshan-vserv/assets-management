@@ -528,17 +528,13 @@ export const updateIncident = async (req, res) => {
     const { id } = req.params;
     const { status, changedBy, ...otherFields } = req.body;
 
-    if (!status) {
-      return res.status(400).json({ message: 'status is required' });
-    }
-
     const incident = await IncidentModel.findById(id);
     if (!incident) {
       return res.status(404).json({ success: false, message: 'Incident Id not found' });
     }
 
     // Store previous technician for comparison
-    const previousTechnician = incident.classificaton?.technician;
+    const previousTechnician = incident.classificaton?.technician || "";
 
     // Track changes in other fields
     const fieldChanges = {};
@@ -549,45 +545,85 @@ export const updateIncident = async (req, res) => {
       }
     });
 
-    // Track status change (always push to timeline, even if same status)
-    incident.statusTimeline.push({
-      status,
-      changedAt: getISTDate(),
-      changedBy
-    });
-    incident.status = status;
+    // Get current technician after update
+    const currentTechnician = incident.classificaton?.technician || "";
+    let technicianJustAssigned = false;
+
+    // If technician is newly assigned and status is "New" or not provided, set status to "Assigned"
+    if (
+      (!previousTechnician || previousTechnician.trim() === "") &&
+      currentTechnician &&
+      currentTechnician.trim() !== "" &&
+      (!status || incident.status === "New")
+    ) {
+      incident.statusTimeline.push({
+        status: "Assigned",
+        changedAt: getISTDate(),
+        changedBy,
+      });
+      incident.status = "Assigned";
+      technicianJustAssigned = true;
+    }
+
+    // Only update status and timeline if status is provided (other than the above auto-assignment)
+    if (status) {
+      incident.statusTimeline.push({
+        status,
+        changedAt: getISTDate(),
+        changedBy,
+      });
+      incident.status = status;
+    }
 
     // Push field changes if any
     if (Object.keys(fieldChanges).length > 0) {
       incident.fieldChangeHistory.push({
         changes: fieldChanges,
         changedAt: getISTDate(),
-        changedBy
+        changedBy,
       });
     }
 
     await incident.save();
 
-    // Get emails
-    const adminEmails = await getEmailsByRole("Admin");
-    const superAdminEmails = await getEmailsByRole("SuperAdmin");
-    const currentTechnician = incident.classificaton?.technician;
-    let technicianEmail = "";
-    if (currentTechnician && currentTechnician.trim() !== "") {
-      technicianEmail = await getEmailById(currentTechnician);
+    // Prepare emails (do not await, send in background)
+    const adminEmailsPromise = getEmailsByRole("Admin");
+    const superAdminEmailsPromise = getEmailsByRole("SuperAdmin");
 
-      // Only send mail if technician is newly assigned or changed
-      if (currentTechnician !== previousTechnician) {
-        await sendAssignedIncidentMail({
+    // Respond to client immediately
+    res.status(200).json({ success: true, data: incident, message: 'Incident updated and lifecycle recorded' });
+
+    // Send emails in background
+    (async () => {
+      try {
+        const adminEmails = await adminEmailsPromise;
+        const superAdminEmails = await superAdminEmailsPromise;
+
+        // Send mail only if technician is newly assigned or changed
+        if (
+          technicianJustAssigned &&
+          currentTechnician &&
+          currentTechnician.trim() !== ""
+        ) {
+          const technicianEmail = await getEmailById(currentTechnician);
+          await sendAssignedIncidentMail({
+            incident,
+            adminEmails,
+            superAdminEmails,
+            technicianEmail,
+          });
+        }
+
+        // Always send status change mail
+        await sendIncidentStatusChangeMail({
           incident,
           adminEmails,
           superAdminEmails,
-          technicianEmail,
         });
+      } catch (mailError) {
+        console.error("Mail sending failed:", mailError);
       }
-    }
-
-    res.status(200).json({ success: true, data: incident, message: 'Incident updated and lifecycle recorded' });
+    })();
   } catch (error) {
     res.status(500).json({ message: 'An error occurred while updating incident', error: error.message });
   }

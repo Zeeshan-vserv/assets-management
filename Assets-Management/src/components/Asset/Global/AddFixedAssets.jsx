@@ -13,6 +13,7 @@ import {
 } from "../../../api/DepartmentRequest";
 import { getAllUsers } from "../../../api/AuthRequest";
 import { Autocomplete, TextField } from "@mui/material";
+import { getAllStoreLocations } from "../../../api/StoreLocationRequest";
 
 const AddFixedAssets = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -23,6 +24,7 @@ const AddFixedAssets = () => {
   const [subDepartmentData, setSubDepartmentData] = useState([]);
   const [filteredSubLocations, setFilteredSubLocations] = useState([]);
   const [filteredSubDepartments, setFilteredSubDepartments] = useState([]);
+  const [storeLocation, setstoreLocation] = useState([]);
   const [users, setUsers] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -96,15 +98,14 @@ const AddFixedAssets = () => {
       const responseLocation = await getAllLocation();
       setLocationData(responseLocation?.data?.data || []);
 
-      // const responseSubLocation = await getAllSubLocation();
-      // setSubLocationData(responseSubLocation?.data?.data || []);
-
       const responseDepartment = await getAllDepartment();
       setDepartmentData(responseDepartment?.data?.data || []);
 
       const responseSubDepartment = await getAllSubDepartment();
-
       setSubDepartmentData(responseSubDepartment?.data?.data || []);
+
+      const responseStoreLocation = await getAllStoreLocations();
+      setstoreLocation(responseStoreLocation?.data?.data || []);
 
       const responseReportingManager = await getAllUsers();
       setUsers(responseReportingManager?.data || []);
@@ -867,21 +868,38 @@ const AddFixedAssets = () => {
               >
                 Store Location
               </label>
-              <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="text"
-                id="storeLocation"
-                name="storeLocation"
-                value={formData.locationInformation.storeLocation}
-                onChange={(e) =>
+              <Autocomplete
+                className="w-[65%]"
+                options={storeLocation}
+                getOptionLabel={(option) => option?.storeLocationName || ""}
+                value={
+                  storeLocation.find(
+                    (loc) =>
+                      loc.storeLocationName ===
+                      formData.locationInformation.storeLocation
+                  ) || null
+                }
+                onChange={(event, newValue) => {
                   setFormData({
                     ...formData,
                     locationInformation: {
                       ...formData.locationInformation,
-                      storeLocation: e.target.value,
+                      storeLocation: newValue ? newValue.storeLocationName : "",
                     },
-                  })
-                }
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Store Location"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
               />
             </div>
           </div>

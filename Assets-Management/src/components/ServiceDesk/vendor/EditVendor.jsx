@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Autocomplete, TextField } from "@mui/material";
-import { NavLink } from "react-router-dom";
-import { createVendor } from "../../../api/vendorRequest";
-import { toast } from "react-toastify";
-import { useSelector } from "react-redux";
+import { NavLink, useParams } from "react-router-dom";
+import {
+  createVendor,
+  getVendorById,
+  updateVendor,
+} from "../../../api/vendorRequest";
 import {
   getAllStatus,
   getAllVendorCategory,
   getAllVendorServiceCategory,
 } from "../../../api/VendorStatusCategoryRequest";
-
-function NewVendor() {
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
+const EditVendor = () => {
+  const { id } = useParams();
+  const [isLoading, setIsLoading] = useState(true);
   const user = useSelector((state) => state.authReducer.authData);
   const [vendorCategories, setVendorCategories] = useState([]);
   const [vendorStatus, setVendorStatus] = useState([]);
@@ -28,6 +33,26 @@ function NewVendor() {
     serviceCategory: "",
     notes: "",
   });
+
+  const fetchVendor = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getVendorById(id);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
+      }
+      setFormData(response?.data.data || []);
+      // setData(response);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVendor();
+  }, [id]);
 
   const fetchDetails = async () => {
     try {
@@ -61,29 +86,14 @@ function NewVendor() {
         ...formData,
         userId: user.userId,
       };
-      const res = await createVendor(formDataToSubmit);
-      console.log(res);
-
-      if (res.status === 201) {
-        toast.success("Vendor added!");
-        setFormData({
-          vendorCode: "",
-          vendorName: "",
-          contactPerson: "",
-          contactNumber: "",
-          emailAddress: "",
-          city: "",
-          address: "",
-          vendorCategory: "",
-          vendorStatus: "",
-          serviceCategory: "",
-          notes: "",
-        });
+      const res = await updateVendor(id, formDataToSubmit);
+      if (res.status === 200) {
+        toast.success("Vendor Updated!");
       } else {
-        toast.error(res.data.message || "Failed to add Vendor");
+        toast.error(res.data.message || "Failed to update vendor");
       }
     } catch (error) {
-      toast.error("Error adding Vendor");
+      toast.error("Error updating Vendor");
     }
   };
 
@@ -100,7 +110,7 @@ function NewVendor() {
               type="submit"
               className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
             >
-              Submit
+              Update
             </button>
             <NavLink
               to="/main/ServiceDesk/AllVendors"
@@ -201,6 +211,87 @@ function NewVendor() {
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none"
               />
             </div>
+            {/* <div className="flex flex-row gap-2 justify-center items-center">
+              <label className="w-[25%] text-xs font-semibold text-slate-600">
+                Vendor Category*
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                name="vendorCategory"
+                value={formData.vendorCategory}
+                onChange={(e, value) =>
+                  setFormData((prev) => ({ ...prev, vendorCategory: value }))
+                }
+                options={["Online Time Service"]}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Vendor Category"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+            </div>
+            <div className="flex flex-row gap-2 justify-center items-center">
+              <label className="w-[25%] text-xs font-semibold text-slate-600">
+                Vendor Status*
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                name="vendorStatus"
+                value={formData.vendorStatus}
+                onChange={(e, value) =>
+                  setFormData((prev) => ({ ...prev, vendorStatus: value }))
+                }
+                options={["Active", "In-Active"]}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Vendor Status"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+            </div>
+            <div className="flex flex-row gap-2 justify-center items-center">
+              <label className="w-[25%] text-xs font-semibold text-slate-600">
+                Service Category*
+              </label>
+              <Autocomplete
+                className="w-[65%]"
+                name="serviceCategory"
+                value={formData.serviceCategory}
+                onChange={(e, value) =>
+                  setFormData((prev) => ({ ...prev, serviceCategory: value }))
+                }
+                options={["Category-A", "Category-B", "Category-C"]}
+                getOptionLabel={(option) => option}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Service Category"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+            </div> */}
             <div className="flex flex-row gap-2 justify-center items-center">
               <label className="w-[25%] text-xs font-semibold text-slate-600">
                 Vendor Category*
@@ -266,7 +357,11 @@ function NewVendor() {
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, serviceCategory: value }))
                 }
-                options={serviceCategories.map((cat) => cat.vendorServiceCategoryName) || []}
+                options={
+                  serviceCategories.map(
+                    (cat) => cat.vendorServiceCategoryName
+                  ) || []
+                }
                 getOptionLabel={(option) => option}
                 renderInput={(params) => (
                   <TextField
@@ -299,6 +394,6 @@ function NewVendor() {
       </div>
     </>
   );
-}
+};
 
-export default NewVendor;
+export default EditVendor;

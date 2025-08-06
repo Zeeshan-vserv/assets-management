@@ -4,13 +4,17 @@ import { useParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useReactToPrint } from "react-to-print";
 import { getGatePassById } from "../../../api/GatePassRequest";
+import { getAssetById } from "../../../api/AssetsRequest";
 
 const PrintGatePass = () => {
   const { id } = useParams();
   const componentRef = React.useRef(null);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState("");
+  const [assetDetails, setAssetDetails] = useState([]);
+  const [assetComponentDetails, setAssetComponentDetails] = useState([]); // <-- new state
 
+  // Fetch Gate Pass
   const fetchGatePass = async () => {
     try {
       setIsLoading(true);
@@ -21,11 +25,72 @@ const PrintGatePass = () => {
       setFormData(response?.data.data || {});
     } catch (error) {
       console.error("Error fetching gate pass:", error);
-      toast.error("Failed to fetch gate pass data");
+      // toast.error("Failed to fetch gate pass data");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Fetch asset details after formData is loaded
+  useEffect(() => {
+    // Fixed Assets
+    if (
+      formData &&
+      formData.assetType === "Fixed Assets" &&
+      Array.isArray(formData.asset) &&
+      formData.asset.length > 0
+    ) {
+      const fetchAssets = async () => {
+        try {
+          const details = await Promise.all(
+            formData.asset.map(async (assetId) => {
+              try {
+                const res = await getAssetById(assetId);
+                return res.data.data;
+              } catch (e) {
+                return null;
+              }
+            })
+          );
+          setAssetDetails(details.filter(Boolean));
+        } catch (e) {
+          setAssetDetails([]);
+        }
+      };
+      fetchAssets();
+    } else {
+      setAssetDetails([]);
+    }
+
+    // Asset Components
+    if (
+      formData &&
+      formData.assetType === "Asset Components" &&
+      Array.isArray(formData.assetComponent) &&
+      formData.assetComponent.length > 0
+    ) {
+      const fetchAssetComponents = async () => {
+        try {
+          const details = await Promise.all(
+            formData.assetComponent.map(async (assetId) => {
+              try {
+                const res = await getAssetById(assetId);
+                return res.data.data;
+              } catch (e) {
+                return null;
+              }
+            })
+          );
+          setAssetComponentDetails(details.filter(Boolean));
+        } catch (e) {
+          setAssetComponentDetails([]);
+        }
+      };
+      fetchAssetComponents();
+    } else {
+      setAssetComponentDetails([]);
+    }
+  }, [formData]);
 
   useEffect(() => {
     fetchGatePass();
@@ -48,10 +113,8 @@ const PrintGatePass = () => {
     onBeforePrint: handleBeforePrint,
   });
 
-  // console.log(formData);
-
   return (
-    <div className="flex flex-col items-center w-screen">
+    <div className="flex flex-col items-center w-full">
       <div className="flex justify-end my-5">
         <button
           className="flex items-center  gap-1 ml-3 bg-blue-400 text-white px-5 py-0.5 rounded-sm hover:scale-105"
@@ -112,54 +175,149 @@ const PrintGatePass = () => {
           </div>
           {/* Asset Details */}
           <div className="mt-10">
-            <table className="">
-              <thead>
-                <tr className="">
-                  <th className="border px-4 py-2">S.No</th>
-                  <th className="border px-4 py-2">Asset Type</th>
-                  <th className="border px-4 py-2">Make</th>
-                  <th className="border px-4 py-2">Model</th>
-                  <th className="border px-4 py-2">Serial Number</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border px-4 py-2">1</td>
-                  <td className="border px-4 py-2">Laptop</td>
-                  <td className="border px-4 py-2">HP</td>
-                  <td className="border px-4 py-2">ELITE 8200 </td>
-                  <td className="border px-4 py-2">IN1A42WJ5Q</td>
-                </tr>
-                <tr>
-                  <td className="border px-4 py-2">2</td>
-                  <td className="border px-4 py-2">Laptop</td>
-                  <td className="border px-4 py-2">HP</td>
-                  <td className="border px-4 py-2">ELITE 8200 </td>
-                  <td className="border px-4 py-2">IN1A42WJ5Q</td>
-                </tr>
-                <tr>
-                  <td className="border px-4 py-2">3</td>
-                  <td className="border px-4 py-2">Laptop</td>
-                  <td className="border px-4 py-2">HP</td>
-                  <td className="border px-4 py-2">ELITE 8200 </td>
-                  <td className="border px-4 py-2">IN1A42WJ5Q</td>
-                </tr>
-                <tr>
-                  <td className="border px-4 py-2">4</td>
-                  <td className="border px-4 py-2">Laptop</td>
-                  <td className="border px-4 py-2">HP</td>
-                  <td className="border px-4 py-2">ELITE 8200 </td>
-                  <td className="border px-4 py-2">IN1A42WJ5Q</td>
-                </tr>
-                <tr>
-                  <td className="border px-4 py-2">5</td>
-                  <td className="border px-4 py-2">Laptop</td>
-                  <td className="border px-4 py-2">HP</td>
-                  <td className="border px-4 py-2">ELITE 8200 </td>
-                  <td className="border px-4 py-2">IN1A42WJ5Q</td>
-                </tr>
-              </tbody>
-            </table>
+            {/* Fixed Assets Table */}
+            {formData?.assetType === "Fixed Assets" && (
+              <table>
+                <thead>
+                  <tr>
+                    <th className="border px-4 py-2">S.No</th>
+                    <th className="border px-4 py-2">Asset Type</th>
+                    <th className="border px-4 py-2">Make</th>
+                    <th className="border px-4 py-2">Model</th>
+                    <th className="border px-4 py-2">Serial Number</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assetDetails.length > 0 ? (
+                    assetDetails.map((asset, idx) => (
+                      <tr key={asset._id || idx}>
+                        <td className="border px-4 py-2">{idx + 1}</td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.category || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.make || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.model || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.serialNumber || ""}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="border px-4 py-2" colSpan={5}>
+                        No asset details found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+
+            {/* Asset Components Table */}
+            {formData?.assetType === "Asset Components" && (
+              <table>
+                <thead>
+                  <tr>
+                    <th className="border px-4 py-2">S.No</th>
+                    <th className="border px-4 py-2">Component Type</th>
+                    <th className="border px-4 py-2">Make</th>
+                    <th className="border px-4 py-2">Model</th>
+                    <th className="border px-4 py-2">Serial Number</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {assetComponentDetails.length > 0 ? (
+                    assetComponentDetails.map((asset, idx) => (
+                      <tr key={asset._id || idx}>
+                        <td className="border px-4 py-2">{idx + 1}</td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.category || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.make || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.model || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset.assetInformation?.serialNumber || ""}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="border px-4 py-2" colSpan={5}>
+                        No asset component details found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+
+            {formData?.assetType === "Consumables" && (
+              <table className="">
+                <thead>
+                  <tr>
+                    <th className="border px-4 py-2">S.No.</th>
+                    <th className="border px-4 py-2">Item Name</th>
+                    <th className="border px-4 py-2">Serial No.</th>
+                    <th className="border px-4 py-2">Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formData?.consumables.length > 0 ? (
+                    formData?.consumables.map((asset, idx) => (
+                      <tr key={asset._id || idx}>
+                        <td className="border px-4 py-2">{idx + 1}</td>
+                        <td className="border px-4 py-2">
+                          {asset?.itemName || ""}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {asset?.serialNo || ""}
+                        </td>
+                        <td className="border px-4 py-2">{asset?.qty || ""}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td className="border px-4 py-2" colSpan={5}>
+                        No asset details found.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+            {/* {console.log(formData)} */}
+            {formData?.assetType === "Others" && (
+              <table className="">
+                <thead>
+                  <tr>
+                    <th className="border px-4 py-2">Item Name</th>
+                    <th className="border px-4 py-2">Quantity</th>
+                    <th className="border px-4 py-2">Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="border px-4 py-2">
+                      {formData?.others?.itemName || ""}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {formData?.others?.quantity || ""}
+                    </td>
+                    <td className="border px-4 py-2">
+                      {formData?.others?.description || ""}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            )}
           </div>
 
           {/* Footer */}
@@ -187,8 +345,8 @@ const PrintGatePass = () => {
               <div className="w-[60%]">
                 <span className="font-bold">To Be Received By: -</span>
                 <p>
-                  <span className="font-semibold">Contact Name - </span> SUDHIR
-                  KUMAR
+                  <span className="font-semibold">Contact Name - </span> Name
+                  Here
                 </p>
                 <p>
                   <span className="font-semibold">Contact No. - </span>{" "}
@@ -204,9 +362,7 @@ const PrintGatePass = () => {
             <div className="flex justify-between">
               <div className="w-[60%]">
                 <span className="font-bold">From: -</span>
-                <p>
-                   {formData?.fromAddress}
-                </p>
+                <p>{formData?.fromAddress}</p>
               </div>
               <div className="flex flex-col items-end">
                 <span className="font-bold">(Approved By)</span>

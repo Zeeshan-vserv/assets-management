@@ -428,7 +428,7 @@ function ServiceRequest() {
                 }}
                 inputProps={{
                   ...params.inputProps,
-                  style: { fontSize: "0.85rem", padding: "8px" },
+                  style: { fontSize: "0.85rem", padding: "6px" },
                 }}
               />
             )}

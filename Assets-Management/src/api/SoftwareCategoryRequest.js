@@ -29,7 +29,7 @@ API.interceptors.response.use(
 
 //Software 
 export const createSoftware = (formData)=>API.post("/software",formData)
-export const getAllSoftware = () => API.get('/software');
+export const getAllSoftware = () => API.get('/software/');
 export const getSoftwareById = (id) => API.get(`/software/${id}`);
 export const updateSoftware = (id, updatedData) => API.put(`/software/${id}`, updatedData);
 export const deleteSoftware = (id) => API.delete(`/software/${id}`);

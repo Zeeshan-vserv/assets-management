@@ -242,7 +242,7 @@ const AddRule = () => {
       <h2 className="text-slate-700 font-semibold">ADD NEW RULES</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-10">
         <div className="w-full p-8 bg-white rounded-md shadow-md pt-10">
-          <div className="flex gap-1 justify-end">
+          <div className="flex gap-2 justify-end">
             <button className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
               Submit
             </button>
@@ -295,7 +295,7 @@ const AddRule = () => {
                 onClick={handleAddCondition}
                 className="flex items-center gap-2 bg-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white hover:bg-[#6c7bbf]"
               >
-                <GoPlusCircle /> Add Condition
+                <GoPlusCircle size={14} /> Add Condition
               </button>
             </div>
 

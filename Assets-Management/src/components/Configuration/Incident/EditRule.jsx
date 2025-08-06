@@ -853,7 +853,7 @@ const EditRule = () => {
                   onClick={handleAddCondition}
                   className="flex items-center gap-2 bg-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white hover:bg-[#6c7bbf]"
                 >
-                  <GoPlusCircle /> Add Condition
+                  <GoPlusCircle size={14} /> Add Condition
                 </button>
               </div>
 

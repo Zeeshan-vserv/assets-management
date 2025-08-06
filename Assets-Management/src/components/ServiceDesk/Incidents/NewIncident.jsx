@@ -125,7 +125,6 @@ const NewIncident = () => {
       setIsLoading(false);
     }
   };
-  // console.log(subCategory);
 
   useEffect(() => {
     fetchDetails();
@@ -281,7 +280,6 @@ const NewIncident = () => {
               >
                 Sub Category
               </label>
-              {/* {console.log(formData)} */}
               <Autocomplete
                 className="w-[65%]"
                 options={subCategory}

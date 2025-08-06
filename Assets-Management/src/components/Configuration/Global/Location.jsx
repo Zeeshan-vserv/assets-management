@@ -40,7 +40,6 @@ function Location() {
   const [deleteLocationId, setDeleteLocationId] = useState(null);
   const [updateLocationModal, setUpdateLocationModal] = useState(false);
   const [editLocations, setEditLocations] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchLocation = async () => {
     try {
@@ -156,7 +155,6 @@ function Location() {
       await fetchLocation();
       setEditLocations(null);
       setUpdateLocationModal(false);
-      setShowConfirm(false);
     } catch (error) {
       console.error("Error updating locaction:", error);
     }
@@ -440,8 +438,10 @@ function Location() {
         <>
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h1>Edit Location</h1>
-              <form onSubmit={updateLocationHandler} className="space-y-4">
+              <h2 className="text-lg font-medium text-gray-700 mb-2">
+                Edit Location
+              </h2>
+              <form onSubmit={updateLocationHandler} className="space-y-2">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
                     Location*
@@ -459,9 +459,7 @@ function Location() {
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
-                    // type="submit"
-                    type="button"
-                    onClick={() => setShowConfirm(true)}
+                    type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
                     Update
@@ -473,12 +471,6 @@ function Location() {
                   >
                     Cancel
                   </button>
-                  <ConfirmUpdateModal
-                    isOpen={showConfirm}
-                    message="Are you sure you want to update Location?"
-                    onConfirm={updateLocationHandler}
-                    onCancel={() => setShowConfirm(false)}
-                  />
                 </div>
               </form>
             </div>
@@ -490,10 +482,10 @@ function Location() {
         <>
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
+              <h2 className="text-lg font-medium text-gray-800 mb-4">
                 Add Location
               </h2>
-              <form onSubmit={addNewLocationHandler} className="space-y-4">
+              <form onSubmit={addNewLocationHandler} className="space-y-2">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
                     Location*
@@ -514,7 +506,7 @@ function Location() {
                     type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
-                    Add
+                    Submit
                   </button>
                   <button
                     type="button"

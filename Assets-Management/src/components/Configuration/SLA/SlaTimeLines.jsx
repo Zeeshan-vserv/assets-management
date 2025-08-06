@@ -21,7 +21,6 @@ import {
 } from "../../../api/slaRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 function SlaTimeLines() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -45,8 +44,6 @@ function SlaTimeLines() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteSlaTimeLinesId, setDeleteSlaTimeLinesId] = useState(null);
 
-  const [showConfirm, setShowConfirm] = useState(false);
-
   const fetchSlaTimeLines = async () => {
     try {
       setIsLoading(true);
@@ -65,7 +62,6 @@ function SlaTimeLines() {
   useEffect(() => {
     fetchSlaTimeLines();
   }, []);
-  // console.log("dd", data);
 
   const columns = useMemo(
     () => [
@@ -204,7 +200,6 @@ function SlaTimeLines() {
         await fetchSlaTimeLines();
         setOpenUpdateModal(false);
         setEditSlaTimeLines(null);
-        setShowConfirm(false);
       }
     } catch (error) {
       console.error("Error updating sla time lines:", error);
@@ -306,7 +301,7 @@ function SlaTimeLines() {
           <>
             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 animate-fade-in space-y-6">
-                <h2 className="text-md font-semibold mb-6 text-start">
+                <h2 className="text-lg font-medium mb-4 text-start">
                   Create Sla Time Lines
                 </h2>
                 <form onSubmit={addNewSlaTimeLinesHandler}>
@@ -430,8 +425,8 @@ function SlaTimeLines() {
                       type="submit"
                       className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                     >
-                      Add
-                    </button> 
+                      Submit
+                    </button>
                     <button
                       type="button"
                       onClick={() => setAddSlaTimeLinesModal(false)}
@@ -449,12 +444,12 @@ function SlaTimeLines() {
           <>
             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 animate-fade-in">
-                <h2 className="text-md font-semibold mb-6 text-start">
+                <h2 className="text-lg font-medium mb-4 text-start">
                   Update Sla Time
                 </h2>
                 <form
                   onSubmit={updateSlaTimeLinesHandler}
-                  className="space-y-2"
+                  className="space-y-4"
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-2">
                     <div className="flex items-center gap-2">
@@ -577,9 +572,7 @@ function SlaTimeLines() {
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
                     <button
-                      // type="submit"
-                      type="button"
-                      onClick={() => setShowConfirm(true)}
+                      type="submit"
                       className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                     >
                       Update
@@ -591,12 +584,6 @@ function SlaTimeLines() {
                     >
                       Cancel
                     </button>
-                    <ConfirmUpdateModal
-                      isOpen={showConfirm}
-                      onConfirm={updateSlaTimeLinesHandler}
-                      message="Are you sure you want to update this SLA timeline?"
-                      onCancel={() => setShowConfirm(false)}
-                    />
                   </div>
                 </form>
               </div>

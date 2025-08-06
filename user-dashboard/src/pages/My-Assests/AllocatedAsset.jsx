@@ -10,7 +10,7 @@ import { mkConfig, generateCsv, download } from "export-to-csv";
 import { jsPDF } from "jspdf";
 import { autoTable } from "jspdf-autotable";
 import { RxCrossCircled } from "react-icons/rx";
-import axios from "axios";
+import { getAllAssets } from "../../api/AssetsRequest.js";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -28,8 +28,8 @@ function AllocatedAsset() {
   const fetchAllocatedAsset = async () => {
     try {
       setIsLoading(true);
-      // const response = await axios.get("https://dummyjson.com/recipes");
-      setData(response?.data?.recipes || []);
+      const response = await getAllAssets();
+      setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching allocated asset:", error);
     } finally {
@@ -40,36 +40,37 @@ function AllocatedAsset() {
   useEffect(() => {
     fetchAllocatedAsset();
   }, []);
-  // console.log("data", data);
+
+  console.log("data", data);
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: "id",
+        accessorKey: "assetId",
         header: "Asset Id",
       },
       {
-        accessorKey: "cuisine",
+        accessorKey: "assetInformation.assetTag",
         header: "Tag",
       },
       {
-        accessorKey: "difficulty",
+        accessorKey: "assetInformation.category",
         header: "Category",
       },
       {
-        accessorKey: "caloriesPerServing",
+        accessorKey: "assetInformation.make",
         header: "Make",
       },
       {
-        accessorKey: "cookTimeMinutes",
+        accessorKey: "assetInformation.model",
         header: "Model",
       },
       {
-        accessorKey: "name",
+        accessorKey: "assetInformation.serialNumber",
         header: "Serial No",
       },
       {
-        accessorKey: "prepTimeMinutes",
+        accessorKey: "locationInformation.location",
         header: "Location",
       },
       {
@@ -92,34 +93,76 @@ function AllocatedAsset() {
           },
         },
       },
+      // {
+      //   id: "assetInformation.assetImage",
+      //   header: "Image",
+      //   size: 100,
+      //   Cell: ({ row }) => (
+      //     <Box
+      //       sx={{
+      //         display: "flex",
+      //       }}
+      //       onClick={() => {
+      //         setSelectedImageUrl(row.original.image);
+      //         setViewImage(true);
+      //       }}
+      //     >
+      //       <img
+      //         alt="avatar"
+      //         src={row.original.image}
+      //         loading="lazy"
+      //         width={40}
+      //         height={40}
+      //         style={{
+      //           borderRadius: "50%",
+      //           objectFit: "cover",
+      //           border: "2px solid #e2e8f0",
+      //         }}
+      //       />
+      //     </Box>
+      //   ),
+      // },
       {
-        id: "image",
+        id: "assetImage",
         header: "Image",
         size: 100,
-        Cell: ({ row }) => (
-          <Box
-            sx={{
-              display: "flex",
-            }}
-            onClick={() => {
-              setSelectedImageUrl(row.original.image);
-              setViewImage(true);
-            }}
-          >
-            <img
-              alt="avatar"
-              src={row.original.image}
-              loading="lazy"
-              width={40}
-              height={40}
-              style={{
-                borderRadius: "50%",
-                objectFit: "cover",
-                border: "2px solid #e2e8f0",
+        Cell: ({ row }) => {
+          const imagePath = row.original.assetInformation?.assetImage;
+          const imageUrl = imagePath
+            ? `http://localhost:5001/${imagePath.replace(/\\/g, "/")}`
+            : null;
+            console.log("imageUrl",imageUrl)
+          return (
+            <Box
+              sx={{ display: "flex", cursor: imageUrl ? "pointer" : "default" }}
+              onClick={() => {
+                if (imageUrl) {
+                  setSelectedImageUrl(imageUrl);
+                  setViewImage(true);
+                }
               }}
-            />
-          </Box>
-        ),
+            >
+              {imageUrl ? (
+                <img
+                  alt="asset"
+                  src={imageUrl}
+                  loading="lazy"
+                  width={40}
+                  height={40}
+                  style={{
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2px solid #e2e8f0",
+                  }}
+                />
+              ) : (
+                <span style={{ fontSize: "12px", color: "#999" }}>
+                  No Image
+                </span>
+              )}
+            </Box>
+          );
+        },
       },
     ],
     [isLoading]

@@ -23,7 +23,6 @@ import {
   updateServiceSubCategory,
   deleteServiceSubCategory,
 } from "../../../api/globalServiceRequest";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const ReqSubCategory = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -45,8 +44,6 @@ const ReqSubCategory = () => {
   // Delete Modal State
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteInfo, setDeleteInfo] = useState({});
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch categories and subcategories
   const fetchData = async () => {
@@ -228,7 +225,6 @@ const ReqSubCategory = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchData();
-        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update subcategory");
@@ -264,8 +260,8 @@ const ReqSubCategory = () => {
       {openAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
-              Add SubCategory
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
+              Add Sub Category
             </h2>
             <form onSubmit={handleAddSubCategory} className="space-y-4">
               <div className="flex items-center gap-2">
@@ -285,9 +281,7 @@ const ReqSubCategory = () => {
                   variant="standard"
                   sx={{ width: 250 }}
                 >
-                  <MenuItem value="" disabled>
-                    Select Category
-                  </MenuItem>
+                  <MenuItem value="">Select Category</MenuItem>
                   {categories.map((cat) => (
                     <MenuItem key={cat.categoryId} value={cat.categoryId}>
                       {cat.categoryName}
@@ -297,7 +291,7 @@ const ReqSubCategory = () => {
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  SubCategory Name*
+                  Sub Category Name*
                 </label>
                 <TextField
                   name="subCategoryName"
@@ -310,8 +304,8 @@ const ReqSubCategory = () => {
                       subCategoryName: e.target.value,
                     }))
                   }
-                  placeholder="Enter SubCategory Name"
                   variant="standard"
+                  placeholder="Enter sub category name"
                   sx={{ width: 250 }}
                 />
               </div>
@@ -320,7 +314,7 @@ const ReqSubCategory = () => {
                   type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
-                  Add
+                  Submit
                 </button>
                 <button
                   type="button"
@@ -334,18 +328,16 @@ const ReqSubCategory = () => {
           </div>
         </div>
       )}
-
-      {/* Edit Modal */}
       {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Edit SubCategory
             </h2>
             <form onSubmit={handleEditSubCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  SubCategory Name*
+                  Sub Category Name*
                 </label>
                 <TextField
                   name="subCategoryName"
@@ -358,16 +350,14 @@ const ReqSubCategory = () => {
                       subCategoryName: e.target.value,
                     }))
                   }
-                  placeholder="Enter SubCategory Name"
+                  placeholder="Enter Sub Category Name"
                   variant="standard"
                   sx={{ width: 250 }}
                 />
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  // type="submit"
-                  type="button"
-                  onClick={() => setShowConfirm(true)}
+                  type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
                   Update
@@ -379,19 +369,11 @@ const ReqSubCategory = () => {
                 >
                   Cancel
                 </button>
-                <ConfirmUpdateModal
-                  isOpen={showConfirm}
-                  onConfirm={handleEditSubCategory}
-                  message="Are you sure you want to update this subcategory?"
-                  onCancel={() => setShowConfirm(false)}
-                />
               </div>
             </form>
           </div>
         </div>
       )}
-
-      {/* Delete Modal */}
       {deleteModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">

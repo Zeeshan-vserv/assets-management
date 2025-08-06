@@ -13,9 +13,8 @@ import {
   createAutoCloseTime,
   getAllAutoCloseTimes,
   updateAutoCloseTime,
-  deleteClosureCode, // ✅ If API name is correct; else use deleteAutoCloseTime
+  deleteClosureCode,
 } from "../../../api/ConfigurationIncidentRequest";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const IncidentAutoCloserTime = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -30,8 +29,6 @@ const IncidentAutoCloserTime = () => {
 
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchAutoCloseTimes = async () => {
     setIsLoading(true);
@@ -176,7 +173,6 @@ const IncidentAutoCloserTime = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchAutoCloseTimes();
-        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update auto close time");
@@ -185,7 +181,7 @@ const IncidentAutoCloserTime = () => {
 
   const handleDeleteAutoCloseTime = async () => {
     try {
-      await deleteClosureCode(deleteId); // ✅ or `deleteAutoCloseTime`
+      await deleteClosureCode(deleteId);
       toast.success("Auto Close Time deleted successfully");
       setDeleteModal(false);
       setDeleteId(null);
@@ -204,11 +200,10 @@ const IncidentAutoCloserTime = () => {
         <MaterialReactTable table={table} />
       </div>
 
-      {/* Add Modal */}
       {openAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Add Auto Close Time
             </h2>
             <form onSubmit={handleAddAutoCloseTime} className="space-y-4">
@@ -234,7 +229,7 @@ const IncidentAutoCloserTime = () => {
                   type="submit"
                   className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
                 >
-                  Add
+                  Submit
                 </button>
                 <button
                   type="button"
@@ -253,7 +248,7 @@ const IncidentAutoCloserTime = () => {
       {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Edit Auto Close Time
             </h2>
             <form onSubmit={handleEditAutoCloseTime} className="space-y-4">
@@ -279,9 +274,7 @@ const IncidentAutoCloserTime = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  // type="submit"
-                  type="button"
-                  onClick={() => setShowConfirm(true)}
+                  type="submit"
                   className="bg-[#6f7fbc] text-white px-4 py-2 rounded-md text-sm"
                 >
                   Update
@@ -293,12 +286,6 @@ const IncidentAutoCloserTime = () => {
                 >
                   Cancel
                 </button>
-                <ConfirmUpdateModal
-                  isOpen={showConfirm}
-                  onConfirm={handleEditAutoCloseTime}
-                  message="Are you sure you want to update this auto close time?"
-                  onCancel={() => setShowConfirm(false)}
-                />
               </div>
             </form>
           </div>

@@ -1,25 +1,26 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FaDesktop } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import AssetPieChart from "../Asset/AssetPieChart";
 import VendorByLocationBarChart from "./VendorByLocationBarChart";
-import { Container } from "@mui/material";
-
+import { Card, Container } from "@mui/material";
+import VendorByCategoryPieChart from "./VendorByCategoryPieChart";
+import VendorByStatusPieChart from "./VendorByStatusPieChart";
 function VendorDashboard() {
   const navigate = useNavigate();
-  const vendorByCategory = [
-    { id: 0, value: 30, label: "Category - A", color: "#1976d2" },
-    { id: 1, value: 170, label: "Category - B", color: "#00C853" },
-  ];
+  const [chartData, setChartData] = useState([]);
 
-  const vendorByStatus = [
-    { id: 0, value: 30, label: "Active", color: "#1976d2" },
-    { id: 1, value: 170, label: "In-Active", color: "#00C853" },
-  ];
+  const fetchVendorDashboardData = async () => {
+    // const response = await
+    // setChartData()
+  };
+  useEffect(() => {
+    fetchVendorDashboardData();
+  }, []);
+
   return (
     <>
       <div className="flex flex-col gap-6 justify-center p-6">
-        <div className="flex justify-between mb-4">
+        <div className="flex justify-between items-center">
           <h2 className="text-lg font-semibold text-start">VENDOR</h2>
           <button
             onClick={() => navigate("/main/ServiceDesk/AllVendors")}
@@ -32,12 +33,27 @@ function VendorDashboard() {
           </button>
         </div>
         <div className="flex flex-wrap justify-center items-center gap-4">
-          <AssetPieChart title="Vendor By Category" data={vendorByCategory} />
-          <AssetPieChart title="Vendor By Status" data={vendorByStatus} />
+          <div className="flex flex-wrap gap-4">
+            <div className="w-[25%] min-w-[250px] flex-1">
+              <VendorByCategoryPieChart />
+            </div>
+            <div className="w-[25%] min-w-[250px] flex-1">
+              <VendorByStatusPieChart />
+            </div>
+          </div>
+          <div className="flex-1 min-w-[300px]">
+            <Card className="p-4 bg-white shadow-md rounded-lg">
+              <VendorByLocationBarChart
+                title="Vendor By Location"
+                chartData={chartData}
+                min={0}
+                max={1.0}
+                stepSizes={0.2}
+                ticksArray={[0.0, 0.2, 0.4, 0.6, 0.8, 1.0]}
+              />
+            </Card>
+          </div>
         </div>
-        <Container sx={{ mt: 4 }}>
-          <VendorByLocationBarChart />
-        </Container>
       </div>
     </>
   );

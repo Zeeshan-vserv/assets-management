@@ -14,64 +14,72 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const browserData = [{ name: "N/A", value: 10 }];
 
-const data = {
-  labels: browserData.map((item) => item.name),
-  datasets: [
-    {
-      label: "Assets",
-      data: browserData.map((item) => item.value),
-      backgroundColor: "#2196f3",
-      borderRadius: 4,
-      barThickness: 30,
-    },
-  ],
-};
-
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  scales: {
-    y: {
-      min: 0,
-      max: 1.0,
-      ticks: {
-        stepSize: 0.2,
-        callback: function (value) {
-          return [0.0, 0.2, 0.4, 0.6, 0.8, 1.0].includes(value) ? value : "";
+const VendorByLocationBarChart = ({
+  title,
+  chartData,
+  min,
+  max,
+  stepSizes,
+  ticksArray,
+}) => {
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        min: min,
+        max: max,
+        ticks: {
+          stepSize: stepSizes,
+          callback: function (value) {
+            if (!ticksArray || !Array.isArray(ticksArray)) return value;
+            return ticksArray.some((tick) => Math.abs(tick - value) < 0.001)
+              ? value
+              : "";
+          },
+        },
+        grid: {
+          drawBorder: false,
+          color: "#e0e0e0",
         },
       },
-      grid: {
-        drawBorder: false,
-        color: "#e0e0e0",
-      },
-    },
-    x: {
-      ticks: {
-        font: {
-          style: "italic",
+      x: {
+        ticks: {
+          font: {
+            style: "italic",
+          },
+        },
+        grid: {
+          display: false,
         },
       },
-      grid: {
+    },
+    plugins: {
+      legend: {
         display: false,
       },
     },
-  },
-  plugins: {
-    legend: {
-      display: false,
-    },
-  },
-};
-
-const VendorByLocationBarChart = () => {
+  };
+  const data = {
+    labels: chartData.map((item) => item.name),
+    datasets: [
+      {
+        label: "Assets",
+        data: chartData.map((item) => item.value),
+        backgroundColor: "#2196f3",
+        borderRadius: 4,
+        barThickness: 30,
+      },
+    ],
+  };
   return (
     <Card sx={{ maxWidth: "100%", mx: "auto", boxShadow: 3 }}>
       <CardContent>
         <Typography variant="h6" gutterBottom>
-          Vendor By Location
+          {title}
         </Typography>
 
-        <Box sx={{ width: "100%", height: { xs: 300, sm: 400, md: 500 } }}>
+        <Box sx={{ width: "100%", height: { xs: 250, sm: 300, md: 350 } }}>
           <Bar data={data} options={options} />
         </Box>
       </CardContent>

@@ -17,7 +17,6 @@ import {
 } from "../../../api/slaRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 // const calendarOptions = [
 //   { calenderName: "Pan India" },
@@ -42,7 +41,6 @@ function HoliDayList() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteHolidayListId, setDeleteHolidayListId] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchHolidayList = async () => {
     try {
@@ -70,8 +68,6 @@ function HoliDayList() {
       setIsLoading(false);
     }
   };
-
-  // console.log("Holiday List Data:", holidayCalendar.holidayCalenderLocation);
 
   useEffect(() => {
     fetchHolidayList();
@@ -209,7 +205,6 @@ function HoliDayList() {
         await fetchHolidayList();
         setEditHolidayList(null);
         setOpenUpdateModal(false);
-        setShowConfirm(false);
       }
     } catch (error) {
       console.error("Error updating holiday list:", error);
@@ -311,11 +306,100 @@ function HoliDayList() {
         {addHolidayListModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-medium mb-4 text-start">
                 Add Holiday Calendar
               </h2>
-              <form onSubmit={addNewHolidatListHandler} className="space-y-2">
-                <div className="space-y-4">
+              <form onSubmit={addNewHolidatListHandler} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Holiday Calendar
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={calendarOptions}
+                    value={
+                      calendarOptions.find(
+                        (opt) =>
+                          opt.calenderName === addHolidayList.calenderName
+                      ) || null
+                    }
+                    onChange={(_, newValue) =>
+                      setAddHolidayList((prev) => ({
+                        ...prev,
+                        calenderName: newValue ? newValue.calenderName : "",
+                      }))
+                    }
+                    getOptionLabel={(option) => option.calenderName || ""}
+                    isOptionEqualToValue={(option, value) =>
+                      option.calenderName === value.calenderName
+                    }
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        className="text-xs text-slate-600"
+                        placeholder="Select"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.8rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Holiday Remarks
+                  </label>
+                  <TextField
+                    name="holidayRemark"
+                    required
+                    fullWidth
+                    value={addHolidayList?.holidayRemark || ""}
+                    onChange={addNewHolidayListChangeHandler}
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Holiday Date
+                  </label>
+                  <input
+                    type="date"
+                    name="holidayDate"
+                    value={addHolidayList?.holidayDate || ""}
+                    onChange={addNewHolidayListChangeHandler}
+                    className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Submit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAddHolidatListModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+        {openUpdateModal && (
+          <>
+            <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+                <h2 className="text-lg font-medium mb-4 text-start">
+                  Edit Holiday Calendar
+                </h2>
+                <form onSubmit={updateHolidayListHandler} className="space-y-4">
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
                       Holiday Calendar
@@ -326,11 +410,11 @@ function HoliDayList() {
                       value={
                         calendarOptions.find(
                           (opt) =>
-                            opt.calenderName === addHolidayList.calenderName
+                            opt.calenderName === editHolidayList?.calenderName
                         ) || null
                       }
                       onChange={(_, newValue) =>
-                        setAddHolidayList((prev) => ({
+                        setEditHolidayList((prev) => ({
                           ...prev,
                           calenderName: newValue ? newValue.calenderName : "",
                         }))
@@ -355,128 +439,34 @@ function HoliDayList() {
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
+                      Holiday Date
+                    </label>
+                    <input
+                      type="date"
+                      name="holidayDate"
+                      value={editHolidayList?.holidayDate || ""}
+                      onChange={updateHolidayListChangeHandler}
+                      className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
                       Holiday Remarks
                     </label>
                     <TextField
                       name="holidayRemark"
                       required
                       fullWidth
-                      value={addHolidayList?.holidayRemark || ""}
-                      onChange={addNewHolidayListChangeHandler}
+                      value={editHolidayList?.holidayRemark || ""}
+                      onChange={updateHolidayListChangeHandler}
                       variant="standard"
                       sx={{ width: 250 }}
                     />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Holiday Date
-                    </label>
-                    <input
-                      type="date"
-                      name="holidayDate"
-                      value={addHolidayList?.holidayDate || ""}
-                      onChange={addNewHolidayListChangeHandler}
-                      className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end gap-3 pt-4">
-                  <button
-                    type="submit"
-                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                  >
-                    Add
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setAddHolidatListModal(false)}
-                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-        {openUpdateModal && (
-          <>
-            <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-                <h2 className="text-md font-semibold mb-6 text-start">
-                  Edit Holiday Calendar
-                </h2>
-                <form onSubmit={updateHolidayListHandler} className="space-y-2">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Holiday Calendar
-                      </label>
-                      <Autocomplete
-                        className="w-[65%]"
-                        options={calendarOptions}
-                        value={
-                          calendarOptions.find(
-                            (opt) =>
-                              opt.calenderName === editHolidayList?.calenderName
-                          ) || null
-                        }
-                        onChange={(_, newValue) =>
-                          setEditHolidayList((prev) => ({
-                            ...prev,
-                            calenderName: newValue ? newValue.calenderName : "",
-                          }))
-                        }
-                        getOptionLabel={(option) => option.calenderName || ""}
-                        isOptionEqualToValue={(option, value) =>
-                          option.calenderName === value.calenderName
-                        }
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="standard"
-                            className="text-xs text-slate-600"
-                            placeholder="Select"
-                            inputProps={{
-                              ...params.inputProps,
-                              style: { fontSize: "0.8rem" },
-                            }}
-                          />
-                        )}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Holiday Date
-                      </label>
-                      <input
-                        type="date"
-                        name="holidayDate"
-                        value={editHolidayList?.holidayDate || ""}
-                        onChange={updateHolidayListChangeHandler}
-                        className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Holiday Remarks
-                      </label>
-                      <TextField
-                        name="holidayRemark"
-                        required
-                        fullWidth
-                        value={editHolidayList?.holidayRemark || ""}
-                        onChange={updateHolidayListChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
-                  </div>
+
                   <div className="flex justify-end gap-3 pt-4">
                     <button
-                      // type="submit"
-                      type="button"
-                      onClick={() => setShowConfirm(true)}
+                      type="submit"
                       className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                     >
                       Update
@@ -488,12 +478,6 @@ function HoliDayList() {
                     >
                       Cancel
                     </button>
-                    <ConfirmUpdateModal
-                      isOpen={showConfirm}
-                      onConfirm={updateHolidayListHandler}
-                      message="Are you sure you want to update this holiday list?"
-                      onCancel={() => setShowConfirm(false)}
-                    />
                   </div>
                 </form>
               </div>

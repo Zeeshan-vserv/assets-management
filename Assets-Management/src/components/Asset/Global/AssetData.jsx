@@ -16,7 +16,7 @@ import { NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllAssets, deleteAsset } from "../../../api/AssetsRequest";
 import { MdDownload } from "react-icons/md";
-
+import { RxCross1 } from "react-icons/rx";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import { RxCross2 } from "react-icons/rx";
 import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
@@ -45,8 +45,6 @@ const AssetData = () => {
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [userDetails, setUserDetails] = useState(null);
 
-  // console.log(filteredData);
-
   const fetchAsset = async () => {
     try {
       setIsLoading(true);
@@ -65,8 +63,6 @@ const AssetData = () => {
   useEffect(() => {
     fetchAsset();
   }, []);
-
-  // console.log("data",data)
 
   // Extract unique categories from data
   const categories = useMemo(() => {
@@ -269,7 +265,6 @@ const AssetData = () => {
       visibleColumns.map((col) => {
         const key = col.id || col.accessorKey;
         let value = item[key];
-        // Format date fields if needed
         return value ?? "";
       })
     );
@@ -406,7 +401,7 @@ Location: ${row?.locationInformation?.location ?? ""}`;
   const handleUserEmailClick = async (userId) => {
     try {
       const res = await getUserById(userId);
-      console.log("User API response:", res); // <-- Add this line
+      console.log("User API response:", res); 
       // Try both options below, depending on your API response:
       setUserDetails(res?.data?.data || res?.data || null);
       setUserModalOpen(true);
@@ -422,7 +417,7 @@ Location: ${row?.locationInformation?.location ?? ""}`;
   };
 
   const table = useMaterialReactTable({
-    data: filteredData, // Use filteredData here
+    data: filteredData, 
     columns,
     getRowId: (row) => row?._id?.toString(),
     enableRowSelection: true,
@@ -431,7 +426,6 @@ Location: ${row?.locationInformation?.location ?? ""}`;
     },
     renderTopToolbarCustomActions: ({ table }) => (
       <Box>
-        {/* Uncomment if you want to add new asset functionality */}
         <NavLink to="/main/Asset/AddFixedAssets">
           <Button
             variant="contained"
@@ -550,7 +544,6 @@ Location: ${row?.locationInformation?.location ?? ""}`;
     <>
       <div className="flex flex-col w-[100%] min-h-full  p-4 bg-slate-100">
         <h2 className="text-lg font-semibold mb-6 text-start">ALL ASSETS</h2>
-        {/* Category Filter Buttons */}
         <div>
           <div className="flex flex-wrap gap-2 mb-4">
             {categories.map((cat) => (
@@ -688,15 +681,14 @@ Location: ${row?.locationInformation?.location ?? ""}`;
         {userModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm relative">
-              <button
-                className="absolute top-2 right-2 text-gray-400 hover:text-red-500 text-xl"
-                onClick={handleCloseUserModal}
-              >
-                &times;
-              </button>
               <h2 className="text-lg font-semibold mb-4 text-blue-700">
                 User Details
               </h2>
+              <RxCross1
+                size={24}
+                onClick={handleCloseUserModal}
+                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl cursor-pointer border-2 rounded-full"
+              />
               {userDetails ? (
                 <div className="space-y-2">
                   <div>
@@ -719,12 +711,12 @@ Location: ${row?.locationInformation?.location ?? ""}`;
               ) : (
                 <div className="text-gray-500">No user details found.</div>
               )}
-              <button
+              {/* <button
                 className="mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
                 onClick={handleCloseUserModal}
               >
                 Close
-              </button>
+              </button> */}
             </div>
           </div>
         )}

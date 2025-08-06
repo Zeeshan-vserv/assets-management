@@ -174,7 +174,6 @@ const EditAsset = () => {
 
     // Append userId if needed
     dataToSend.append("userId", user.userId);
-    // console.log(id,formData, dataToSend);
 
     updateAsset(id, dataToSend);
     toast.success("Asset updated Sucessfully");
@@ -187,9 +186,8 @@ const EditAsset = () => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-10">
         {/* Asset Information fields */}
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <div className="flex gap-1 justify-end">
+          <div className="flex gap-2 justify-end">
             <button
-              // type="submit"
               type="button"
               onClick={() => setShowConfirm(true)}
               className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
@@ -677,7 +675,7 @@ const EditAsset = () => {
                     assetState: {
                       ...formData.assetState,
                       department: newValue ? newValue.departmentName : "",
-                      subDepartment: "", // Reset subDepartment when department changes
+                      subDepartment: "",
                     },
                   });
                   setFilteredSubDepartments(newValue?.subdepartments || []);
@@ -791,7 +789,7 @@ const EditAsset = () => {
                     locationInformation: {
                       ...formData.locationInformation,
                       location: newValue ? newValue.locationName : "",
-                      subLocation: "", // Reset subLocation when location changes
+                      subLocation: "",
                     },
                   });
                   setFilteredSubLocations(newValue?.subLocations || []);
@@ -1064,23 +1062,6 @@ const EditAsset = () => {
                   })
                 }
               />
-
-              {/* <input
-                className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                type="date"
-                id="poDate"
-                name="poDate"
-                value={formData.financeInformation.poDate}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    financeInformation: {
-                      ...formData.financeInformation,
-                      poDate: e.target.value,
-                    },
-                  })
-                }
-              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -1135,21 +1116,6 @@ const EditAsset = () => {
                   })
                 }
               />
-              {/* <input
-                type="date"
-                id="invoiceDate"
-                name="invoiceDate"
-                value={formData.financeInformation.invoiceDate}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    financeInformation: {
-                      ...formData.financeInformation,
-                      invoiceDate: e.target.value,
-                    },
-                  })
-                }
-              /> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label
@@ -1418,21 +1384,6 @@ const EditAsset = () => {
                     })
                   }
                 />
-                {/* <input
-                  type="date"
-                  id="istPmDate"
-                  name="istPmDate"
-                  value={formData.preventiveMaintenance.istPmDate}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      preventiveMaintenance: {
-                        ...formData.preventiveMaintenance,
-                        istPmDate: e.target.value,
-                      },
-                    })
-                  }
-                /> */}
               </div>
             )}
           </div>

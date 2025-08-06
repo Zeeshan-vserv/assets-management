@@ -21,7 +21,6 @@ import {
 } from "../../../api/VendorStatusCategoryRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -45,8 +44,6 @@ function Status() {
 
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteStatusId, setDeleteStatusId] = useState(null);
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchStatus = async () => {
     try {
@@ -170,7 +167,6 @@ function Status() {
       if (updateStatusResponse?.data?.success) {
         toast.success("Status updated successfully");
         fetchStatus();
-        setShowConfirm(false);
       }
       setOpenUpdateModal(false);
       setEditStatus(null);
@@ -402,32 +398,31 @@ function Status() {
         {addStatusModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
+              <h2 className="text-lg font-semibold mb-4 text-start">
                 Add Status
               </h2>
-              <form onSubmit={addNewStatusHandler} className="space-y-2">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Status *
-                    </label>
-                    <TextField
-                      name="statusName"
-                      required
-                      fullWidth
-                      value={addNewStatus?.statusName || ""}
-                      onChange={addNewStatusChangeHandler}
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
-                  </div>
+              <form onSubmit={addNewStatusHandler} className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Status *
+                  </label>
+                  <TextField
+                    name="statusName"
+                    required
+                    fullWidth
+                    value={addNewStatus?.statusName || ""}
+                    onChange={addNewStatusChangeHandler}
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
                 </div>
+
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
-                    Add
+                    Submit
                   </button>
                   <button
                     type="button"
@@ -445,11 +440,11 @@ function Status() {
           <>
             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-                <h2 className="text-md font-semibold mb-6 text-start">
+                <h2 className="text-lg font-semibold mb-4 text-start">
                   Edit Status
                 </h2>
                 <form onSubmit={updateStatusHandler} className="space-y-2">
-                  <div className="space-y-2">
+                  <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
                         Status *
@@ -467,9 +462,7 @@ function Status() {
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
                     <button
-                      // type="submit"
-                      type="button"
-                      onClick={() => setShowConfirm(true)}
+                      type="submit"
                       className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                     >
                       Update
@@ -481,12 +474,6 @@ function Status() {
                     >
                       Cancel
                     </button>
-                    <ConfirmUpdateModal
-                      isOpen={showConfirm}
-                      onConfirm={updateStatusHandler}
-                      message="Are you sure you want to update status?"
-                      onCancel={() => setShowConfirm(false)}
-                    />
                   </div>
                 </form>
               </div>

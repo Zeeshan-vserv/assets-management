@@ -96,12 +96,9 @@ const AddFixedAssets = () => {
     try {
       setIsLoading(true);
       const responseLocation = await getAllLocation();
-      // console.log(responseLocation?.data?.data);
-
       setLocationData(responseLocation?.data?.data || []);
 
       const responseDepartment = await getAllDepartment();
-      // console.log(responseDepartment?.data?.data);
       setDepartmentData(responseDepartment?.data?.data || []);
 
       const responseSubDepartment = await getAllSubDepartment();
@@ -147,8 +144,6 @@ const AddFixedAssets = () => {
 
     // Append userId if needed
     dataToSend.append("userId", user.userId);
-
-    console.log(dataToSend);
     await createAsset(dataToSend);
     toast.success("Asset created Sucessfully");
     setFormData({
@@ -209,7 +204,7 @@ const AddFixedAssets = () => {
       <h2 className="text-slate-700 font-semibold">NEW ASSET</h2>
       <form onSubmit={handleSubmit} className="flex flex-col gap-10">
         <div className="w-full p-8 bg-white rounded-md shadow-md">
-          <div className="flex gap-1 justify-end">
+          <div className="flex gap-2 justify-end">
             <button className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white">
               Submit
             </button>
@@ -690,7 +685,7 @@ const AddFixedAssets = () => {
                     assetState: {
                       ...formData.assetState,
                       department: newValue ? newValue.departmentName : "",
-                      subDepartment: "", // Reset subDepartment when department changes
+                      subDepartment: "",
                     },
                   });
                   setFilteredSubDepartments(newValue?.subdepartments || []);
@@ -806,7 +801,7 @@ const AddFixedAssets = () => {
                     locationInformation: {
                       ...formData.locationInformation,
                       location: newValue ? newValue.locationName : "",
-                      subLocation: "", // Reset subLocation when location changes
+                      subLocation: "",
                     },
                   });
                   setFilteredSubLocations(newValue?.subLocations || []);

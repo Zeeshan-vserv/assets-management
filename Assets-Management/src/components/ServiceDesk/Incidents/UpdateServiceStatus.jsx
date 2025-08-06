@@ -9,8 +9,9 @@ import { useEffect } from "react";
 import dayjs from "dayjs";
 import { getIncidentById } from "../../../api/IncidentRequest";
 import { getUserById } from "../../../api/AuthRequest";
- 
-const UpdateServiceStatus = () =>  {
+import { getServiceRequestById } from "../../../api/serviceRequest";
+
+const UpdateServiceStatus = () => {
   const { id } = useParams();
   const [openIndex, setOpenIndex] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,7 +52,7 @@ const UpdateServiceStatus = () =>  {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await getIncidentById(id);
+      const response = await getServiceRequestById(id);
       if (response?.data?.data) {
         setFormData(response.data.data);
       }
@@ -82,6 +83,7 @@ const UpdateServiceStatus = () =>  {
       setIsLoading(false);
     }
   };
+  console.log(formData);
 
   useEffect(() => {
     if (formData.userId) {
@@ -89,37 +91,45 @@ const UpdateServiceStatus = () =>  {
     }
   }, [formData.userId]);
 
+  const getLatestStatus = (timeline) => {
+    if (!Array.isArray(timeline) || timeline.length === 0) return "No Status";
+    return timeline[timeline.length - 1]?.status || "No Status";
+  };
+
   const incidentDetails = [
-    { label: "Status", value: formData.status || "" },
-    { label: "Priority", value: formData.classificaton.priorityLevel || "" },
-    { label: "Subject", value: formData.subject || "" },
+    {
+      label: "Status",
+      value: getLatestStatus(formData?.statusTimeline),
+    },
+    { label: "Priority", value: formData?.classificaton?.priorityLevel || "" },
+    { label: "Subject", value: formData?.subject || "" },
     {
       label: "Support Dept.",
-      value: formData.classificaton.supportDepartmentName || "",
+      value: formData?.classificaton?.supportDepartmentName || "",
     },
     {
       label: "Support Group",
-      value: formData.classificaton.supportGroupName || "",
+      value: formData?.classificaton?.supportGroupName || "",
     },
     {
       label: "Logged Time",
-      value: formData.createdAt
+      value: formData?.createdAt
         ? dayjs(formData.createdAt).format("DD MMM YYYY, hh:mm A")
         : "",
     },
-    { label: "Email", value: formData.submitter.userEmail || "" },
-    { label: "Asset", value: formData.assetDetails.asset || "" },
-    { label: "Asset S.No.", value: formData.assetDetails.serialNo || "" },
-    { label: "User", value: formData.submitter.user || "" },
+    { label: "Email", value: formData?.submitter?.userEmail || "" },
+    { label: "Asset", value: formData?.assetDetails?.asset || "" },
+    { label: "Asset S.No.", value: formData?.assetDetails?.serialNo || "" },
+    { label: "User", value: formData?.submitter?.user || "" },
     { label: "VIP User", value: userDets?.isVip ? "Yes" : "No" },
-    { label: "Assigned To", value: formData.classificaton.technician || "" },
+    { label: "Assigned To", value: formData?.classificaton?.technician || "" },
     {
       label: "Contact No.",
-      value: formData.submitter.userContactNumber || "",
+      value: formData?.submitter?.userContactNumber || "",
     },
-    { label: "Category", value: formData.category || "" },
+    { label: "Category", value: formData?.category || "" },
   ];
-  
+
   return (
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
@@ -156,7 +166,9 @@ const UpdateServiceStatus = () =>  {
                 >
                   <option value="">Select Status</option>
                   <option value="Work On Process">Work On Process</option>
-                  <option value="Person Not Available">Person Not Available</option>
+                  <option value="Person Not Available">
+                    Person Not Available
+                  </option>
                   <option value="Part Not Avaitable">Part Not Avaitable</option>
                   <option value="Work Done">Work Done</option>
                 </select>
@@ -268,5 +280,5 @@ const UpdateServiceStatus = () =>  {
       </div>
     </>
   );
-}
-export default UpdateServiceStatus
+};
+export default UpdateServiceStatus;

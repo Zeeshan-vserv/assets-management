@@ -1,7 +1,362 @@
 import AuthModel from "../models/authModel.js";
+import { ServiceAutoCloseModel } from "../models/globalServiceReqModel.js";
 import ServiceCounterModel from "../models/serviceCounterModel.js";
 import ServiceRequestModel from "../models/serviceRequestModel.js";
-import { SLACreationModel, SLATimelineModel } from "../models/slaModel.js";
+import { addServiceRequestToUserHistory } from "./AuthController.js";
+import { SLACreationModel, SLATimelineModel, HolidayListModel, HolidayCalenderModel } from "../models/slaModel.js";
+import {
+  getEmailById,
+  getEmailsByRole,
+  sendAssignedServiceRequestMail,
+  sendNewServiceRequestMail,
+  sendApprovalMail,
+  sendRequesterNotificationMail
+} from "../utils/mailSystem.js";
+
+// Helper: Get all holiday dates from both HolidayList and HolidayCalender
+async function getAllHolidayDates() {
+  const holidayLists = await HolidayListModel.find();
+  const holidayCalendars = await HolidayCalenderModel.find();
+  const listDates = holidayLists.map(h => new Date(h.holidayDate).toISOString().slice(0, 10));
+  const calendarDates = holidayCalendars.map(h => new Date(h.holidayDate).toISOString().slice(0, 10));
+  return Array.from(new Set([...listDates, ...calendarDates]));
+}
+
+// Helper: Calculate SLA deadline (business hours logic) with holiday support
+async function addBusinessTimeWithHoliday(startDate, hoursToAdd, slaTimeline) {
+  const holidayDates = await getAllHolidayDates();
+  let remainingMinutes = Math.round(hoursToAdd * 60);
+  let current = new Date(startDate);
+
+  function getBusinessWindow(date) {
+    const weekDay = date.toLocaleString("en-US", { weekday: "long" });
+    const slot = slaTimeline.find((s) => s.weekDay === weekDay);
+    if (!slot || !slot.startTime || !slot.endTime) return null;
+    const [startHour, startMinute] = slot.startTime.split(":").map(Number);
+    const [endHour, endMinute] = slot.endTime.split(":").map(Number);
+    const start = new Date(date);
+    start.setHours(startHour, startMinute, 0, 0);
+    const end = new Date(date);
+    end.setHours(endHour, endMinute, 0, 0);
+    return { start, end };
+  }
+
+  while (remainingMinutes > 0) {
+    const dateStr = current.toISOString().slice(0, 10);
+    if (holidayDates.includes(dateStr)) {
+      // Skip holiday
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    const window = getBusinessWindow(current);
+    if (!window) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    if (current < window.start) current = new Date(window.start);
+    if (current >= window.end) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    const minutesLeftToday = Math.floor((window.end - current) / 60000);
+    const minutesToAdd = Math.min(remainingMinutes, minutesLeftToday);
+    current = new Date(current.getTime() + minutesToAdd * 60000);
+    remainingMinutes -= minutesToAdd;
+    if (remainingMinutes > 0) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+    }
+  }
+  return current;
+}
+
+// Helper: Get business minutes between two dates with holiday support
+async function getBusinessMinutesBetweenWithHoliday(now, end, slaTimeline) {
+  const holidayDates = await getAllHolidayDates();
+  let minutes = 0;
+  let current = new Date(now);
+  while (current < end) {
+    const dateStr = current.toISOString().slice(0, 10);
+    if (holidayDates.includes(dateStr)) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    const weekDay = current.toLocaleString("en-US", { weekday: "long" });
+    const slot = slaTimeline.find((s) => s.weekDay === weekDay);
+    if (!slot || !slot.startTime || !slot.endTime) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    const [startHour, startMinute] = slot.startTime.split(":").map(Number);
+    const [endHour, endMinute] = slot.endTime.split(":").map(Number);
+    const start = new Date(current);
+    start.setHours(startHour, startMinute, 0, 0);
+    const endWindow = new Date(current);
+    endWindow.setHours(endHour, endMinute, 0, 0);
+    if (current >= endWindow) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+      continue;
+    }
+    if (current < start) current = new Date(start);
+    const until = end < endWindow ? end : endWindow;
+    const diff = Math.max(0, (until - current) / 60000);
+    minutes += diff;
+    current = new Date(until);
+    if (current < end) {
+      current.setDate(current.getDate() + 1);
+      current.setHours(0, 0, 0, 0);
+    }
+  }
+  return Math.round(minutes);
+}
+
+export const getAllIncidentsSla = async (req, res) => {
+  try {
+    const incidents = await IncidentModel.find();
+    const slaConfig = await SLACreationModel.findOne({ default: true });
+    const slaTimelineData = await SLATimelineModel.find();
+    const businessHours = slaConfig?.slaTimeline || [];
+
+    const results = incidents.map((incident) => {
+      const severity = incident?.classificaton?.severityLevel;
+      const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
+      const matchedTimeline = slaTimelineData.find(
+        (item) =>
+          item.priority?.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
+      );
+      const resolution = matchedTimeline?.resolutionSLA || "00:30";
+      const [slaHours, slaMinutes] = resolution.split(":").map(Number);
+      const totalHours = slaHours + slaMinutes / 60;
+
+      const loggedIn = new Date(
+        incident?.createdAt || incident?.submitter?.loggedInTime
+      );
+      // Example for SLA calculation
+      const slaDeadline = addBusinessTime(loggedIn, totalHours, businessHours);
+
+      const timeline = incident.statusTimeline || [];
+      const latestStatus = timeline?.at(-1)?.status?.toLowerCase();
+      let slaRemainingMinutes;
+      if (latestStatus === "resolved") {
+        const resolvedEntry = [...timeline].reverse().find(
+          (t) => t.status?.toLowerCase() === "resolved"
+        );
+        const resolvedTime = resolvedEntry ? new Date(resolvedEntry.changedAt) : null;
+        if (resolvedTime) {
+          slaRemainingMinutes = resolvedTime < slaDeadline
+            ? getBusinessMinutesBetween(resolvedTime, slaDeadline, businessHours)
+            : -getBusinessMinutesBetween(slaDeadline, resolvedTime, businessHours);
+        } else {
+          slaRemainingMinutes = 0;
+        }
+      } else {
+        const now = new Date();
+        // Example for remaining minutes
+        if (now < slaDeadline) {
+          slaRemainingMinutes = getBusinessMinutesBetween(now, slaDeadline, businessHours);
+        } else {
+          slaRemainingMinutes = -getBusinessMinutesBetween(slaDeadline, now, businessHours);
+        }
+      }
+
+      const formatMinutes = (minutes) => {
+        if (minutes == null) return "N/A";
+        const abs = Math.abs(minutes);
+        const hr = Math.floor(abs / 60);
+        const min = abs % 60;
+        return `${hr} hr ${min} min`;
+      };
+
+      return {
+        _id: incident._id,
+        incidentId: incident.incidentId,
+        sla: formatMinutes(slaRemainingMinutes),
+        slaRawMinutes: slaRemainingMinutes,
+      };
+    });
+
+    res.json({ success: true, data: results });
+  } catch (error) {
+    res.status(500).json({ message: "Error calculating SLA for all incidents", error: error.message });
+  }
+};
+
+export const getAllIncidentsTat = async (req, res) => {
+  try {
+    const incidents = await IncidentModel.find();
+
+    const results = incidents.map((incident) => {
+      const timeline = incident.statusTimeline || [];
+      const assignedEntry = [...timeline].reverse().find(
+        (t) => t.status?.toLowerCase() === "assigned"
+      );
+      const resolvedEntry = [...timeline].reverse().find(
+        (t) => t.status?.toLowerCase() === "resolved"
+      );
+      let tatMinutes = null;
+      if (assignedEntry && resolvedEntry) {
+        const assignedTime = new Date(assignedEntry.changedAt);
+        const resolvedTime = new Date(resolvedEntry.changedAt);
+        if (resolvedTime > assignedTime) {
+          tatMinutes = Math.floor((resolvedTime - assignedTime) / 60000);
+        }
+      }
+
+      const formatMinutes = (minutes) => {
+        if (minutes == null) return "N/A";
+        const abs = Math.abs(minutes);
+        const hr = Math.floor(abs / 60);
+        const min = abs % 60;
+        return `${hr} hr ${min} min`;
+      };
+
+      return {
+        _id: incident._id,
+        incidentId: incident.incidentId,
+        tat: formatMinutes(tatMinutes),
+        tatRawMinutes: tatMinutes,
+      };
+    });
+
+    res.json({ success: true, data: results });
+  } catch (error) {
+    res.status(500).json({ message: "Error calculating TAT for all incidents", error: error.message });
+  }
+};
+
+export const getIncidentSla = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const incident = await IncidentModel.findById(id);
+    if (!incident) return res.status(404).json({ message: "Incident not found" });
+
+    // ...SLA calculation logic (same as before, but only return SLA)...
+
+    // Get SLA config and timeline
+    const slaConfig = await SLACreationModel.findOne({ default: true });
+    const slaTimelineData = await SLATimelineModel.find();
+    const businessHours = slaConfig?.slaTimeline || [];
+    const severity = incident?.classificaton?.severityLevel;
+    const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
+    const matchedTimeline = slaTimelineData.find(
+      (item) =>
+        item.priority?.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
+    );
+    const resolution = matchedTimeline?.resolutionSLA || "00:30";
+    const [slaHours, slaMinutes] = resolution.split(":").map(Number);
+    const totalHours = slaHours + slaMinutes / 60;
+
+    // SLA Deadline
+    const loggedIn = new Date(
+      incident?.createdAt || incident?.submitter?.loggedInTime
+    );
+    // Example for SLA calculation
+    const slaDeadline = await addBusinessTimeWithHoliday(loggedIn, totalHours, businessHours);
+
+    // SLA Remaining (stopped at resolved)
+    const timeline = incident.statusTimeline || [];
+    const latestStatus = timeline?.at(-1)?.status?.toLowerCase();
+    let slaRemainingMinutes;
+    if (latestStatus === "resolved") {
+      const resolvedEntry = [...timeline].reverse().find(
+        (t) => t.status?.toLowerCase() === "resolved"
+      );
+      const resolvedTime = resolvedEntry ? new Date(resolvedEntry.changedAt) : null;
+      if (resolvedTime) {
+        slaRemainingMinutes = resolvedTime < slaDeadline
+          ? getBusinessMinutesBetween(resolvedTime, slaDeadline, businessHours)
+          : -getBusinessMinutesBetween(slaDeadline, resolvedTime, businessHours);
+      } else {
+        slaRemainingMinutes = 0;
+      }
+    } else {
+      const now = new Date();
+      // Example for remaining minutes
+      if (now < slaDeadline) {
+        slaRemainingMinutes = getBusinessMinutesBetween(now, slaDeadline, businessHours);
+      } else {
+        slaRemainingMinutes = -getBusinessMinutesBetween(slaDeadline, now, businessHours);
+      }
+    }
+
+    // Format output
+    const formatMinutes = (minutes) => {
+      if (minutes == null) return "N/A";
+      const abs = Math.abs(minutes);
+      const hr = Math.floor(abs / 60);
+      const min = abs % 60;
+      return `${hr} hr ${min} min`;
+    };
+
+    res.json({
+      success: true,
+      sla: formatMinutes(slaRemainingMinutes),
+      slaRawMinutes: slaRemainingMinutes,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error calculating SLA", error: error.message });
+  }
+};
+
+export const getIncidentTat = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const incident = await IncidentModel.findById(id);
+    if (!incident) return res.status(404).json({ message: "Incident not found" });
+
+    // TAT Calculation (assigned to resolved)
+    const timeline = incident.statusTimeline || [];
+    const assignedEntry = [...timeline].reverse().find(
+      (t) => t.status?.toLowerCase() === "assigned"
+    );
+    const resolvedEntry = [...timeline].reverse().find(
+      (t) => t.status?.toLowerCase() === "resolved"
+    );
+    let tatMinutes = null;
+    if (assignedEntry && resolvedEntry) {
+      const assignedTime = new Date(assignedEntry.changedAt);
+      const resolvedTime = new Date(resolvedEntry.changedAt);
+      if (resolvedTime > assignedTime) {
+        tatMinutes = Math.floor((resolvedTime - assignedTime) / 60000);
+      }
+    }
+
+    // Format output
+    const formatMinutes = (minutes) => {
+      if (minutes == null) return "N/A";
+      const abs = Math.abs(minutes);
+      const hr = Math.floor(abs / 60);
+      const min = abs % 60;
+      return `${hr} hr ${min} min`;
+    };
+
+    res.json({
+      success: true,
+      tat: formatMinutes(tatMinutes),
+      tatRawMinutes: tatMinutes,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error calculating TAT", error: error.message });
+  }
+};
+
+// ✅ Utility: Get IST Time
+// Convert date to IST
+function getISTDate(date = new Date()) {
+  return new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
+}
+
+async function getHolidayDates() {
+  const holidayLists = await HolidayListModel.find();
+  // Assuming holidayDate is stored as a Date or ISO string
+  return holidayLists.map(h => new Date(h.holidayDate).toISOString().slice(0, 10));
+}
 
 // Helper: Calculate SLA deadline (business hours logic)
 function addBusinessTime(startDate, hoursToAdd, slaTimeline) {
@@ -98,331 +453,6 @@ function getBusinessMinutesBetween(now, end, slaTimeline) {
   return Math.round(minutes);
 }
 
-export const getAllServiceSla = async (req, res) => {
-  try {
-    const services = await ServiceRequestModel.find();
-    const slaConfig = await SLACreationModel.findOne({ default: true });
-    const slaTimelineData = await SLATimelineModel.find();
-    const businessHours = slaConfig?.slaTimeline || [];
-
-    const results = services.map((service) => {
-      const severity = service?.classificaton?.severityLevel;
-      const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
-      const matchedTimeline = slaTimelineData.find(
-        (item) =>
-          item.priority?.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
-      );
-      const resolution = matchedTimeline?.resolutionSLA || "00:30";
-      const [slaHours, slaMinutes] = resolution.split(":").map(Number);
-      const totalHours = slaHours + slaMinutes / 60;
-
-      const loggedIn = new Date(
-        service?.createdAt || service?.submitter?.loggedInTime
-      );
-      const slaDeadline = addBusinessTime(loggedIn, totalHours, businessHours);
-
-      const timeline = service.statusTimeline || [];
-      const latestStatus = timeline?.at(-1)?.status?.toLowerCase();
-      let slaRemainingMinutes;
-      if (latestStatus === "resolved") {
-        const resolvedEntry = [...timeline]
-          .reverse()
-          .find((t) => t.status?.toLowerCase() === "resolved");
-        const resolvedTime = resolvedEntry
-          ? new Date(resolvedEntry.changedAt)
-          : null;
-        if (resolvedTime) {
-          slaRemainingMinutes =
-            resolvedTime < slaDeadline
-              ? getBusinessMinutesBetween(
-                  resolvedTime,
-                  slaDeadline,
-                  businessHours
-                )
-              : -getBusinessMinutesBetween(
-                  slaDeadline,
-                  resolvedTime,
-                  businessHours
-                );
-        } else {
-          slaRemainingMinutes = 0;
-        }
-      } else {
-        const now = new Date();
-        if (now < slaDeadline) {
-          slaRemainingMinutes = getBusinessMinutesBetween(
-            now,
-            slaDeadline,
-            businessHours
-          );
-        } else {
-          slaRemainingMinutes = -getBusinessMinutesBetween(
-            slaDeadline,
-            now,
-            businessHours
-          );
-        }
-      }
-
-      const formatMinutes = (minutes) => {
-        if (minutes == null) return "N/A";
-        const abs = Math.abs(minutes);
-        const hr = Math.floor(abs / 60);
-        const min = abs % 60;
-        return `${hr} hr ${min} min`;
-      };
-
-      return {
-        _id: service._id,
-        serviceId: service.serviceId,
-        sla: formatMinutes(slaRemainingMinutes),
-        slaRawMinutes: slaRemainingMinutes,
-      };
-    });
-
-    res.json({ success: true, data: results });
-  } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error calculating SLA for all services",
-        error: error.message,
-      });
-  }
-};
-
-export const getAllServicesTat = async (req, res) => {
-  try {
-    const services = await ServiceRequestModel.find();
-
-    const results = services.map((service) => {
-      const timeline = service.statusTimeline || [];
-      const assignedEntry = [...timeline]
-        .reverse()
-        .find((t) => t.status?.toLowerCase() === "assigned");
-      const resolvedEntry = [...timeline]
-        .reverse()
-        .find((t) => t.status?.toLowerCase() === "resolved");
-      let tatMinutes = null;
-      if (assignedEntry && resolvedEntry) {
-        const assignedTime = new Date(assignedEntry.changedAt);
-        const resolvedTime = new Date(resolvedEntry.changedAt);
-        if (resolvedTime > assignedTime) {
-          tatMinutes = Math.floor((resolvedTime - assignedTime) / 60000);
-        }
-      }
-
-      const formatMinutes = (minutes) => {
-        if (minutes == null) return "N/A";
-        const abs = Math.abs(minutes);
-        const hr = Math.floor(abs / 60);
-        const min = abs % 60;
-        return `${hr} hr ${min} min`;
-      };
-
-      return {
-        _id: service._id,
-        serviceId: service.serviceId,
-        tat: formatMinutes(tatMinutes),
-        tatRawMinutes: tatMinutes,
-      };
-    });
-
-    res.json({ success: true, data: results });
-  } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error calculating TAT for all services",
-        error: error.message,
-      });
-  }
-};
-
-// export const getIncidentSla = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const incident = await IncidentModel.findById(id);
-//     if (!incident) return res.status(404).json({ message: "Incident not found" });
-
-//     // ...SLA calculation logic (same as before, but only return SLA)...
-
-//     // Get SLA config and timeline
-//     const slaConfig = await SLACreationModel.findOne({ default: true });
-//     const slaTimelineData = await SLATimelineModel.find();
-//     const businessHours = slaConfig?.slaTimeline || [];
-//     const severity = incident?.classificaton?.severityLevel;
-//     const cleanSeverity = severity?.replace(/[\s\-]/g, "").toLowerCase();
-//     const matchedTimeline = slaTimelineData.find(
-//       (item) =>
-//         item.priority?.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
-//     );
-//     const resolution = matchedTimeline?.resolutionSLA || "00:30";
-//     const [slaHours, slaMinutes] = resolution.split(":").map(Number);
-//     const totalHours = slaHours + slaMinutes / 60;
-
-//     // SLA Deadline
-//     const loggedIn = new Date(
-//       incident?.createdAt || incident?.submitter?.loggedInTime
-//     );
-//     const slaDeadline = addBusinessTime(loggedIn, totalHours, businessHours);
-
-//     // SLA Remaining (stopped at resolved)
-//     const timeline = incident.statusTimeline || [];
-//     const latestStatus = timeline?.at(-1)?.status?.toLowerCase();
-//     let slaRemainingMinutes;
-//     if (latestStatus === "resolved") {
-//       const resolvedEntry = [...timeline].reverse().find(
-//         (t) => t.status?.toLowerCase() === "resolved"
-//       );
-//       const resolvedTime = resolvedEntry ? new Date(resolvedEntry.changedAt) : null;
-//       if (resolvedTime) {
-//         slaRemainingMinutes = resolvedTime < slaDeadline
-//           ? getBusinessMinutesBetween(resolvedTime, slaDeadline, businessHours)
-//           : -getBusinessMinutesBetween(slaDeadline, resolvedTime, businessHours);
-//       } else {
-//         slaRemainingMinutes = 0;
-//       }
-//     } else {
-//       const now = new Date();
-//       if (now < slaDeadline) {
-//         slaRemainingMinutes = getBusinessMinutesBetween(now, slaDeadline, businessHours);
-//       } else {
-//         slaRemainingMinutes = -getBusinessMinutesBetween(slaDeadline, now, businessHours);
-//       }
-//     }
-
-//     // Format output
-//     const formatMinutes = (minutes) => {
-//       if (minutes == null) return "N/A";
-//       const abs = Math.abs(minutes);
-//       const hr = Math.floor(abs / 60);
-//       const min = abs % 60;
-//       return `${hr} hr ${min} min`;
-//     };
-
-//     res.json({
-//       success: true,
-//       sla: formatMinutes(slaRemainingMinutes),
-//       slaRawMinutes: slaRemainingMinutes,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error calculating SLA", error: error.message });
-//   }
-// };
-
-// export const getIncidentTat = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const incident = await IncidentModel.findById(id);
-//     if (!incident) return res.status(404).json({ message: "Incident not found" });
-
-//     // TAT Calculation (assigned to resolved)
-//     const timeline = incident.statusTimeline || [];
-//     const assignedEntry = [...timeline].reverse().find(
-//       (t) => t.status?.toLowerCase() === "assigned"
-//     );
-//     const resolvedEntry = [...timeline].reverse().find(
-//       (t) => t.status?.toLowerCase() === "resolved"
-//     );
-//     let tatMinutes = null;
-//     if (assignedEntry && resolvedEntry) {
-//       const assignedTime = new Date(assignedEntry.changedAt);
-//       const resolvedTime = new Date(resolvedEntry.changedAt);
-//       if (resolvedTime > assignedTime) {
-//         tatMinutes = Math.floor((resolvedTime - assignedTime) / 60000);
-//       }
-//     }
-
-//     // Format output
-//     const formatMinutes = (minutes) => {
-//       if (minutes == null) return "N/A";
-//       const abs = Math.abs(minutes);
-//       const hr = Math.floor(abs / 60);
-//       const min = abs % 60;
-//       return `${hr} hr ${min} min`;
-//     };
-
-//     res.json({
-//       success: true,
-//       tat: formatMinutes(tatMinutes),
-//       tatRawMinutes: tatMinutes,
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: "Error calculating TAT", error: error.message });
-//   }
-// };
-
-// ✅ Utility: Get IST Time
-// Convert date to IST
-function getISTDate(date = new Date()) {
-  return new Date(date.getTime() + 5.5 * 60 * 60 * 1000);
-}
-
-// ✅ Utility: Calculate TAT (Assigned to Resolved) in IST
-function calculateTAT(assignedAt, resolvedAt) {
-  const start = getISTDate(new Date(assignedAt));
-  const end = getISTDate(new Date(resolvedAt));
-  const diffMs = end - start;
-
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const days = Math.floor(diffMins / (60 * 24));
-  const hours = Math.floor((diffMins % (60 * 24)) / 60);
-  const mins = diffMins % 60;
-
-  return `${days} days ${hours} hours ${mins} mins`;
-}
-
-// Calculate SLA deadline
-function calculateSLADeadline(
-  loggedInTime,
-  slaHours,
-  slaTimeline = [],
-  serviceWindow = true
-) {
-  if (serviceWindow) {
-    return new Date(loggedInTime.getTime() + slaHours * 60 * 60 * 1000);
-  } else {
-    let remainingHours = slaHours;
-    let current = dayjs(loggedInTime);
-    let deadline = current;
-
-    while (remainingHours > 0) {
-      const weekday = deadline.format("dddd");
-      const slot = slaTimeline.find((s) => s.weekDay === weekday);
-
-      if (slot) {
-        const workStart = dayjs(
-          deadline.format("YYYY-MM-DD") +
-            "T" +
-            dayjs(slot.startTime).format("HH:mm")
-        );
-        const workEnd = dayjs(
-          deadline.format("YYYY-MM-DD") +
-            "T" +
-            dayjs(slot.endTime).format("HH:mm")
-        );
-
-        if (deadline.isBefore(workEnd)) {
-          const available = Math.max(
-            0,
-            workEnd.diff(dayjs.max(deadline, workStart), "hour", true)
-          );
-          const used = Math.min(available, remainingHours);
-          remainingHours -= used;
-          deadline = deadline.add(used, "hour");
-        }
-      }
-
-      if (remainingHours > 0) {
-        deadline = deadline.add(1, "day").startOf("day");
-      }
-    }
-
-    return deadline.toDate();
-  }
-}
-
 export const createServiceRequest = async (req, res) => {
   try {
     const { userId, ...serviceRequestData } = req.body;
@@ -431,22 +461,10 @@ export const createServiceRequest = async (req, res) => {
     const user = await AuthModel.findById(userId);
 
     // Parse possible JSON fields
-    let submitter =
-      typeof serviceRequestData.submitter === "string"
-        ? JSON.parse(serviceRequestData.submitter)
-        : serviceRequestData.submitter;
-    let assetDetails =
-      typeof serviceRequestData.assetDetails === "string"
-        ? JSON.parse(serviceRequestData.assetDetails)
-        : serviceRequestData.assetDetails;
-    let locationDetails =
-      typeof serviceRequestData.locationDetails === "string"
-        ? JSON.parse(serviceRequestData.locationDetails)
-        : serviceRequestData.locationDetails;
-    let classificaton =
-      typeof serviceRequestData.classificaton === "string"
-        ? JSON.parse(serviceRequestData.classificaton)
-        : serviceRequestData.classificaton;
+    let submitter = typeof serviceRequestData.submitter === "string" ? JSON.parse(serviceRequestData.submitter) : serviceRequestData.submitter;
+    let assetDetails = typeof serviceRequestData.assetDetails === "string" ? JSON.parse(serviceRequestData.assetDetails) : serviceRequestData.assetDetails;
+    let locationDetails = typeof serviceRequestData.locationDetails === "string" ? JSON.parse(serviceRequestData.locationDetails) : serviceRequestData.locationDetails;
+    let classificaton = typeof serviceRequestData.classificaton === "string" ? JSON.parse(serviceRequestData.classificaton) : serviceRequestData.classificaton;
 
     // Determine status based on technician field
     let status = "New";
@@ -469,20 +487,16 @@ export const createServiceRequest = async (req, res) => {
     );
 
     const now = getISTDate();
-    const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(
-      now.getMonth() + 1
-    ).padStart(2, "0")}${now.getFullYear()}`;
+    const dateStr = `${String(now.getDate()).padStart(2, "0")}${String(now.getMonth() + 1).padStart(2, "0")}${now.getFullYear()}`;
     const newServiceRequestId = `SER${dateStr}${counter.seq}`;
 
-    // Fill submitter defaults
+    // Fill submitter defaults (safe date handling)
     submitter = {
       user: submitter?.user || user?.employeeName || "",
       userId: submitter?.userId || user?.userId || "",
       userEmail: submitter?.userEmail || user?.emailAddress || "",
       loggedBy: submitter?.loggedBy || user?.employeeName || "",
-      loggedInTime: submitter?.loggedInTime
-        ? getISTDate(new Date(submitter.loggedInTime))
-        : now,
+      loggedInTime: safeISTDate(submitter?.loggedInTime, now),
     };
 
     // Fill location defaults
@@ -490,37 +504,6 @@ export const createServiceRequest = async (req, res) => {
       location: locationDetails?.location || user?.location || "",
       subLocation: locationDetails?.subLocation || user?.subLocation || "",
     };
-
-    // SLA Calculation
-    const severity = classificaton?.severityLevel || "";
-    let resolutionHours = 24;
-    let slaTimeline = [];
-    let serviceWindow = true;
-
-    if (severity) {
-      const cleanSeverity = severity.replace(/[\s\-]/g, "").toLowerCase();
-      const allTimelines = await SLATimelineModel.find();
-      const matched = allTimelines.find(
-        (t) => t.priority.replace(/[\s\-]/g, "").toLowerCase() === cleanSeverity
-      );
-      if (matched?.resolutionSLA) {
-        const [h, m] = matched.resolutionSLA.split(":").map(Number);
-        resolutionHours = h + m / 60;
-      }
-    }
-
-    const slaConfig = await SLACreationModel.findOne({ default: true });
-    if (slaConfig) {
-      serviceWindow = slaConfig.serviceWindow;
-      slaTimeline = slaConfig.slaTimeline || [];
-    }
-
-    const slaDeadline = calculateSLADeadline(
-      submitter.loggedInTime,
-      resolutionHours,
-      slaTimeline,
-      serviceWindow
-    );
 
     const approvalStatusArr = [];
     if (serviceRequestData.approver1) {
@@ -531,7 +514,7 @@ export const createServiceRequest = async (req, res) => {
       });
     }
 
-    // Save Service Request
+    // Save Service Request (no SLA/TAT calculation here)
     const newServiceRequest = new ServiceRequestModel({
       userId,
       serviceId: newServiceRequestId,
@@ -541,9 +524,8 @@ export const createServiceRequest = async (req, res) => {
       loggedVia: serviceRequestData.loggedVia,
       description: serviceRequestData.description,
       status,
-      sla: slaDeadline,
       isSla: true,
-      tat: serviceRequestData.tat || "",
+      tat: "",
       feedback: serviceRequestData.feedback,
       attachment: attachmentPath,
       submitter,
@@ -566,6 +548,47 @@ export const createServiceRequest = async (req, res) => {
 
     await newServiceRequest.save();
 
+    // Send notification emails
+const adminEmails = await getEmailsByRole("Admin");
+const superAdminEmails = await getEmailsByRole("SuperAdmin");
+let technicianEmail = "";
+if (classificaton?.technician && classificaton.technician.trim() !== "") {
+  technicianEmail = await getEmailById(classificaton.technician);
+}
+const approverEmails = [];
+if (newServiceRequest.approver1) approverEmails.push(newServiceRequest.approver1);
+if (newServiceRequest.approver2) approverEmails.push(newServiceRequest.approver2);
+if (newServiceRequest.approver3) approverEmails.push(newServiceRequest.approver3);
+
+// Send "New Service Request" mail
+await sendNewServiceRequestMail({
+  serviceRequest: newServiceRequest,
+  adminEmails,
+  superAdminEmails,
+  technicianEmail,
+  approverEmails,
+});
+
+// Optionally, send assigned mail if technician assigned
+if (technicianEmail) {
+  await sendAssignedServiceRequestMail({
+    serviceRequest: newServiceRequest,
+    adminEmails,
+    superAdminEmails,
+    technicianEmail,
+    approverEmails,
+  });
+}
+
+// Optionally, send approval mail to first approver
+if (newServiceRequest.approver1) {
+  await sendApprovalMail({
+    serviceRequest: newServiceRequest,
+    approverEmail: newServiceRequest.approver1,
+    level: 1,
+  });
+}
+
     res.status(201).json({
       success: true,
       data: newServiceRequest,
@@ -578,7 +601,6 @@ export const createServiceRequest = async (req, res) => {
     });
   }
 };
-
 export const getAllServiceRequests = async (req, res) => {
   try {
     const serviceRequests = await ServiceRequestModel.find().sort({ createdAt: -1 });
@@ -636,10 +658,6 @@ export const updateServiceRequest = async (req, res) => {
     const { id } = req.params;
     const { status, changedBy, ...otherFields } = req.body;
 
-    if (!status) {
-      return res.status(400).json({ message: "status is required" });
-    }
-
     const serviceRequest = await ServiceRequestModel.findById(id);
     if (!serviceRequest) {
       return res
@@ -647,7 +665,10 @@ export const updateServiceRequest = async (req, res) => {
         .json({ success: false, message: "Service Request Id not found" });
     }
 
-    // Track changes in other fields
+    // --- Capture previous technician BEFORE updating fields ---
+    const previousTechnician = serviceRequest.classificaton?.technician || "";
+
+    // Track changes in other fields (including classificaton)
     const fieldChanges = {};
     Object.keys(otherFields).forEach((key) => {
       if (
@@ -659,36 +680,61 @@ export const updateServiceRequest = async (req, res) => {
       }
     });
 
-    // Track status change (always push to timeline, even if same status)
-    serviceRequest.statusTimeline.push({
-      status,
-      changedAt: getISTDate(),
-      changedBy,
-    });
-    serviceRequest.status = status;
-    let statusChanged = true;
+    // --- Now get the current technician AFTER update ---
+    const currentTechnician =
+      (serviceRequest.classificaton && serviceRequest.classificaton.technician) || "";
 
-    // ✅ TAT Calculation: If status is "Resolved", calculate TAT from latest "Assigned" to latest "Resolved"
-    if (status.toLowerCase() === "resolved") {
-      const timeline = serviceRequest.statusTimeline;
-      const assignedEntry = [...timeline]
-        .reverse()
-        .find((e) => e.status?.toLowerCase() === "assigned");
-      const resolvedEntry = [...timeline]
-        .reverse()
-        .find((e) => e.status?.toLowerCase() === "resolved");
-      if (assignedEntry && resolvedEntry) {
-        const tat = calculateTAT(
-          assignedEntry.changedAt,
-          resolvedEntry.changedAt
-        );
-        serviceRequest.tat = tat;
+    let technicianJustAssigned = false;
+
+    // If technician is newly assigned and status is "New" or not provided, set status to "Assigned"
+    if (
+      (!previousTechnician || previousTechnician.trim() === "") &&
+      currentTechnician &&
+      currentTechnician.trim() !== "" &&
+      (!status || serviceRequest.status === "New")
+    ) {
+      serviceRequest.statusTimeline.push({
+        status: "Assigned",
+        changedAt: getISTDate(),
+        changedBy,
+      });
+      serviceRequest.status = "Assigned";
+      technicianJustAssigned = true;
+    }
+
+    // Only update status and timeline if status is provided (other than the above auto-assignment)
+    if (status) {
+      serviceRequest.statusTimeline.push({
+        status,
+        changedAt: getISTDate(),
+        changedBy,
+      });
+      serviceRequest.status = status;
+
+      // TAT logic if status is "Resolved"
+      if (status.toLowerCase() === "resolved") {
+        const timeline = serviceRequest.statusTimeline;
+        const assignedEntry = [...timeline]
+          .reverse()
+          .find((e) => e.status?.toLowerCase() === "assigned");
+        const resolvedEntry = [...timeline]
+          .reverse()
+          .find((e) => e.status?.toLowerCase() === "resolved");
+        if (assignedEntry && resolvedEntry) {
+          const assignedTime = new Date(assignedEntry.changedAt);
+          const resolvedTime = new Date(resolvedEntry.changedAt);
+          if (resolvedTime > assignedTime) {
+            serviceRequest.tat = `${Math.floor(
+              (resolvedTime - assignedTime) / 60000
+            )} min`;
+          }
+        } else {
+          serviceRequest.tat = "N/A";
+        }
+        serviceRequest.isResolved = true;
       } else {
-        serviceRequest.tat = "N/A";
+        serviceRequest.isResolved = false;
       }
-      serviceRequest.isResolved = true;
-    } else {
-      serviceRequest.isResolved = false;
     }
 
     // Push field changes if any
@@ -701,20 +747,40 @@ export const updateServiceRequest = async (req, res) => {
     }
 
     await serviceRequest.save();
-    res
-      .status(200)
-      .json({
-        success: true,
-        data: serviceRequest,
-        message: "Service Request updated and lifecycle recorded",
+
+    const adminEmails = await getEmailsByRole("Admin");
+    const superAdminEmails = await getEmailsByRole("SuperAdmin");
+    const approverEmails = [];
+    if (serviceRequest.approver1) approverEmails.push(serviceRequest.approver1);
+    if (serviceRequest.approver2) approverEmails.push(serviceRequest.approver2);
+    if (serviceRequest.approver3) approverEmails.push(serviceRequest.approver3);
+
+    // Send mail only if technician is newly assigned
+    if (
+      technicianJustAssigned &&
+      currentTechnician &&
+      currentTechnician.trim() !== ""
+    ) {
+      const technicianEmail = await getEmailById(currentTechnician);
+      await sendAssignedServiceRequestMail({
+        serviceRequest,
+        adminEmails,
+        superAdminEmails,
+        technicianEmail,
+        approverEmails,
       });
+    }
+
+    res.status(200).json({
+      success: true,
+      data: serviceRequest,
+      message: "Service Request updated and lifecycle recorded",
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "An error occurred while updating service request",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "An error occurred while updating service request",
+      error: error.message,
+    });
   }
 };
 
@@ -776,12 +842,32 @@ export const approveServiceRequest = async (req, res) => {
           level: nextLevel,
           status: "Pending"
         });
+        // Send approval mail to next approver
+        await sendApprovalMail({
+          serviceRequest,
+          approverEmail: nextApprover,
+          level: nextLevel,
+        });
       } else {
         // All approvals done
         serviceRequest.approval = true;
+        // Notify requester
+        const requesterEmail = serviceRequest.submitter?.userEmail;
+        await sendRequesterNotificationMail({
+          serviceRequest,
+          requesterEmail,
+          action: "Approved",
+        });
       }
     } else if (action === "Rejected") {
       serviceRequest.approval = false;
+      // Notify requester
+      const requesterEmail = serviceRequest.submitter?.userEmail;
+      await sendRequesterNotificationMail({
+        serviceRequest,
+        requesterEmail,
+        action: "Rejected",
+      });
     }
 
     await serviceRequest.save();
@@ -865,3 +951,49 @@ export const getMyPendingApprovals = async (req, res) => {
     res.status(500).json({ message: "Error fetching my pending approvals", error: error.message });
   }
 };
+
+export const autoCloseResolvedServiceRequests = async () => {
+  try {
+    // Fetch autoCloseTime from config model (default to 60 if not set)
+    const config = await ServiceAutoCloseModel.findOne();
+    // If autoCloseTime is stored as string, convert to number
+    const autoCloseTimeMinutes = config?.autoCloseTime
+      ? Number(config.autoCloseTime)
+      : 60;
+
+    const now = new Date();
+    // Find all service requests with status "Resolved"
+    const services = await ServiceRequestModel.find({ status: "Resolved" });
+
+    for (const service of services) {
+      // Find the last resolved time from statusTimeline
+      const resolvedEntry = [...service.statusTimeline].reverse().find(
+        (t) => t.status?.toLowerCase() === "resolved"
+      );
+      if (!resolvedEntry) continue;
+
+      const resolvedTime = new Date(resolvedEntry.changedAt);
+      const diffMinutes = Math.floor((now - resolvedTime) / (1000 * 60));
+
+      if (diffMinutes >= autoCloseTimeMinutes) {
+        // Add "Closed" status to timeline and update status
+        service.statusTimeline.push({
+          status: "Closed",
+          changedAt: now,
+          changedBy: "system", // or any system user id
+        });
+        service.status = "Closed";
+        await service.save();
+      }
+    }
+    return { success: true, message: "Auto-close job completed." };
+  } catch (error) {
+    return { success: false, message: "Error in auto-close job", error: error.message };
+  }
+};
+
+function safeISTDate(val, fallback) {
+  if (!val) return fallback;
+  const d = new Date(val);
+  return isNaN(d.getTime()) ? fallback : getISTDate(d);
+}

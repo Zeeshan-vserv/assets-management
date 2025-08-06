@@ -32,6 +32,7 @@ import {
 } from "../../../api/SuportDepartmentRequest";
 import { getAllUsers, getUserById } from "../../../api/AuthRequest";
 import { useSelector } from "react-redux";
+import { getAllByTechnician } from "../../../api/ReportRequest";
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
@@ -43,9 +44,6 @@ const ticketOptions = ["All Tickets", "Incidents Tickets", "Service Tickets"];
 
 const TaskAssigned = () => {
   // Redux userId
-  const currentUserId = useSelector(
-    (state) => state.authReducer.authData?.userId
-  );
   const user = useSelector((state) => state.authReducer.authData);
 
   // State
@@ -69,11 +67,12 @@ const TaskAssigned = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [ticketType, setTicketType] = useState(ticketOptions[0]);
+  
 
   const fetchDepartment = useCallback(async () => {
     setIsLoading(true);
-    try {
-      const response = await getAllIncident();
+    try {      
+      const response = await getAllByTechnician(user?.userId);
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching departments:", error);
@@ -144,7 +143,6 @@ const TaskAssigned = () => {
   const selectedRow = data.find((item) => item._id === seletecetdRowId);
   const latestStatus = selectedRow?.statusTimeline?.at(-1)?.status || "";
 
-  console.log(selectedTechnician);
 
   // Status update handler
   const handleStatusUpdate = async (e) => {

@@ -1,6 +1,6 @@
 import express from 'express'
 import authMiddleware from '../middleware/AuthMiddleware.js'
-import { createGatePass, deleteGatePass, getAllGatePass, getGatePassById, updateGatePass } from '../controllers/GatePassController.js'
+import { approveGatePass, createGatePass, deleteGatePass, getAllGatePass, getGatePassById, updateGatePass } from '../controllers/GatePassController.js'
 import multer from 'multer';
 import { requirePagePermission } from '../middleware/roleMiddleware.js';
 
@@ -21,5 +21,6 @@ router.get('/', authMiddleware, requirePagePermission('gatePass', 'isView'), get
 router.get('/:id', authMiddleware, requirePagePermission('gatePass', 'isView'), getGatePassById)
 router.put('/:id', authMiddleware, requirePagePermission('gatePass', 'isEdit'), upload.single('attachment'), updateGatePass)
 router.delete('/:id', authMiddleware, requirePagePermission('gatePass', 'isDelete'), deleteGatePass)
+router.post('/:id/approve', authMiddleware, requirePagePermission('serviceRequest', 'isEdit'), approveGatePass);
 
 export default router

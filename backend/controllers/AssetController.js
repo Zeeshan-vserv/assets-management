@@ -1,6 +1,7 @@
 import AssetModel from "../models/assetModel.js";
 import xlsx from 'xlsx';
 import fs from 'fs';
+import AuthModel from "../models/authModel.js";
 
 export const createAsset = async (req, res) => {
     try {
@@ -13,7 +14,7 @@ export const createAsset = async (req, res) => {
         const lastAsset = await AssetModel.findOne().sort({ assetId: -1 });
         const nextAssetId = lastAsset ? lastAsset.assetId + 1 : 1;
 
-        
+
         if (req.file) {
             if (!assetData.assetInformation) assetData.assetInformation = {};
             assetData.assetInformation.assetImage = req.file.path;
@@ -26,6 +27,17 @@ export const createAsset = async (req, res) => {
         });
 
         const asset = await newAsset.save();
+
+        // --- Add asset allocation history to user ---
+        const user = await AuthModel.findById(userId);
+        if (user) {
+            user.assetAllocationHistory.push({
+                assetId: asset._id,
+                allocatedAt: new Date(),
+                status: "Allocated",
+            });
+            await user.save();
+        }
         res.status(201).json({ asset, message: "Asset Created" });
     } catch (err) {
         res.status(400).json({ message: err.message });
@@ -33,27 +45,27 @@ export const createAsset = async (req, res) => {
 }
 
 export const getAllAssets = async (req, res) => {
-    try{
+    try {
         const assets = await AssetModel.find().populate('userId', 'emailAddrress')
-        res.status(200).json({success: true,data: assets})
+        res.status(200).json({ success: true, data: assets })
     }
-    catch(err){
-        res.status(400).json({message: err.message})
+    catch (err) {
+        res.status(400).json({ message: err.message })
     }
 }
 
 export const getAssetById = async (req, res) => {
-    try{
+    try {
         const { id } = req.params
         const asset = await AssetModel.findById(id).populate('userId', 'emailAddrress')
-        if(!asset){
-            return res.status(404).json({success:false, message: 'Asset not found'})
+        if (!asset) {
+            return res.status(404).json({ success: false, message: 'Asset not found' })
         }
-        res.status(200).json({success: true, data: asset})
-        
+        res.status(200).json({ success: true, data: asset })
+
     }
-    catch(err){
-        res.status(500).json({message: err.message})
+    catch (err) {
+        res.status(500).json({ message: err.message })
     }
 }
 
@@ -78,9 +90,25 @@ export const updateAsset = async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = { ...req.body };
-        const updatedBy = updateData.updatedBy; // Extract before deleting
+        const updatedBy = updateData.updatedBy;
         delete updateData.updatedBy;
         delete updateData.updateHistory;
+
+        // Sanitize date fields
+        const dateFields = [
+            "financeInformation.poDate",
+            "financeInformation.invoiceDate",
+            "preventiveMaintenance.istPmDate"
+        ];
+        dateFields.forEach(field => {
+            const [parent, child] = field.split(".");
+            if (
+                updateData[parent] &&
+                (updateData[parent][child] === "" || updateData[parent][child] === "null")
+            ) {
+                updateData[parent][child] = null;
+            }
+        });
 
         const asset = await AssetModel.findById(id);
         if (!asset) {
@@ -103,6 +131,26 @@ export const updateAsset = async (req, res) => {
         }
 
         await asset.save();
+
+        // --- Asset allocation history update ---
+        if (updateData.userId) {
+            const user = await AuthModel.findById(updateData.userId);
+            if (user) {
+                // Check if this allocation is new (not already in history)
+                const alreadyAllocated = user.assetAllocationHistory.some(
+                    (entry) => entry.assetId.toString() === asset._id.toString() && entry.status === "Allocated"
+                );
+                if (!alreadyAllocated) {
+                    user.assetAllocationHistory.push({
+                        assetId: asset._id,
+                        allocatedAt: new Date(),
+                        status: "Allocated",
+                    });
+                    await user.save();
+                }
+            }
+        }
+
         res.status(200).json({ success: true, data: asset, message: 'Asset updated and history recorded' });
     } catch (error) {
         res.status(500).json({ message: 'Error updating asset', error: error.message });
@@ -114,10 +162,10 @@ export const deleteAsset = async (req, res) => {
         const { id } = req.params
         const deleteAsset = await AssetModel.findByIdAndDelete(id)
 
-        if(!deleteAsset){
-            return res.status(404).json({success:false, message:'Asset Id not found'})
+        if (!deleteAsset) {
+            return res.status(404).json({ success: false, message: 'Asset Id not found' })
         }
-        res.status(200).json({ success:true, data: deleteAsset, message:"Asset deleted successfully"})
+        res.status(200).json({ success: true, data: deleteAsset, message: "Asset deleted successfully" })
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while deleting Asset' });
     }
@@ -212,42 +260,42 @@ export const uploadAssetFromExcel = async (req, res) => {
 }
 
 export const getAssetStatusCounts = async (req, res) => {
-  try {
-    const assetList = [
-      "Total",
-      "In Store",
-      "Allocated",
-      "In Repair",
-      "Theft/Lost",
-      "Discard/Replaced",
-      "Disposed/Scrapped",
-      "Sold"
-    ];
+    try {
+        const assetList = [
+            "Total",
+            "In Store",
+            "Allocated",
+            "In Repair",
+            "Theft/Lost",
+            "Discard/Replaced",
+            "Disposed/Scrapped",
+            "Sold"
+        ];
 
-    const pipeline = [
-      {
-        $group: {
-          _id: "$assetState.assetIsCurrently",
-          count: { $sum: 1 }
-        }
-      }
-    ];
+        const pipeline = [
+            {
+                $group: {
+                    _id: "$assetState.assetIsCurrently",
+                    count: { $sum: 1 }
+                }
+            }
+        ];
 
-    const results = await AssetModel.aggregate(pipeline);
+        const results = await AssetModel.aggregate(pipeline);
 
-    const counts = {};
-    assetList.forEach(status => {
-      const found = results.find(r => r._id === status);
-      counts[status] = found ? found.count : 0;
-    });
+        const counts = {};
+        assetList.forEach(status => {
+            const found = results.find(r => r._id === status);
+            counts[status] = found ? found.count : 0;
+        });
 
-    // Total count
-    counts["Total"] = await AssetModel.countDocuments();
+        // Total count
+        counts["Total"] = await AssetModel.countDocuments();
 
-    res.json({ success: true, data: counts });
-  } catch (error) {
-    console.error("Error fetching asset counts:", error);
-    res.status(500).json({ message: "Error fetching asset counts", error: error.message });
-  }
+        res.json({ success: true, data: counts });
+    } catch (error) {
+        console.error("Error fetching asset counts:", error);
+        res.status(500).json({ message: "Error fetching asset counts", error: error.message });
+    }
 };
 

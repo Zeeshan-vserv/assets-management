@@ -45,7 +45,7 @@ export const getIncidentTat = (id) =>
   API.get(`/incident/tat/${id}`);
 
 export const getAllIncidentsSla = () =>
-  API.get(`/incident/sla-all`);
+  API.get(`/incident/sla`);
 
 export const getAllIncidentsTat = () =>
-  API.get(`/incident/tat-all`);
+  API.get(`/incident/tat`);

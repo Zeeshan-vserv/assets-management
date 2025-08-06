@@ -2,7 +2,8 @@ import express from 'express'
 import multer from "multer";
 import path from "path";
 import authMiddleware from '../middleware/AuthMiddleware.js'
-import { approveServiceRequest, createServiceRequest, deleteServiceRequest, getAllServiceRequests, getAllServiceSla, getAllServicesTat, getMyPendingApprovals, getServiceRequestById, getServiceRequestByUserId, getServiceRequestStatusCounts, updateServiceRequest } from '../controllers/serviceRequestController.js';
+import { approveServiceRequest, createServiceRequest, deleteServiceRequest, getAllIncidentsSla, getAllIncidentsTat, getAllServiceRequests, getIncidentSla, getIncidentTat, getMyPendingApprovals, getServiceRequestById, getServiceRequestByUserId, getServiceRequestStatusCounts, updateServiceRequest } from '../controllers/serviceRequestController.js';
+import { requirePagePermission } from '../middleware/roleMiddleware.js';
 
 const router = express.Router()
 
@@ -19,17 +20,18 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post('/', authMiddleware, upload.single('attachment'), createServiceRequest);
-router.get("/sla-all", getAllServiceSla);
-router.get("/tat-all", getAllServicesTat);
-router.get('/status-counts', authMiddleware, getServiceRequestStatusCounts);
-router.get('/my-approvals', authMiddleware, getMyPendingApprovals);
-router.get('/', authMiddleware, getAllServiceRequests)
-router.get('/user/:userId', getServiceRequestByUserId)
-router.get('/:id', authMiddleware, getServiceRequestById)
-router.put('/:id', authMiddleware, updateServiceRequest)
-router.delete('/:id', authMiddleware, deleteServiceRequest)
-router.post('/:id/approve', authMiddleware, approveServiceRequest)
-
+router.post('/', authMiddleware, requirePagePermission('serviceRequest', 'isEdit'), upload.single('attachment'), createServiceRequest);
+router.get('/sla', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getAllIncidentsSla);
+router.get('/tat', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getAllIncidentsTat);
+router.get('/sla/:id', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getIncidentSla);
+router.get('/tat/:id', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getIncidentTat);
+router.get('/status-counts', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getServiceRequestStatusCounts);
+router.get('/my-approvals', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getMyPendingApprovals);
+router.get('/', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getAllServiceRequests);
+router.get('/user/:userId', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getServiceRequestByUserId);
+router.get('/:id', authMiddleware, requirePagePermission('serviceRequest', 'isView'), getServiceRequestById);
+router.put('/:id', authMiddleware, requirePagePermission('serviceRequest', 'isEdit'), updateServiceRequest);
+router.delete('/:id', authMiddleware, requirePagePermission('serviceRequest', 'isDelete'), deleteServiceRequest);
+router.post('/:id/approve', authMiddleware, requirePagePermission('serviceRequest', 'isEdit'), approveServiceRequest);
 
 export default router

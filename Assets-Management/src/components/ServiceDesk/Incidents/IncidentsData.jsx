@@ -770,7 +770,6 @@ const IncidentsData = () => {
                 </p>
               </div>
             </div>
-
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setShowUserModal(false)}
@@ -790,7 +789,7 @@ const IncidentsData = () => {
                 <div className="flex flex-col items-center justify-center">
                   <div className="rounded-xl px-6 py-6 flex flex-col items-center">
                     <svg
-                      className="w-16 h-16 text-blue-500 mb-4"
+                      className="w-16 h-16 text-blue-500 mb-4 animate-check"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 48 48"
@@ -820,13 +819,15 @@ const IncidentsData = () => {
                       You cannot assign it again.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setChangeStatus(false)}
-                    className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
-                  >
-                    Close
-                  </button>
+                  <div className="p-[2px] rounded-md bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 inline-block">
+                    <button
+                      type="button"
+                      onClick={() => setChangeStatus(false)}
+                      className="px-6 py-2 rounded-sm bg-white text-blue-600 hover:bg-gray-100 transition font-semibold"
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               </>
             ) : (

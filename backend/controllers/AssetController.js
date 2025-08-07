@@ -47,7 +47,7 @@ export const createAsset = async (req, res) => {
 
 export const getAllAssets = async (req, res) => {
     try {
-        const assets = await AssetModel.find().populate('userId', 'emailAddrress')
+        const assets = await AssetModel.find().sort({ createdAt: -1 })
         res.status(200).json({ success: true, data: assets })
     }
     catch (err) {

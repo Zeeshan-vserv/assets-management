@@ -59,7 +59,7 @@ export const createGatePass = async (req, res) => {
 
 export const getAllGatePass = async (req, res) => {
     try {
-        const gatePass = await GatePass.find()
+        const gatePass = await GatePass.find().sort({ createdAt: -1 })
         res.status(200).json({ success: true, data: gatePass })
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while fetchig gate pass' })

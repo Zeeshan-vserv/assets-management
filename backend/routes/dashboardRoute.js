@@ -1,5 +1,5 @@
 import express from "express";
-import { getAssetsByCategory, getAssetsByLocation, getAssetsByStatus, getAssetsBySubLocation, getAssetsBySupportType, getAssetsByWarrantyExpiry, getIncidentOpenClosedByField, getOpenIncidentsBySeverity, getOpenIncidentsByStatus, getResolutionSlaStatus, getResponseSlaStatus, getServiceOpenByField, getServiceRequestStatusSummary, getTechnicianIncidentStatusSummary, getTotalIncidentsByDateRange, getTotalServicesByDateRange } from "../controllers/DashboardController.js";
+import { exportAssetReport, exportIncidentReport, exportServiceRequestReport, getAssetsByCategory, getAssetsByLocation, getAssetsByStatus, getAssetsBySubLocation, getAssetsBySupportType, getAssetsByWarrantyExpiry, getIncidentOpenClosedByField, getOpenIncidentsBySeverity, getOpenIncidentsByStatus, getResolutionSlaStatus, getResponseSlaStatus, getServiceOpenByField, getServiceRequestStatusSummary, getTechnicianIncidentStatusSummary, getTotalIncidentsByDateRange, getTotalServicesByDateRange } from "../controllers/DashboardController.js";
 import authMiddleware from "../middleware/AuthMiddleware.js";
 import { requirePagePermission } from "../middleware/roleMiddleware.js";
 const router = express.Router();
@@ -32,5 +32,9 @@ router.get("/assets-by-category", authMiddleware, requirePagePermission('dashboa
 router.get("/assets-by-location", authMiddleware, requirePagePermission('dashboard', 'isView'), getAssetsByLocation);
 router.get("/assets-by-sub-location", authMiddleware, requirePagePermission('dashboard', 'isView'), getAssetsBySubLocation);
 // router.get("/assets-by-business-unit", authMiddleware, requirePagePermission('dashboard', 'isView'), getAssetsByBusinessUnit);
+
+router.post("/incidentsReport", exportIncidentReport);
+router.post("/service-requests", exportServiceRequestReport);
+router.post("/assets", exportAssetReport);
 
 export default router;

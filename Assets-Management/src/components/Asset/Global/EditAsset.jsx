@@ -20,6 +20,7 @@ import {
 import { getAllUsers } from "../../../api/AuthRequest";
 import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 import { getAllStoreLocations } from "../../../api/StoreLocationRequest";
+import { getAllVendors } from "../../../api/vendorRequest";
 const EditAsset = () => {
   const { id } = useParams();
   const user = useSelector((state) => state.authReducer.authData);
@@ -32,6 +33,8 @@ const EditAsset = () => {
   const [filteredSubLocations, setFilteredSubLocations] = useState([]);
   const [filteredSubDepartments, setFilteredSubDepartments] = useState([]);
   const [users, setUsers] = useState([]);
+  const [vendorData, setVendors] = useState([]);
+
   const [formData, setFormData] = useState({
     assetInformation: {
       category: "",
@@ -136,6 +139,10 @@ const EditAsset = () => {
 
       const responseStoreLocation = await getAllStoreLocations();
       setstoreLocation(responseStoreLocation?.data?.data || []);
+
+      const responseVendors = await getAllVendors();
+      // console.log("Vendors Response:", responseVendors?.data?.data || []);
+      setVendors(responseVendors?.data?.data || []);
 
       const responseReportingManager = await getAllUsers();
       setUsers(responseReportingManager?.data || []);
@@ -920,7 +927,39 @@ const EditAsset = () => {
               >
                 Vendor
               </label>
-              <select
+              <Autocomplete
+                className="w-[65%]"
+                options={vendorData}
+                getOptionLabel={(option) => option.vendorName}
+                value={
+                  vendorData.find(
+                    (vendor) =>
+                      vendor.vendorName === formData.warrantyInformation.vendor
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    warrantyInformation: {
+                      ...formData.warrantyInformation,
+                      vendor: newValue ? newValue.vendorName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Vendor"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
+              {/* <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="vendor"
                 id="vendor"
@@ -937,7 +976,7 @@ const EditAsset = () => {
               >
                 <option value="">Select</option>
                 <option value="N/A">N/A</option>
-              </select>
+              </select> */}
             </div>
             <div className="flex items-center w-[46%]">
               <label

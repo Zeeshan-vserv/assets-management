@@ -6,6 +6,7 @@ import RequestDashboard from "./Request/RequestDashboard";
 import SoftwareDashboard from "./Software/SoftwareDashboard";
 import VendorDashboard from "./Vendor/VendorDashboard";
 import TaskDashboard from "./Task/TaskDashboard"
+import Report from "./AuditReport/Report";
 function DashboardRoute() {
   return (
     <>
@@ -16,6 +17,7 @@ function DashboardRoute() {
         <Route path="/task" element={<TaskDashboard />} />
         <Route path="/asset" element={<DashboardAsset />} />
         <Route path="/vendor" element={<VendorDashboard />} />
+        <Route path="/AuditReport" element={<Report />} />
       </Routes>
     </>
   );

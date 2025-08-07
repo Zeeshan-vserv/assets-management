@@ -369,154 +369,69 @@ const Navigation = ({ nav, setNav }) => {
           </>
         );
       case "reports":
-        return (
-          <>
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => toggleSubMenu("reports")}
-            >
-              reports{" "}
-              {expandedSubMenus.reports ? (
-                <IoMdArrowDropdown />
-              ) : (
-                <IoMdArrowDropright />
-              )}
-            </h3>
-            {expandedSubMenus.reports && (
-              <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
+        if (
+          userData.userRole === "Super Admin" ||
+          userData.userRole === "Admin"
+        ) {
+          return (
+            <>
+              <h3
+                className="flex items-center justify-between hover:underline cursor-pointer"
+                onClick={() => {
+                  setNav(false);
+                }}
+              >
+                <NavLink
+                  to="/main/dashboard/AuditReport"
+                  className={({ isActive }) =>
+                    `hover:underline cursor-pointer ${
+                      isActive ? "text-blue-400" : ""
+                    }`
+                  }
                 >
-                  sla creation
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  sla mapping
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  sla timelines
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  priority matix
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  holiday calendar
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  holiday list
-                </li>
-              </ul>
-            )}
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => toggleSubMenu("auditLogs")}
-            >
-              audit logs{" "}
-              {expandedSubMenus.auditLogs ? (
-                <IoMdArrowDropdown />
-              ) : (
-                <IoMdArrowDropright />
-              )}
-            </h3>
-            {expandedSubMenus.auditLogs && (
-              <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  sla creation
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  sla mapping
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  sla timelines
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  priority matix
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  holiday calendar
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  holiday list
-                </li>
-              </ul>
-            )}
-          </>
-        );
+                  Audit Report
+                </NavLink>
+              </h3>
+            </>
+          );
+        }
       case "configuration":
-        return (
-          <>
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => toggleSubMenu("global")}
-            >
-              global
-              {expandedSubMenus.global ? (
-                <IoMdArrowDropdown />
-              ) : (
-                <IoMdArrowDropright />
-              )}
-            </h3>
-            {expandedSubMenus.global && (
-              <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                {/* {console.log(userData)} */}
-                {userData.users.isView && (
+        if (userData.userRole === "Super Admin") {
+          return (
+            <>
+              <h3
+                className="flex items-center justify-between hover:underline cursor-pointer"
+                onClick={() => toggleSubMenu("global")}
+              >
+                global
+                {expandedSubMenus.global ? (
+                  <IoMdArrowDropdown />
+                ) : (
+                  <IoMdArrowDropright />
+                )}
+              </h3>
+              {expandedSubMenus.global && (
+                <ul className="flex flex-col gap-2 list-disc pl-5 ">
+                  {/* {console.log(userData)} */}
+                  {userData.users.isView && (
+                    <li
+                      className="text-[11px] hover:underline"
+                      onClick={() => {
+                        setNav(false);
+                      }}
+                    >
+                      <NavLink
+                        to="/main/configuration/Users"
+                        className={({ isActive }) =>
+                          `hover:underline cursor-pointer ${
+                            isActive ? "text-blue-400" : ""
+                          }`
+                        }
+                      >
+                        Users
+                      </NavLink>
+                    </li>
+                  )}
                   <li
                     className="text-[11px] hover:underline"
                     onClick={() => {
@@ -524,307 +439,289 @@ const Navigation = ({ nav, setNav }) => {
                     }}
                   >
                     <NavLink
-                      to="/main/configuration/Users"
+                      to="/main/configuration/components"
                       className={({ isActive }) =>
                         `hover:underline cursor-pointer ${
                           isActive ? "text-blue-400" : ""
                         }`
                       }
                     >
-                      Users
+                      components
                     </NavLink>
                   </li>
-                )}
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/components"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    components
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/department"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/department"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Department
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Department
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/sub-department"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/sub-department"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Sub Department
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Sub Department
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/location"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/location"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Location
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Location
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/sub-location"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/sub-location"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Sub Location
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Sub Location
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/import-user"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/import-user"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Import User
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Import User
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/supportDepartment"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/supportDepartment"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Support Department
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Support Department
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/supportGroup"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    Support Group
-                  </NavLink>
-                </li>
-              </ul>
-            )}
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => toggleSubMenu("incidents")}
-            >
-              incidents{" "}
-              {expandedSubMenus.incidents ? (
-                <IoMdArrowDropdown />
-              ) : (
-                <IoMdArrowDropright />
+                    <NavLink
+                      to="/main/configuration/supportGroup"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Support Group
+                    </NavLink>
+                  </li>
+                </ul>
               )}
-            </h3>
-            {expandedSubMenus.incidents && (
-              <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/IncidentStatus"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+              <h3
+                className="flex items-center justify-between hover:underline cursor-pointer"
+                onClick={() => toggleSubMenu("incidents")}
+              >
+                incidents{" "}
+                {expandedSubMenus.incidents ? (
+                  <IoMdArrowDropdown />
+                ) : (
+                  <IoMdArrowDropright />
+                )}
+              </h3>
+              {expandedSubMenus.incidents && (
+                <ul className="flex flex-col gap-2 list-disc pl-5 ">
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Incident Status
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/AutoCloseTime"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/IncidentStatus"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Incident Status
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Auto Close Time
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/CloserCode"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/AutoCloseTime"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Auto Close Time
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Closer Code
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/PredefinedReplies"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/CloserCode"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Closer Code
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Predefined Replies
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/PendingReason"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/PredefinedReplies"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Predefined Replies
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Pending Reason
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/Category"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/PendingReason"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Pending Reason
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    category
-                  </NavLink>
-                </li>
-                {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >category</li> */}
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/SubCategory"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/Category"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      category
+                    </NavLink>
+                  </li>
+                  {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >category</li> */}
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    sub category
-                  </NavLink>
-                </li>
-                {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub category</li> */}
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/IncidentRules"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/SubCategory"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      sub category
+                    </NavLink>
+                  </li>
+                  {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub category</li> */}
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    rules
-                  </NavLink>
-                </li>
-                {/* <li
+                    <NavLink
+                      to="/main/configuration/IncidentRules"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      rules
+                    </NavLink>
+                  </li>
+                  {/* <li
                   className="text-[11px] hover:underline"
                   onClick={() => {
                     setNav(false);
@@ -832,327 +729,327 @@ const Navigation = ({ nav, setNav }) => {
                 >
                   escalatio level
                 </li> */}
-              </ul>
-            )}
-
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => toggleSubMenu("sla")}
-            >
-              sla{" "}
-              {expandedSubMenus.sla ? (
-                <IoMdArrowDropdown />
-              ) : (
-                <IoMdArrowDropright />
+                </ul>
               )}
-            </h3>
-            {expandedSubMenus.sla && (
-              <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/sla-creation"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    sla creation
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/sla-mapping"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    sla mapping
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/sla-time-lines"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    sla timelines
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/priority-matrix"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    priority matix
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/holiday-calendar"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    holiday calendar
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/holiday-list"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    holiday list
-                  </NavLink>
-                </li>
-              </ul>
-            )}
 
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => toggleSubMenu("request")}
-            >
-              request{" "}
-              {expandedSubMenus.request ? (
-                <IoMdArrowDropdown />
-              ) : (
-                <IoMdArrowDropright />
+              <h3
+                className="flex items-center justify-between hover:underline cursor-pointer"
+                onClick={() => toggleSubMenu("sla")}
+              >
+                sla{" "}
+                {expandedSubMenus.sla ? (
+                  <IoMdArrowDropdown />
+                ) : (
+                  <IoMdArrowDropright />
+                )}
+              </h3>
+              {expandedSubMenus.sla && (
+                <ul className="flex flex-col gap-2 list-disc pl-5 ">
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/sla-creation"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      sla creation
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/sla-mapping"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      sla mapping
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/sla-time-lines"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      sla timelines
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/priority-matrix"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      priority matix
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/holiday-calendar"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      holiday calendar
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/holiday-list"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      holiday list
+                    </NavLink>
+                  </li>
+                </ul>
               )}
-            </h3>
-            {expandedSubMenus.request && (
-              <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/ReqAutoClosedTime"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    auto closed time
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/ReqCategory"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    category
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/ReqSubCategory"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    sub category
-                  </NavLink>
-                </li>
-              </ul>
-            )}
 
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => toggleSubMenu("asset")}
-            >
-              asset{" "}
-              {expandedSubMenus.asset ? (
-                <IoMdArrowDropdown />
-              ) : (
-                <IoMdArrowDropright />
+              <h3
+                className="flex items-center justify-between hover:underline cursor-pointer"
+                onClick={() => toggleSubMenu("request")}
+              >
+                request{" "}
+                {expandedSubMenus.request ? (
+                  <IoMdArrowDropdown />
+                ) : (
+                  <IoMdArrowDropright />
+                )}
+              </h3>
+              {expandedSubMenus.request && (
+                <ul className="flex flex-col gap-2 list-disc pl-5 ">
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/ReqAutoClosedTime"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      auto closed time
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/ReqCategory"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      category
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/ReqSubCategory"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      sub category
+                    </NavLink>
+                  </li>
+                </ul>
               )}
-            </h3>
-            {expandedSubMenus.asset && (
-              <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/software-category"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+
+              <h3
+                className="flex items-center justify-between hover:underline cursor-pointer"
+                onClick={() => toggleSubMenu("asset")}
+              >
+                asset{" "}
+                {expandedSubMenus.asset ? (
+                  <IoMdArrowDropdown />
+                ) : (
+                  <IoMdArrowDropright />
+                )}
+              </h3>
+              {expandedSubMenus.asset && (
+                <ul className="flex flex-col gap-2 list-disc pl-5 ">
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Software Category
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/software-name"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/software-category"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Software Category
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Software Name
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/publisher"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/software-name"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Software Name
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Publisher
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/store-location"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/publisher"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Publisher
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Store Location
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/condition"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/store-location"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Store Location
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Condition
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/consumable-category"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/condition"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Condition
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Consumable Category
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/consumable-sub-category"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+                    <NavLink
+                      to="/main/configuration/consumable-category"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Consumable Category
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Consumable SubCategory
-                  </NavLink>
-                </li>
-                {/* <li
+                    <NavLink
+                      to="/main/configuration/consumable-sub-category"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Consumable SubCategory
+                    </NavLink>
+                  </li>
+                  {/* <li
                   className="text-[11px] hover:underline"
                   onClick={() => {
                     setNav(false);
@@ -1169,41 +1066,41 @@ const Navigation = ({ nav, setNav }) => {
                     Asset Tag
                   </NavLink>
                 </li> */}
-              </ul>
-            )}
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => toggleSubMenu("gatepass")}
-            >
-              Gate Pass{" "}
-              {expandedSubMenus.gatepass ? (
-                <IoMdArrowDropdown />
-              ) : (
-                <IoMdArrowDropright />
+                </ul>
               )}
-            </h3>
-            {expandedSubMenus.gatepass && (
-              <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/GatePassAddress"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
+              <h3
+                className="flex items-center justify-between hover:underline cursor-pointer"
+                onClick={() => toggleSubMenu("gatepass")}
+              >
+                Gate Pass{" "}
+                {expandedSubMenus.gatepass ? (
+                  <IoMdArrowDropdown />
+                ) : (
+                  <IoMdArrowDropright />
+                )}
+              </h3>
+              {expandedSubMenus.gatepass && (
+                <ul className="flex flex-col gap-2 list-disc pl-5 ">
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
                   >
-                    Gate Pass Address
-                  </NavLink>
-                </li>
-              </ul>
-            )}
-            {/* <h3
+                    <NavLink
+                      to="/main/configuration/GatePassAddress"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      Gate Pass Address
+                    </NavLink>
+                  </li>
+                </ul>
+              )}
+              {/* <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {
                 setNav(false);
@@ -1211,81 +1108,20 @@ const Navigation = ({ nav, setNav }) => {
             >
               gate pass
             </h3> */}
-            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >vendor</h3> */}
-            {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >license</h3> */}
-
-            <h3
-              className="flex items-center justify-between hover:underline cursor-pointer"
-              onClick={() => toggleSubMenu("vendor")}
-            >
-              vendor{" "}
-              {expandedSubMenus.vendor ? (
-                <IoMdArrowDropdown />
-              ) : (
-                <IoMdArrowDropright />
-              )}
-            </h3>
-            {expandedSubMenus.vendor && (
-              <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/vendor-category"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    Category
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/status"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    Status
-                  </NavLink>
-                </li>
-                <li
-                  className="text-[11px] hover:underline"
-                  onClick={() => {
-                    setNav(false);
-                  }}
-                >
-                  <NavLink
-                    to="/main/configuration/service-category"
-                    className={({ isActive }) =>
-                      `hover:underline cursor-pointer ${
-                        isActive ? "text-blue-400" : ""
-                      }`
-                    }
-                  >
-                    Service Category
-                  </NavLink>
-                </li>
-              </ul>
-            )}
-          </>
-        );
+              {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >vendor</h3> */}
+              {/* <h3 className='flex items-center justify-between hover:underline cursor-pointer' onClick={() => {setNav(false)}} >license</h3> */}
+            </>
+          );
+        }
+        return null;
       default:
         return null;
     }
   };
+
+  {
+    console.log(userData.userRole === "Super Admin");
+  }
 
   return (
     <div className="flex h-full">
@@ -1320,26 +1156,31 @@ const Navigation = ({ nav, setNav }) => {
             setNav(true);
           }}
         />
-        <TbReportSearch
-          title="Reports"
-          className={`${
-            activeMenu == "reports" ? "text-blue-400" : ""
-          } cursor-pointer`}
-          onClick={() => {
-            setActiveMenu("reports");
-            setNav(true);
-          }}
-        />
-        <MdOutlineAdminPanelSettings
-          title="Configuration"
-          className={`${
-            activeMenu == "configuration" ? "text-blue-400" : ""
-          } cursor-pointer`}
-          onClick={() => {
-            setActiveMenu("configuration");
-            setNav(true);
-          }}
-        />
+        {(userData.userRole === "Super Admin" ||
+          userData.userRole === "Admin") && (
+          <TbReportSearch
+            title="Reports"
+            className={`${
+              activeMenu == "reports" ? "text-blue-400" : ""
+            } cursor-pointer`}
+            onClick={() => {
+              setActiveMenu("reports");
+              setNav(true);
+            }}
+          />
+        )}
+        {userData.userRole === "Super Admin" && (
+          <MdOutlineAdminPanelSettings
+            title="Configuration"
+            className={`${
+              activeMenu == "configuration" ? "text-blue-400" : ""
+            } cursor-pointer`}
+            onClick={() => {
+              setActiveMenu("configuration");
+              setNav(true);
+            }}
+          />
+        )}
       </div>
 
       <div

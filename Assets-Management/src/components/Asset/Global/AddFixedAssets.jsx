@@ -14,6 +14,7 @@ import {
 import { getAllUsers } from "../../../api/AuthRequest";
 import { Autocomplete, TextField } from "@mui/material";
 import { getAllStoreLocations } from "../../../api/StoreLocationRequest";
+import { getAllVendors } from "../../../api/vendorRequest";
 
 const AddFixedAssets = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -26,6 +27,7 @@ const AddFixedAssets = () => {
   const [filteredSubDepartments, setFilteredSubDepartments] = useState([]);
   const [storeLocation, setstoreLocation] = useState([]);
   const [users, setUsers] = useState([]);
+  const [vendorData, setVendors] = useState([]);
 
   const [formData, setFormData] = useState({
     assetInformation: {
@@ -109,6 +111,10 @@ const AddFixedAssets = () => {
 
       const responseReportingManager = await getAllUsers();
       setUsers(responseReportingManager?.data || []);
+
+      const responseVendors = await getAllVendors();
+      // console.log("Vendors Response:", responseVendors?.data?.data || []);
+      setVendors(responseVendors?.data?.data || []);
     } catch (error) {
       console.error("Error fetching locations:", error);
     } finally {
@@ -920,7 +926,7 @@ const AddFixedAssets = () => {
               >
                 Vendor
               </label>
-              <select
+              {/* <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="vendor"
                 id="vendor"
@@ -937,7 +943,39 @@ const AddFixedAssets = () => {
               >
                 <option value="">Select</option>
                 <option value="N/A">N/A</option>
-              </select>
+              </select> */}
+              <Autocomplete
+                className="w-[65%]"
+                options={vendorData}
+                getOptionLabel={(option) => option.vendorName}
+                value={
+                  vendorData.find(
+                    (vendor) =>
+                      vendor.vendorName === formData.warrantyInformation.vendor
+                  ) || null
+                }
+                onChange={(event, newValue) => {
+                  setFormData({
+                    ...formData,
+                    warrantyInformation: {
+                      ...formData.warrantyInformation,
+                      vendor: newValue ? newValue.vendorName : "",
+                    },
+                  });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    className="text-xs text-slate-600"
+                    placeholder="Select Vendor"
+                    inputProps={{
+                      ...params.inputProps,
+                      style: { fontSize: "0.8rem" },
+                    }}
+                  />
+                )}
+              />
             </div>
             <div className="flex items-center w-[46%] max-lg:w-full">
               <label

@@ -646,7 +646,7 @@ function ServiceRequest() {
         <MaterialReactTable table={table} />
         {showUserModal && selectedUser && (
           <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
-            <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 animate-fade-in transition-all duration-300">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 animate-fade-in transition-all duration-300">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">
                 User Details
               </h2>

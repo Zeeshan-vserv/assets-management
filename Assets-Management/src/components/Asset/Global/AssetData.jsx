@@ -16,7 +16,6 @@ import { NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllAssets, deleteAsset } from "../../../api/AssetsRequest";
 import { MdDownload } from "react-icons/md";
-import { RxCross1 } from "react-icons/rx";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import { RxCross2 } from "react-icons/rx";
 import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
@@ -417,7 +416,7 @@ Location: ${row?.locationInformation?.location ?? ""}`;
   };
 
   const table = useMaterialReactTable({
-    data: filteredData, 
+    data: filteredData,
     columns,
     getRowId: (row) => row?._id?.toString(),
     enableRowSelection: true,
@@ -679,44 +678,49 @@ Location: ${row?.locationInformation?.location ?? ""}`;
         )}
         {/* User Details Modal */}
         {userModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm relative">
-              <h2 className="text-lg font-semibold mb-4 text-blue-700">
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 animate-fade-in transition-all duration-300">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">
                 User Details
               </h2>
-              <RxCross1
-                size={24}
-                onClick={handleCloseUserModal}
-                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl cursor-pointer border-2 rounded-full"
-              />
               {userDetails ? (
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
                   <div>
-                    <span className="font-medium">Name:</span>{" "}
-                    {userDetails.employeeName || "-"}
+                    <p className="font-medium">Name:</p>
+                    <p className="text-gray-600">
+                      {userDetails.employeeName || "-"}
+                    </p>
                   </div>
                   <div>
-                    <span className="font-medium">Employee Code:</span>{" "}
-                    {userDetails.employeeCode || "-"}
+                    <p className="font-medium">Employee Code:</p>
+                    <p className="text-gray-600">
+                      {userDetails.employeeCode || "-"}
+                    </p>
                   </div>
                   <div>
-                    <span className="font-medium">Email:</span>{" "}
-                    {userDetails.emailAddress || "-"}
+                    <p className="font-medium">Email:</p>
+                    <p className="text-gray-600">
+                      {userDetails.emailAddress || "-"}
+                    </p>
                   </div>
                   <div>
-                    <span className="font-medium">Mobile:</span>{" "}
-                    {userDetails.mobileNumber || "-"}
+                    <p className="font-medium">Mobile:</p>
+                    <p className="text-gray-600">
+                      {userDetails.mobileNumber || "-"}
+                    </p>
                   </div>
                 </div>
               ) : (
                 <div className="text-gray-500">No user details found.</div>
               )}
-              {/* <button
-                className="mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-                onClick={handleCloseUserModal}
-              >
-                Close
-              </button> */}
+              <div className="flex justify-end mt-6">
+                <button
+                  className="px-5 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+                  onClick={handleCloseUserModal}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}

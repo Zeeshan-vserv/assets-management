@@ -2,6 +2,7 @@ import AssetModel from "../models/assetModel.js";
 import xlsx from 'xlsx';
 import fs from 'fs';
 import AuthModel from "../models/authModel.js";
+import { getISTDate } from "../utils/dateUtils.js";
 
 export const createAsset = async (req, res) => {
     try {
@@ -46,7 +47,7 @@ export const createAsset = async (req, res) => {
 
 export const getAllAssets = async (req, res) => {
     try {
-        const assets = await AssetModel.find().populate('userId', 'emailAddrress')
+        const assets = await AssetModel.find().sort({ createdAt: -1 })
         res.status(200).json({ success: true, data: assets })
     }
     catch (err) {
@@ -125,7 +126,7 @@ export const updateAsset = async (req, res) => {
         if (Object.keys(changes).length > 0) {
             asset.updateHistory.push({
                 updatedBy,
-                updatedAt: new Date(),
+                updatedAt: new getISTDate(),
                 changes
             });
         }
@@ -143,7 +144,7 @@ export const updateAsset = async (req, res) => {
                 if (!alreadyAllocated) {
                     user.assetAllocationHistory.push({
                         assetId: asset._id,
-                        allocatedAt: new Date(),
+                        allocatedAt: new getISTDate(),
                         status: "Allocated",
                     });
                     await user.save();

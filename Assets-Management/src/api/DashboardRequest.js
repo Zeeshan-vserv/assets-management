@@ -89,3 +89,27 @@ export const getAssetsByLocation = () =>
 export const getAssetsBySubLocation = () =>
   API.get('/dashboard/assets-by-sub-location');
 
+export const exportIncidentReport = (data) =>
+  API.post('/dashboard/incidentsReport', data, {
+    responseType: 'blob', 
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+
+export const exportServiceRequestReport = (data) =>
+  API.post('/dashboard/service-requests', data, {
+    responseType: 'blob',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+
+export const exportAssetReport = (data) =>
+  API.post('/dashboard/assets', data, {
+    responseType: 'blob', 
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+

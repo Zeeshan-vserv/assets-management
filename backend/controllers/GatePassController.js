@@ -59,7 +59,7 @@ export const createGatePass = async (req, res) => {
 
 export const getAllGatePass = async (req, res) => {
     try {
-        const gatePass = await GatePass.find()
+        const gatePass = await GatePass.find().sort({ createdAt: -1 })
         res.status(200).json({ success: true, data: gatePass })
     } catch (error) {
         res.status(500).json({ message: 'An error occurred while fetchig gate pass' })
@@ -148,7 +148,7 @@ export const approveGatePass = async (req, res) => {
 
     // Update status
     currentApproval.status = action;
-    currentApproval.actionAt = new Date();
+    currentApproval.actionAt = new getISTDate();
     currentApproval.remarks = remarks;
 
     // If approved and next approver exists, set next to Pending

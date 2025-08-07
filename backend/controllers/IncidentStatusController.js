@@ -1,4 +1,5 @@
 import { IncidentStatusModel } from "../models/incidentStatusModel.js";
+import { getISTDate } from "../utils/dateUtils.js";
 
 // Create a new incident status timeline (for a new incident)
 export const createIncidentStatus = async (req, res) => {
@@ -14,7 +15,7 @@ export const createIncidentStatus = async (req, res) => {
                 description,
                 clockHold,
                 reason,
-                changedAt: new Date(),
+                changedAt: new getISTDate(),
                 changedBy
         });
 
@@ -65,7 +66,7 @@ export const updateIncidentStatus = async (req, res) => {
                 description,
                 clockHold,
                 reason,
-                changedAt: new Date(),
+                changedAt: new getISTDate(),
                 changedBy
             },
             { new: true }

@@ -148,7 +148,7 @@ export const approveGatePass = async (req, res) => {
 
     // Update status
     currentApproval.status = action;
-    currentApproval.actionAt = new Date();
+    currentApproval.actionAt = new getISTDate();
     currentApproval.remarks = remarks;
 
     // If approved and next approver exists, set next to Pending

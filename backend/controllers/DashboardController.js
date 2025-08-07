@@ -1,6 +1,7 @@
 import AssetModel from "../models/assetModel.js";
 import IncidentModel from "../models/incidentModel.js";
 import ServiceRequestModel from "../models/serviceRequestModel.js";
+import { getISTDate } from "../utils/dateUtils.js";
 
 export const getTechnicianIncidentStatusSummary = async (req, res) => {
   try {
@@ -97,8 +98,8 @@ export const getTotalIncidentsByDateRange = async (req, res) => {
   try {
     // Parse query params
     const { from, to, groupBy = "day" } = req.query;
-    const startDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); // default 30 days ago
-    const endDate = to ? new Date(to) : new Date();
+    const startDate = from ? new getISTDate(from) : new getISTDate(getISTDate.now() - 30 * 24 * 60 * 60 * 1000); // default 30 days ago
+    const endDate = to ? new getISTDate(to) : new getISTDate();
 
     // Choose date format for grouping
     let dateFormat;
@@ -139,8 +140,8 @@ export const getTotalIncidentsByDateRange = async (req, res) => {
 export const getOpenIncidentsByStatus = async (req, res) => {
   try {
     const { from, to } = req.query;
-    const startDate = from ? new Date(from) : new Date(Date.now() - 30*24*60*60*1000);
-    const endDate = to ? new Date(to) : new Date();
+    const startDate = from ? new getISTDate(from) : new getISTDate(getISTDate.now() - 30*24*60*60*1000);
+    const endDate = to ? new getISTDate(to) : new getISTDate();
 
     // Only count incidents that are not closed/cancelled/resolved
     const openStatuses = ["Assigned", "In Progress", "New"];
@@ -183,8 +184,8 @@ export const getOpenIncidentsByStatus = async (req, res) => {
 export const getOpenIncidentsBySeverity = async (req, res) => {
   try {
     const { from, to } = req.query;
-    const startDate = from ? new Date(from) : new Date(Date.now() - 30*24*60*60*1000);
-    const endDate = to ? new Date(to) : new Date();
+    const startDate = from ? new getISTDate(from) : new getISTDate(getISTDate.now() - 30*24*60*60*1000);
+    const endDate = to ? new getISTDate(to) : new getISTDate();
 
     const openStatuses = ["Assigned", "In Progress", "New"];
     const severities = ["Severity-1", "Severity-2", "Severity-3", "Severity-4"];
@@ -227,8 +228,8 @@ export const getOpenIncidentsBySeverity = async (req, res) => {
 export const getResponseSlaStatus = async (req, res) => {
   try {
     const { from, to } = req.query;
-    const startDate = from ? new Date(from) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const endDate = to ? new Date(to) : new Date();
+    const startDate = from ? new getISTDate(from) : new getISTDate(getISTDate.now() - 7 * 24 * 60 * 60 * 1000);
+    const endDate = to ? new getISTDate(to) : new getISTDate();
 
     // Fetch incidents in date range
     const incidents = await IncidentModel.find({
@@ -247,8 +248,8 @@ export const getResponseSlaStatus = async (req, res) => {
       );
       if (!resolvedEntry) continue;
 
-      const resolvedAt = new Date(resolvedEntry.changedAt);
-      const slaDeadline = new Date(incident.sla);
+      const resolvedAt = new getISTDate(resolvedEntry.changedAt);
+      const slaDeadline = new getISTDate(incident.sla);
 
       if (resolvedAt <= slaDeadline) {
         met += 1;
@@ -271,8 +272,8 @@ export const getResponseSlaStatus = async (req, res) => {
 export const getResolutionSlaStatus = async (req, res) => {
   try {
     const { from, to } = req.query;
-    const startDate = from ? new Date(from) : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const endDate = to ? new Date(to) : new Date();
+    const startDate = from ? new getISTDate(from) : new getISTDate(getISTDate.now() - 7 * 24 * 60 * 60 * 1000);
+    const endDate = to ? new getISTDate(to) : new getISTDate();
 
     // Fetch incidents in date range
     const incidents = await IncidentModel.find({
@@ -291,9 +292,9 @@ export const getResolutionSlaStatus = async (req, res) => {
       );
       if (!resolvedEntry) continue;
 
-      const resolvedAt = new Date(resolvedEntry.changedAt);
+      const resolvedAt = new getISTDate(resolvedEntry.changedAt);
       // Use incident.resolutionSla for the deadline (make sure this field exists)
-      const slaDeadline = new Date(incident.resolutionSla || incident.sla);
+      const slaDeadline = new getISTDate(incident.resolutionSla || incident.sla);
 
       if (resolvedAt <= slaDeadline) {
         met += 1;
@@ -336,8 +337,8 @@ export const getIncidentOpenClosedByField = async (req, res) => {
       return res.status(400).json({ message: "Invalid groupBy field" });
     }
 
-    const startDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const endDate = to ? new Date(to) : new Date();
+    const startDate = from ? new getISTDate(from) : new getISTDate(getISTDate.now() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = to ? new getISTDate(to) : new getISTDate();
 
     const pipeline = [
       {
@@ -503,8 +504,8 @@ export const getTotalServicesByDateRange = async (req, res) => {
   try {
     // Parse query params
     const { from, to, groupBy = "day" } = req.query;
-    const startDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000); 
-    const endDate = to ? new Date(to) : new Date();
+    const startDate = from ? new getISTDate(from) : new getISTDate(getISTDate.now() - 30 * 24 * 60 * 60 * 1000); 
+    const endDate = to ? new getISTDate(to) : new getISTDate();
 
     // Choose date format for grouping
     let dateFormat;
@@ -565,8 +566,8 @@ export const getServiceOpenByField = async (req, res) => {
       return res.status(400).json({ message: "Invalid groupBy field" });
     }
 
-    const startDate = from ? new Date(from) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const endDate = to ? new Date(to) : new Date();
+    const startDate = from ? new getISTDate(from) : new getISTDate(getISTDate.now() - 30 * 24 * 60 * 60 * 1000);
+    const endDate = to ? new getISTDate(to) : new getISTDate();
 
     const pipeline = [
       {
@@ -675,7 +676,7 @@ export const getAssetsBySupportType = async (req, res) => {
 
 export const getAssetsByWarrantyExpiry = async (req, res) => {
   try {
-    const now = new Date();
+    const now = new getISTDate();
     const pipeline = [
       {
         $addFields: {

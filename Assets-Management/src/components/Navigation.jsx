@@ -515,7 +515,7 @@ const Navigation = ({ nav, setNav }) => {
             </h3>
             {expandedSubMenus.global && (
               <ul className="flex flex-col gap-2 list-disc pl-5 ">
-                {console.log(userData)}
+                {/* {console.log(userData)} */}
                 {userData.users.isView && (
                   <li
                     className="text-[11px] hover:underline"

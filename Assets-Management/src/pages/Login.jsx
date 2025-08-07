@@ -20,7 +20,7 @@ const Login = () => {
     try{
       const response =  dispatch(login(formData))
       if(response.success){
-        navigate('/dashboardAsset')
+        navigate('/main/dashboard/asset')
       }
       else{
         // console.log(response.message)

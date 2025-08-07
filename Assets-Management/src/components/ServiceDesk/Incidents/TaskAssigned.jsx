@@ -151,11 +151,15 @@ const TaskAssigned = () => {
     if (!data) return [];
     if (ticketType === "All Tickets") {
       return data;
-    } else if (ticketType === "My Tickets") {
-      return data.filter((item) => item.submitter?.userId === user?.userId);
+    } else if (ticketType === "Incidents Tickets") {
+      // Show only tickets with incidentId
+      return data.filter((item) => !!item.incidentId);
+    } else if (ticketType === "Service Tickets") {
+      // Show only tickets with serviceId
+      return data.filter((item) => !!item.serviceId);
     }
     return data;
-  }, [data, ticketType, user?.userId]);
+  }, [data, ticketType]);
 
   console.log(data);
 
@@ -438,8 +442,8 @@ const TaskAssigned = () => {
     },
     renderTopToolbarCustomActions: ({ table }) => (
       <Box className="flex flex-wrap w-full">
-        <NavLink to="/main/ServiceDesk/NewIncident">
-          <Button
+        {/* <NavLink to="/main/ServiceDesk/NewIncident">
+           <Button
             variant="contained"
             size="small"
             startIcon={<AddCircleOutlineIcon />}
@@ -452,8 +456,8 @@ const TaskAssigned = () => {
             }}
           >
             New Incident
-          </Button>
-        </NavLink>
+          </Button> 
+        </NavLink> */}
         <Autocomplete
           className="w-[15%]"
           sx={{

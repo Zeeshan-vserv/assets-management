@@ -27,7 +27,7 @@ function Finance({ id }) {
   const updateLossHandler = (e) => {
     e.preventDefault();
     //call api
-    console.log("Updating amount:", editAmount);
+    // console.log("Updating amount:", editAmount);
     setData(
       data.map((item) =>
         item._id === id ? { ...item, amount: editAmount.amount } : item

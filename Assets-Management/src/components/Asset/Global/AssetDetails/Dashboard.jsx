@@ -38,7 +38,7 @@ function Dashboard({ id }) {
     fetchCreator();
   }, [data]);
 
-  console.log(data);
+  // console.log(data);
   return (
     <>
       <div>

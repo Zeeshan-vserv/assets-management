@@ -148,7 +148,7 @@ const AddFixedAssets = () => {
     // Append userId if needed
     dataToSend.append("userId", user.userId);
 
-    console.log(dataToSend);
+    // console.log(dataToSend);
     await createAsset(dataToSend);
     toast.success("Asset created Sucessfully");
     setFormData({

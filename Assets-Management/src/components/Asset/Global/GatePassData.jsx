@@ -194,7 +194,7 @@ function GatePassData() {
       setDeleteGetPassId(null);
       fetchGetPass(); // Refresh data after delete
     } catch (error) {
-      console.log("Delete Get pass error", error);
+      // console.log("Delete Get pass error", error);
     }
   };
 

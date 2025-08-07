@@ -31,7 +31,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-SubCategory.csv",
+  filename: "Assets-Management-ConsumableSubCategory.csv",
 });
 
 function ConsumableSubCategory() {
@@ -318,7 +318,7 @@ function ConsumableSubCategory() {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-    doc.save("Assets-Management-Components.pdf");
+    doc.save("Assets-Management-ConsumableSubCategory.pdf");
   };
 
   const table = useMaterialReactTable({

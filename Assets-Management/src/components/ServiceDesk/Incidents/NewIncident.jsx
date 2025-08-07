@@ -34,7 +34,7 @@ const NewIncident = () => {
   const [assetData, setAssetData] = useState([]);
   const [supportDepartmentData, setSupportDepartmentData] = useState([]);
   const [supportGroupData, setSupportGroupData] = useState([]);
-  const [technician, setTechnician] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [users, setUsers] = useState([]);
 
   const [formData, setFormData] = useState({

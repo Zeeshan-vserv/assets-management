@@ -9,11 +9,11 @@ export const getAllByTechnician = async (req, res) => {
     // Fetch incidents and service requests
     const incidents = await IncidentModel.find({
       "classificaton.technician": technicianId,
-    }).lean();
+    }).lean().sort({ createdAt: -1 });
 
     const serviceRequests = await ServiceRequestModel.find({
       "classificaton.technician": technicianId,
-    }).lean();
+    }).lean().sort({ createdAt: -1 });
 
     // Add type to each
     const incidentItems = incidents.map(item => ({ ...item, type: "incident" }));

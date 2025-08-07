@@ -249,7 +249,7 @@ const Users = () => {
       margin: { top: 20 },
     });
 
-    doc.save("Assets-Management-Components.pdf");
+    doc.save("Assets-Management-Users.pdf");
   };
 
   const handleDeleteComponents = (id) => {
@@ -291,7 +291,6 @@ const Users = () => {
         <Box>
           <NavLink to="/main/configuration/AddUser">
             <Button
-              // onClick={() => setOpenAddModal(true)}
               variant="contained"
               size="small"
               startIcon={<AddCircleOutlineIcon />}

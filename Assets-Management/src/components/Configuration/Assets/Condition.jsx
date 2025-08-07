@@ -27,7 +27,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Department.csv",
+  filename: "Assets-Management-AssetCondition.csv",
 });
 
 function Condition() {
@@ -265,7 +265,7 @@ function Condition() {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-    doc.save("Assets-Management-Components.pdf");
+    doc.save("Assets-Management-AssetCondition.pdf");
   };
 
   const table = useMaterialReactTable({

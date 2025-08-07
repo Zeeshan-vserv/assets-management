@@ -21,8 +21,6 @@ import {
   getAllIncident,
   getIncidentStatusCounts,
   updateIncident,
-  getIncidentSla,
-  getIncidentTat,
   getAllIncidentsSla,
   getAllIncidentsTat,
 } from "../../../api/IncidentRequest";
@@ -36,7 +34,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Department.csv",
+  filename: "Assets-Management-IncidentData.csv",
 });
 
 const ticketOptions = ["All Tickets", "My Tickets"];
@@ -464,42 +462,75 @@ const IncidentsData = () => {
     [isLoading, allTat, allSla]
   );
 
-  // Export helpers
-  const getVisibleColumns = () =>
-    table
+
+const handleExportRows = (rows) => {
+  const visibleColumns = table
+    .getAllLeafColumns()
+    .filter(
+      (col) =>
+        col.getIsVisible() &&
+        col.id !== "mrt-row-select" &&
+        col.id !== "edit" &&
+        col.id !== "delete" &&
+        col.id !== "attachment" &&
+        col.id !== "print"
+    );
+
+  const rowData = rows.map((row) => {
+    const result = {};
+    visibleColumns.forEach((col) => {
+      const key = col.id || col.accessorKey;
+      let value = row.original[key];
+      // Stringify objects/arrays for CSV export
+      if (typeof value === "object" && value !== null) {
+        value = JSON.stringify(value);
+      }
+      result[key] = value;
+    });
+    return result;
+  });
+
+  if (rowData.length === 0) {
+    alert("No data to export!");
+    return;
+  }
+
+  const csv = generateCsv(csvConfig)(rowData);
+  download(csvConfig)(csv);
+};
+
+  const handleExportData = () => {
+    const visibleColumns = table
       .getAllLeafColumns()
       .filter(
         (col) =>
           col.getIsVisible() &&
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
-          col.id !== "delete"
+          col.id !== "delete" &&
+          col.id !== "attachment" &&
+          col.id !== "print"
       );
 
-  const handleExportRows = (rows) => {
-    const visibleColumns = getVisibleColumns();
-    const rowData = rows.map((row) => {
+    const exportData = filteredData.map((item) => {
       const result = {};
       visibleColumns.forEach((col) => {
         const key = col.id || col.accessorKey;
-        result[key] = row.original[key];
+        let value = item[key];
+        // If value is an object or array, stringify it
+        if (typeof value === "object" && value !== null) {
+          value = JSON.stringify(value);
+        }
+        result[key] = value;
       });
       return result;
     });
-    const csv = generateCsv(csvConfig)(rowData);
-    download(csvConfig)(csv);
-  };
 
-  const handleExportData = () => {
-    const visibleColumns = getVisibleColumns();
-    const exportData = data.map((item) => {
-      const result = {};
-      visibleColumns.forEach((col) => {
-        const key = col.id || col.accessorKey;
-        result[key] = item[key];
-      });
-      return result;
-    });
+    if (exportData.length === 0) {
+      alert("No data to export!");
+      return;
+    }
+
     const csv = generateCsv(csvConfig)(exportData);
     download(csvConfig)(csv);
   };
@@ -517,7 +548,12 @@ const IncidentsData = () => {
         return value ?? "";
       })
     );
-    const doc = new jsPDF({});
+    // const doc = new jsPDF({});
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a3",
+    });
     autoTable(doc, {
       head: [headers],
       body: exportData,
@@ -525,7 +561,7 @@ const IncidentsData = () => {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-    doc.save("Assets-Management-Components.pdf");
+    doc.save("Assets-Management-IncidentData.pdf");
   };
 
   // Table instance

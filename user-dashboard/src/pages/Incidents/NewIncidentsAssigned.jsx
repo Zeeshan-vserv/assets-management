@@ -97,7 +97,7 @@ const NewIncidentsAssigned = () => {
     );
   }, [technicianData, newIncidentAssignedTo.role]);
 
-  console.log(data);
+  // console.log(data);
 
   const columns = useMemo(
     () => [
@@ -219,7 +219,7 @@ const NewIncidentsAssigned = () => {
 
       const response = await updateIncident(assignedId._id, updateData);
     } catch (error) {
-      console.log("Error updating technicians", error);
+      // console.log("Error updating technicians", error);
     }
   };
 

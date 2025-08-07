@@ -98,13 +98,13 @@ function SlaCreation() {
   const handleChangeStatus = () => {
     handleCloseMenu();
     //logic
-    console.log("handleChangeStatus");
+    // console.log("handleChangeStatus");
   };
 
   const handleDefault = () => {
     handleCloseMenu();
     //logic
-    console.log("handleDefault");
+    // console.log("handleDefault");
   };
 
   //row selected logic
@@ -141,7 +141,7 @@ function SlaCreation() {
     renderTopToolbarCustomActions: ({ table }) => {
       return (
         <Box>
-          {console.log(data.length === 0)}
+          {/* {console.log(data.length === 0)} */}
           {data.length === 0 && (
             <Button
             onClick={() => navigate("/main/configuration/new-sla-creation")}

@@ -309,7 +309,7 @@ function NewSlaCreation() {
       toast.success("SLA created successfully");
 
     }
-    console.log(response);
+    // console.log(response);
   };
 
   return (

@@ -53,7 +53,7 @@ const ReqSubCategory = () => {
         getAllServiceCategory(),
         getAllServiceSubCategory(),
       ]);
-      console.log("Categories:", subRes);
+      // console.log("Categories:", subRes);
 
       setCategories(catRes?.data?.data || []);
       setData(
@@ -76,7 +76,7 @@ const ReqSubCategory = () => {
     }
   };
 
-  console.log(data);
+  // console.log(data);
 
   useEffect(() => {
     fetchData();

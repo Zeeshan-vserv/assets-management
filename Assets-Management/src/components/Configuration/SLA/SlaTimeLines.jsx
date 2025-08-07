@@ -146,7 +146,7 @@ function SlaTimeLines() {
       setAddSlaTimeLinesModal(false);
       setAddNewSlaTimeLines({});
     } catch (error) {
-      console.log("Error creating sla time lines ", error);
+      // console.log("Error creating sla time lines ", error);
     }
   };
 

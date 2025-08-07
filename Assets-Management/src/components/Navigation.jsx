@@ -83,7 +83,7 @@ const Navigation = ({ nav, setNav }) => {
                 request
               </NavLink>
             </h3>
-            <h3
+            {/* <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {
                 setNav(false);
@@ -99,8 +99,8 @@ const Navigation = ({ nav, setNav }) => {
               >
                 software
               </NavLink>
-            </h3>
-            <h3
+            </h3> */}
+            {/* <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {
                 setNav(false);
@@ -116,7 +116,7 @@ const Navigation = ({ nav, setNav }) => {
               >
                 task
               </NavLink>
-            </h3>
+            </h3> */}
             <h3
               className="flex items-center justify-between hover:underline cursor-pointer"
               onClick={() => {
@@ -320,7 +320,6 @@ const Navigation = ({ nav, setNav }) => {
                     summary
                   </NavLink>
                 </li>
-                {userData.importAsset.isView && (
                   <li
                     className="text-[11px] hover:underline"
                     onClick={() => {
@@ -338,7 +337,6 @@ const Navigation = ({ nav, setNav }) => {
                       assets import
                     </NavLink>
                   </li>
-                )}
               </ul>
             )}
             {/* <h3
@@ -413,7 +411,6 @@ const Navigation = ({ nav, setNav }) => {
               {expandedSubMenus.global && (
                 <ul className="flex flex-col gap-2 list-disc pl-5 ">
                   {/* {console.log(userData)} */}
-                  {userData.users.isView && (
                     <li
                       className="text-[11px] hover:underline"
                       onClick={() => {
@@ -431,7 +428,6 @@ const Navigation = ({ nav, setNav }) => {
                         Users
                       </NavLink>
                     </li>
-                  )}
                   <li
                     className="text-[11px] hover:underline"
                     onClick={() => {
@@ -1119,9 +1115,6 @@ const Navigation = ({ nav, setNav }) => {
     }
   };
 
-  {
-    console.log(userData.userRole === "Super Admin");
-  }
 
   return (
     <div className="flex h-full">

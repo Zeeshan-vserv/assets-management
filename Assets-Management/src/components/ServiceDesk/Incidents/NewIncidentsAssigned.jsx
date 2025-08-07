@@ -224,7 +224,7 @@ const NewIncidentsAssigned = () => {
       const response = await updateIncident(assignedId._id, updateData);
       // console.log("sub", assignedId._id, updateData);
     } catch (error) {
-      console.log("Error updateing technicians", error);
+      // console.log("Error updateing technicians", error);
     }
   };
   // console.log("id", assignedId);

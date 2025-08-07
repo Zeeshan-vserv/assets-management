@@ -72,7 +72,7 @@ function ServiceRequestApproval() {
     try {
       setIsLoading(true);
       const response = await getMyPendingApprovals();
-      console.log("API response:", response?.data?.data); // <-- Add this
+      // console.log("API response:", response?.data?.data); // <-- Add this
       setData(response?.data?.data || []);
     } catch (error) {
       console.error("Error fetching service request approval:", error);

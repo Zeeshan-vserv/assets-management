@@ -130,7 +130,7 @@ const PriorityMatrix = () => {
         priority: "",
       });
     } catch (error) {
-      console.log("Error creating priority matrix", error);
+      // console.log("Error creating priority matrix", error);
     }
   };
 

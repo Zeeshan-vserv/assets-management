@@ -171,7 +171,7 @@ function SubDepartment() {
 
   //delete
   const handleDeleteSubDepartment = async (subDepartment, id) => {
-    console.log(subDepartment);
+    // console.log(subDepartment);
 
     setDeleteSubDepartmentId({
       departmentId: subDepartment.department_id,

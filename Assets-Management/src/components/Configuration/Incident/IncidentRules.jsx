@@ -48,7 +48,7 @@ const IncidentRules = () => {
     }
   };
 
-  console.log("Data fetched:", data);
+  // console.log("Data fetched:", data);
   
 
   useEffect(() => {
@@ -68,7 +68,7 @@ const IncidentRules = () => {
         enableSorting: false,
         Cell: ({ row }) => (
           <NavLink to={`/main/configuration/EditRule/${row.original._id}`}>
-            {console.log(row.original)}
+            {/* {console.log(row.original)} */}
           <IconButton
             color="primary"
             aria-label="edit"

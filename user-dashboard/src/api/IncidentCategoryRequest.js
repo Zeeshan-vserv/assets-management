@@ -2,7 +2,7 @@ import axios from 'axios'
 import store from '../store2/ReduxStore2'
 import { logout } from '../action2/AuthAction2';
 
-const API = axios.create({ baseURL: 'http://localhost:5001' })
+const API = axios.create({ baseURL: import.meta.env.VITE_API_KEY })
 
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");

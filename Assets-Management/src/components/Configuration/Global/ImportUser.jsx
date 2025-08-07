@@ -30,7 +30,7 @@ function ImportUser() {
       }
       setShowConfirm(false);
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       console.error("User Upload Failed:", error);
     }
   };

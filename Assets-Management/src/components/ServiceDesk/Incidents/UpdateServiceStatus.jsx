@@ -155,7 +155,7 @@ const UpdateServiceStatus = () => {
         form.append("attachment", updateServiceRequestData.attachment);
       }
       const response = await updateServiceRequest(id, form);
-      console.log("Service Request Updated:", response);
+      // console.log("Service Request Updated:", response);
     } catch (error) {
       console.error("Error updating service request:", error);
     }

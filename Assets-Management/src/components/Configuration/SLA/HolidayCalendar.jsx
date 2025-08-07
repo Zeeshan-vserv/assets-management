@@ -117,7 +117,7 @@ function HolidayCalendar() {
         setAddCalendarLocModal(false);
       }
     } catch (error) {
-      console.log("Error creating holiday calendar");
+      // console.log("Error creating holiday calendar");
     }
   };
 

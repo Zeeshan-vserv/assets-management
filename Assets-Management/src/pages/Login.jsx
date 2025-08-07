@@ -27,7 +27,7 @@ const Login = () => {
         toast.error("Invalid credentials");
       }
     } catch (err) {
-      console.log(err);
+      // console.log(err);
     }
   };
   return (

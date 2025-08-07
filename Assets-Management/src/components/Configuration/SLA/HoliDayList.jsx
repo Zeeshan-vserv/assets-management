@@ -158,7 +158,7 @@ function HoliDayList() {
         setAddHolidatListModal(false);
       }
     } catch (error) {
-      console.log("Error creating holiday list");
+      // console.log("Error creating holiday list");
     }
   };
 

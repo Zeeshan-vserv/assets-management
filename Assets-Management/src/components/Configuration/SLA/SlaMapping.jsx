@@ -149,7 +149,7 @@ function SlaMapping() {
         slaName: "",
       });
     } catch (error) {
-      console.log("Error creating sla mapping ", error);
+      // console.log("Error creating sla mapping ", error);
     }
   };
 

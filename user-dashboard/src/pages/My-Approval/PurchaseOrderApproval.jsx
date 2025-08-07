@@ -119,11 +119,11 @@ function PurchaseOrderApproval() {
   );
 
   const handleAccept = (id) => {
-    console.log("accept", id);
+    // console.log("accept", id);
   };
 
   const handleReject = (id) => {
-    console.log("reject", id);
+    // console.log("reject", id);
   };
 
   //Exports

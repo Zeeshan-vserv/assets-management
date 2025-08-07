@@ -101,7 +101,7 @@ function Insurances({ id }) {
     e.preventDefault();
     try {
       //call api
-      console.log("addNewInsurance", addNewInsurance);
+      // console.log("addNewInsurance", addNewInsurance);
       fetchInsurance();
     } catch (error) {
       console.error("Error adding new insurance:", error);

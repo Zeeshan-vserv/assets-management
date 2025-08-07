@@ -13,7 +13,7 @@ function RecentIncidents() {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  console.log(user.userId);
+  // console.log(user.userId);
   
 
   const fetchRecentIncidents = async () => {

@@ -143,8 +143,8 @@ const UpdateStatus = () => {
         form.append("attachment", updateStatusData.attachment);
       }
       const response = await updateIncident(id, form);
-      console.log("response", response);
-      console.log("formData", form);
+      // console.log("response", response);
+      // console.log("formData", form);
     } catch (error) {
       console.error("Error updating to work status", error);
     }

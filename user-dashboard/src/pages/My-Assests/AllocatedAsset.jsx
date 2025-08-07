@@ -41,7 +41,7 @@ function AllocatedAsset() {
     fetchAllocatedAsset();
   }, []);
 
-  console.log("data", data);
+  // console.log("data", data);
 
   const columns = useMemo(
     () => [
@@ -131,7 +131,7 @@ function AllocatedAsset() {
           const imageUrl = imagePath
             ? `http://localhost:5001/${imagePath.replace(/\\/g, "/")}`
             : null;
-            console.log("imageUrl",imageUrl)
+            // console.log("imageUrl",imageUrl)
           return (
             <Box
               sx={{ display: "flex", cursor: imageUrl ? "pointer" : "default" }}

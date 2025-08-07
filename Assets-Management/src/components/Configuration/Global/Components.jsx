@@ -20,7 +20,6 @@ import {
 } from "../../../api/ComponentsRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -39,7 +38,6 @@ function Components() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteComponentsId, setDeleteComponentsId] = useState(null);
   const [newComponent, setNewComponent] = useState({ componentName: "" });
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchUser = async () => {
     try {
@@ -144,7 +142,6 @@ function Components() {
         );
         await fetchUser();
         setOpenModal(false);
-        setShowConfirm(false);
       }
     } catch (error) {
       console.error("Error updating component:", error);
@@ -429,15 +426,15 @@ function Components() {
         <MaterialReactTable table={table} />
         {openModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+              <h2 className="text-lg font-medium text-gray-800 mb-4">
                 Edit Component
               </h2>
               <form onSubmit={updateComponentsHandler} className="space-y-4">
                 <div className="flex flex-col">
                   <label
                     htmlFor="name"
-                    className="text-sm font-medium text-gray-600 mb-1"
+                    className="text-sm font-medium text-gray-600 mb-2"
                   >
                     Component Name <span className="text-red-500">*</span>
                   </label>
@@ -448,14 +445,13 @@ function Components() {
                     value={editComponents?.name || ""}
                     onChange={componentsInputChangeHandler}
                     placeholder="Enter component name"
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    className="px-4 py-2 border border-gray-300 rounded-lg outline-none transition-all"
                   />
                 </div>
 
                 <div className="flex justify-end gap-3 pt-4 border-t mt-6">
                   <button
-                    type="button"
-                    onClick={() => setShowConfirm(true)}
+                    type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
                     Update
@@ -467,12 +463,6 @@ function Components() {
                   >
                     Cancel
                   </button>
-                  <ConfirmUpdateModal
-                    isOpen={showConfirm}
-                    message="Are you sure you want to update Component Name?"
-                    onConfirm={updateComponentsHandler}
-                    onCancel={() => setShowConfirm(false)}
-                  />
                 </div>
               </form>
             </div>
@@ -480,15 +470,15 @@ function Components() {
         )}
         {openAddModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
-              <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+              <h2 className="text-lg font-medium text-gray-800 mb-4">
                 Add Component
               </h2>
               <form onSubmit={addNewComponentHandler} className="space-y-4">
                 <div className="flex flex-col">
                   <label
                     htmlFor="componentName"
-                    className="text-sm font-medium text-gray-600 mb-1"
+                    className="text-sm font-medium text-gray-600 mb-2"
                   >
                     Component Name <span className="text-red-500">*</span>
                   </label>
@@ -500,7 +490,7 @@ function Components() {
                     onChange={newComponentChangeHandler}
                     required
                     placeholder="Enter component name"
-                    className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                    className="px-4 py-2 border border-gray-300 rounded-lg outline-none transition-all"
                   />
                 </div>
 
@@ -509,7 +499,7 @@ function Components() {
                     type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
-                    Add
+                    Submit
                   </button>
                   <button
                     type="button"
@@ -521,7 +511,6 @@ function Components() {
                 </div>
               </form>
             </div>
-              
           </div>
         )}
         {deleteConfirmationModal && (

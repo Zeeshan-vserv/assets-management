@@ -3,7 +3,15 @@ import {
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Button, IconButton, Menu, MenuItem } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  TextField,
+} from "@mui/material";
 import { MdModeEdit } from "react-icons/md";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
@@ -31,6 +39,9 @@ function GatePassData() {
   const [deleteGetPassId, setDeleteGetPassId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const [closeGatePassModal, setCloseGetPassModal] = useState(false);
+  const [closeGatePassRowId, setCloseGetPassRowId] = useState(null);
+  const [closeStatus, setCloseStatus] = useState("");
 
   const fetchGetPass = async () => {
     try {
@@ -51,11 +62,9 @@ function GatePassData() {
     fetchGetPass();
   }, []);
 
-  // console.log(data);
-
   const columns = useMemo(
     () => [
-         {
+      {
         id: "print",
         header: "Print",
         size: 80,
@@ -140,7 +149,7 @@ function GatePassData() {
               href={`http://localhost:5001/${cell.getValue()}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-slate-400 px-6 py-2 rounded-lg border-2 border-slate-600"
+              className="bg-slate-500 px-6 py-2 rounded-lg border-2 border-slate-600 text-white"
             >
               View
             </a>
@@ -161,7 +170,7 @@ function GatePassData() {
           </IconButton>
         ),
       },
-   
+
       {
         id: "delete",
         header: "Delete",
@@ -192,13 +201,11 @@ function GatePassData() {
       await deleteGatePass(deleteGetPassId);
       setOpenGetPassDeleteModal(false);
       setDeleteGetPassId(null);
-      fetchGetPass(); // Refresh data after delete
+      fetchGetPass();
     } catch (error) {
       // console.log("Delete Get pass error", error);
     }
   };
-
-  // ... rest of your code (export, PDF, actions, table config) remains unchanged
 
   const handleExportRows = (rows) => {
     const visibleColumns = table
@@ -288,16 +295,6 @@ function GatePassData() {
     setAnchorEl(null);
   };
 
-  const printGetPassHandler = () => {
-    const selectedRows = table.getSelectedRowModel().rows;
-    if (selectedRows.length === 0) {
-      alert("Please select Get Pass to print.");
-      return;
-    }
-    const selectedIds = selectedRows.map((row) => row.original._id);
-    // logic for printing
-    handleClose();
-  };
   const closeGetPassHandler = () => {
     const selectedRows = table.getSelectedRowModel().rows;
     if (selectedRows.length === 0) {
@@ -305,8 +302,20 @@ function GatePassData() {
       return;
     }
     const selectedIds = selectedRows.map((row) => row.original._id);
-    // logic for closing
+    setCloseGetPassRowId(selectedIds);
+    setCloseGetPassModal(true);
     handleClose();
+  };
+
+  const closeGatePassSubmitHandler = (e) => {
+    e.preventDefault();
+    try {
+      console.log("closeGatePassRowId", closeGatePassRowId);
+      //call api
+      setCloseGetPassModal(false);
+    } catch (error) {
+      console.log("Error updating in close gate pass");
+    }
   };
 
   const table = useMaterialReactTable({
@@ -353,9 +362,6 @@ function GatePassData() {
             Action
           </Button>
           <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-            <MenuItem onClick={printGetPassHandler} sx={{ fontSize: "0.8rem" }}>
-              Print Get Pass
-            </MenuItem>
             <MenuItem onClick={closeGetPassHandler} sx={{ fontSize: "0.8rem" }}>
               Close Get Pass
             </MenuItem>
@@ -484,6 +490,161 @@ function GatePassData() {
               </div>
             </div>
           </>
+        )}
+
+        {closeGatePassModal && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
+              <h2 className="text-lg font-medium text-gray-800 mb-6">
+                Close GatePass
+              </h2>
+              <form onSubmit={closeGatePassSubmitHandler} className="space-y-4">
+                <div className="flex items-center gap-2 mt-2">
+                  <label className="w-[30%] mt-1 text-sm text-slate-700">
+                    Status <span className="text-red-500 text-md">*</span>
+                  </label>
+                  <Autocomplete
+                    className="w-[65%]"
+                    options={[
+                      "This item is received",
+                      "Other Reason/Partial Received",
+                    ]}
+                    value={closeStatus}
+                    onChange={(event, newValue) => setCloseStatus(newValue)}
+                    getOptionLabel={(option) => option}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="standard"
+                        placeholder="Selec"
+                        inputProps={{
+                          ...params.inputProps,
+                          style: { fontSize: "0.9rem" },
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                {closeStatus === "This item is received" && (
+                  <>
+                    <div className="space-y-5">
+                      <div className="flex items-center gap-2 mt-1">
+                        <label className="w-[30%] mt-1 text-xs font-semibold text-slate-600">
+                          Assets Received{" "}
+                          <span className="text-red-500 text-md">*</span>
+                        </label>
+                        <Autocomplete
+                          className="w-[65%]"
+                          options={[
+                            "CALIBW660INA142WJ31",
+                            "CALIBW397INA142WJ62",
+                            "CALIBW392IN1A42WJ28",
+                          ]}
+                          getOptionLabel={(option) => option}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              variant="standard"
+                              placeholder="Selec"
+                              inputProps={{
+                                ...params.inputProps,
+                                style: { fontSize: "0.9rem" },
+                              }}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <label className="w-[30%] text-xs font-semibold text-slate-600">
+                          Received Date{" "}
+                          <span className="text-red-500 text-md">*</span>
+                        </label>
+                        <input
+                          type="date"
+                          className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-400"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <label className="w-[30%] text-xs font-semibold text-slate-600">
+                          Received From (Contact Name){" "}
+                          <span className="text-red-500 text-md">*</span>
+                        </label>
+                        <input className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-400" />
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <label className="w-[30%] text-xs font-semibold text-slate-600">
+                          Received From (Contact No.){" "}
+                          <span className="text-red-500 text-md">*</span>
+                        </label>
+                        <input className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-400" />
+                      </div>
+                      <div className="flex items-center gap-2 mt-1">
+                        <label className="w-[30%] text-xs font-semibold text-slate-600">
+                          Remarks(Contact No.){" "}
+                          <span className="text-red-500 text-md">*</span>
+                        </label>
+                        <textarea className="w-[65%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none rounded-md focus:border-blue-400"></textarea>
+                      </div>
+                    </div>
+                  </>
+                )}
+                {closeStatus === "Other Reason/Partial Received" && (
+                  <>
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-2 mt-2">
+                        <label className="w-[30%] text-sm text-slate-700">
+                          Assets Received{" "}
+                          <span className="text-red-500 text-md">*</span>
+                        </label>
+                        <Autocomplete
+                          className="w-[65%]"
+                          options={[
+                            "CALIBW660INA142WJ31",
+                            "CALIBW397INA142WJ62",
+                            "CALIBW392IN1A42WJ28",
+                          ]}
+                          getOptionLabel={(option) => option}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              variant="standard"
+                              placeholder="Selec"
+                              inputProps={{
+                                ...params.inputProps,
+                                style: { fontSize: "0.9rem" },
+                              }}
+                            />
+                          )}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2 mt-2">
+                        <label className="w-[30%] text-sm text-slate-700">
+                          Remarks(Contact No.){" "}
+                          <span className="text-red-500 text-md">*</span>
+                        </label>
+                        <textarea className="w-[65%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none rounded-md focus:border-blue-500"></textarea>
+                      </div>
+                    </div>
+                  </>
+                )}
+                <div className="flex justify-end gap-3 pt-4 mt-6">
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCloseGetPassModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-md text-sm transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
       </div>
     </>

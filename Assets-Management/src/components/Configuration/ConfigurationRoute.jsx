@@ -19,7 +19,7 @@ import StoreLocation from "./Assets/StoreLocation.jsx";
 import Condition from "./Assets/Condition.jsx";
 import ConsumableCategory from "./Assets/ConsumableCategory.jsx";
 import ConsumableSubCategory from "./Assets/ConsumableSubCategory.jsx";
-import AssetTag from "./Assets/AssetTag.jsx";
+// import AssetTag from "./Assets/AssetTag.jsx";
 import VendorCategory from "./Vendor/VendorCategory.jsx";
 import Status from "./Vendor/Status.jsx";
 import ServiceCategory from "./Vendor/ServiceCategory.jsx";
@@ -99,7 +99,7 @@ function ConfigurationRoute() {
           path="consumable-sub-category"
           element={<ConsumableSubCategory />}
         />
-        <Route path="asset-tag" element={<AssetTag />} />
+        {/* <Route path="asset-tag" element={<AssetTag />} /> */}
 
         {/* Vendor Routes */}
         <Route path="vendor-category" element={<VendorCategory />} />

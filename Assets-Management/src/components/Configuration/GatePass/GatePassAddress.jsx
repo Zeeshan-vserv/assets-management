@@ -20,7 +20,6 @@ import {
 } from "../../../api/gatePassAddressRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -46,7 +45,6 @@ function GatePassAddress() {
 
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const user = useSelector((state) => state.authReducer?.authData);
 
@@ -170,7 +168,6 @@ function GatePassAddress() {
         fetchAddresses();
         setEditModal(false);
         setEditForm({ _id: "", addressName: "" });
-        setShowConfirm(false);
       } else {
         toast.error(res.data.message || "Failed to update address");
       }
@@ -404,15 +401,14 @@ function GatePassAddress() {
         </h2>
         <MaterialReactTable table={table} />
       </div>
-      {/* Add Modal */}
       {addModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-md font-semibold mb-6 text-start">
+            <h2 className="text-lg font-semibold mb-4 text-start">
               Add Gate Pass Address
             </h2>
-            <form onSubmit={handleAddSubmit} className="space-y-2">
-              <div className="flex items-center gap-2 mt-1">
+            <form onSubmit={handleAddSubmit} className="space-y-4">
+              <div className="flex items-center gap-2 mt-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
                   Address Name
                 </label>
@@ -431,7 +427,7 @@ function GatePassAddress() {
                   type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
-                  Add
+                  Submit
                 </button>
                 <button
                   type="button"
@@ -445,15 +441,14 @@ function GatePassAddress() {
           </div>
         </div>
       )}
-      {/* Edit Modal */}
       {editModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-md font-semibold mb-6 text-start">
+            <h2 className="text-lg font-semibold mb-4 text-start">
               Edit Gate Pass Address
             </h2>
-            <form onSubmit={handleEditSubmit} className="space-y-2">
-              <div className="flex items-center gap-2 mt-1">
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <div className="flex items-center gap-2 mt-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
                   Address Name
                 </label>
@@ -469,9 +464,7 @@ function GatePassAddress() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  // type="submit"
-                  type="button"
-                  onClick={() => setShowConfirm(true)}
+                  type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
                   Update
@@ -483,18 +476,11 @@ function GatePassAddress() {
                 >
                   Cancel
                 </button>
-                <ConfirmUpdateModal
-                  isOpen={showConfirm}
-                  onConfirm={handleEditSubmit}
-                  message="Are you sure you want to update this Get pass address?"
-                  onCancel={() => setShowConfirm(false)}
-                />
               </div>
             </form>
           </div>
         </div>
       )}
-      {/* Delete Modal */}
       {deleteModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-8">

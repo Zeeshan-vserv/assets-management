@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { createSLA, getSLAById, updateSLA } from "../../../api/slaRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 function EditSlaCreation() {
   const { id } = useParams();
@@ -35,6 +36,8 @@ function EditSlaCreation() {
     })),
   });
 
+  const [showConfirm, setShowConfirm] = useState(false);
+
   // const fetchData = async () => {
   //   try {
   //     setIsLoading(true);
@@ -51,60 +54,65 @@ function EditSlaCreation() {
   //   }
   // };
 
-const fetchData = async () => {
-  try {
-    setIsLoading(true);
-    const response = await getSLAById(id);
-    if (response.status !== 200) {
-      throw new Error("Failed to fetch data");
-    }
-    const data = response?.data?.data || {};
-
-    // Map fetched timeline to weekdays, fill blanks for missing days
-    const timelineMap = {};
-    if (Array.isArray(data.slaTimeline)) {
-      data.slaTimeline.forEach((item) => {
-        timelineMap[item.weekDay] = {
-          weekDay: item.weekDay,
-          selected: item.selected ?? true,
-          startTime: item.startTime
-            ? new Date(item.startTime).toISOString().substr(11, 5)
-            : "",
-          endTime: item.endTime
-            ? new Date(item.endTime).toISOString().substr(11, 5)
-            : "",
-        };
-      });
-    }
-    const mergedTimeline = weekdays.map((day) =>
-      timelineMap[day] || {
-        weekDay: day,
-        selected: false,
-        startTime: "",
-        endTime: "",
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const response = await getSLAById(id);
+      if (response.status !== 200) {
+        throw new Error("Failed to fetch data");
       }
-    );
+      const data = response?.data?.data || {};
 
-    setFormData({
-      slaName: data.slaName || "",
-      holidayCalender: data.holidayCalender || "",
-      default: data.default === true ? "Yes" : data.default === false ? "No" : null,
-      status: data.status === true ? "Yes" : data.status === false ? "No" : null,
-      serviceWindow: data.serviceWindow === true ? "Yes" : data.serviceWindow === false ? "No" : null,
-      slaTimeline: mergedTimeline,
-    });
-  } catch (error) {
-    console.error("Error fetching users:", error);
-  } finally {
-    setIsLoading(false);
-  }
-};
+      // Map fetched timeline to weekdays, fill blanks for missing days
+      const timelineMap = {};
+      if (Array.isArray(data.slaTimeline)) {
+        data.slaTimeline.forEach((item) => {
+          timelineMap[item.weekDay] = {
+            weekDay: item.weekDay,
+            selected: item.selected ?? true,
+            startTime: item.startTime
+              ? new Date(item.startTime).toISOString().substr(11, 5)
+              : "",
+            endTime: item.endTime
+              ? new Date(item.endTime).toISOString().substr(11, 5)
+              : "",
+          };
+        });
+      }
+      const mergedTimeline = weekdays.map(
+        (day) =>
+          timelineMap[day] || {
+            weekDay: day,
+            selected: false,
+            startTime: "",
+            endTime: "",
+          }
+      );
+
+      setFormData({
+        slaName: data.slaName || "",
+        holidayCalender: data.holidayCalender || "",
+        default:
+          data.default === true ? "Yes" : data.default === false ? "No" : null,
+        status:
+          data.status === true ? "Yes" : data.status === false ? "No" : null,
+        serviceWindow:
+          data.serviceWindow === true
+            ? "Yes"
+            : data.serviceWindow === false
+            ? "No"
+            : null,
+        slaTimeline: mergedTimeline,
+      });
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   useEffect(() => {
     fetchData();
   }, []);
-
-  // console.log(formData);
-  
 
   // For text input
   const handleChange = (e) => {
@@ -157,11 +165,11 @@ const fetchData = async () => {
           endTime: new Date(`1970-01-01T${endTime}:00Z`),
         })),
     };
-    const response = await updateSLA(id,payload);
+    const response = await updateSLA(id, payload);
     if (response?.data.success) {
       toast.success("SLA Updated successfully");
+      setShowConfirm(false);
     }
-    // console.log(response);
   };
 
   return (
@@ -172,7 +180,9 @@ const fetchData = async () => {
           <div className="w-full p-8 bg-white rounded-md shadow-md">
             <div className="my-2 flex gap-2 justify-end">
               <button
-                type="submit"
+                // type="submit"
+                type="button"
+                onClick={() => setShowConfirm(true)}
                 className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
               >
                 Submit
@@ -184,6 +194,12 @@ const fetchData = async () => {
               >
                 Cancel
               </button>
+              <ConfirmUpdateModal
+                isOpen={showConfirm}
+                onConfirm={handleSubmit}
+                message="Are you sure you want to update SLA Creation?"
+                onCancel={() => setShowConfirm(false)}
+              />
             </div>
             <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-8">
               <div className="flex items-center w-[46%] max-lg:w-[100%]">

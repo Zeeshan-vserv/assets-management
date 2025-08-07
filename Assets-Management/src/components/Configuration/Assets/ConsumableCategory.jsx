@@ -21,7 +21,6 @@ import {
 } from "../../../api/ConsumableRequest";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -47,8 +46,6 @@ function ConsumableCategory() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteConsumableCategoryId, setDeleteConsumableCategoryId] =
     useState(null);
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchConsumableCategory = async () => {
     try {
@@ -173,7 +170,6 @@ function ConsumableCategory() {
         fetchConsumableCategory();
         setOpenUpdateModal(false);
         setEditConsumableCategory(null);
-        setShowConfirm(false);
       } else {
         toast.error(res.data.message || "Failed to update category");
       }
@@ -408,35 +404,33 @@ function ConsumableCategory() {
         {addCosumableCategoryModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className="text-md font-semibold mb-6 text-start">
-                Add CONSUMABLE CATEGORY
+              <h2 className="text-lg font-medium mb-4 text-start">
+                Add Consumable Category
               </h2>
               <form
                 onSubmit={addNewConsumableCategoryHandler}
-                className="space-y-2"
+                className="space-y-4"
               >
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Consumable Category*
-                    </label>
-                    <TextField
-                      name="cosumableCategory"
-                      required
-                      fullWidth
-                      value={addNewCosumableCategory?.cosumableCategory || ""}
-                      onChange={addNewConsumableCategoryChangeHandler}
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
-                  </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Consumable Category*
+                  </label>
+                  <TextField
+                    name="cosumableCategory"
+                    required
+                    fullWidth
+                    value={addNewCosumableCategory?.cosumableCategory || ""}
+                    onChange={addNewConsumableCategoryChangeHandler}
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
                 </div>
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="submit"
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
-                    Add
+                    Submit
                   </button>
                   <button
                     type="button"
@@ -454,34 +448,31 @@ function ConsumableCategory() {
           <>
             <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
               <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-                <h2 className="text-md font-semibold mb-6 text-start">
-                  Edit CONSUMABLE CATEGORY
+                <h2 className="text-lg font-medium mb-4 text-start">
+                  Edit Consumable Category
                 </h2>
                 <form
                   onSubmit={updateConsumableCategoryHandler}
-                  className="space-y-2"
+                  className="space-y-4"
                 >
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Consumable Category*
-                      </label>
-                      <TextField
-                        name="cosumableCategory"
-                        required
-                        fullWidth
-                        value={editConsumableCategory?.cosumableCategory || ""}
-                        onChange={updateConsumableCategoryChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Consumable Category*
+                    </label>
+                    <TextField
+                      name="cosumableCategory"
+                      required
+                      fullWidth
+                      value={editConsumableCategory?.cosumableCategory || ""}
+                      onChange={updateConsumableCategoryChangeHandler}
+                      variant="standard"
+                      sx={{ width: 250 }}
+                    />
                   </div>
+
                   <div className="flex justify-end gap-3 pt-4">
                     <button
-                      // type="submit"
-                      type="button"
-                      onClick={() => setShowConfirm(true)}
+                      type="submit"
                       className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                     >
                       Update
@@ -493,12 +484,6 @@ function ConsumableCategory() {
                     >
                       Cancel
                     </button>
-                    <ConfirmUpdateModal
-                      isOpen={showConfirm}
-                      onConfirm={updateConsumableCategoryHandler}
-                      message="Are you sure you want to update this consumable category?"
-                      onCancel={() => setShowConfirm(false)}
-                    />
                   </div>
                 </form>
               </div>

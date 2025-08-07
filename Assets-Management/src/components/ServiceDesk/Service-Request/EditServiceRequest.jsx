@@ -230,7 +230,7 @@ function EditServiceRequest() {
         userId: user?.userId,
         status: formData.status,
       });
-      toast.success("Service Request Added Successfully");
+      toast.success("Service Request Updated Successfully");
       setFormData({
         subject: "",
         loggedVia: "",
@@ -295,7 +295,6 @@ function EditServiceRequest() {
           <div className="w-full p-8 bg-white rounded-md shadow-md">
             <div className="flex gap-2 justify-end">
               <button
-                // type="submit"
                 type="button"
                 onClick={() => setShowConfirm(true)}
                 className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
@@ -463,7 +462,6 @@ function EditServiceRequest() {
                   />
                 </div>
               </div>
-              {/* {console.log(formData.purchaseRequest)} */}
               <div className="flex items-center w-[46%]">
                 <label
                   htmlFor=""
@@ -713,7 +711,6 @@ function EditServiceRequest() {
                     ) || null
                   }
                   onChange={(event, newValue) => {
-                    // console.log(newValue);
                     setFormData({
                       ...formData,
                       asset: {
@@ -840,7 +837,7 @@ function EditServiceRequest() {
                       location: {
                         ...formData.location,
                         location: newValue ? newValue.locationName : "",
-                        subLocation: "", // Reset subLocation when location changes
+                        subLocation: "", 
                       },
                     });
                     setFilteredSubLocations(newValue?.subLocations || []);

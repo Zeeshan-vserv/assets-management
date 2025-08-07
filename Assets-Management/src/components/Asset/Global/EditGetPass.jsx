@@ -188,7 +188,6 @@ function EditGetPass() {
       const res = await updateGatePass(id, fd);
       if (res.data.success) {
         toast.success("Gate Pass updated successfully!");
-        // Optionally redirect or reset form here
         setShowConfirm(false);
       } else {
         toast.error(res.data.message || "Failed to update gate pass");
@@ -210,12 +209,11 @@ function EditGetPass() {
         >
           <div className="flex gap-3 justify-end">
             <button
-              // type="submit"
               type="button"
               onClick={() => setShowConfirm(true)}
               className="bg-[#8092D1] shadow-[#8092D1] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
             >
-              Submit
+              Update
             </button>
             <NavLink
               to="/main/Asset/GatePassData"

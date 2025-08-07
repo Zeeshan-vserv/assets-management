@@ -15,7 +15,6 @@ import {
   getAllServiceCategory,
   updateServiceCategory,
 } from "../../../api/globalServiceRequest";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const ReqCategory = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -33,8 +32,6 @@ const ReqCategory = () => {
   // Delete Modal State
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch categories
   const fetchCategories = async () => {
@@ -189,7 +186,6 @@ const ReqCategory = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchCategories();
-        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update category");
@@ -217,12 +213,10 @@ const ReqCategory = () => {
         </h2>
         <MaterialReactTable table={table} />
       </div>
-
-      {/* Add Modal */}
       {openAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Add Category
             </h2>
             <form onSubmit={handleAddCategory} className="space-y-4">
@@ -246,7 +240,7 @@ const ReqCategory = () => {
                   type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
-                  Add
+                  Submit
                 </button>
                 <button
                   type="button"
@@ -265,7 +259,7 @@ const ReqCategory = () => {
       {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Edit Category
             </h2>
             <form onSubmit={handleEditCategory} className="space-y-4">
@@ -291,9 +285,7 @@ const ReqCategory = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  // type="submit"
-                  type="button"
-                  onClick={() => setShowConfirm(true)}
+                  type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
                   Update
@@ -305,12 +297,6 @@ const ReqCategory = () => {
                 >
                   Cancel
                 </button>
-                <ConfirmUpdateModal
-                  isOpen={showConfirm}
-                  onConfirm={handleEditCategory}
-                  message="Are you sure you want to update this category?"
-                  onCancel={() => setShowConfirm(false)}
-                />
               </div>
             </form>
           </div>

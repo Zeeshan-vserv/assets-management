@@ -44,7 +44,6 @@ function SubLocation() {
   const [deleteSubLocationInfo, setDeleteSubLocationInfo] = useState(null);
   const [updateSubLocationModal, setUpdateSubLocationModal] = useState(false);
   const [editSubLocation, setEditSubLocation] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchSubLocations = async () => {
     try {
@@ -188,7 +187,6 @@ function SubLocation() {
       setUpdateSubLocationModal(false);
       setEditSubLocation(null);
       fetchSubLocations();
-      setShowConfirm(false);
     } catch (error) {
       toast.error("Failed to update sub location");
     }
@@ -453,11 +451,10 @@ function SubLocation() {
       {updateSubLocationModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Edit Sub Location
             </h2>
-            {/* {console.log(editSubLocation)} */}
-            <form onSubmit={updateSubLocationHandler}>
+            <form onSubmit={updateSubLocationHandler} className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
                 <label className="w-40 text-sm font-medium text-gray-500">
                   Location*
@@ -465,20 +462,6 @@ function SubLocation() {
                 <span className="w-60 text-lg border-b border-gray-400 text-black">
                   {editSubLocation?.locationName || "N/A"}
                 </span>
-                {/* <select
-                  name="locationId"
-                  required
-                  value={editSubLocation?.locationId || ""}
-                  onChange={subLocationInputChangeHandler}
-                  className="w-[250px] border-b-2 border-gray-300 p-2 outline-none"
-                >
-                  <option value="">Select Location</option>
-                  {locations.map((loc) => (
-                    <option key={loc._id} value={loc._id}>
-                      {loc.locationName}
-                    </option>
-                  ))}
-                </select> */}
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
@@ -497,9 +480,7 @@ function SubLocation() {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  // type="submit"
-                  type="button"
-                  onClick={() => setShowConfirm(true)}
+                  type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
                   Update
@@ -511,12 +492,6 @@ function SubLocation() {
                 >
                   Cancel
                 </button>
-                <ConfirmUpdateModal
-                  isOpen={showConfirm}
-                  message="Are you sure you want to update Sub Location?"
-                  onConfirm={updateSubLocationHandler}
-                  onCancel={() => setShowConfirm(false)}
-                />
               </div>
             </form>
           </div>
@@ -525,11 +500,11 @@ function SubLocation() {
       {openAddSubLocationModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Add Sub Location
             </h2>
-            <form onSubmit={addNewSubLocationHandler}>
-              <div className="flex items-center gap-2 mb-4">
+            <form onSubmit={addNewSubLocationHandler} className="space-y-4">
+              <div className="flex items-center gap-2 mt-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
                   Location*
                 </label>
@@ -538,7 +513,7 @@ function SubLocation() {
                   required
                   value={addNewSubLocation.locationId}
                   onChange={addNewSubLocationChangeHandler}
-                  className="w-[250px] border-b-2 border-gray-300 p-2 outline-none"
+                  className="w-[250px] border-b-2 border-gray-300 p-2 outline-none cursor-pointer"
                 >
                   <option value="">Select Location</option>
                   {locations.map((loc) => (
@@ -568,7 +543,7 @@ function SubLocation() {
                   type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
-                  Add
+                  Submit
                 </button>
                 <button
                   type="button"

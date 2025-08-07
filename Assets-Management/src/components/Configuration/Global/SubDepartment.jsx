@@ -23,7 +23,6 @@ import {
 } from "../../../api/DepartmentRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -47,7 +46,6 @@ function SubDepartment() {
   const [deleteSubDepartmentId, setDeleteSubDepartmentId] = useState(null);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [editDepartment, setEditDepartment] = useState(null);
-  const [showConfirm, setShowConfirm] = useState(false);
 
   const fetchDepartmentAndSubDepartemntData = async () => {
     try {
@@ -159,8 +157,6 @@ function SubDepartment() {
       // ],
     };
 
-    // console.log(selectedDepartment._id,formData);
-
     const response = await addSubDepartment(selectedDepartment._id, formData);
     if (response?.data?.success) {
       toast.success("Sub Department Added successfully");
@@ -239,7 +235,6 @@ function SubDepartment() {
       const formData = {
         subdepartmentName: editDepartment.subdepartmentName,
       };
-      // console.log(editDepartment._id,formData);
 
       const response = await updateSubDepartment(editDepartment._id, formData);
       if (response?.data?.success) {
@@ -247,7 +242,6 @@ function SubDepartment() {
         await fetchDepartmentAndSubDepartemntData();
         setOpenUpdateModal(false);
         setEditDepartment(null);
-        setShowConfirm(false);
       } else {
         throw new Error(
           response?.data?.message || "Failed to update sub department"
@@ -467,49 +461,51 @@ function SubDepartment() {
         {openAddSubDepartemntModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-              <h2 className=""> Add new Sub Department</h2>
+              <h2 className="text-lg font-medium text-gray-800 mb-4">
+                {" "}
+                Add Sub Department
+              </h2>
               <form onSubmit={addNewSubDepartmentHandler} className="space-y-4">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 mt-4">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Department Name
-                    </label>
-                    <Autocomplete
-                      sx={{ width: 250 }}
-                      options={departments.map((dept) => dept.departmentName)}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Select Department"
-                          variant="standard"
-                          required
-                        />
-                      )}
-                      value={addNewSubDepartment.departmentName || null}
-                      onChange={(event, value) =>
-                        setNewSubDepartment((prev) => ({
-                          ...prev,
-                          departmentName: value || "",
-                        }))
-                      }
-                    />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <label className="w-40 text-sm font-medium text-gray-500">
-                      Sub Department Name
-                    </label>
-                    <TextField
-                      name="subdepartmentName"
-                      required
-                      fullWidth
-                      value={addNewSubDepartment.subdepartmentName}
-                      onChange={addNewSubDepartmentChangeHandler}
-                      placeholder="Enter Sub Department Name"
-                      variant="standard"
-                      sx={{ width: 250 }}
-                    />
-                  </div>
+                <div className="flex items-center gap-2 mt-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Department Name
+                  </label>
+                  <Autocomplete
+                    sx={{ width: 250 }}
+                    options={departments.map((dept) => dept.departmentName)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Select"
+                        variant="standard"
+                        required
+                      />
+                    )}
+                    value={addNewSubDepartment.departmentName || null}
+                    onChange={(event, value) =>
+                      setNewSubDepartment((prev) => ({
+                        ...prev,
+                        departmentName: value || "",
+                      }))
+                    }
+                  />
                 </div>
+                <div className="flex items-center gap-2">
+                  <label className="w-40 text-sm font-medium text-gray-500">
+                    Sub Department Name
+                  </label>
+                  <TextField
+                    name="subdepartmentName"
+                    required
+                    fullWidth
+                    value={addNewSubDepartment.subdepartmentName}
+                    onChange={addNewSubDepartmentChangeHandler}
+                    placeholder="Enter Sub Department Name"
+                    variant="standard"
+                    sx={{ width: 250 }}
+                  />
+                </div>
+
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="submit"
@@ -562,6 +558,10 @@ function SubDepartment() {
         {openUpdateModal && (
           <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
+              <h2 className="text-lg font-medium text-gray-800 mb-4">
+                {" "}
+                Edit Sub Department
+              </h2>
               <form onSubmit={updateSubDepartmentHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
@@ -600,9 +600,8 @@ function SubDepartment() {
 
                 <div className="flex justify-end gap-3 pt-4">
                   <button
-                    type="button"
-                    onClick={() => setShowConfirm(true)}
-                    // onClick={() => setOpenUpdateModal(false)}
+                    type="submit"
+                    onClick={() => setOpenUpdateModal(false)}
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
                     Update
@@ -614,12 +613,6 @@ function SubDepartment() {
                   >
                     Cancel
                   </button>
-                  <ConfirmUpdateModal
-                    isOpen={showConfirm}
-                    message="Are you sure you want to update Sub Department?"
-                    onConfirm={updateSubDepartmentHandler}
-                    onCancel={() => setShowConfirm(false)}
-                  />
                 </div>
               </form>
             </div>

@@ -21,7 +21,6 @@ import {
   getAllPredefinedResponses,
   updatePredefinedResponse,
 } from "../../../api/ConfigurationIncidentRequest";
-import ConfirmUpdateModal from "../../ConfirmUpdateModal";
 
 const PredefinedReplies = () => {
   const user = useSelector((state) => state.authReducer.authData);
@@ -42,8 +41,6 @@ const PredefinedReplies = () => {
   // Delete Modal State
   const [deleteModal, setDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
-
-  const [showConfirm, setShowConfirm] = useState(false);
 
   // Fetch predefined replies
   const fetchReplies = async () => {
@@ -202,14 +199,12 @@ const PredefinedReplies = () => {
         setOpenEditModal(false);
         setEditForm(null);
         fetchReplies();
-        setShowConfirm(false);
       }
     } catch (err) {
       toast.error("Failed to update predefined reply");
     }
   };
 
-  // Delete Handler
   const handleDeleteCategory = async () => {
     try {
       await deletePredefinedResponse(deleteId);
@@ -231,11 +226,10 @@ const PredefinedReplies = () => {
         <MaterialReactTable table={table} />
       </div>
 
-      {/* Add Modal */}
       {openAddModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Add Predefined Reply
             </h2>
             <form onSubmit={handleAddCategory} className="space-y-4">
@@ -266,7 +260,7 @@ const PredefinedReplies = () => {
                 <TextareaAutosize
                   name="predefinedContent"
                   className="border-[1px] border-black rounded-md p-1"
-                  // required
+                  required
                   minRows={3}
                   style={{
                     width: 250,
@@ -288,7 +282,7 @@ const PredefinedReplies = () => {
                   type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
-                  Add
+                  Submit
                 </button>
                 <button
                   type="button"
@@ -303,11 +297,10 @@ const PredefinedReplies = () => {
         </div>
       )}
 
-      {/* Edit Modal */}
       {openEditModal && editForm && (
         <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 animate-fade-in space-y-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6">
+            <h2 className="text-lg font-medium text-gray-800 mb-4">
               Edit Predefined Reply
             </h2>
             <form onSubmit={handleEditCategory} className="space-y-4">
@@ -337,8 +330,8 @@ const PredefinedReplies = () => {
                 </label>
                 <TextareaAutosize
                   name="predefinedContent"
-                  // required
-                  className="border-[1px] border-black rounded-md p-1"
+                  required
+                  className="border-[1px] border-black rounded-md p-1 outline-none"
                   minRows={3}
                   style={{
                     width: 250,
@@ -357,9 +350,7 @@ const PredefinedReplies = () => {
               </div>
               <div className="flex justify-end gap-3 pt-4">
                 <button
-                  // type="submit"
-                  type="button"
-                  onClick={() => setShowConfirm(true)}
+                  type="submit"
                   className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                 >
                   Update
@@ -371,12 +362,6 @@ const PredefinedReplies = () => {
                 >
                   Cancel
                 </button>
-                <ConfirmUpdateModal
-                  isOpen={showConfirm}
-                  onConfirm={handleEditCategory}
-                  message="Are you sure you want to update this predefined reply?"
-                  onCancel={() => setShowConfirm(false)}
-                />
               </div>
             </form>
           </div>

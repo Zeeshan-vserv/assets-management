@@ -115,12 +115,6 @@ function Incident() {
       return data.filter(
         (item) =>
           item.userId === user?.userId && user?.userId === item.submitter.userId
-        // (item) =>
-        //   console.log(
-        //     item,
-        //     item.userId === user?.userId &&
-        //       user?.userId === item.submitter.userId
-        //   )
       );
     } else if (ticketType === "Other User Tickets") {
       return data.filter(
@@ -175,10 +169,6 @@ function Incident() {
         Cell: ({ cell }) =>
           dayjs(cell.getValue()).format("DD MMM YYYY, hh:mm A"),
       },
-      // {
-      //   accessorKey: "status",
-      //   header: "Status",
-      // },
       {
         header: "Status",
         accessorKey: "statusTimeline",
@@ -451,139 +441,6 @@ function Incident() {
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
         <h2 className="text-md font-semibold text-start">MY INCIDENTS</h2>
-        {/* <Box className="flex flex-wrap items-center w-full">
-          <Button
-            onClick={() => navigate("/new-incident")}
-            variant="contained"
-            size="small"
-            startIcon={<AddCircleOutlineIcon />}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "#fff",
-              textTransform: "none",
-              mt: 1,
-              mb: 1,
-            }}
-          >
-            New
-          </Button>
-          <Autocomplete
-            className="w-40"
-            sx={{
-              ml: 2,
-              mt: 1,
-              mb: 1,
-              "& .MuiInputBase-root": {
-                borderRadius: "0.35rem",
-                backgroundColor: "#f9fafb",
-                fontSize: "0.85rem",
-                border: "1px solid #e2e8f0",
-                transition: "all 0.3s ease",
-              },
-              "& .MuiInputBase-root:hover": {
-                borderColor: "#94a3b8",
-              },
-            }}
-            options={ticketOptions}
-            value={ticketType}
-            onChange={(_, newValue) => setTicketType(newValue || ticketOptions[0])}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                variant="standard"
-                placeholder="Select"
-                InputProps={{
-                  ...params.InputProps,
-                  disableUnderline: true,
-                }}
-                inputProps={{
-                  ...params.inputProps,
-                  style: { fontSize: "0.85rem", padding: "8px" },
-                }}
-              />
-            )}
-          />
-          <Button
-            variant="contained"
-            size="small"
-            startIcon={<MdDashboard size={16} />}
-            onClick={handleClick}
-            sx={{
-              backgroundColor: "#2563eb",
-              color: "#fff",
-              textTransform: "none",
-              mt: 1,
-              mb: 1,
-              ml: 1,
-            }}
-          >
-            Action
-          </Button>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-          >
-            <MenuItem
-              onClick={handleChangeStatus}
-              sx={{ fontSize: "0.875rem" }}
-            >
-              Change Status
-            </MenuItem>
-          </Menu>
-          <Button
-            onClick={handlePdfData}
-            startIcon={<AiOutlineFilePdf />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export as PDF
-          </Button>
-          <Button
-            onClick={handleExportData}
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export All Data
-          </Button>
-          <Button
-            disabled={table.getPrePaginationRowModel().rows.length === 0}
-            onClick={() =>
-              handleExportRows(table.getPrePaginationRowModel().rows)
-            }
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export All Rows
-          </Button>
-          <Button
-            disabled={table.getRowModel().rows.length === 0}
-            onClick={() => handleExportRows(table.getRowModel().rows)}
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export Page Rows
-          </Button>
-          <Button
-            disabled={
-              !table.getIsSomeRowsSelected() && !table.getIsAllRowsSelected()
-            }
-            onClick={() => handleExportRows(table.getSelectedRowModel().rows)}
-            startIcon={<AiOutlineFileExcel />}
-            size="small"
-            variant="outlined"
-            sx={{ textTransform: "none", ml: 2, mt: 1, mb: 1 }}
-          >
-            Export Selected Rows
-          </Button>
-        </Box> */}
         <MaterialReactTable table={table} />
         {assignedToViewModal && (
           <>

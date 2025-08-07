@@ -401,7 +401,7 @@ Location: ${row?.locationInformation?.location ?? ""}`;
   const handleUserEmailClick = async (userId) => {
     try {
       const res = await getUserById(userId);
-      console.log("User API response:", res); 
+      // console.log("User API response:", res); // <-- Add this line
       // Try both options below, depending on your API response:
       setUserDetails(res?.data?.data || res?.data || null);
       setUserModalOpen(true);

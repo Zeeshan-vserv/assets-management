@@ -103,7 +103,7 @@ export const login = async (req, res) => {
     // Remove sensitive fields
     const { password: pwd, confirmPassword, ...safeUser } = user._doc;
 
-    res.status(200).json({ user: safeUser, token });
+    res.status(200).json({ user: safeUser, token,message:"Login successful" });
   } catch (error) {
     console.log("User not Authenticated", error);
     res

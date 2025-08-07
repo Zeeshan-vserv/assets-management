@@ -20,7 +20,7 @@ export const login = (formData, navigate) => async (dispatch) => {
 
     // Fetch permissions after successful login
     dispatch(fetchPermissions(data.token));
-
+    return { success: true, message: "Login successful" };
     // Navigate in your component after dispatching login
     if (navigate) navigate(data.redirectTo || "/dashboardAsset", { replace: true });
   } catch (error) {
@@ -28,6 +28,7 @@ export const login = (formData, navigate) => async (dispatch) => {
       type: "AUTH_FAIL",
       error: error.response ? error.response.data.message : "An error occurred",
     });
+    return { success: false, message: error.response?.data?.message || "Invalid credentials" };
   }
 };
 

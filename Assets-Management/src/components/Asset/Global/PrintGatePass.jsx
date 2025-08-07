@@ -98,11 +98,11 @@ const PrintGatePass = () => {
   }, []);
 
   const handleAfterPrint = React.useCallback(() => {
-    console.log("`onAfterPrint` called");
+    // console.log("`onAfterPrint` called");
   }, []);
 
   const handleBeforePrint = React.useCallback(() => {
-    console.log("`onBeforePrint` called");
+    // console.log("`onBeforePrint` called");
     return Promise.resolve();
   }, []);
 

@@ -203,7 +203,7 @@ function GatePassData() {
       setDeleteGetPassId(null);
       fetchGetPass();
     } catch (error) {
-      console.log("Delete Get pass error", error);
+      // console.log("Delete Get pass error", error);
     }
   };
 

@@ -27,7 +27,7 @@ import {
   getAllSupportDepartment,
   getAllSupportGroup,
 } from "../../../api/SuportDepartmentRequest";
-import { getAllUsers } from "../../../api/AuthRequest";
+import { getAllUsers, getUserById } from "../../../api/AuthRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -59,6 +59,9 @@ function ServiceRequest() {
   const [onHoldRemarks, setOnHoldRemarks] = useState("");
   const [resolvedComments, setResolvedComments] = useState("");
   const [closureCode, setClosureCode] = useState("");
+  const [allUsers, setAllUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showUserModal, setShowUserModal] = useState(false);
 
   const fetchService = useCallback(async () => {
     setIsLoading(true);
@@ -112,6 +115,12 @@ function ServiceRequest() {
 
   useEffect(() => {
     fetchService();
+  }, []);
+
+  useEffect(() => {
+    getAllUsers().then((res) => {
+      setAllUsers(res?.data?.data || []);
+    });
   }, []);
 
   const fetchDropdownData = useCallback(async () => {
@@ -175,7 +184,8 @@ function ServiceRequest() {
 
     if (selectDropDownValue === "assigned") {
       updateData.classificaton = {
-        supportDepartmentName: selectedSupportDepartment?.supportDepartmentName || "",
+        supportDepartmentName:
+          selectedSupportDepartment?.supportDepartmentName || "",
         supportGroupName: selectedSupportGroup?.supportGroupName || "",
         technician: selectedTechnician?._id || "",
       };
@@ -230,9 +240,57 @@ function ServiceRequest() {
         accessorKey: "submitter.user",
         header: "Submitter",
       },
+      // {
+      //   accessorKey: "classificaton.technician",
+      //   header: "Assigned To",
+      // },
       {
         accessorKey: "classificaton.technician",
         header: "Assigned To",
+        Cell: ({ cell }) => {
+          const technicianId = cell.getValue();
+          const [email, setEmail] = React.useState(null);
+
+          React.useEffect(() => {
+            let isMounted = true;
+            if (technicianId) {
+              getUserById(technicianId)
+                .then((res) => {
+                  if (isMounted)
+                    setEmail(res?.data?.emailAddress || technicianId);
+                })
+                .catch(() => {
+                  if (isMounted) setEmail(technicianId);
+                });
+            }
+            return () => {
+              isMounted = false;
+            };
+          }, [technicianId]);
+
+          return (
+            <span
+              style={{
+                color: "#2563eb",
+                cursor: "pointer",
+                textDecoration: "underline",
+              }}
+              onClick={async (e) => {
+                e.stopPropagation();
+                try {
+                  const res = await getUserById(technicianId);
+                  setSelectedUser(res?.data);
+                  setShowUserModal(true);
+                } catch {
+                  setSelectedUser(null);
+                  setShowUserModal(false);
+                }
+              }}
+            >
+              {email || technicianId}
+            </span>
+          );
+        },
       },
       // {
       //   accessorKey: "",
@@ -586,6 +644,63 @@ function ServiceRequest() {
           ))}
         </div>
         <MaterialReactTable table={table} />
+        {showUserModal && selectedUser && (
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 animate-fade-in transition-all duration-300">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">
+                User Details
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+                <div>
+                  <p className="font-medium">Name</p>
+                  <p className="text-gray-600">
+                    {selectedUser.employeeName || "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium">Email</p>
+                  <p className="text-gray-600 break-all">
+                    {selectedUser.emailAddress || "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium">Role</p>
+                  <p className="text-gray-600">
+                    {selectedUser.userRole || "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium">Employee Code</p>
+                  <p className="text-gray-600">
+                    {selectedUser.employeeCode || "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium">Contact Number</p>
+                  <p className="text-gray-600">
+                    {selectedUser.mobileNumber || "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium">Designation</p>
+                  <p className="text-gray-600">
+                    {selectedUser.designation || "-"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => setShowUserModal(false)}
+                  className="px-5 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {changeStatus && (
           <>
             <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
@@ -606,7 +721,9 @@ function ServiceRequest() {
                       >
                         <option value="">Select</option>
                         <option value="new">New</option>
-                        <option value="approvalPending">Approval Pending</option>
+                        <option value="approvalPending">
+                          Approval Pending
+                        </option>
                         <option value="provisioning">Provisioning</option>
                         <option value="assigned">Assigned</option>
                         <option value="inProgress">In Progress</option>
@@ -615,15 +732,20 @@ function ServiceRequest() {
                         <option value="rejected">Rejected</option>
                         <option value="resolved">Resolved</option>
                         <option value="closed">Closed</option>
-                        <option value="serviceToIncident">Service To Incident</option>
-                        <option value="waitingForUpdate">Waiting For Update</option>
+                        <option value="serviceToIncident">
+                          Service To Incident
+                        </option>
+                        <option value="waitingForUpdate">
+                          Waiting For Update
+                        </option>
                       </select>
                     </div>
                     {selectDropDownValue === "assigned" && (
                       <>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Support Department<span className="text-red-500">*</span>
+                            Support Department
+                            <span className="text-red-500">*</span>
                           </label>
                           <div className="w-[60%]">
                             <Autocomplete
@@ -636,7 +758,12 @@ function ServiceRequest() {
                                 setSelectedSupportDepartment(newValue)
                               }
                               renderInput={(params) => (
-                                <TextField {...params} label="Select" variant="standard" required />
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
                               )}
                             />
                           </div>
@@ -656,7 +783,12 @@ function ServiceRequest() {
                                 setSelectedSupportGroup(newValue)
                               }
                               renderInput={(params) => (
-                                <TextField {...params} label="Select" variant="standard" required />
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
                               )}
                             />
                           </div>
@@ -680,7 +812,12 @@ function ServiceRequest() {
                                 setSelectedTechnician(newValue)
                               }
                               renderInput={(params) => (
-                                <TextField {...params} label="Select" variant="standard" required />
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
                               )}
                             />
                           </div>
@@ -691,7 +828,8 @@ function ServiceRequest() {
                       <>
                         <div className="flex items-center gap-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Enter Comments<span className="text-red-500">*</span>
+                            Enter Comments
+                            <span className="text-red-500">*</span>
                           </label>
                           <textarea
                             className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
@@ -702,7 +840,8 @@ function ServiceRequest() {
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Support Department<span className="text-red-500">*</span>
+                            Support Department
+                            <span className="text-red-500">*</span>
                           </label>
                           <div className="w-[60%]">
                             <Autocomplete
@@ -712,9 +851,16 @@ function ServiceRequest() {
                                 "Standby Provided",
                               ]}
                               value={onHoldDept}
-                              onChange={(_, newValue) => setOnHoldDept(newValue)}
+                              onChange={(_, newValue) =>
+                                setOnHoldDept(newValue)
+                              }
                               renderInput={(params) => (
-                                <TextField {...params} label="Select" variant="standard" required />
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
                               )}
                             />
                           </div>
@@ -736,13 +882,16 @@ function ServiceRequest() {
                       <>
                         <div className="flex items-center gap-2 mt-2">
                           <label className="w-[40%] text-sm font-medium text-gray-500">
-                            Enter Comments<span className="text-red-500">*</span>
+                            Enter Comments
+                            <span className="text-red-500">*</span>
                           </label>
                           <textarea
                             rows={2}
                             className="w-[60%] px-4 py-2 border-b border-gray-300 outline-none transition-all cursor-pointer"
                             value={resolvedComments}
-                            onChange={(e) => setResolvedComments(e.target.value)}
+                            onChange={(e) =>
+                              setResolvedComments(e.target.value)
+                            }
                             required
                           />
                         </div>
@@ -754,9 +903,16 @@ function ServiceRequest() {
                             <Autocomplete
                               options={[""]}
                               value={closureCode}
-                              onChange={(_, newValue) => setClosureCode(newValue)}
+                              onChange={(_, newValue) =>
+                                setClosureCode(newValue)
+                              }
                               renderInput={(params) => (
-                                <TextField {...params} label="Select" variant="standard" required />
+                                <TextField
+                                  {...params}
+                                  label="Select"
+                                  variant="standard"
+                                  required
+                                />
                               )}
                             />
                           </div>

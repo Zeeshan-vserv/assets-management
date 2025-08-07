@@ -16,7 +16,7 @@ function App() {
       <Routes>
         <Route
           path="/auth"
-          element={user ? <Navigate to="/main" /> : <Login />}
+          element={user ? <Navigate to="/main/dashboard/asset" /> : <Login />}
         />
         {/* Only render Main if not on /not-authorized */}
         <Route

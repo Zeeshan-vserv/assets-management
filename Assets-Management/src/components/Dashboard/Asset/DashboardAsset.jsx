@@ -69,7 +69,7 @@ useEffect(() => {
     fetchAssets();
   }, []);
 
-  console.log("rr", data);
+  // console.log("rr", data);
 
   //static data later chnage
   const AssetsByStatus = [

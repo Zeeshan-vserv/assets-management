@@ -19,8 +19,7 @@ const fieldChangeEntrySchema = new mongoose.Schema({
 const approvalEntrySchema = new mongoose.Schema({
   approver: String, // email or userId
   level: Number,
-  status: { type: String, default: "Pending" }, // Pending, Approved, Rejected
-  actionAt: Date,
+  status: { type: String, default: "Pending" },
   remarks: String
 }, { _id: false });
 

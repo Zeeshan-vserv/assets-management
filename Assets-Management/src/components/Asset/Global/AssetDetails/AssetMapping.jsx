@@ -9,9 +9,9 @@ function AssetMapping({ assetMappingModal, setAssetMappingModal }) {
 
   const handleSave = () => {
     if (isMapWithSerial) {
-      console.log("Saving Serial Number:", serialNumber);
+      // console.log("Saving Serial Number:", serialNumber);
     } else {
-      console.log("Saving Host Name:", hostName);
+      // console.log("Saving Host Name:", hostName);
     }
     setAssetMappingModal(false);
     setIsMapWithSerial(false);
@@ -19,9 +19,9 @@ function AssetMapping({ assetMappingModal, setAssetMappingModal }) {
 
   const handleRemove = () => {
     if (isMapWithSerial) {
-      console.log("Removing Serial Number:", serialNumber);
+      // console.log("Removing Serial Number:", serialNumber);
     } else {
-      console.log("Removing Host Name:", hostName);
+      // console.log("Removing Host Name:", hostName);
     }
     setAssetMappingModal(false);
     setIsMapWithSerial(false);
@@ -29,9 +29,9 @@ function AssetMapping({ assetMappingModal, setAssetMappingModal }) {
 
   const handleUpdate = () => {
     if (isMapWithSerial) {
-      console.log("Updating Serial Number:", serialNumber);
+      // console.log("Updating Serial Number:", serialNumber);
     } else {
-      console.log("Updating Host Name:", hostName);
+      // console.log("Updating Host Name:", hostName);
     }
     setAssetMappingModal(false);
     setIsMapWithSerial(false);

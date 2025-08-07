@@ -203,24 +203,20 @@ const AssetData = () => {
   // };
 
   const handleExportRows = (rows) => {
-    const visibleColumns = table
-      .getAllLeafColumns()
-      .filter(
-        (col) =>
-          col.getIsVisible() &&
-          col.id !== "mrt-row-select" &&
-          col.id !== "edit" &&
-          col.id !== "delete" &&
-          col.id !== "file"
-      );
-
     const rowData = rows.map((row) => {
-      const result = {};
-      visibleColumns.forEach((col) => {
-        const key = col.id || col.accessorKey;
-        result[key] = row.original[key];
-      });
-      return result;
+      const rowValues = {};
+      table
+        .getAllLeafColumns()
+        .filter((column) => column.getIsVisible())
+        .filter(
+          (column) => !["mrt-row-select", "edit", "delete"].includes(column.id)
+        )
+        .forEach((column) => {
+          const value = row.getValue(column.id);
+          rowValues[column.columnDef.header] =
+            value !== undefined ? String(value) : "";
+        });
+      return rowValues;
     });
 
     const csv = generateCsv(csvConfig)(rowData);
@@ -228,55 +224,61 @@ const AssetData = () => {
   };
 
   const handleExportData = () => {
-    const visibleColumns = table
-      .getAllLeafColumns()
-      .filter(
-        (col) =>
-          col.getIsVisible() &&
-          col.id !== "mrt-row-select" &&
-          col.id !== "edit" &&
-          col.id !== "delete" &&
-          col.id !== "file"
-      );
+    const rowData = data.map((row) => {
+      const rowValues = {};
+      table
+        .getAllLeafColumns()
+        .filter((column) => column.getIsVisible())
+        .filter(
+          (column) => !["mrt-row-select", "edit", "delete"].includes(column.id)
+        )
+        .forEach((column) => {
+          const accessorKey = column.columnDef.accessorKey || column.id;
+          const keys = accessorKey.split(".");
+          let value = row;
 
-    const exportData = data.map((item) => {
-      const result = {};
-      visibleColumns.forEach((col) => {
-        const key = col.id || col.accessorKey;
-        result[key] = item[key];
-      });
-      return result;
+          keys.forEach((key) => {
+            value = value?.[key];
+          });
+
+          rowValues[column.columnDef.header] =
+            value !== undefined ? String(value) : "";
+        });
+      return rowValues;
     });
-
-    const csv = generateCsv(csvConfig)(exportData);
+    const csv = generateCsv(csvConfig)(rowData);
     download(csvConfig)(csv);
   };
 
   const handlePdfData = () => {
-    const excludedColumns = ["mrt-row-select", "edit", "delete", "file"];
+    const doc = new jsPDF();
     const visibleColumns = table
       .getAllLeafColumns()
-      .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
+      .filter((column) => column.getIsVisible())
+      .filter(
+        (column) => !["mrt-row-select", "edit", "delete"].includes(column.id)
+      );
+    const headers = visibleColumns.map((column) => column.columnDef.header);
+    const body = data.map((row) => {
+      return visibleColumns.map((column) => {
+        const accessorKey = column.columnDef.accessorKey || column.id;
+        const keys = accessorKey.split(".");
+        let value = row;
 
-    const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
+        keys.forEach((key) => {
+          value = value?.[key];
+        });
 
-    const exportData = data.map((item) =>
-      visibleColumns.map((col) => {
-        const key = col.id || col.accessorKey;
-        let value = item[key];
-        return value ?? "";
-      })
-    );
-
-    const doc = new jsPDF();
+        return value !== undefined ? String(value) : "";
+      });
+    });
     autoTable(doc, {
       head: [headers],
-      body: exportData,
+      body: body,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-
     doc.save("Assets-Management-Assets.pdf");
   };
 

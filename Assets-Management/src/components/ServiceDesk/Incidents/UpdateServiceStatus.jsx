@@ -7,7 +7,10 @@ import {
 import { useEffect } from "react";
 import dayjs from "dayjs";
 import { getUserById } from "../../../api/AuthRequest";
-import { getServiceRequestById } from "../../../api/serviceRequest";
+import {
+  getServiceRequestById,
+  updateServiceRequest,
+} from "../../../api/serviceRequest";
 
 const UpdateServiceStatus = () => {
   const { id } = useParams();
@@ -46,6 +49,14 @@ const UpdateServiceStatus = () => {
       technician: "",
     },
   });
+
+  const [updateServiceRequestData, setUpdateServiceRequestData] = useState({
+    status: "",
+    closingSummary: "",
+    closeRemarks: "",
+    attachment: "",
+  });
+
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -126,6 +137,30 @@ const UpdateServiceStatus = () => {
     { label: "Category", value: formData?.category || "" },
   ];
 
+  const handleUpdateServiceChange = (e) => {
+    const { name, value, type, files } = e.target;
+    setUpdateServiceRequestData((prev) => ({
+      ...prev,
+      [name]: type === "file" ? files[0] : value,
+    }));
+  };
+  const updateWorkStatusHandler = async (e) => {
+    e.preventDefault();
+    try {
+      const form = new FormData();
+      form.append("status", updateServiceRequestData.status);
+      form.append("closingSummary", updateServiceRequestData.closingSummary);
+      form.append("closeRemarks", updateServiceRequestData.closeRemarks);
+      if (updateServiceRequestData.attachment) {
+        form.append("attachment", updateServiceRequestData.attachment);
+      }
+      const response = await updateServiceRequest(id, form);
+      console.log("Service Request Updated:", response);
+    } catch (error) {
+      console.error("Error updating service request:", error);
+    }
+  };
+
   return (
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
@@ -139,7 +174,10 @@ const UpdateServiceStatus = () => {
                 <h3 className="text-base text-gray-800 font-semibold mb-4">
                   Update Work Status(Service)
                 </h3>
-                <button className="px-3 py-2 bg-blue-500 text-white rounded-md shadow cursor-pointer hover:bg-blue-600">
+                <button
+                  onClick={updateWorkStatusHandler}
+                  className="px-3 py-2 bg-blue-500 text-white rounded-md shadow cursor-pointer hover:bg-blue-600"
+                >
                   <div className="flex flex-row items-center">
                     <MdOutlineSystemSecurityUpdateGood size={20} />
                     <span className="text-sm">Update</span>
@@ -154,11 +192,11 @@ const UpdateServiceStatus = () => {
                   Status
                 </label>
                 <select
-                  className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                  name="status"
                   id="status"
-                  // value={formData.loggedVia}
-                  // onChange={handleChange}
+                  name="status"
+                  value={updateServiceRequestData.status}
+                  onChange={handleUpdateServiceChange}
+                  className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 >
                   <option value="">Select Status</option>
                   <option value="Work On Process">Work On Process</option>
@@ -166,21 +204,24 @@ const UpdateServiceStatus = () => {
                     Person Not Available
                   </option>
                   <option value="Part Not Avaitable">Part Not Avaitable</option>
-                  <option value="Work Done">Work Done</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
                 </select>
               </div>
               <div className="flex items-center w-[50%] max-lg:w-[100%]">
                 <label
-                  htmlFor="comment"
+                  htmlFor="closeRemarks"
                   className="w-[28%] text-xs font-semibold text-slate-600"
                 >
                   Comment
                 </label>
                 <input
-                  className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                   type="text"
-                  id="comment"
-                  name="comment"
+                  id="closeRemarks"
+                  name="closeRemarks"
+                  value={updateServiceRequestData.closeRemarks}
+                  onChange={handleUpdateServiceChange}
+                  className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 />
               </div>
             </div>
@@ -189,8 +230,10 @@ const UpdateServiceStatus = () => {
               <h2 className="text-base font-semibold mb-4 text-gray-800">
                 Closer Statement
               </h2>
-
               <textarea
+                name="closingSummary"
+                value={updateServiceRequestData.closingSummary}
+                onChange={handleUpdateServiceChange}
                 className="w-full border border-gray-300 rounded-md p-3  resize-y font-['Verdana'] text-[11pt] outline-none"
                 placeholder="Type your reply..."
               />
@@ -200,15 +243,10 @@ const UpdateServiceStatus = () => {
                 </label>
                 <input
                   type="file"
+                  onChange={handleUpdateServiceChange}
                   className="border file:border file:rounded-sm file:px-1 border-gray-300 rounded-md px-2 py-1 file:cursor-pointer"
                 />
               </div>
-              <button className="mt-4 px-3 py-2 bg-slate-500 text-white rounded-md shadow cursor-pointer hover:bg-slate-600">
-                <div className="flex flex-row items-center">
-                  <MdOutlineReply size={20} />
-                  <span className="text-sm">Send</span>
-                </div>
-              </button>
             </div>
           </div>
           <div className="w-full lg:max-w-[500px] bg-white p-4 rounded-md shadow-md overflow-x-auto">

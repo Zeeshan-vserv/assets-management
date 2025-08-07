@@ -5,6 +5,7 @@ const statusEntrySchema = new mongoose.Schema({
     closingSummary: String,
     closeRemarks: String,
     closureCategory: String,
+    attachment: String,
     changedAt: { type: Date, default: Date.now },
     changedBy: String
 }, { _id: false });

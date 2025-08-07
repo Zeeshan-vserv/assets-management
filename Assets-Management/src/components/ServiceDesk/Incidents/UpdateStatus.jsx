@@ -45,6 +45,13 @@ const UpdateStatus = () => {
       technician: "",
     },
   });
+  const [updateStatusData, setUpdateStatusData] = useState({
+    status: "",
+    closingSummary: "",
+    closeRemarks: "",
+    attachment: "",
+  });
+
   const fetchData = async () => {
     try {
       setIsLoading(true);
@@ -117,23 +124,29 @@ const UpdateStatus = () => {
     { label: "Category", value: formData.category || "" },
   ];
 
+  const handleUpdateStatusChange = (e) => {
+    const { name, value, files, type } = e.target;
+    setUpdateStatusData((prev) => ({
+      ...prev,
+      [name]: type === "file" ? files[0] : value,
+    }));
+  };
+
   const updateWorkStatusHandler = async (e) => {
     e.preventDefault();
     try {
-      const updateData = {
-        
-      };
-      const response = await updateIncident(id, updateData);
+      const form = new FormData();
+      form.append("status", updateStatusData.status);
+      form.append("closingSummary", updateStatusData.closingSummary);
+      form.append("closeRemarks", updateStatusData.closeRemarks);
+      if (updateStatusData.attachment) {
+        form.append("attachment", updateStatusData.attachment);
+      }
+      const response = await updateIncident(id, form);
+      console.log("response", response);
+      console.log("formData", form);
     } catch (error) {
-      console.log("Error updating to work status");
-    }
-  };
-
-  const closerStatementHandler = (e) => {
-    e.preventDefault();
-    try {
-    } catch (error) {
-      console.log("Error updating to closer statement");
+      console.error("Error updating to work status", error);
     }
   };
 
@@ -163,15 +176,17 @@ const UpdateStatus = () => {
               </div>
               <div className="flex items-center w-[50%] max-lg:w-[100%]">
                 <label
-                  htmlFor=""
+                  htmlFor="status"
                   className="w-[28%] text-xs font-semibold text-slate-600"
                 >
                   Status
                 </label>
                 <select
+                  id="status"
+                  name="status"
+                  value={updateStatusData.status}
+                  onChange={handleUpdateStatusChange}
                   className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                  name=""
-                  id=""
                 >
                   <option value="">Select Status</option>
                   <option value="Work On Process">Work On Process</option>
@@ -179,32 +194,35 @@ const UpdateStatus = () => {
                     Person Not Available
                   </option>
                   <option value="Part Not Avaitable">Part Not Avaitable</option>
-                  <option value="Work Done">Work Done</option>
+                  <option value="resolved">Resolved</option>
+                  <option value="closed">Closed</option>
                 </select>
               </div>
               <div className="flex items-center w-[50%] max-lg:w-[100%]">
                 <label
-                  htmlFor=""
+                  htmlFor="closeRemarks"
                   className="w-[28%] text-xs font-semibold text-slate-600"
                 >
                   Comment
                 </label>
                 <input
+                  id="closeRemarks"
+                  name="closeRemarks"
+                  value={updateStatusData.closeRemarks}
+                  onChange={handleUpdateStatusChange}
                   className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                   type="text"
-                  id=""
-                  name=""
                 />
               </div>
             </div>
-
-            {/* Closer Statement */}
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-base font-semibold mb-4 text-gray-800">
                 Closer Statement
               </h2>
               <textarea
-                name=""
+                name="closingSummary"
+                value={updateStatusData.closingSummary}
+                onChange={handleUpdateStatusChange}
                 className="w-full border border-gray-300 rounded-md p-3  resize-y font-['Verdana'] text-[11pt] outline-none"
                 placeholder="Type your reply..."
               />
@@ -214,18 +232,11 @@ const UpdateStatus = () => {
                 </label>
                 <input
                   type="file"
+                  name="attachment"
+                  onChange={handleUpdateStatusChange}
                   className="border file:border file:rounded-sm file:px-1 border-gray-300 rounded-md px-2 py-1 file:cursor-pointer"
                 />
               </div>
-              <button
-                onClick={closerStatementHandler}
-                className="mt-4 px-3 py-2 bg-slate-500 text-white rounded-md shadow cursor-pointer hover:bg-slate-600"
-              >
-                <div className="flex flex-row items-center">
-                  <MdOutlineReply size={20} />
-                  <span className="text-sm">Send</span>
-                </div>
-              </button>
             </div>
           </div>
           <div className="w-full lg:max-w-[500px] bg-white p-4 rounded-md shadow-md overflow-x-auto">

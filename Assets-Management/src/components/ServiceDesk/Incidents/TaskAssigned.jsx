@@ -157,7 +157,7 @@ const TaskAssigned = () => {
     return data;
   }, [data, ticketType, user?.userId]);
 
-  console.log(data);
+  // console.log(data);
 
   // Table columns
   const columns = useMemo(
@@ -188,7 +188,7 @@ const TaskAssigned = () => {
       },
       {
         header: "Ticket ID",
-        accessorKey: "ticketId", 
+        accessorKey: "ticketId",
         Cell: ({ row }) => {
           const incidentId = row.original.incidentId;
           const serviceId = row.original.serviceId;

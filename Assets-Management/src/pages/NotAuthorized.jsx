@@ -1,38 +1,4 @@
-// import React from "react";
-
-// function NotAuthorized() {
-//   const handleGoBack = () => {
-//     window.history.go(-2);
-//   };
-
-//   return (
-//     <div style={{ textAlign: "center", marginTop: "2rem" }}>
-//       <h1>You are not allowed to access this page.</h1>
-//       <p>Please contact your administrator if you believe this is a mistake.</p>
-//       <button
-//         style={{
-//           marginTop: "1rem",
-//           padding: "0.5rem 1rem",
-//           background: "#2563eb",
-//           color: "#fff",
-//           border: "none",
-//           borderRadius: "4px",
-//           cursor: "pointer",
-//         }}
-//         onClick={handleGoBack}
-//       >
-//         Go Back
-//       </button>
-//     </div>
-//   );
-// }
-
-// export default NotAuthorized;
-
-
-
 import React from "react";
-
 const NotAuthorized = () => {
 
   const handleGoBack = () => {
@@ -66,7 +32,10 @@ const NotAuthorized = () => {
           🛫 Access Denied
         </h1>
         <p className="text-xl md:text-2xl text-white/90 mb-8">
-          The route you tried to take doesn't exist.
+          You do not have the necessary permissions to access this resource.
+        </p>
+        <p className="text-xl md:text-2xl text-white/90 mb-8">
+          If you believe this is an error, please contact the system administrator or support team for assistance.
         </p>
         <button
           onClick={handleGoBack}

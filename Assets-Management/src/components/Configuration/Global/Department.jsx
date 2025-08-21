@@ -21,6 +21,7 @@ import {
 } from "../../../api/DepartmentRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { getAllUsers } from "../../../api/AuthRequest";
 
 const csvConfig = mkConfig({
   fieldSeparator: ",",
@@ -42,6 +43,7 @@ function Department() {
   const [deleteConfirmationModal, setDeleteConfirmationModal] = useState(false);
   const [deleteDepartmentId, setDeleteDepartmentId] = useState(null);
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
+  const [userData, setUserData] = useState([]);
 
   const fetchDepartment = async () => {
     try {
@@ -58,6 +60,20 @@ function Department() {
   useEffect(() => {
     fetchDepartment();
   }, []);
+
+  const fetchUserData = async () => {
+    try {
+      const response = await getAllUsers();
+      setUserData(response?.data);
+    } catch (error) {
+      console.log("Error fetching in user data");
+    }
+  };
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  console.log("userData", userData);
 
   const columns = useMemo(
     () => [
@@ -417,10 +433,20 @@ function Department() {
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
-                    options={[
-                      "bittu.kumar@vservit.com",
-                      "zeeshan.ahmed@vservit.com",
-                    ]}
+                    options={userData}
+                    getOptionLabel={(option) => option?.emailAddress || ""}
+                    value={
+                      userData.find(
+                        (u) =>
+                          u?.emailAddress === addNewDepartment?.departmentHead
+                      ) || null
+                    }
+                    onChange={(event, value) =>
+                      setNewDepartment((prev) => ({
+                        ...prev,
+                        departmentHead: value?.emailAddress || "",
+                      }))
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -429,13 +455,6 @@ function Department() {
                         required
                       />
                     )}
-                    value={addNewDepartment.departmentHead || null}
-                    onChange={(event, value) =>
-                      setNewDepartment((prev) => ({
-                        ...prev,
-                        departmentHead: value,
-                      }))
-                    }
                   />
                 </div>
 

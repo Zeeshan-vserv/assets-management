@@ -223,7 +223,7 @@ const Category = () => {
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Category Name*
+                  Category Name <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="categoryName"
@@ -265,7 +265,7 @@ const Category = () => {
             <form onSubmit={handleEditCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Category Name*
+                  Category Name <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="categoryName"

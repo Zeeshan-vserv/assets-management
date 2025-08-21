@@ -442,6 +442,7 @@ function Components() {
                     id="name"
                     type="text"
                     name="name"
+                    required
                     value={editComponents?.name || ""}
                     onChange={componentsInputChangeHandler}
                     placeholder="Enter component name"

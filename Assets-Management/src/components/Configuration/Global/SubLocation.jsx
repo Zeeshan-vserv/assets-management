@@ -457,7 +457,7 @@ function SubLocation() {
             <form onSubmit={updateSubLocationHandler} className="space-y-4">
               <div className="flex items-center gap-2 mb-4">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Location*
+                  Location <span className="text-red-500">*</span>
                 </label>
                 <span className="w-60 text-lg border-b border-gray-400 text-black">
                   {editSubLocation?.locationName || "N/A"}
@@ -465,7 +465,7 @@ function SubLocation() {
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Sub Location*
+                  Sub Location <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="subLocationName"
@@ -506,7 +506,7 @@ function SubLocation() {
             <form onSubmit={addNewSubLocationHandler} className="space-y-4">
               <div className="flex items-center gap-2 mt-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Location*
+                  Location <span className="text-red-500">*</span>
                 </label>
                 <select
                   name="locationId"
@@ -525,7 +525,7 @@ function SubLocation() {
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Sub Location*
+                  Sub Location <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="subLocationName"

@@ -413,7 +413,7 @@ function ConsumableCategory() {
               >
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Consumable Category*
+                    Consumable Category <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="cosumableCategory"
@@ -457,7 +457,7 @@ function ConsumableCategory() {
                 >
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Consumable Category*
+                      Consumable Category <span className="text-red-500 text-base">*</span>
                     </label>
                     <TextField
                       name="cosumableCategory"

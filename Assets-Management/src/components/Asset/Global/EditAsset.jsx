@@ -227,12 +227,13 @@ const EditAsset = () => {
                 htmlFor="category"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Category
+                Category <span className="text-red-500 text-base">*</span>
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="category"
                 id="category"
+                required
                 value={formData.assetInformation.category}
                 onChange={(e) =>
                   setFormData({
@@ -295,13 +296,14 @@ const EditAsset = () => {
                 htmlFor="assetTag"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Asset Tag
+                Asset Tag <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="assetTag"
                 name="assetTag"
+                required
                 value={formData.assetInformation.assetTag}
                 onChange={(e) =>
                   setFormData({
@@ -319,12 +321,13 @@ const EditAsset = () => {
                 htmlFor="criticality"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Criticality
+                Criticality <span className="text-red-500 text-base">*</span>
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="criticality"
                 id="criticality"
+                required
                 value={formData.assetInformation.criticality}
                 onChange={(e) =>
                   setFormData({
@@ -346,13 +349,14 @@ const EditAsset = () => {
                 htmlFor="make"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Make
+                Make <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="make"
                 name="make"
+                required
                 value={formData.assetInformation.make}
                 onChange={(e) =>
                   setFormData({
@@ -370,13 +374,14 @@ const EditAsset = () => {
                 htmlFor="model"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Model
+                Model <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="model"
                 name="model"
+                required
                 value={formData.assetInformation.model}
                 onChange={(e) =>
                   setFormData({
@@ -394,13 +399,14 @@ const EditAsset = () => {
                 htmlFor="serialNumber"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Serial Number
+                Serial Number <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="serialNumber"
                 name="serialNumber"
+                required
                 value={formData.assetInformation.serialNumber}
                 onChange={(e) =>
                   setFormData({

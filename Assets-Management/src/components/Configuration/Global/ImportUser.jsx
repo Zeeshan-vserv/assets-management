@@ -8,6 +8,7 @@ import ConfirmUpdateModal from "../../ConfirmUpdateModal.jsx";
 function ImportUser() {
   const [fileData, setFileData] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
+  const fileInputRef = useRef(null); // Add this line
 
   const uploadFileChangeHandler = (e) => {
     const file = e.target.files[0];
@@ -27,10 +28,12 @@ function ImportUser() {
       if (response?.data?.success) {
         toast.success("Users uploaded successfully");
         setFileData(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""; // Clear the file input
+        }
       }
       setShowConfirm(false);
     } catch (error) {
-      // console.log(error);
       console.error("User Upload Failed:", error);
     }
   };
@@ -50,6 +53,8 @@ function ImportUser() {
               </label>
               <input
                 type="file"
+                required
+                ref={fileInputRef} // Add this prop
                 onChange={uploadFileChangeHandler}
                 className={`block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4
                        file:rounded-sm file:border-0

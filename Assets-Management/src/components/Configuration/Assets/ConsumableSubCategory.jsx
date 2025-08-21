@@ -454,7 +454,7 @@ function ConsumableSubCategory() {
             <form onSubmit={handleAdd} className="space-y-4">
               <div className="flex items-center gap-2 mt-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Consumable Category
+                  Consumable Category <span className="text-red-500 text-base">*</span>
                 </label>
                 <Autocomplete
                   sx={{ width: 250 }}
@@ -477,7 +477,7 @@ function ConsumableSubCategory() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Sub Category *
+                    Sub Category <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="subConsumableName"
@@ -519,7 +519,7 @@ function ConsumableSubCategory() {
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div className="flex items-center gap-2 mt-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Consumable Category
+                  Consumable Category <span className="text-red-500 text-base">*</span>
                 </label>
                 <Autocomplete
                   sx={{ width: 250 }}
@@ -542,7 +542,7 @@ function ConsumableSubCategory() {
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Sub Category *
+                    Sub Category <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="subConsumableName"

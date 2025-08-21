@@ -231,13 +231,14 @@ const EditIncident = () => {
                 htmlFor="subject"
                 className="w-[28%] text-xs font-semibold text-slate-600"
               >
-                Subject
+                Subject <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="subject"
                 name="subject"
+                required
                 value={formData.subject}
                 onChange={handleChange}
               />
@@ -248,11 +249,12 @@ const EditIncident = () => {
                 htmlFor="category"
                 className="w-[28%] text-xs font-semibold text-slate-600"
               >
-                Category
+                Category <span className="text-red-500 text-base">*</span>
               </label>
               <Autocomplete
                 className="w-[65%]"
                 options={category}
+                required
                 getOptionLabel={(option) => option.categoryName || ""}
                 value={
                   category.find(
@@ -285,11 +287,12 @@ const EditIncident = () => {
                 htmlFor="subCategory"
                 className="w-[28%] text-xs font-semibold text-slate-600"
               >
-                Sub Category
+                Sub Category <span className="text-red-500 text-base">*</span>
               </label>
               <Autocomplete
                 className="w-[65%]"
                 options={subCategory}
+                required
                 getOptionLabel={(option) => option.subCategoryName || ""}
                 value={
                   subCategory.find(
@@ -322,12 +325,13 @@ const EditIncident = () => {
                 htmlFor="loggedVia"
                 className="w-[28%] text-xs font-semibold text-slate-600"
               >
-                Logged Via
+                Logged Via <span className="text-red-500 text-base">*</span>
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="loggedVia"
                 id="loggedVia"
+                required
                 value={formData.loggedVia}
                 onChange={handleChange}
               >
@@ -343,7 +347,7 @@ const EditIncident = () => {
                 htmlFor="description"
                 className="w-[28%] text-xs font-semibold text-slate-600"
               >
-                Description
+                Description 
               </label>
               <textarea
                 className="w-[97%] text-xs text-slate-600 border-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -367,11 +371,12 @@ const EditIncident = () => {
                 htmlFor="user"
                 className="w-[28%] text-xs font-semibold text-slate-600"
               >
-                User
+                User <span className="text-red-500 text-base">*</span>
               </label>
               <Autocomplete
                 className="w-[65%]"
                 options={users}
+                required
                 getOptionLabel={(option) =>
                   option.employeeName && option.emailAddress
                     ? `${option.employeeName} - ${option.emailAddress}`
@@ -513,11 +518,12 @@ const EditIncident = () => {
                 htmlFor="asset"
                 className="w-[28%] text-xs font-semibold text-slate-600"
               >
-                Asset
+                Asset <span className="text-red-500 text-base">*</span>
               </label>
               <Autocomplete
                 className="w-[65%]"
                 options={assetData}
+                required
                 getOptionLabel={(asset) =>
                   asset.assetInformation.assetTag &&
                   asset.assetInformation.serialNumber

@@ -399,7 +399,7 @@ const SupportDepartment = () => {
               <form onSubmit={addNewDepartmentHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Support Department Name
+                    Support Department Name <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="supportDepartmentName"
@@ -470,7 +470,7 @@ const SupportDepartment = () => {
               <form onSubmit={updateNewDepartmentHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Support Department Name
+                    Support Department Name <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="supportDepartmentName"

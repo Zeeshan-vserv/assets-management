@@ -231,6 +231,8 @@ function SubDepartment() {
   const updateSubDepartmentHandler = async (e) => {
     e.preventDefault();
     if (!editDepartment?._id) return;
+    console.log(editDepartment?._id);
+    
     try {
       const formData = {
         subdepartmentName: editDepartment.subdepartmentName,
@@ -341,7 +343,7 @@ function SubDepartment() {
     enableRowSelection: true,
     initialState: {
       density: "compact",
-      pagination: { pageSize: 5 },
+      pagination: { pageSize: 10 },
     },
     renderTopToolbarCustomActions: ({ table }) => {
       return (
@@ -468,7 +470,7 @@ function SubDepartment() {
               <form onSubmit={addNewSubDepartmentHandler} className="space-y-4">
                 <div className="flex items-center gap-2 mt-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Department Name
+                    Department Name <span className="text-red-500">*</span>
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
@@ -492,7 +494,7 @@ function SubDepartment() {
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Sub Department Name
+                    Sub Department Name <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="subdepartmentName"
@@ -565,26 +567,15 @@ function SubDepartment() {
               <form onSubmit={updateSubDepartmentHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Department Name
+                    Department Name <span className="text-red-500">*</span>
                   </label>
                   <span className="w-60 text-lg border-b border-gray-400 text-black">
                     {editDepartment?.departmentName || "N/A"}
                   </span>
-                  {/* <TextField
-                    name="departmentName"
-                    required
-                    fullWidth
-                    value={editDepartment?.departmentName || ""}
-                    onChange={addNewSubDepartmentChangeHandler}
-                    placeholder="Enter Department Name"
-                    variant="standard"
-                    sx={{ width: 250 }}
-                    readOnly
-                  /> */}
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Department Name
+                    Department Name <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="subdepartmentName"
@@ -601,7 +592,6 @@ function SubDepartment() {
                 <div className="flex justify-end gap-3 pt-4">
                   <button
                     type="submit"
-                    onClick={() => setOpenUpdateModal(false)}
                     className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
                   >
                     Update

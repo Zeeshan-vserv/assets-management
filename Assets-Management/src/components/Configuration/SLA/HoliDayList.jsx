@@ -312,10 +312,11 @@ function HoliDayList() {
               <form onSubmit={addNewHolidatListHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Holiday Calendar
+                    Holiday Calendar <span className="text-red-500 text-base">*</span>
                   </label>
                   <Autocomplete
                     className="w-[65%]"
+                    required
                     options={calendarOptions}
                     value={
                       calendarOptions.find(
@@ -349,7 +350,7 @@ function HoliDayList() {
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Holiday Remarks
+                    Holiday Remarks <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="holidayRemark"
@@ -363,11 +364,12 @@ function HoliDayList() {
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Holiday Date
+                    Holiday Date <span className="text-red-500 text-base">*</span>
                   </label>
                   <input
                     type="date"
                     name="holidayDate"
+                    required
                     value={addHolidayList?.holidayDate || ""}
                     onChange={addNewHolidayListChangeHandler}
                     className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -402,11 +404,12 @@ function HoliDayList() {
                 <form onSubmit={updateHolidayListHandler} className="space-y-4">
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Holiday Calendar
+                      Holiday Calendar <span className="text-red-500 text-base">*</span>
                     </label>
                     <Autocomplete
                       className="w-[65%]"
                       options={calendarOptions}
+                      required
                       value={
                         calendarOptions.find(
                           (opt) =>
@@ -439,11 +442,12 @@ function HoliDayList() {
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Holiday Date
+                      Holiday Date <span className="text-red-500 text-base">*</span>
                     </label>
                     <input
                       type="date"
                       name="holidayDate"
+                      required
                       value={editHolidayList?.holidayDate || ""}
                       onChange={updateHolidayListChangeHandler}
                       className="w-[65%] text-sm text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
@@ -451,7 +455,7 @@ function HoliDayList() {
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Holiday Remarks
+                      Holiday Remarks <span className="text-red-500 text-base">*</span>
                     </label>
                     <TextField
                       name="holidayRemark"

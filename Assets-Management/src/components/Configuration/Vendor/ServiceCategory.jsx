@@ -413,7 +413,7 @@ function ServiceCategory() {
               >
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Category
+                    Category <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="vendorServiceCategoryName"
@@ -459,7 +459,7 @@ function ServiceCategory() {
                 >
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Category *
+                      Category <span className="text-red-500 text-base">*</span>
                     </label>
                     <TextField
                       name="vendorServiceCategoryName"

@@ -444,7 +444,7 @@ function Location() {
               <form onSubmit={updateLocationHandler} className="space-y-2">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Location*
+                    Location <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="locationName"
@@ -488,7 +488,7 @@ function Location() {
               <form onSubmit={addNewLocationHandler} className="space-y-2">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Location*
+                    Location <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="locationName"

@@ -270,6 +270,7 @@ const AddUser = () => {
               <Autocomplete
                 className="w-[65%]"
                 options={locationData}
+                required
                 getOptionLabel={(option) => option.locationName}
                 value={
                   locationData.find(
@@ -342,6 +343,7 @@ const AddUser = () => {
               <Autocomplete
                 className="w-[65%]"
                 options={departmentData}
+                required
                 getOptionLabel={(option) => option.departmentName}
                 value={
                   departmentData.find(
@@ -410,12 +412,13 @@ const AddUser = () => {
                 htmlFor="reportingManager"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Reporting Manager{" "}
+                Reporting Manager
                 <span className="text-red-500 text-base">*</span>
               </label>
               <Autocomplete
                 className="w-[65%]"
                 options={reportingManagerData}
+                required
                 getOptionLabel={(option) => option.emailAddress}
                 value={
                   reportingManagerData.find(
@@ -486,6 +489,7 @@ const AddUser = () => {
               <Autocomplete
                 className="w-[65%]"
                 name="userRole"
+                required
                 value={formData.userRole}
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, userRole: value }))

@@ -289,7 +289,7 @@ function AssetTag() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mt-1">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Asset Category
+                      Asset Category <span className="text-red-500 text-base">*</span>
                     </label>
                     <Autocomplete
                       sx={{ width: 250 }}
@@ -313,7 +313,7 @@ function AssetTag() {
                   </div>
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Asset Tag Prefix
+                      Asset Tag Prefix <span className="text-red-500 text-base">*</span>
                     </label>
                     <TextField
                       name="assetTagPrefix"

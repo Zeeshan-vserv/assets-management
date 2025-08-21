@@ -375,7 +375,7 @@ const SupportGroup = () => {
               <form onSubmit={handleAddSubmit} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Support Department Name
+                    Support Department Name <span className="text-red-500">*</span>
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
@@ -401,7 +401,7 @@ const SupportGroup = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Support Group Name
+                    Support Group Name <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="supportGroupName"
@@ -474,7 +474,7 @@ const SupportGroup = () => {
               <form onSubmit={handleEditSubmit} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Support Department Name
+                    Support Department Name <span className="text-red-500">*</span>
                   </label>
                   <span className="w-60 text-lg border-b border-gray-400 text-black">
                     {editGroup?.supportDepartmentName || "N/A"}
@@ -482,7 +482,7 @@ const SupportGroup = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Support Group Name
+                    Support Group Name <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="supportGroupName"

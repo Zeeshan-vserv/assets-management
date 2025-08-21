@@ -392,7 +392,7 @@ const AddRule = () => {
             </h3>
 
             {/* Support Department */}
-            <div className="flex items-center w-[46%]">
+              <div className="flex items-center w-[46%] max-lg:w-full">
               <label className="w-[25%] text-xs font-semibold text-slate-600">
                 Support Department
               </label>

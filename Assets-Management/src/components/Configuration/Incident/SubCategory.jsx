@@ -257,7 +257,7 @@ const SubCategory = () => {
             <form onSubmit={handleAddSubCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Category*
+                  Category <span className="text-red-500">*</span>
                 </label>
                 <Select
                   required
@@ -284,7 +284,7 @@ const SubCategory = () => {
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  SubCategory Name*
+                  SubCategory Name <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="subCategoryName"
@@ -331,7 +331,7 @@ const SubCategory = () => {
             <form onSubmit={handleEditSubCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  SubCategory Name*
+                  SubCategory Name <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="subCategoryName"

@@ -410,7 +410,7 @@ function GatePassAddress() {
             <form onSubmit={handleAddSubmit} className="space-y-4">
               <div className="flex items-center gap-2 mt-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Address Name
+                  Address Name <span className="text-red-500 text-base">*</span>
                 </label>
                 <TextField
                   name="addressName"
@@ -450,7 +450,7 @@ function GatePassAddress() {
             <form onSubmit={handleEditSubmit} className="space-y-4">
               <div className="flex items-center gap-2 mt-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Address Name
+                  Address Name <span className="text-red-500 text-base">*</span>
                 </label>
                 <TextField
                   name="addressName"

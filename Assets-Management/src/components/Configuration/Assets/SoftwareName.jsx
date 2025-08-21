@@ -382,7 +382,7 @@ function SoftwareName() {
               <form onSubmit={addNewSoftwareNameHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Software Name
+                    Software Name <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="softwareName"
@@ -472,7 +472,7 @@ function SoftwareName() {
               <form onSubmit={updateSoftwareNameHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Software Name
+                    Software Name <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="softwareName"
@@ -486,7 +486,7 @@ function SoftwareName() {
                 </div>
                 <div className="flex items-center gap-2 mt-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Publisher
+                    Publisher <span className="text-red-500 text-base">*</span>
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
@@ -512,7 +512,7 @@ function SoftwareName() {
                 </div>
                 <div className="flex items-center gap-2 mt-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Software Category
+                    Software Category <span className="text-red-500 text-base">*</span>
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}

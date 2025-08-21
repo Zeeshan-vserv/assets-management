@@ -227,7 +227,7 @@ const AutoClosedTime = () => {
             <form onSubmit={handleAddAutoCloseTime} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Auto Close Time*
+                  Auto Close Time <span className="text-red-500 text-base">*</span>
                 </label>
                 <TextField
                   name="autoCloseTime"
@@ -272,7 +272,7 @@ const AutoClosedTime = () => {
             <form onSubmit={handleEditAutoCloseTime} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Auto Close Time*
+                  Auto Close Time <span className="text-red-500 text-base">*</span>
                 </label>
                 <TextField
                   name="autoCloseTime"

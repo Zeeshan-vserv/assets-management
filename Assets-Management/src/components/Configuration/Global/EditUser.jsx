@@ -227,6 +227,7 @@ const EditUser = () => {
               <Autocomplete
                 className="w-[65%]"
                 options={locationData}
+                required
                 getOptionLabel={(option) => option?.locationName}
                 value={
                   locationData.find(
@@ -335,6 +336,7 @@ const EditUser = () => {
               <Autocomplete
                 className="w-[65%]"
                 options={departmentData}
+                required
                 getOptionLabel={(option) => option?.departmentName}
                 value={
                   departmentData.find(
@@ -482,6 +484,7 @@ const EditUser = () => {
               <Autocomplete
                 className="w-[65%]"
                 name="userRole"
+                required
                 value={formData.userRole}
                 onChange={(e, value) =>
                   setFormData((prev) => ({ ...prev, userRole: value }))

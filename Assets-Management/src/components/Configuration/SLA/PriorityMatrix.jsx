@@ -282,10 +282,11 @@ const PriorityMatrix = () => {
               >
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Urgency
+                    Urgency <span className="text-red-500 text-base">*</span>
                   </label>
                   <select
                     name="urgency"
+                    required
                     value={addNewPriorityMatrix?.urgency || ""}
                     onChange={addNewPriorityMatrixChangeHandler}
                     placeholder="Enter Urgency"
@@ -300,10 +301,11 @@ const PriorityMatrix = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Impact
+                    Impact <span className="text-red-500 text-base">*</span>
                   </label>
                   <select
                     name="impact"
+                    required
                     value={addNewPriorityMatrix?.impact || ""}
                     onChange={addNewPriorityMatrixChangeHandler}
                     placeholder="Enter Urgency"
@@ -318,10 +320,11 @@ const PriorityMatrix = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Priority
+                    Priority <span className="text-red-500 text-base">*</span>
                   </label>
                   <select
                     name="priority"
+                    required
                     value={addNewPriorityMatrix?.priority || ""}
                     onChange={addNewPriorityMatrixChangeHandler}
                     placeholder="Enter Urgency"
@@ -365,10 +368,11 @@ const PriorityMatrix = () => {
               >
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Urgency
+                    Urgency <span className="text-red-500 text-base">*</span>
                   </label>
                   <select
                     name="urgency"
+                    required
                     value={editPriorityMatrix?.urgency || ""}
                     onChange={updatePriorityMatrixChangeHandler}
                     placeholder="Enter Urgency"
@@ -383,10 +387,11 @@ const PriorityMatrix = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Impact
+                    Impact <span className="text-red-500 text-base">*</span>
                   </label>
                   <select
                     name="impact"
+                    required
                     value={editPriorityMatrix?.impact || ""}
                     onChange={updatePriorityMatrixChangeHandler}
                     placeholder="Enter Urgency"
@@ -401,10 +406,11 @@ const PriorityMatrix = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Priority
+                    Priority <span className="text-red-500 text-base">*</span>
                   </label>
                   <select
                     name="priority"
+                    required
                     value={editPriorityMatrix?.priority || ""}
                     onChange={updatePriorityMatrixChangeHandler}
                     placeholder="Enter Urgency"

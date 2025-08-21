@@ -239,11 +239,12 @@ const AddFixedAssets = () => {
                 htmlFor="category"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Category
+                Category <span className="text-red-500 text-base">*</span>
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="category"
+                required
                 id="category"
                 value={formData.assetInformation.category}
                 onChange={(e) =>
@@ -255,7 +256,6 @@ const AddFixedAssets = () => {
                     },
                   })
                 }
-                // required
               >
                 <option value="">Select</option>
                 <option value="IT Assets">IT Assets</option>
@@ -307,12 +307,13 @@ const AddFixedAssets = () => {
                 htmlFor="assetTag"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Asset Tag
+                Asset Tag <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="assetTag"
+                required
                 name="assetTag"
                 value={formData.assetInformation.assetTag}
                 onChange={(e) =>
@@ -331,12 +332,13 @@ const AddFixedAssets = () => {
                 htmlFor="criticality"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Criticality
+                Criticality <span className="text-red-500 text-base">*</span>
               </label>
               <select
                 className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 name="criticality"
                 id="criticality"
+                required
                 value={formData.assetInformation.criticality}
                 onChange={(e) =>
                   setFormData({
@@ -358,13 +360,14 @@ const AddFixedAssets = () => {
                 htmlFor="make"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Make
+                Make <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="make"
                 name="make"
+                required
                 value={formData.assetInformation.make}
                 onChange={(e) =>
                   setFormData({
@@ -382,13 +385,14 @@ const AddFixedAssets = () => {
                 htmlFor="model"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Model
+                Model <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="model"
                 name="model"
+                required
                 value={formData.assetInformation.model}
                 onChange={(e) =>
                   setFormData({
@@ -406,12 +410,13 @@ const AddFixedAssets = () => {
                 htmlFor="serialNumber"
                 className="w-[25%] text-xs font-semibold text-slate-600"
               >
-                Serial Number
+                Serial Number <span className="text-red-500 text-base">*</span>
               </label>
               <input
                 className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 type="text"
                 id="serialNumber"
+                required
                 name="serialNumber"
                 value={formData.assetInformation.serialNumber}
                 onChange={(e) =>

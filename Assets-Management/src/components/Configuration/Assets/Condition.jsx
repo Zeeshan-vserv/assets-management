@@ -399,7 +399,7 @@ function Condition() {
               <form onSubmit={addNewConditionHandler} className="space-y-2">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Condition *
+                    Condition <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="conditionName"
@@ -441,7 +441,7 @@ function Condition() {
                 <form onSubmit={updateConditionHandler} className="space-y-4">
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Condition *
+                      Condition <span className="text-red-500 text-base">*</span>
                     </label>
                     <TextField
                       name="conditionName"

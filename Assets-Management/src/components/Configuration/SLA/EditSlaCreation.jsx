@@ -1,7 +1,12 @@
 import { Autocomplete, TextField } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createSLA, getSLAById, updateSLA } from "../../../api/slaRequest";
+import {
+  createSLA,
+  getAllHolidayCalender,
+  getSLAById,
+  updateSLA,
+} from "../../../api/slaRequest";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import ConfirmUpdateModal from "../../ConfirmUpdateModal";
@@ -37,6 +42,7 @@ function EditSlaCreation() {
   });
 
   const [showConfirm, setShowConfirm] = useState(false);
+  const [holidayCalender, setHolidayCalender] = useState([]);
 
   // const fetchData = async () => {
   //   try {
@@ -112,6 +118,24 @@ function EditSlaCreation() {
   };
   useEffect(() => {
     fetchData();
+  }, []);
+
+  const fetchHolidayCalender = async () => {
+    // Fetch holiday calendar from the API
+    try {
+      const response = await getAllHolidayCalender();
+      if (response?.data?.success) {
+        setHolidayCalender(response?.data?.data);
+      } else {
+        toast.error("Failed to fetch holiday calendar");
+      }
+    } catch (error) {
+      console.error("Error fetching holiday calendar:", error);
+      toast.error("Error fetching holiday calendar");
+    }
+  };
+  useEffect(() => {
+    fetchHolidayCalender();
   }, []);
 
   // For text input
@@ -226,12 +250,23 @@ function EditSlaCreation() {
                 </label>
                 <Autocomplete
                   className="w-[65%]"
-                  options={["Pan India"]}
-                  value={formData.holidayCalender}
-                  onChange={(_, value) =>
-                    handleAutoChange("holidayCalender", value || "")
+                  options={holidayCalender}
+                  getOptionLabel={(option) =>
+                    option.holidayCalenderLocation || ""
                   }
-                  getOptionLabel={(option) => option}
+                  required
+                  value={
+                    holidayCalender.find(
+                      (val) =>
+                        val.holidayCalenderLocation === formData.holidayCalender
+                    ) || null
+                  }
+                  onChange={(event, value) =>
+                    handleAutoChange(
+                      "holidayCalender",
+                      value.holidayCalenderLocation || ""
+                    )
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -255,6 +290,7 @@ function EditSlaCreation() {
                   className="w-[65%]"
                   options={["Yes", "No"]}
                   value={formData.default}
+                  required
                   onChange={(_, value) => handleAutoChange("default", value)}
                   getOptionLabel={(option) => option}
                   renderInput={(params) => (
@@ -278,6 +314,7 @@ function EditSlaCreation() {
                 </label>
                 <Autocomplete
                   className="w-[65%]"
+                  required
                   options={["Yes", "No"]}
                   value={formData.status}
                   onChange={(_, value) =>
@@ -305,6 +342,7 @@ function EditSlaCreation() {
                 </label>
                 <Autocomplete
                   className="w-[65%]"
+                  required
                   options={["Yes", "No"]}
                   value={formData.serviceWindow}
                   onChange={(_, value) =>

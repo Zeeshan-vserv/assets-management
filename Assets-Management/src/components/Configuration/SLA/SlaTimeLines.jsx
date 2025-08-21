@@ -308,7 +308,7 @@ function SlaTimeLines() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-2">
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Priority
+                        Priority <span className="text-red-500 text-base">*</span>
                       </label>
                       <Autocomplete
                         options={[
@@ -318,6 +318,7 @@ function SlaTimeLines() {
                           "Severity-4",
                         ]}
                         value={addNewSlaTimeLines.priority || ""}
+                        required
                         onChange={(event, newValue) =>
                           setAddNewSlaTimeLines((prev) => ({
                             ...prev,
@@ -340,7 +341,7 @@ function SlaTimeLines() {
                     </div>
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Display Name
+                        Display Name <span className="text-red-500 text-base">*</span>
                       </label>
                       <TextField
                         name="displayName"
@@ -359,18 +360,18 @@ function SlaTimeLines() {
                       <textarea
                         name="description"
                         value={addNewSlaTimeLines.description || ""}
-                        required
                         onChange={addNewSlaTimeLinesChangeHandler}
                         className="w-full border border-slate-500 rounded-md focus:border-blue-500 outline-none"
                       ></textarea>
                     </div>
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Response SLA
+                        Response SLA <span className="text-red-500 text-base">*</span>
                       </label>
                       <input
                         type="text"
                         name="responseSLA"
+                        required
                         value={addNewSlaTimeLines.responseSLA || ""}
                         onChange={addNewSlaTimeLinesChangeHandler}
                         placeholder="HH:MM"
@@ -379,11 +380,12 @@ function SlaTimeLines() {
                     </div>
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Resolution SLA
+                        Resolution SLA <span className="text-red-500 text-base">*</span>
                       </label>
                       <input
                         type="text"
                         name="resolutionSLA"
+                        required
                         value={addNewSlaTimeLines.resolutionSLA || ""}
                         placeholder="HH:MM"
                         onChange={addNewSlaTimeLinesChangeHandler}
@@ -454,7 +456,7 @@ function SlaTimeLines() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-2">
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Priority
+                        Priority <span className="text-red-500 text-base">*</span>
                       </label>
                       <Autocomplete
                         options={[
@@ -463,6 +465,7 @@ function SlaTimeLines() {
                           "Priority - 3",
                           "Priority - 4",
                         ]}
+                        required
                         value={editSlaTimeLines?.priority || ""}
                         onChange={(event, newValue) =>
                           setEditSlaTimeLines((prev) => ({
@@ -486,7 +489,7 @@ function SlaTimeLines() {
                     </div>
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Display Name
+                        Display Name <span className="text-red-500 text-base">*</span>
                       </label>
                       <TextField
                         name="displayName"
@@ -505,14 +508,13 @@ function SlaTimeLines() {
                       <textarea
                         name="description"
                         value={editSlaTimeLines?.description || ""}
-                        required
                         onChange={updateSlaTimeLinesChangeHandler}
                         className="w-full border border-slate-500 rounded-md focus:border-blue-500 outline-none"
                       ></textarea>
                     </div>
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Response SLA
+                        Response SLA <span className="text-red-500 text-base">*</span>
                       </label>
                       <TextField
                         name="responseSLA"
@@ -526,7 +528,7 @@ function SlaTimeLines() {
                     </div>
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Resolution SLA
+                        Resolution SLA <span className="text-red-500 text-base">*</span>
                       </label>
                       <TextField
                         name="resolutionSLA"
@@ -544,7 +546,6 @@ function SlaTimeLines() {
                       </label>
                       <TextField
                         name="penality"
-                        required
                         fullWidth
                         value={editSlaTimeLines?.penality || ""}
                         onChange={updateSlaTimeLinesChangeHandler}

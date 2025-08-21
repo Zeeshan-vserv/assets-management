@@ -267,7 +267,7 @@ function HolidayCalendar() {
               >
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Holiday Calendar Location
+                    Holiday Calendar Location <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="holidayCalenderLocation"
@@ -312,7 +312,7 @@ function HolidayCalendar() {
                 >
                   <div className="flex items-center gap-2">
                     <label className="w-40 text-sm font-medium text-gray-500">
-                      Holiday Calendar Location
+                      Holiday Calendar Location <span className="text-red-500 text-base">*</span>
                     </label>
                     <TextField
                       name="holidayCalenderLocation"

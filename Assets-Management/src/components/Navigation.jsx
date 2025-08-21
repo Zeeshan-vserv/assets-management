@@ -320,23 +320,23 @@ const Navigation = ({ nav, setNav }) => {
                     summary
                   </NavLink>
                 </li>
-                  <li
-                    className="text-[11px] hover:underline"
-                    onClick={() => {
-                      setNav(false);
-                    }}
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/Asset/asset-import"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
                   >
-                    <NavLink
-                      to="/main/Asset/asset-import"
-                      className={({ isActive }) =>
-                        `hover:underline cursor-pointer ${
-                          isActive ? "text-blue-400" : ""
-                        }`
-                      }
-                    >
-                      assets import
-                    </NavLink>
-                  </li>
+                    assets import
+                  </NavLink>
+                </li>
               </ul>
             )}
             {/* <h3
@@ -411,23 +411,23 @@ const Navigation = ({ nav, setNav }) => {
               {expandedSubMenus.global && (
                 <ul className="flex flex-col gap-2 list-disc pl-5 ">
                   {/* {console.log(userData)} */}
-                    <li
-                      className="text-[11px] hover:underline"
-                      onClick={() => {
-                        setNav(false);
-                      }}
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/Users"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
                     >
-                      <NavLink
-                        to="/main/configuration/Users"
-                        className={({ isActive }) =>
-                          `hover:underline cursor-pointer ${
-                            isActive ? "text-blue-400" : ""
-                          }`
-                        }
-                      >
-                        Users
-                      </NavLink>
-                    </li>
+                      Users
+                    </NavLink>
+                  </li>
                   <li
                     className="text-[11px] hover:underline"
                     onClick={() => {
@@ -700,7 +700,7 @@ const Navigation = ({ nav, setNav }) => {
                     </NavLink>
                   </li>
                   {/* <li className='text-[11px] hover:underline' onClick={() => {setNav(false)}} >sub category</li> */}
-                  <li
+                  {/* <li
                     className="text-[11px] hover:underline"
                     onClick={() => {
                       setNav(false);
@@ -716,7 +716,7 @@ const Navigation = ({ nav, setNav }) => {
                     >
                       rules
                     </NavLink>
-                  </li>
+                  </li> */}
                   {/* <li
                   className="text-[11px] hover:underline"
                   onClick={() => {
@@ -741,6 +741,23 @@ const Navigation = ({ nav, setNav }) => {
               </h3>
               {expandedSubMenus.sla && (
                 <ul className="flex flex-col gap-2 list-disc pl-5 ">
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/holiday-calendar"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      holiday calendar
+                    </NavLink>
+                  </li>
                   <li
                     className="text-[11px] hover:underline"
                     onClick={() => {
@@ -809,23 +826,7 @@ const Navigation = ({ nav, setNav }) => {
                       priority matix
                     </NavLink>
                   </li>
-                  <li
-                    className="text-[11px] hover:underline"
-                    onClick={() => {
-                      setNav(false);
-                    }}
-                  >
-                    <NavLink
-                      to="/main/configuration/holiday-calendar"
-                      className={({ isActive }) =>
-                        `hover:underline cursor-pointer ${
-                          isActive ? "text-blue-400" : ""
-                        }`
-                      }
-                    >
-                      holiday calendar
-                    </NavLink>
-                  </li>
+
                   <li
                     className="text-[11px] hover:underline"
                     onClick={() => {
@@ -1114,7 +1115,6 @@ const Navigation = ({ nav, setNav }) => {
         return null;
     }
   };
-
 
   return (
     <div className="flex h-full">

@@ -436,7 +436,7 @@ function StoreLocation() {
               <form onSubmit={addNewStoreLocationHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Location
+                    Location <span className="text-red-500 text-base">*</span>
                   </label>
                   <Autocomplete
                     options={locations}
@@ -466,7 +466,7 @@ function StoreLocation() {
                 </div>
                 <div className="flex items-center gap-2 mt-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Store Location*
+                    Store Location <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="storeLocation"
@@ -507,7 +507,7 @@ function StoreLocation() {
               <form onSubmit={updateStoreLocationHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Location
+                    Location <span className="text-red-500 text-base">*</span>
                   </label>
                   <Autocomplete
                     options={locations}
@@ -537,7 +537,7 @@ function StoreLocation() {
                 </div>
                 <div className="flex items-center gap-2 mt-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Store Location*
+                    Store Location <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="storeLocation"

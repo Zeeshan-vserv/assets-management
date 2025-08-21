@@ -260,6 +260,7 @@ function SlaMapping() {
                   <Autocomplete
                     className="w-[65%]"
                     options={supportDepartment}
+                    required
                     value={
                       supportDepartment.find(
                         (dept) =>

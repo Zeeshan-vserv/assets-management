@@ -235,7 +235,7 @@ const PredefinedReplies = () => {
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Title*
+                  Title <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="predefinedTitle"
@@ -255,11 +255,11 @@ const PredefinedReplies = () => {
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Content
+                  Content <span className="text-red-500">*</span>
                 </label>
                 <TextareaAutosize
                   name="predefinedContent"
-                  className="border-[1px] border-black rounded-md p-1"
+                  className="border-[1px] border-black rounded-md p-1 focus:border-blue-500 focus:border-2 outline-none"
                   required
                   minRows={3}
                   style={{
@@ -306,7 +306,7 @@ const PredefinedReplies = () => {
             <form onSubmit={handleEditCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Title*
+                  Title <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="predefinedTitle"
@@ -326,12 +326,12 @@ const PredefinedReplies = () => {
               </div>
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Content
+                  Content <span className="text-red-500">*</span>
                 </label>
                 <TextareaAutosize
                   name="predefinedContent"
                   required
-                  className="border-[1px] border-black rounded-md p-1 outline-none"
+                  className="border-[1px] border-black rounded-md p-1 focus:border-blue-500 focus:border-2 outline-none"
                   minRows={3}
                   style={{
                     width: 250,

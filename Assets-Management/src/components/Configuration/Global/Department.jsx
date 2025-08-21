@@ -398,7 +398,7 @@ function Department() {
               <form onSubmit={addNewDepartmentHandler} className="space-y-2">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Department Name
+                    Department Name <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="departmentName"
@@ -413,7 +413,7 @@ function Department() {
                 </div>
                 <div className="flex items-center gap-2 mt-4">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Department Head
+                    Department Head <span className="text-red-500">*</span>
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}
@@ -497,7 +497,7 @@ function Department() {
               <form onSubmit={updateNewDepartmentHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Department Name
+                    Department Name <span className="text-red-500">*</span>
                   </label>
                   <TextField
                     name="departmentName"
@@ -512,7 +512,7 @@ function Department() {
                 </div>
                 <div className="flex items-center gap-2 mt-4">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Department Head
+                    Department Head <span className="text-red-500">*</span>
                   </label>
                   <Autocomplete
                     sx={{ width: 250 }}

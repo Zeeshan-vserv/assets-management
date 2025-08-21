@@ -9,7 +9,7 @@ import SubDepartment from "./Global/SubDepartment.jsx";
 import Location from "./Global/Location.jsx";
 import SubLocation from "./Global/SubLocation.jsx";
 import ImportUser from "./Global/ImportUser.jsx";
-import Organization from "./Global/Organization.jsx";
+// import Organization from "./Global/Organization.jsx";
 import Category from "./Incident/Category.jsx";
 import SubCategory from "./Incident/SubCategory.jsx";
 import SoftwareCategory from "./Assets/SoftwareCategory.jsx";
@@ -70,7 +70,7 @@ function ConfigurationRoute() {
         <Route path="location" element={<Location />} />
         <Route path="sub-location" element={<SubLocation />} />
         <Route path="import-user" element={<ImportUser />} />
-        <Route path="organization" element={<Organization />} />
+        {/* <Route path="organization" element={<Organization />} /> */}
         <Route path="supportDepartment" element={<SupportDepartment />} />
         <Route path="supportGroup" element={<SupportGroup />} />
         {/* Incident Routes */}

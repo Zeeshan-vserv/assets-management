@@ -338,7 +338,7 @@ function Publisher() {
               <form onSubmit={addNewPublisherHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Publisher *
+                    Publisher <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="publisherName"
@@ -380,7 +380,7 @@ function Publisher() {
               <form onSubmit={updatePublisherHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Publisher *
+                    Publisher <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="publisherName"

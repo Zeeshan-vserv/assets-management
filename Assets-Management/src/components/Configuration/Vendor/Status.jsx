@@ -404,7 +404,7 @@ function Status() {
               <form onSubmit={addNewStatusHandler} className="space-y-4">
                 <div className="flex items-center gap-2">
                   <label className="w-40 text-sm font-medium text-gray-500">
-                    Status *
+                    Status <span className="text-red-500 text-base">*</span>
                   </label>
                   <TextField
                     name="statusName"
@@ -447,7 +447,7 @@ function Status() {
                   <div className="space-y-4">
                     <div className="flex items-center gap-2">
                       <label className="w-40 text-sm font-medium text-gray-500">
-                        Status *
+                        Status <span className="text-red-500 text-base">*</span>
                       </label>
                       <TextField
                         name="statusName"

@@ -223,7 +223,7 @@ const PendingReason = () => {
             <form onSubmit={handleAddCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Pending Reason*
+                  Pending Reason <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="pendingReason"
@@ -267,7 +267,7 @@ const PendingReason = () => {
             <form onSubmit={handleEditCategory} className="space-y-4">
               <div className="flex items-center gap-2">
                 <label className="w-40 text-sm font-medium text-gray-500">
-                  Pending Reason*
+                  Pending Reason <span className="text-red-500">*</span>
                 </label>
                 <TextField
                   name="pendingReason"

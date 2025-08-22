@@ -320,23 +320,23 @@ const Navigation = ({ nav, setNav }) => {
                     summary
                   </NavLink>
                 </li>
-                  <li
-                    className="text-[11px] hover:underline"
-                    onClick={() => {
-                      setNav(false);
-                    }}
+                <li
+                  className="text-[11px] hover:underline"
+                  onClick={() => {
+                    setNav(false);
+                  }}
+                >
+                  <NavLink
+                    to="/main/Asset/asset-import"
+                    className={({ isActive }) =>
+                      `hover:underline cursor-pointer ${
+                        isActive ? "text-blue-400" : ""
+                      }`
+                    }
                   >
-                    <NavLink
-                      to="/main/Asset/asset-import"
-                      className={({ isActive }) =>
-                        `hover:underline cursor-pointer ${
-                          isActive ? "text-blue-400" : ""
-                        }`
-                      }
-                    >
-                      assets import
-                    </NavLink>
-                  </li>
+                    assets import
+                  </NavLink>
+                </li>
               </ul>
             )}
             {/* <h3
@@ -390,6 +390,57 @@ const Navigation = ({ nav, setNav }) => {
                   Audit Report
                 </NavLink>
               </h3>
+              <h3
+                className="flex items-center justify-between hover:underline cursor-pointer"
+                onClick={() => {
+                  toggleSubMenu("audits");
+                }}
+              >
+                Audit Logs{" "}
+                {expandedSubMenus.audits ? (
+                  <IoMdArrowDropdown />
+                ) : (
+                  <IoMdArrowDropright />
+                )}
+              </h3>
+              {expandedSubMenus.audits && (
+                <ul className="flex flex-col gap-2 list-disc pl-5 ">
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/dashboard/user-information"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      User Information
+                    </NavLink>
+                  </li>
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/dashboard/user-status-logs"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
+                    >
+                      User Status Logs
+                    </NavLink>
+                  </li>
+                </ul>
+              )}
             </>
           );
         }
@@ -411,23 +462,23 @@ const Navigation = ({ nav, setNav }) => {
               {expandedSubMenus.global && (
                 <ul className="flex flex-col gap-2 list-disc pl-5 ">
                   {/* {console.log(userData)} */}
-                    <li
-                      className="text-[11px] hover:underline"
-                      onClick={() => {
-                        setNav(false);
-                      }}
+                  <li
+                    className="text-[11px] hover:underline"
+                    onClick={() => {
+                      setNav(false);
+                    }}
+                  >
+                    <NavLink
+                      to="/main/configuration/Users"
+                      className={({ isActive }) =>
+                        `hover:underline cursor-pointer ${
+                          isActive ? "text-blue-400" : ""
+                        }`
+                      }
                     >
-                      <NavLink
-                        to="/main/configuration/Users"
-                        className={({ isActive }) =>
-                          `hover:underline cursor-pointer ${
-                            isActive ? "text-blue-400" : ""
-                          }`
-                        }
-                      >
-                        Users
-                      </NavLink>
-                    </li>
+                      Users
+                    </NavLink>
+                  </li>
                   <li
                     className="text-[11px] hover:underline"
                     onClick={() => {
@@ -1114,7 +1165,6 @@ const Navigation = ({ nav, setNav }) => {
         return null;
     }
   };
-
 
   return (
     <div className="flex h-full">

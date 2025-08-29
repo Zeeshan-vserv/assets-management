@@ -1,5 +1,5 @@
 import express from "express";
-import { getAllByTechnician } from "../controllers/reportController.js";
+import { getAllByTechnician } from "../controllers/ReportController.js";
 
 const router = express.Router();
 

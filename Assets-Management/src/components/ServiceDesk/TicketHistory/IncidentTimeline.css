@@ -1,0 +1,205 @@
+/* IncidentHistoryList.css & IncidentTimeline.css */
+
+/* Incident List Container */
+.incident-list-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 16px 0;
+}
+
+/* Incident Card */
+.incident-card {
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px #f0f0f0;
+  border: 1px solid #e5e7eb;
+  padding: 24px 20px 18px 20px;
+  transition: box-shadow 0.2s, transform 0.2s;
+  position: relative;
+  opacity: 0;
+  animation: fadeInUp 0.5s forwards;
+}
+.incident-card:hover {
+  box-shadow: 0 4px 24px #e0e7ef;
+  transform: translateY(-4px);
+}
+
+/* Incident Header */
+.incident-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.incident-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 2px;
+  color: #1976d2;
+}
+.incident-meta {
+  font-size: 0.97rem;
+  color: #555;
+  margin-bottom: 4px;
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.incident-status-chip {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 999px;
+  font-size: 0.93em;
+  font-weight: 500;
+  margin-right: 8px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+}
+.status-new { background: #e6f9f0; color: #00C853; border-color: #b2f2e6; }
+.status-assigned { background: #fff3e0; color: #FF9100; border-color: #ffd180; }
+.status-inprogress { background: #fff8e1; color: #FFAB00; border-color: #ffe082; }
+.status-resolved { background: #e3f2fd; color: #2962FF; border-color: #90caf9; }
+.status-closed { background: #ffebee; color: #D50000; border-color: #ffcdd2; }
+.status-taskassigned { background: #fffde7; color: #FFC107; border-color: #fff9c4; }
+.incident-category, .incident-loggedby {
+  font-size: 0.95em;
+  color: #666;
+  margin-right: 10px;
+}
+.incident-sla {
+  font-size: 0.95em;
+  color: #444;
+  background: #f6f8fa;
+  border-radius: 8px;
+  padding: 4px 10px;
+  margin-top: 2px;
+}
+.no-incidents {
+  color: #888;
+  text-align: center;
+  margin-top: 40px;
+  font-size: 1.1em;
+}
+
+/* Animation */
+.fade-in {
+  opacity: 0;
+  animation: fadeInUp 0.5s forwards;
+}
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}
+
+/* Timeline Container */
+.timeline-container {
+  margin-top: 18px;
+  margin-bottom: 8px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  max-width: 800px;
+}
+.timeline-header {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: #1976d2;
+  margin-bottom: 10px;
+}
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.timeline-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 18px;
+  position: relative;
+}
+.timeline-icon {
+  min-width: 32px;
+  min-height: 32px;
+  max-width: 32px;
+  max-height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  margin-right: 14px;
+  box-shadow: 0 2px 8px #e0e7ef;
+  font-size: 1.2em;
+}
+.timeline-content {
+  flex: 1;
+  background: #f9fafb;
+  border-radius: 10px;
+  padding: 10px 16px 10px 16px;
+  box-shadow: 0 1px 4px #f0f0f0;
+  position: relative;
+}
+.timeline-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+.timeline-status {
+  font-weight: 600;
+  color: #222;
+  font-size: 1.04em;
+}
+.timeline-date {
+  font-size: 0.97em;
+  color: #888;
+  margin-left: 10px;
+}
+.timeline-user {
+  font-size: 0.97em;
+  color: #555;
+  margin-bottom: 2px;
+}
+.timeline-summary, .timeline-note {
+  font-size: 0.97em;
+  color: #444;
+  margin-top: 2px;
+}
+.timeline-empty {
+  color: #aaa;
+  font-size: 1em;
+  margin: 10px 0 0 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .incident-card {
+    padding: 14px 8px 12px 8px;
+  }
+  .timeline-container {
+    padding: 10px;
+  }
+  .timeline-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+  .timeline-status {
+    font-size: 0.95rem;
+  }
+  .timeline-date,
+  .timeline-user,
+  .timeline-summary {
+    font-size: 0.8rem;
+  }
+}

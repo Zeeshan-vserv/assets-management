@@ -6,6 +6,9 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import NotAuthorized from "./pages/NotAuthorized.jsx";
 import Report from "./components/Dashboard/AuditReport/Report.jsx";
+import IncidentHistory from './pages/IncidentHistoryPage.jsx'
+import IncidentFlowchart from './components/ServiceDesk/FlowCharts/IncidentFlowchart.jsx';
+import ServiceRequestFlowchart from './components/ServiceDesk/FlowCharts/ServiceRequestChart.jsx';
 
 function App() {
   const user = useSelector((state) => state.authReducer.authData);
@@ -36,6 +39,9 @@ function App() {
         <Route path="/not-authorized" element={<NotAuthorized />} />
         // In your App.js or routes file
         <Route path="/download-report" element={<Report />} />
+        <Route path="/incident-history" element={<IncidentHistory />} />
+        <Route path="/incident-flowchart" element={<IncidentFlowchart />} />
+        <Route path="/service-request-flowchart" element={<ServiceRequestFlowchart />} />
       </Routes>
     </>
   );

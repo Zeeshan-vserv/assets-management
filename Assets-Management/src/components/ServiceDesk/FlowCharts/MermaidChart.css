@@ -1,0 +1,19 @@
+.mermaid-chart-container {
+  width: 100%;
+  overflow-x: auto;
+  position: relative;
+}
+
+/* Dim everything by default */
+.node.dim,
+.edgePath.dim {
+  opacity: 0.1;
+  transition: opacity 0.3s ease;
+}
+
+/* Focused node or edge */
+.node:not(.dim),
+.edgePath:not(.dim) {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}

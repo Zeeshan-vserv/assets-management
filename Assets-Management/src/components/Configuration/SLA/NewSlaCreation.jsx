@@ -1,223 +1,3 @@
-// import { Autocomplete, TextField } from "@mui/material";
-// import React, { useState } from "react";
-// import { useNavigate } from "react-router-dom";
-
-// function NewSlaCreation() {
-//   const navigate = useNavigate();
-//   const [formData, setFormData] = useState({
-//     slaName: "",
-//     holidayCalender: "",
-//     default: null,
-//     status: null,
-//     serviceWindow: null,
-//     slaTimeline: [
-//       {
-//         weekDay: String,
-//         startTime: Date,
-//         endTime: Date,
-//       },
-//     ],
-//   });
-
-//   const handleChange = (e) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
-
-//   const handleSubmit = (e) => {
-//     e.preventDefault();
-//     setFormData();
-//   };
-
-//   const weekdays = [
-//     "Monday",
-//     "Tuesday",
-//     "Wednesday",
-//     "Thursday",
-//     "Friday",
-//     "Saturday",
-//     "Sunday",
-//   ];
-
-//   return (
-//     <>
-//       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
-//         <h2 className="text-slate-700 font-semibold">NEW SLA</h2>
-//         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-//           <div className="w-full p-8 bg-white rounded-md shadow-md">
-//             <div className="my-2 flex gap-2 justify-end">
-//               <button
-//                 type="submit"
-//                 className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
-//               >
-//                 Submit
-//               </button>
-//               <button
-//                 onClick={() => navigate("/main/configuration/sla-creation")}
-//                 className="bg-[#df656b] shadow-[#F26E75] shadow-md py-1.5 px-3 rounded-md text-sm text-white"
-//               >
-//                 Cancel
-//               </button>
-//             </div>
-//             <div className="flex flex-wrap max-lg:flex-col gap-6 justify-between mt-8">
-//               <div className="flex items-center w-[46%] max-lg:w-[100%]">
-//                 <label
-//                   htmlFor="slaName"
-//                   className="w-[25%] text-xs font-semibold text-slate-600"
-//                 >
-//                   SLA Name<span className="text-red-500 text-base">*</span>
-//                 </label>
-//                 <input
-//                   className="w-[65%] text-xs text-slate-600 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-//                   type="text"
-//                   id="slaName"
-//                   name="slaName"
-//                   value={formData?.slaName}
-//                   onChange={handleChange}
-//                   required
-//                 />
-//               </div>
-//               <div className="flex items-center w-[46%] max-lg:w-[100%]">
-//                 <label className="w-[25%] text-xs font-semibold text-slate-600">
-//                   Holiday Calendar
-//                   <span className="text-red-500 text-base">*</span>
-//                 </label>
-//                 <Autocomplete
-//                   className="w-[65%]"
-//                   options={["Pan India"]}
-//                   getOptionLabel={(option) => option}
-//                   renderInput={(params) => (
-//                     <TextField
-//                       {...params}
-//                       variant="standard"
-//                       className="text-xs text-slate-600"
-//                       placeholder="Select"
-//                       inputProps={{
-//                         ...params.inputProps,
-//                         style: { fontSize: "0.8rem" },
-//                       }}
-//                     />
-//                   )}
-//                 />
-//               </div>
-//               <div className="flex items-center w-[46%] max-lg:w-[100%]">
-//                 <label className="w-[25%] text-xs font-semibold text-slate-600">
-//                   Set as default
-//                   <span className="text-red-500 text-base">*</span>
-//                 </label>
-//                 <Autocomplete
-//                   className="w-[65%]"
-//                   options={["Yes", "No"]}
-//                   getOptionLabel={(option) => option}
-//                   renderInput={(params) => (
-//                     <TextField
-//                       {...params}
-//                       variant="standard"
-//                       className="text-xs text-slate-600"
-//                       placeholder="Select"
-//                       inputProps={{
-//                         ...params.inputProps,
-//                         style: { fontSize: "0.8rem" },
-//                       }}
-//                     />
-//                   )}
-//                 />
-//               </div>
-//               <div className="flex items-center w-[46%] max-lg:w-[100%]">
-//                 <label className="w-[25%] text-xs font-semibold text-slate-600">
-//                   Active
-//                   <span className="text-red-500 text-base">*</span>
-//                 </label>
-//                 <Autocomplete
-//                   className="w-[65%]"
-//                   options={["Yes", "No"]}
-//                   getOptionLabel={(option) => option}
-//                   renderInput={(params) => (
-//                     <TextField
-//                       {...params}
-//                       variant="standard"
-//                       className="text-xs text-slate-600"
-//                       placeholder="Select"
-//                       inputProps={{
-//                         ...params.inputProps,
-//                         style: { fontSize: "0.8rem" },
-//                       }}
-//                     />
-//                   )}
-//                 />
-//               </div>
-//               <div className="flex items-center w-[46%] max-lg:w-[100%]">
-//                 <label className="w-[25%] text-xs font-semibold text-slate-600">
-//                   Service Window (24x7)
-//                   <span className="text-red-500 text-base">*</span>
-//                 </label>
-//                 <Autocomplete
-//                   className="w-[65%]"
-//                   options={["Yes", "No"]}
-//                   getOptionLabel={(option) => option}
-//                   renderInput={(params) => (
-//                     <TextField
-//                       {...params}
-//                       variant="standard"
-//                       className="text-xs text-slate-600"
-//                       placeholder="Select"
-//                       inputProps={{
-//                         ...params.inputProps,
-//                         style: { fontSize: "0.8rem" },
-//                       }}
-//                     />
-//                   )}
-//                 />
-//               </div>
-//             </div>
-//             <div className="mt-10 overflow-x-auto">
-//               <table className="min-w-full border-collapse border border-gray-200 shadow-sm text-xs">
-//                 <thead className="bg-blue-100 text-gray-700">
-//                   <tr>
-//                     <th className="p-2 border text-left  text-sm">Select</th>
-//                     <th className="p-2 border text-left text-sm">Weekday</th>
-//                     <th className="p-2 border text-left text-sm">From Time</th>
-//                     <th className="p-2 border text-left text-sm">To Time</th>
-//                   </tr>
-//                 </thead>
-//                 <tbody>
-//                   {weekdays.map((day, idx) => (
-//                     <tr key={idx} className="even:bg-gray-50">
-//                       <td className="p-2 border text-start">
-//                         <input type="checkbox" className="w-4 h-4" />
-//                       </td>
-//                       <td className="p-2 border font-medium text-sm">{day}</td>
-//                       <td className="p-2 border">
-//                         <div className="flex flex-row justify-between items-center gap-1">
-//                           <span>Select Time</span>
-//                           <input
-//                             type="time"
-//                             className="max:w-full w-[60%] shadow-sm border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
-//                           />
-//                         </div>
-//                       </td>
-//                       <td className="p-2 border">
-//                         <div className="flex flex-row justify-between items-center gap-1">
-//                           <span>Select Time</span>
-//                           <input
-//                             type="time"
-//                             className="max:w-full w-[60%] shadow-sm border rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-400"
-//                           />
-//                         </div>
-//                       </td>
-//                     </tr>
-//                   ))}
-//                 </tbody>
-//               </table>
-//             </div>
-//           </div>
-//         </form>
-//       </div>
-//     </>
-//   );
-// }
-
-// export default NewSlaCreation;
-
 import { Autocomplete, TextField } from "@mui/material";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -274,43 +54,43 @@ function NewSlaCreation() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const payload = {
-      ...formData,
-      userId: user.userId,
-      default:
-        formData.default === "Yes"
-          ? true
-          : formData.default === "No"
-          ? false
-          : null,
-      status:
-        formData.status === "Yes"
-          ? true
-          : formData.status === "No"
-          ? false
-          : null,
-      serviceWindow:
-        formData.serviceWindow === "Yes"
-          ? true
-          : formData.serviceWindow === "No"
-          ? false
-          : null,
-      slaTimeline: formData.slaTimeline
-        .filter((item) => item.startTime && item.endTime)
-        .map(({ weekDay, startTime, endTime }) => ({
-          weekDay,
-          startTime: new Date(`1970-01-01T${startTime}:00Z`),
-          endTime: new Date(`1970-01-01T${endTime}:00Z`),
-        })),
-    };
-    const response = await createSLA(payload);
-    if (response?.data.success) {
-      toast.success("SLA created successfully");
-
-    }
-    console.log(response);
+  e.preventDefault();
+  const payload = {
+    ...formData,
+    userId: user.userId,
+    default:
+      formData.default === "Yes"
+        ? true
+        : formData.default === "No"
+        ? false
+        : null,
+    status:
+      formData.status === "Yes"
+        ? true
+        : formData.status === "No"
+        ? false
+        : null,
+    serviceWindow:
+      formData.serviceWindow === "Yes"
+        ? true
+        : formData.serviceWindow === "No"
+        ? false
+        : null,
+    slaTimeline: formData.slaTimeline
+      .filter((item) => item.selected && item.startTime && item.endTime)
+      .map(({ weekDay, startTime, endTime }) => ({
+        weekDay,
+        startTime, // "HH:mm"
+        endTime,   // "HH:mm"
+      })),
   };
+  const response = await createSLA(payload);
+  if (response?.data.success) {
+    toast.success("SLA created successfully");
+    navigate("/main/configuration/sla-creation");
+  }
+  console.log(response);
+};
 
   return (
     <>

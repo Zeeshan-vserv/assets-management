@@ -21,12 +21,15 @@ const statusMeta = {
 function formatDate(dateStr) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
+  // Format as "30 Aug 2025, 11:46" (UTC)
   return d.toLocaleString("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    hour12: false,
+    timeZone: "UTC"
   });
 }
 

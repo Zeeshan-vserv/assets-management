@@ -21,8 +21,6 @@ import {
   getAllIncident,
   getIncidentStatusCounts,
   updateIncident,
-  getIncidentSla,
-  getIncidentTat,
   getAllIncidentsSla,
   getAllIncidentsTat,
 } from "../../../api/IncidentRequest";

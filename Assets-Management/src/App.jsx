@@ -10,6 +10,7 @@ import IncidentHistory from './pages/IncidentHistoryPage.jsx'
 import IncidentFlowchart from './components/ServiceDesk/FlowCharts/IncidentFlowchart.jsx';
 import ServiceRequestFlowchart from './components/ServiceDesk/FlowCharts/ServiceRequestChart.jsx';
 
+
 function App() {
   const user = useSelector((state) => state.authReducer.authData);
   const [count, setCount] = useState(0);
@@ -42,6 +43,7 @@ function App() {
         <Route path="/incident-history" element={<IncidentHistory />} />
         <Route path="/incident-flowchart" element={<IncidentFlowchart />} />
         <Route path="/service-request-flowchart" element={<ServiceRequestFlowchart />} />
+
       </Routes>
     </>
   );

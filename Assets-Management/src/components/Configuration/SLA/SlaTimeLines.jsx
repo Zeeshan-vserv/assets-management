@@ -30,12 +30,17 @@ function SlaTimeLines() {
   const [addSlaTimeLinesModal, setAddSlaTimeLinesModal] = useState(false);
   const [addNewSlaTimeLines, setAddNewSlaTimeLines] = useState({
     priority: "",
+    type: "",
     displayName: "",
     description: "",
-    responseSLA: Date,
-    resolutionSLA: Date,
+    responseSLADay: "",
+    responseSLAHour: "",
+    responseSLAMinute: "",
+    resolutionSLADay: "",
+    resolutionSLAHour: "",
+    resolutionSLAMinute: "",
     penality: "",
-    stattus: null,
+    stattus: false,
   });
 
   const [editSlaTimeLines, setEditSlaTimeLines] = useState(null);
@@ -74,14 +79,18 @@ function SlaTimeLines() {
         header: "Display Name",
       },
       {
+        accessorKey: "type",
+        header: "SLA Type",
+        Cell: ({ cell }) => cell.getValue()?.toUpperCase() || "",
+      },
+      {
         accessorKey: "responseSLA",
-        header: "Response SLA (in Mins.)",
+        header: "Response SLA (D:HH:MM)",
       },
       {
         accessorKey: "resolutionSLA",
-        header: "Resolution SLA (in Mins.)",
+        header: "Resolution SLA (D:HH:MM)",
       },
-
       {
         id: "edit",
         header: "Edit",
@@ -118,23 +127,33 @@ function SlaTimeLines() {
 
   //Add
   const addNewSlaTimeLinesChangeHandler = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setAddNewSlaTimeLines((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
+  const pad = (num) => String(num).padStart(2, "0");
+
   const addNewSlaTimeLinesHandler = async (e) => {
     e.preventDefault();
+    // Combine day, hour and minute fields into "D:HH:MM"
+    const responseSLA = `${addNewSlaTimeLines.responseSLADay || 0}:${pad(
+      addNewSlaTimeLines.responseSLAHour || 0
+    )}:${pad(addNewSlaTimeLines.responseSLAMinute || 0)}`;
+    const resolutionSLA = `${addNewSlaTimeLines.resolutionSLADay || 0}:${pad(
+      addNewSlaTimeLines.resolutionSLAHour || 0
+    )}:${pad(addNewSlaTimeLines.resolutionSLAMinute || 0)}`;
     try {
       const formData = {
         userId: user.userId,
         priority: addNewSlaTimeLines.priority,
+        type: addNewSlaTimeLines.type,
         displayName: addNewSlaTimeLines.displayName,
         description: addNewSlaTimeLines.description,
-        responseSLA: addNewSlaTimeLines.responseSLA,
-        resolutionSLA: addNewSlaTimeLines.resolutionSLA,
+        responseSLA,
+        resolutionSLA,
         penality: addNewSlaTimeLines.penality,
         stattus: addNewSlaTimeLines.stattus,
       };
@@ -144,23 +163,50 @@ function SlaTimeLines() {
         await fetchSlaTimeLines();
       }
       setAddSlaTimeLinesModal(false);
-      setAddNewSlaTimeLines({});
+      setAddNewSlaTimeLines({
+        priority: "",
+        displayName: "",
+        description: "",
+        responseSLADay: "",
+        responseSLAHour: "",
+        responseSLAMinute: "",
+        resolutionSLADay: "",
+        resolutionSLAHour: "",
+        resolutionSLAMinute: "",
+        penality: "",
+        stattus: false,
+      });
     } catch (error) {
       console.log("Error creating sla time lines ", error);
     }
   };
 
-  //update
   const handleUpdateSlaTimeLines = (id) => {
     const slaTimeLinesToEdit = data?.find((d) => d._id === id);
     if (slaTimeLinesToEdit) {
+      // Split responseSLA and resolutionSLA into day, hour and minute for editing
+      const [
+        responseSLADay = "",
+        responseSLAHour = "",
+        responseSLAMinute = "",
+      ] = (slaTimeLinesToEdit.responseSLA || "").split(":");
+      const [
+        resolutionSLADay = "",
+        resolutionSLAHour = "",
+        resolutionSLAMinute = "",
+      ] = (slaTimeLinesToEdit.resolutionSLA || "").split(":");
       setEditSlaTimeLines({
         _id: slaTimeLinesToEdit._id,
         priority: slaTimeLinesToEdit.priority,
+        type: slaTimeLinesToEdit.type,
         displayName: slaTimeLinesToEdit.displayName,
         description: slaTimeLinesToEdit.description,
-        responseSLA: slaTimeLinesToEdit.responseSLA,
-        resolutionSLA: slaTimeLinesToEdit.resolutionSLA,
+        responseSLADay,
+        responseSLAHour,
+        responseSLAMinute,
+        resolutionSLADay,
+        resolutionSLAHour,
+        resolutionSLAMinute,
         penality: slaTimeLinesToEdit.penality,
         stattus: slaTimeLinesToEdit.stattus,
       });
@@ -169,10 +215,10 @@ function SlaTimeLines() {
   };
 
   const updateSlaTimeLinesChangeHandler = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setEditSlaTimeLines((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
@@ -180,12 +226,20 @@ function SlaTimeLines() {
     e.preventDefault();
     if (!editSlaTimeLines?._id) return;
 
+    const responseSLA = `${editSlaTimeLines.responseSLADay || 0}:${pad(
+      editSlaTimeLines.responseSLAHour || 0
+    )}:${pad(editSlaTimeLines.responseSLAMinute || 0)}`;
+    const resolutionSLA = `${editSlaTimeLines.resolutionSLADay || 0}:${pad(
+      editSlaTimeLines.resolutionSLAHour || 0
+    )}:${pad(editSlaTimeLines.resolutionSLAMinute || 0)}`;
+
     const updatedData = {
       priority: editSlaTimeLines.priority,
+      type: editSlaTimeLines.type,
       displayName: editSlaTimeLines.displayName,
       description: editSlaTimeLines.description,
-      responseSLA: editSlaTimeLines.responseSLA,
-      resolutionSLA: editSlaTimeLines.resolutionSLA,
+      responseSLA,
+      resolutionSLA,
       penality: editSlaTimeLines.penality,
       stattus: editSlaTimeLines.stattus,
     };
@@ -298,297 +352,441 @@ function SlaTimeLines() {
         <h2 className="text-lg font-semibold mb-6 text-start">SLA TIMELINE</h2>
         <MaterialReactTable table={table} />
         {addSlaTimeLinesModal && (
-          <>
-            <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 animate-fade-in space-y-6">
-                <h2 className="text-lg font-medium mb-4 text-start">
-                  Create Sla Time Lines
-                </h2>
-                <form onSubmit={addNewSlaTimeLinesHandler}>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Priority
-                      </label>
-                      <Autocomplete
-                        options={[
-                          "Severity-1",
-                          "Severity-2",
-                          "Severity-3",
-                          "Severity-4",
-                        ]}
-                        value={addNewSlaTimeLines.priority || ""}
-                        onChange={(event, newValue) =>
-                          setAddNewSlaTimeLines((prev) => ({
-                            ...prev,
-                            priority: newValue,
-                          }))
-                        }
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="standard"
-                            placeholder="Select Priority"
-                            inputProps={{
-                              ...params.inputProps,
-                              style: { fontSize: "0.8rem" },
-                            }}
-                          />
-                        )}
-                        className="w-full"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Display Name
-                      </label>
-                      <TextField
-                        name="displayName"
-                        required
-                        fullWidth
-                        value={addNewSlaTimeLines.displayName || ""}
-                        onChange={addNewSlaTimeLinesChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Description
-                      </label>
-                      <textarea
-                        name="description"
-                        value={addNewSlaTimeLines.description || ""}
-                        required
-                        onChange={addNewSlaTimeLinesChangeHandler}
-                        className="w-full border border-slate-500 rounded-md focus:border-blue-500 outline-none"
-                      ></textarea>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Response SLA
-                      </label>
-                      <input
-                        type="text"
-                        name="responseSLA"
-                        value={addNewSlaTimeLines.responseSLA || ""}
-                        onChange={addNewSlaTimeLinesChangeHandler}
-                        placeholder="HH:MM"
-                        className="w-full border-b border-slate-400 focus:border-blue-500 outline-none"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Resolution SLA
-                      </label>
-                      <input
-                        type="text"
-                        name="resolutionSLA"
-                        value={addNewSlaTimeLines.resolutionSLA || ""}
-                        placeholder="HH:MM"
-                        onChange={addNewSlaTimeLinesChangeHandler}
-                        className="w-full border-b border-gray-400 focus:border-blue-500 outline-none"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Penality
-                      </label>
-                      <input
-                        type="text"
-                        name="penality"
-                        value={addNewSlaTimeLines.penality || ""}
-                        onChange={addNewSlaTimeLinesChangeHandler}
-                        className="w-full border-b border-gray-400 focus:border-blue-500 outline-none"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Active
-                      </label>
-                      <input
-                        type="checkbox"
-                        name="stattus"
-                        checked={addNewSlaTimeLines.stattus || false}
-                        onChange={(e) =>
-                          setAddNewSlaTimeLines((prev) => ({
-                            ...prev,
-                            stattus: e.target.checked,
-                          }))
-                        }
-                        className="w-6 h-4"
-                      />
-                    </div>
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 animate-fade-in space-y-6">
+              <h2 className="text-lg font-medium mb-4 text-start">
+                Create Sla Time Lines
+              </h2>
+              <form onSubmit={addNewSlaTimeLinesHandler}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Priority
+                    </label>
+                    <Autocomplete
+                      options={[
+                        "Severity-1",
+                        "Severity-2",
+                        "Severity-3",
+                        "Severity-4",
+                      ]}
+                      value={addNewSlaTimeLines.priority || ""}
+                      onChange={(event, newValue) =>
+                        setAddNewSlaTimeLines((prev) => ({
+                          ...prev,
+                          priority: newValue,
+                        }))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="standard"
+                          placeholder="Select Priority"
+                          inputProps={{
+                            ...params.inputProps,
+                            style: { fontSize: "0.8rem" },
+                          }}
+                        />
+                      )}
+                      className="w-full"
+                    />
                   </div>
-                  <div className="flex justify-end gap-3 pt-4">
-                    <button
-                      type="submit"
-                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                    >
-                      Submit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAddSlaTimeLinesModal(false)}
-                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                    >
-                      Cancel
-                    </button>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      SLA Type
+                    </label>
+                    <Autocomplete
+                      options={["incident", "service"]}
+                      value={addNewSlaTimeLines?.type || ""}
+                      onChange={(event, newValue) =>
+                        setAddNewSlaTimeLines((prev) => ({
+                          ...prev,
+                          type: newValue,
+                        }))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="standard"
+                          placeholder="Select SLA Type"
+                          inputProps={{
+                            ...params.inputProps,
+                            style: { fontSize: "0.8rem" },
+                          }}
+                        />
+                      )}
+                      className="w-full"
+                    />
                   </div>
-                </form>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Display Name
+                    </label>
+                    <TextField
+                      name="displayName"
+                      required
+                      fullWidth
+                      value={addNewSlaTimeLines.displayName || ""}
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      variant="standard"
+                      sx={{ width: 250 }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Description
+                    </label>
+                    <textarea
+                      name="description"
+                      value={addNewSlaTimeLines.description || ""}
+                      required
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      className="w-full border border-slate-500 rounded-md focus:border-blue-500 outline-none"
+                    ></textarea>
+                  </div>
+                  {/* Response SLA */}
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Response SLA
+                    </label>
+                    <input
+                      type="number"
+                      name="responseSLADay"
+                      min="0"
+                      placeholder="D"
+                      value={addNewSlaTimeLines.responseSLADay}
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-slate-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                    <span>:</span>
+                    <input
+                      type="number"
+                      name="responseSLAHour"
+                      min="0"
+                      max="23"
+                      placeholder="HH"
+                      value={addNewSlaTimeLines.responseSLAHour}
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-slate-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                    <span>:</span>
+                    <input
+                      type="number"
+                      name="responseSLAMinute"
+                      min="0"
+                      max="59"
+                      placeholder="MM"
+                      value={addNewSlaTimeLines.responseSLAMinute}
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-slate-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                  </div>
+
+                  {/* Resolution SLA */}
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Resolution SLA
+                    </label>
+                    <input
+                      type="number"
+                      name="resolutionSLADay"
+                      min="0"
+                      placeholder="D"
+                      value={addNewSlaTimeLines.resolutionSLADay}
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-gray-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                    <span>:</span>
+                    <input
+                      type="number"
+                      name="resolutionSLAHour"
+                      min="0"
+                      max="23"
+                      placeholder="HH"
+                      value={addNewSlaTimeLines.resolutionSLAHour}
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-gray-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                    <span>:</span>
+                    <input
+                      type="number"
+                      name="resolutionSLAMinute"
+                      min="0"
+                      max="59"
+                      placeholder="MM"
+                      value={addNewSlaTimeLines.resolutionSLAMinute}
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-gray-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Penality
+                    </label>
+                    <input
+                      type="text"
+                      name="penality"
+                      value={addNewSlaTimeLines.penality || ""}
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      className="w-full border-b border-gray-400 focus:border-blue-500 outline-none"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Active
+                    </label>
+                    <input
+                      type="checkbox"
+                      name="stattus"
+                      checked={addNewSlaTimeLines.stattus || false}
+                      onChange={addNewSlaTimeLinesChangeHandler}
+                      className="w-6 h-4"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Submit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAddSlaTimeLinesModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
-          </>
+          </div>
         )}
         {openUpdateModal && (
-          <>
-            <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
-              <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 animate-fade-in">
-                <h2 className="text-lg font-medium mb-4 text-start">
-                  Update Sla Time
-                </h2>
-                <form
-                  onSubmit={updateSlaTimeLinesHandler}
-                  className="space-y-4"
-                >
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-2">
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Priority
-                      </label>
-                      <Autocomplete
-                        options={[
-                          "Priority - 1",
-                          "Priority - 2",
-                          "Priority - 3",
-                          "Priority - 4",
-                        ]}
-                        value={editSlaTimeLines?.priority || ""}
-                        onChange={(event, newValue) =>
-                          setEditSlaTimeLines((prev) => ({
-                            ...prev,
-                            priority: newValue,
-                          }))
-                        }
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            variant="standard"
-                            placeholder="Select Priority"
-                            inputProps={{
-                              ...params.inputProps,
-                              style: { fontSize: "0.8rem" },
-                            }}
-                          />
-                        )}
-                        className="w-full"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Display Name
-                      </label>
-                      <TextField
-                        name="displayName"
-                        required
-                        fullWidth
-                        value={editSlaTimeLines.displayName || ""}
-                        onChange={updateSlaTimeLinesChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Description
-                      </label>
-                      <textarea
-                        name="description"
-                        value={editSlaTimeLines?.description || ""}
-                        required
-                        onChange={updateSlaTimeLinesChangeHandler}
-                        className="w-full border border-slate-500 rounded-md focus:border-blue-500 outline-none"
-                      ></textarea>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Response SLA
-                      </label>
-                      <TextField
-                        name="responseSLA"
-                        required
-                        fullWidth
-                        value={editSlaTimeLines?.responseSLA || ""}
-                        onChange={updateSlaTimeLinesChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Resolution SLA
-                      </label>
-                      <TextField
-                        name="resolutionSLA"
-                        required
-                        fullWidth
-                        value={editSlaTimeLines.resolutionSLA || ""}
-                        onChange={updateSlaTimeLinesChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Penality / Hour
-                      </label>
-                      <TextField
-                        name="penality"
-                        required
-                        fullWidth
-                        value={editSlaTimeLines?.penality || ""}
-                        onChange={updateSlaTimeLinesChangeHandler}
-                        variant="standard"
-                        sx={{ width: 250 }}
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <label className="w-40 text-sm font-medium text-gray-500">
-                        Active
-                      </label>
-                      <input
-                        type="checkbox"
-                        name="stattus"
-                        checked={editSlaTimeLines.stattus || false}
-                        onChange={(e) =>
-                          setAddNewSlaTimeLines((prev) => ({
-                            ...prev,
-                            stattus: e.target.checked,
-                          }))
-                        }
-                        className="w-6 h-4"
-                      />
-                    </div>
+          <div className="fixed inset-0 bg-black/60 z-50 flex justify-center items-center">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl p-8 animate-fade-in">
+              <h2 className="text-lg font-medium mb-4 text-start">
+                Update Sla Time
+              </h2>
+              <form onSubmit={updateSlaTimeLinesHandler} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Priority
+                    </label>
+                    <Autocomplete
+                      options={[
+                        "Severity-1",
+                        "Severity-2",
+                        "Severity-3",
+                        "Severity-4",
+                      ]}
+                      value={editSlaTimeLines?.priority || ""}
+                      onChange={(event, newValue) =>
+                        setEditSlaTimeLines((prev) => ({
+                          ...prev,
+                          priority: newValue,
+                        }))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="standard"
+                          placeholder="Select Priority"
+                          inputProps={{
+                            ...params.inputProps,
+                            style: { fontSize: "0.8rem" },
+                          }}
+                        />
+                      )}
+                      className="w-full"
+                    />
                   </div>
-                  <div className="flex justify-end gap-3 pt-4">
-                    <button
-                      type="submit"
-                      className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
-                    >
-                      Update
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setOpenUpdateModal(false)}
-                      className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
-                    >
-                      Cancel
-                    </button>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      SLA Type
+                    </label>
+                    <Autocomplete
+                      options={["incident", "service"]}
+                      value={editSlaTimeLines?.type || ""}
+                      onChange={(event, newValue) =>
+                        setEditSlaTimeLines((prev) => ({
+                          ...prev,
+                          type: newValue,
+                        }))
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          variant="standard"
+                          placeholder="Select SLA Type"
+                          inputProps={{
+                            ...params.inputProps,
+                            style: { fontSize: "0.8rem" },
+                          }}
+                        />
+                      )}
+                      className="w-full"
+                    />
                   </div>
-                </form>
-              </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Display Name
+                    </label>
+                    <TextField
+                      name="displayName"
+                      required
+                      fullWidth
+                      value={editSlaTimeLines.displayName || ""}
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      variant="standard"
+                      sx={{ width: 250 }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Description
+                    </label>
+                    <textarea
+                      name="description"
+                      value={editSlaTimeLines?.description || ""}
+                      required
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      className="w-full border border-slate-500 rounded-md focus:border-blue-500 outline-none"
+                    ></textarea>
+                  </div>
+                  {/* Response SLA */}
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Response SLA
+                    </label>
+                    <input
+                      type="number"
+                      name="responseSLADay"
+                      min="0"
+                      placeholder="DD"
+                      value={editSlaTimeLines?.responseSLADay}
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-slate-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                    <span>:</span>
+                    <input
+                      type="number"
+                      name="responseSLAHour"
+                      min="0"
+                      max="23"
+                      placeholder="HH"
+                      value={editSlaTimeLines?.responseSLAHour}
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-slate-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                    <span>:</span>
+                    <input
+                      type="number"
+                      name="responseSLAMinute"
+                      min="0"
+                      max="59"
+                      placeholder="MM"
+                      value={editSlaTimeLines?.responseSLAMinute}
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-slate-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                  </div>
+                  {/* Resolution SLA */}
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Resolution SLA
+                    </label>
+                    <input
+                      type="number"
+                      name="resolutionSLADay"
+                      min="0"
+                      placeholder="DD"
+                      value={editSlaTimeLines?.resolutionSLADay}
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-gray-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                    <span>:</span>
+                    <input
+                      type="number"
+                      name="resolutionSLAHour"
+                      min="0"
+                      max="23"
+                      placeholder="HH"
+                      value={editSlaTimeLines?.resolutionSLAHour}
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-gray-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                    <span>:</span>
+                    <input
+                      type="number"
+                      name="resolutionSLAMinute"
+                      min="0"
+                      max="59"
+                      placeholder="MM"
+                      value={editSlaTimeLines?.resolutionSLAMinute}
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      className="w-16 border-b border-gray-400 focus:border-blue-500 outline-none"
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Penality / Hour
+                    </label>
+                    <TextField
+                      name="penality"
+                      required
+                      fullWidth
+                      value={editSlaTimeLines?.penality || ""}
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      variant="standard"
+                      sx={{ width: 250 }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="w-40 text-sm font-medium text-gray-500">
+                      Active
+                    </label>
+                    <input
+                      type="checkbox"
+                      name="stattus"
+                      checked={editSlaTimeLines?.stattus || false}
+                      onChange={updateSlaTimeLinesChangeHandler}
+                      className="w-6 h-4"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3 pt-4">
+                  <button
+                    type="submit"
+                    className="bg-[#6f7fbc] shadow-[#7a8bca] shadow-md px-4 py-2 rounded-md text-sm text-white transition-all"
+                  >
+                    Update
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOpenUpdateModal(false)}
+                    className="bg-[#df656b] shadow-[#F26E75] shadow-md text-white px-4 py-2 rounded-lg transition-all text-sm font-medium"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
-          </>
+          </div>
         )}
         {deleteConfirmationModal && (
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">

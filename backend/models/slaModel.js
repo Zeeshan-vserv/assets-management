@@ -10,8 +10,8 @@ const slaCreatetionSchema = new mongoose.Schema({
     slaTimeline: [
         {
             weekDay: String,
-            startTime: Date,
-            endTime: Date
+            startTime: String,
+            endTime: String
         }
     ]
 },{timestamps: true})
@@ -29,6 +29,7 @@ export const SLAMappingModel = mongoose.model('SLAMapping', slaMappingSchema);
 const slaTimelineSchema = new mongoose.Schema({
     userId: String,
     priority: String,
+    type: String,
     displayName: String,
     description: String,
     responseSLA: String,

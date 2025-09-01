@@ -33,7 +33,7 @@ function formatDate(dateStr) {
   });
 }
 
-const IncidentTimeline = ({ timeline, title = "Incident Timeline" }) => {
+const IncidentTimeline = ({ timeline, title = "Incident Timeline", userMap = {} }) => {
   if (!timeline || timeline.length === 0) return <p className="timeline-empty">No status history.</p>;
 
   return (
@@ -45,6 +45,8 @@ const IncidentTimeline = ({ timeline, title = "Incident Timeline" }) => {
             color: "#888",
             icon: <HourglassEmpty fontSize="small" />,
           };
+          // Get user name from userMap, fallback to ID if not found
+          const userName = userMap[entry.changedBy] || entry.changedBy;
           return (
             <li className="timeline-item" key={idx}>
               <div
@@ -59,7 +61,7 @@ const IncidentTimeline = ({ timeline, title = "Incident Timeline" }) => {
                   <span className="timeline-date">{formatDate(entry.changedAt)}</span>
                 </div>
                 {entry.changedBy && (
-                  <div className="timeline-user">by {entry.changedBy}</div>
+                  <div className="timeline-user">by {userName}</div>
                 )}
                 {entry.closingSummary && (
                   <div className="timeline-summary">

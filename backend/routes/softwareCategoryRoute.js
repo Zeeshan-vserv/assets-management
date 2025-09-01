@@ -4,6 +4,10 @@ import authMiddleware from '../middleware/AuthMiddleware.js'
 import { requirePagePermission } from '../middleware/roleMiddleware.js'
 
 const router = express.Router()
+router.get('/softwareCategory', authMiddleware, requirePagePermission('softwareCategory', 'isView'), getAllSoftwareCategory)
+router.get('/softwareCategory/:id', authMiddleware, requirePagePermission('softwareCategory', 'isView'), getSoftwareCategoryById)
+router.get('/publisher', authMiddleware, requirePagePermission('softwareCategory', 'isView'), getAllPublisher)
+router.get('/publisher/:id', authMiddleware, requirePagePermission('softwareCategory', 'isView'), getPublisherById)
 
 router.get('/softwareCategory', authMiddleware, requirePagePermission('softwareCategory', 'isView'), getAllSoftwareCategory)
 router.get('/softwareCategory/:id', authMiddleware, requirePagePermission('softwareCategory', 'isView'), getSoftwareCategoryById)

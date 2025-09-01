@@ -27,7 +27,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Department.csv",
+  filename: "Assets-Management-VendorCategory.csv",
 });
 
 function VendorCategory() {
@@ -70,7 +70,7 @@ function VendorCategory() {
       },
       {
         accessorKey: "categoryName",
-        header: "Name",
+        header: "Category Name",
       },
       {
         id: "edit",
@@ -180,6 +180,7 @@ function VendorCategory() {
     setDeleteVendorCategoryId(id);
     setDeleteConfirmationModal(true);
   };
+
   const deleteVendorCategoryHandler = async (e) => {
     e.preventDefault();
     try {
@@ -271,7 +272,7 @@ function VendorCategory() {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-    doc.save("Assets-Management-Components.pdf");
+    doc.save("Assets-Management-VendorCategory.pdf");
   };
 
   const table = useMaterialReactTable({

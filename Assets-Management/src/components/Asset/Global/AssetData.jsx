@@ -16,7 +16,6 @@ import { NavLink } from "react-router-dom";
 import { toast } from "react-toastify";
 import { getAllAssets, deleteAsset } from "../../../api/AssetsRequest";
 import { MdDownload } from "react-icons/md";
-import { RxCross1 } from "react-icons/rx";
 import QrCodeIcon from "@mui/icons-material/QrCode";
 import { RxCross2 } from "react-icons/rx";
 import { QRCodeSVG as QRCodeComponent } from "qrcode.react";
@@ -204,24 +203,20 @@ const AssetData = () => {
   // };
 
   const handleExportRows = (rows) => {
-    const visibleColumns = table
-      .getAllLeafColumns()
-      .filter(
-        (col) =>
-          col.getIsVisible() &&
-          col.id !== "mrt-row-select" &&
-          col.id !== "edit" &&
-          col.id !== "delete" &&
-          col.id !== "file"
-      );
-
     const rowData = rows.map((row) => {
-      const result = {};
-      visibleColumns.forEach((col) => {
-        const key = col.id || col.accessorKey;
-        result[key] = row.original[key];
-      });
-      return result;
+      const rowValues = {};
+      table
+        .getAllLeafColumns()
+        .filter((column) => column.getIsVisible())
+        .filter(
+          (column) => !["mrt-row-select", "edit", "delete"].includes(column.id)
+        )
+        .forEach((column) => {
+          const value = row.getValue(column.id);
+          rowValues[column.columnDef.header] =
+            value !== undefined ? String(value) : "";
+        });
+      return rowValues;
     });
 
     const csv = generateCsv(csvConfig)(rowData);
@@ -229,55 +224,61 @@ const AssetData = () => {
   };
 
   const handleExportData = () => {
-    const visibleColumns = table
-      .getAllLeafColumns()
-      .filter(
-        (col) =>
-          col.getIsVisible() &&
-          col.id !== "mrt-row-select" &&
-          col.id !== "edit" &&
-          col.id !== "delete" &&
-          col.id !== "file"
-      );
+    const rowData = data.map((row) => {
+      const rowValues = {};
+      table
+        .getAllLeafColumns()
+        .filter((column) => column.getIsVisible())
+        .filter(
+          (column) => !["mrt-row-select", "edit", "delete"].includes(column.id)
+        )
+        .forEach((column) => {
+          const accessorKey = column.columnDef.accessorKey || column.id;
+          const keys = accessorKey.split(".");
+          let value = row;
 
-    const exportData = data.map((item) => {
-      const result = {};
-      visibleColumns.forEach((col) => {
-        const key = col.id || col.accessorKey;
-        result[key] = item[key];
-      });
-      return result;
+          keys.forEach((key) => {
+            value = value?.[key];
+          });
+
+          rowValues[column.columnDef.header] =
+            value !== undefined ? String(value) : "";
+        });
+      return rowValues;
     });
-
-    const csv = generateCsv(csvConfig)(exportData);
+    const csv = generateCsv(csvConfig)(rowData);
     download(csvConfig)(csv);
   };
 
   const handlePdfData = () => {
-    const excludedColumns = ["mrt-row-select", "edit", "delete", "file"];
+    const doc = new jsPDF();
     const visibleColumns = table
       .getAllLeafColumns()
-      .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
+      .filter((column) => column.getIsVisible())
+      .filter(
+        (column) => !["mrt-row-select", "edit", "delete"].includes(column.id)
+      );
+    const headers = visibleColumns.map((column) => column.columnDef.header);
+    const body = data.map((row) => {
+      return visibleColumns.map((column) => {
+        const accessorKey = column.columnDef.accessorKey || column.id;
+        const keys = accessorKey.split(".");
+        let value = row;
 
-    const headers = visibleColumns.map((col) => col.columnDef.header || col.id);
+        keys.forEach((key) => {
+          value = value?.[key];
+        });
 
-    const exportData = data.map((item) =>
-      visibleColumns.map((col) => {
-        const key = col.id || col.accessorKey;
-        let value = item[key];
-        return value ?? "";
-      })
-    );
-
-    const doc = new jsPDF();
+        return value !== undefined ? String(value) : "";
+      });
+    });
     autoTable(doc, {
       head: [headers],
-      body: exportData,
+      body: body,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-
     doc.save("Assets-Management-Assets.pdf");
   };
 
@@ -401,7 +402,7 @@ Location: ${row?.locationInformation?.location ?? ""}`;
   const handleUserEmailClick = async (userId) => {
     try {
       const res = await getUserById(userId);
-      console.log("User API response:", res); 
+      // console.log("User API response:", res); // <-- Add this line
       // Try both options below, depending on your API response:
       setUserDetails(res?.data?.data || res?.data || null);
       setUserModalOpen(true);
@@ -417,7 +418,7 @@ Location: ${row?.locationInformation?.location ?? ""}`;
   };
 
   const table = useMaterialReactTable({
-    data: filteredData, 
+    data: filteredData,
     columns,
     getRowId: (row) => row?._id?.toString(),
     enableRowSelection: true,
@@ -679,44 +680,49 @@ Location: ${row?.locationInformation?.location ?? ""}`;
         )}
         {/* User Details Modal */}
         {userModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-sm relative">
-              <h2 className="text-lg font-semibold mb-4 text-blue-700">
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 animate-fade-in transition-all duration-300">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">
                 User Details
               </h2>
-              <RxCross1
-                size={24}
-                onClick={handleCloseUserModal}
-                className="absolute top-3 right-3 text-gray-400 hover:text-red-500 text-xl cursor-pointer border-2 rounded-full"
-              />
               {userDetails ? (
-                <div className="space-y-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
                   <div>
-                    <span className="font-medium">Name:</span>{" "}
-                    {userDetails.employeeName || "-"}
+                    <p className="font-medium">Name:</p>
+                    <p className="text-gray-600">
+                      {userDetails.employeeName || "-"}
+                    </p>
                   </div>
                   <div>
-                    <span className="font-medium">Employee Code:</span>{" "}
-                    {userDetails.employeeCode || "-"}
+                    <p className="font-medium">Employee Code:</p>
+                    <p className="text-gray-600">
+                      {userDetails.employeeCode || "-"}
+                    </p>
                   </div>
                   <div>
-                    <span className="font-medium">Email:</span>{" "}
-                    {userDetails.emailAddress || "-"}
+                    <p className="font-medium">Email:</p>
+                    <p className="text-gray-600">
+                      {userDetails.emailAddress || "-"}
+                    </p>
                   </div>
                   <div>
-                    <span className="font-medium">Mobile:</span>{" "}
-                    {userDetails.mobileNumber || "-"}
+                    <p className="font-medium">Mobile:</p>
+                    <p className="text-gray-600">
+                      {userDetails.mobileNumber || "-"}
+                    </p>
                   </div>
                 </div>
               ) : (
                 <div className="text-gray-500">No user details found.</div>
               )}
-              {/* <button
-                className="mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-                onClick={handleCloseUserModal}
-              >
-                Close
-              </button> */}
+              <div className="flex justify-end mt-6">
+                <button
+                  className="px-5 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
+                  onClick={handleCloseUserModal}
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         )}

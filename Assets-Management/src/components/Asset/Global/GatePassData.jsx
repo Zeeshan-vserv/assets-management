@@ -203,7 +203,7 @@ function GatePassData() {
       setDeleteGetPassId(null);
       fetchGetPass();
     } catch (error) {
-      console.log("Delete Get pass error", error);
+      // console.log("Delete Get pass error", error);
     }
   };
 
@@ -216,7 +216,8 @@ function GatePassData() {
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
           col.id !== "delete" &&
-          col.id !== "file"
+          col.id !== "attachment" &&
+          col.id !== "print"
       );
 
     const rowData = rows.map((row) => {
@@ -241,7 +242,8 @@ function GatePassData() {
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
           col.id !== "delete" &&
-          col.id !== "file"
+          col.id !== "attachment" &&
+          col.id !== "print"
       );
 
     const exportData = data.map((item) => {
@@ -258,7 +260,13 @@ function GatePassData() {
   };
 
   const handlePdfData = () => {
-    const excludedColumns = ["mrt-row-select", "edit", "delete", "file"];
+    const excludedColumns = [
+      "mrt-row-select",
+      "edit",
+      "delete",
+      "attachment",
+      "print",
+    ];
     const visibleColumns = table
       .getAllLeafColumns()
       .filter((col) => col.getIsVisible() && !excludedColumns.includes(col.id));
@@ -274,7 +282,12 @@ function GatePassData() {
       })
     );
 
-    const doc = new jsPDF();
+    // const doc = new jsPDF();
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a3",
+    });
     autoTable(doc, {
       head: [headers],
       body: exportData,

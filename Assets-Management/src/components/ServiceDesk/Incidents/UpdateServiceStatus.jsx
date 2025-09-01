@@ -6,9 +6,13 @@ import {
 } from "react-icons/md";
 import { useEffect } from "react";
 import dayjs from "dayjs";
-import { getIncidentById, updateIncident } from "../../../api/IncidentRequest";
 import { getUserById } from "../../../api/AuthRequest";
-const UpdateStatus = () => {
+import {
+  getServiceRequestById,
+  updateServiceRequest,
+} from "../../../api/serviceRequest";
+
+const UpdateServiceStatus = () => {
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [userDets, setUserDets] = useState("");
@@ -45,7 +49,8 @@ const UpdateStatus = () => {
       technician: "",
     },
   });
-  const [updateStatusData, setUpdateStatusData] = useState({
+
+  const [updateServiceRequestData, setUpdateServiceRequestData] = useState({
     status: "",
     closingSummary: "",
     closeRemarks: "",
@@ -55,7 +60,7 @@ const UpdateStatus = () => {
   const fetchData = async () => {
     try {
       setIsLoading(true);
-      const response = await getIncidentById(id);
+      const response = await getServiceRequestById(id);
       if (response?.data?.data) {
         setFormData(response.data.data);
       }
@@ -93,60 +98,66 @@ const UpdateStatus = () => {
     }
   }, [formData.userId]);
 
+  const getLatestStatus = (timeline) => {
+    if (!Array.isArray(timeline) || timeline.length === 0) return "No Status";
+    return timeline[timeline.length - 1]?.status || "No Status";
+  };
+
   const incidentDetails = [
-    { label: "Status", value: formData.status || "" },
-    { label: "Priority", value: formData.classificaton.priorityLevel || "" },
-    { label: "Subject", value: formData.subject || "" },
+    {
+      label: "Status",
+      value: getLatestStatus(formData?.statusTimeline),
+    },
+    { label: "Priority", value: formData?.classificaton?.priorityLevel || "" },
+    { label: "Subject", value: formData?.subject || "" },
     {
       label: "Support Dept.",
-      value: formData.classificaton.supportDepartmentName || "",
+      value: formData?.classificaton?.supportDepartmentName || "",
     },
     {
       label: "Support Group",
-      value: formData.classificaton.supportGroupName || "",
+      value: formData?.classificaton?.supportGroupName || "",
     },
     {
       label: "Logged Time",
-      value: formData.createdAt
+      value: formData?.createdAt
         ? dayjs(formData.createdAt).format("DD MMM YYYY, hh:mm A")
         : "",
     },
-    { label: "Email", value: formData.submitter.userEmail || "" },
-    { label: "Asset", value: formData.assetDetails.asset || "" },
-    { label: "Asset S.No.", value: formData.assetDetails.serialNo || "" },
-    { label: "User", value: formData.submitter.user || "" },
+    { label: "Email", value: formData?.submitter?.userEmail || "" },
+    { label: "Asset", value: formData?.assetDetails?.asset || "" },
+    { label: "Asset S.No.", value: formData?.assetDetails?.serialNo || "" },
+    { label: "User", value: formData?.submitter?.user || "" },
     { label: "VIP User", value: userDets?.isVip ? "Yes" : "No" },
-    { label: "Assigned To", value: formData.classificaton.technician || "" },
+    { label: "Assigned To", value: formData?.classificaton?.technician || "" },
     {
       label: "Contact No.",
-      value: formData.submitter.userContactNumber || "",
+      value: formData?.submitter?.userContactNumber || "",
     },
-    { label: "Category", value: formData.category || "" },
+    { label: "Category", value: formData?.category || "" },
   ];
 
-  const handleUpdateStatusChange = (e) => {
-    const { name, value, files, type } = e.target;
-    setUpdateStatusData((prev) => ({
+  const handleUpdateServiceChange = (e) => {
+    const { name, value, type, files } = e.target;
+    setUpdateServiceRequestData((prev) => ({
       ...prev,
       [name]: type === "file" ? files[0] : value,
     }));
   };
-
   const updateWorkStatusHandler = async (e) => {
     e.preventDefault();
     try {
       const form = new FormData();
-      form.append("status", updateStatusData.status);
-      form.append("closingSummary", updateStatusData.closingSummary);
-      form.append("closeRemarks", updateStatusData.closeRemarks);
-      if (updateStatusData.attachment) {
-        form.append("attachment", updateStatusData.attachment);
+      form.append("status", updateServiceRequestData.status);
+      form.append("closingSummary", updateServiceRequestData.closingSummary);
+      form.append("closeRemarks", updateServiceRequestData.closeRemarks);
+      if (updateServiceRequestData.attachment) {
+        form.append("attachment", updateServiceRequestData.attachment);
       }
-      const response = await updateIncident(id, form);
-      console.log("response", response);
-      console.log("formData", form);
+      const response = await updateServiceRequest(id, form);
+      console.log("Service Request Updated:", response);
     } catch (error) {
-      console.error("Error updating to work status", error);
+      console.error("Error updating service request:", error);
     }
   };
 
@@ -154,15 +165,14 @@ const UpdateStatus = () => {
     <>
       <div className="w-[100%] min-h-screen p-6 flex flex-col gap-5 bg-slate-200">
         <h2 className="text-md font-semibold mb-4 text-start">
-          INCIDENT ID - {id}
+          Service Request ID - {id}
         </h2>
         <div className="flex flex-wrap justify-center gap-4">
           <div className="flex flex-col gap-3 flex-1 h-full min-w-[600px]">
-            {/* Update Work Status */}
             <div className="flex flex-wrap bg-white p-4 rounded-lg shadow-md ">
               <div className="w-full flex items-center justify-between mb-4">
                 <h3 className="text-base text-gray-800 font-semibold mb-4">
-                  Update Work Status
+                  Update Work Status(Service)
                 </h3>
                 <button
                   onClick={updateWorkStatusHandler}
@@ -184,8 +194,8 @@ const UpdateStatus = () => {
                 <select
                   id="status"
                   name="status"
-                  value={updateStatusData.status}
-                  onChange={handleUpdateStatusChange}
+                  value={updateServiceRequestData.status}
+                  onChange={handleUpdateServiceChange}
                   className="w-[65%] text-xs border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
                 >
                   <option value="">Select Status</option>
@@ -194,8 +204,8 @@ const UpdateStatus = () => {
                     Person Not Available
                   </option>
                   <option value="Part Not Avaitable">Part Not Avaitable</option>
-                  <option value="resolved">Resolved</option>
-                  <option value="closed">Closed</option>
+                  <option value="Resolved">Resolved</option>
+                  <option value="Closed">Closed</option>
                 </select>
               </div>
               <div className="flex items-center w-[50%] max-lg:w-[100%]">
@@ -206,23 +216,24 @@ const UpdateStatus = () => {
                   Comment
                 </label>
                 <input
+                  type="text"
                   id="closeRemarks"
                   name="closeRemarks"
-                  value={updateStatusData.closeRemarks}
-                  onChange={handleUpdateStatusChange}
+                  value={updateServiceRequestData.closeRemarks}
+                  onChange={handleUpdateServiceChange}
                   className="w-[65%] text-sm text-slate-800 border-b-2 border-slate-300 p-2 outline-none focus:border-blue-500"
-                  type="text"
                 />
               </div>
             </div>
+
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-base font-semibold mb-4 text-gray-800">
                 Closer Statement
               </h2>
               <textarea
                 name="closingSummary"
-                value={updateStatusData.closingSummary}
-                onChange={handleUpdateStatusChange}
+                value={updateServiceRequestData.closingSummary}
+                onChange={handleUpdateServiceChange}
                 className="w-full border border-gray-300 rounded-md p-3  resize-y font-['Verdana'] text-[11pt] outline-none"
                 placeholder="Type your reply..."
               />
@@ -232,8 +243,7 @@ const UpdateStatus = () => {
                 </label>
                 <input
                   type="file"
-                  name="attachment"
-                  onChange={handleUpdateStatusChange}
+                  onChange={handleUpdateServiceChange}
                   className="border file:border file:rounded-sm file:px-1 border-gray-300 rounded-md px-2 py-1 file:cursor-pointer"
                 />
               </div>
@@ -263,4 +273,4 @@ const UpdateStatus = () => {
     </>
   );
 };
-export default UpdateStatus;
+export default UpdateServiceStatus;

@@ -39,8 +39,8 @@ router.get('/sla/:id', authMiddleware, requirePagePermission('incident', 'isView
 router.get('/tat/:id', authMiddleware, requirePagePermission('incident', 'isView'), getIncidentTat);
 router.get('/status-counts', authMiddleware, requirePagePermission('incident', 'isView'), getIncidentStatusCounts);
 router.get('/', authMiddleware, requirePagePermission('incident', 'isView'), getAllIncident);
-router.get('/:id', authMiddleware, requirePagePermission('incident', 'isView'), getIncidentById);
 router.get('/user/:userId', authMiddleware, requirePagePermission('incident', 'isView'), getIncidentByUserId);
+router.get('/:id', authMiddleware, requirePagePermission('incident', 'isView'), getIncidentById);
 router.put('/:id', authMiddleware, requirePagePermission('incident', 'isEdit'), updateIncident);
 router.delete('/:id', authMiddleware, requirePagePermission('incident', 'isDelete'), deleteIncident);
 router.post('/autoclose', authMiddleware, requirePagePermission('incident', 'isEdit'), async (req, res) => {

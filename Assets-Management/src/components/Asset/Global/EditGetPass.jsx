@@ -61,7 +61,7 @@ function EditGetPass() {
         throw new Error("Failed to fetch data");
       }
 
-      console.log(response.data);
+      // console.log(response.data);
 
       const data = response.data.data || {};
       setFormData({

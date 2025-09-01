@@ -214,6 +214,7 @@ function Department() {
     const csv = generateCsv(csvConfig)(rowData);
     download(csvConfig)(csv);
   };
+
   const handleExportData = () => {
     const visibleColumns = table
       .getAllLeafColumns()
@@ -237,6 +238,7 @@ function Department() {
     const csv = generateCsv(csvConfig)(exportData);
     download(csvConfig)(csv);
   };
+
   const handlePdfData = () => {
     const excludedColumns = ["mrt-row-select", "edit", "delete"];
 
@@ -264,7 +266,7 @@ function Department() {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-    doc.save("Assets-Management-Components.pdf");
+    doc.save("Assets-Management-Departments.pdf");
   };
 
   const table = useMaterialReactTable({

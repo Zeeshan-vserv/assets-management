@@ -27,7 +27,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Components",
+  filename: "Assets-Management-Locations",
 });
 
 function Location() {
@@ -273,7 +273,7 @@ function Location() {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-    doc.save("Assets-Management-Components.pdf");
+    doc.save("Assets-Management-Locations.pdf");
   };
 
   const table = useMaterialReactTable({

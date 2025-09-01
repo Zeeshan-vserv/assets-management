@@ -36,7 +36,7 @@ const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
   useKeysAsHeaders: true,
-  filename: "Assets-Management-Department.csv",
+  filename: "Assets-Management-IncidentData.csv",
 });
 
 const ticketOptions = ["All Tickets", "My Tickets"];
@@ -483,42 +483,75 @@ const IncidentsData = () => {
     [isLoading, allTat, allSla]
   );
 
-  // Export helpers
-  const getVisibleColumns = () =>
-    table
+
+const handleExportRows = (rows) => {
+  const visibleColumns = table
+    .getAllLeafColumns()
+    .filter(
+      (col) =>
+        col.getIsVisible() &&
+        col.id !== "mrt-row-select" &&
+        col.id !== "edit" &&
+        col.id !== "delete" &&
+        col.id !== "attachment" &&
+        col.id !== "print"
+    );
+
+  const rowData = rows.map((row) => {
+    const result = {};
+    visibleColumns.forEach((col) => {
+      const key = col.id || col.accessorKey;
+      let value = row.original[key];
+      // Stringify objects/arrays for CSV export
+      if (typeof value === "object" && value !== null) {
+        value = JSON.stringify(value);
+      }
+      result[key] = value;
+    });
+    return result;
+  });
+
+  if (rowData.length === 0) {
+    alert("No data to export!");
+    return;
+  }
+
+  const csv = generateCsv(csvConfig)(rowData);
+  download(csvConfig)(csv);
+};
+
+  const handleExportData = () => {
+    const visibleColumns = table
       .getAllLeafColumns()
       .filter(
         (col) =>
           col.getIsVisible() &&
           col.id !== "mrt-row-select" &&
           col.id !== "edit" &&
-          col.id !== "delete"
+          col.id !== "delete" &&
+          col.id !== "attachment" &&
+          col.id !== "print"
       );
 
-  const handleExportRows = (rows) => {
-    const visibleColumns = getVisibleColumns();
-    const rowData = rows.map((row) => {
+    const exportData = filteredData.map((item) => {
       const result = {};
       visibleColumns.forEach((col) => {
         const key = col.id || col.accessorKey;
-        result[key] = row.original[key];
+        let value = item[key];
+        // If value is an object or array, stringify it
+        if (typeof value === "object" && value !== null) {
+          value = JSON.stringify(value);
+        }
+        result[key] = value;
       });
       return result;
     });
-    const csv = generateCsv(csvConfig)(rowData);
-    download(csvConfig)(csv);
-  };
 
-  const handleExportData = () => {
-    const visibleColumns = getVisibleColumns();
-    const exportData = data.map((item) => {
-      const result = {};
-      visibleColumns.forEach((col) => {
-        const key = col.id || col.accessorKey;
-        result[key] = item[key];
-      });
-      return result;
-    });
+    if (exportData.length === 0) {
+      alert("No data to export!");
+      return;
+    }
+
     const csv = generateCsv(csvConfig)(exportData);
     download(csvConfig)(csv);
   };
@@ -536,7 +569,12 @@ const IncidentsData = () => {
         return value ?? "";
       })
     );
-    const doc = new jsPDF({});
+    // const doc = new jsPDF({});
+    const doc = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a3",
+    });
     autoTable(doc, {
       head: [headers],
       body: exportData,
@@ -544,7 +582,7 @@ const IncidentsData = () => {
       headStyles: { fillColor: [66, 139, 202] },
       margin: { top: 20 },
     });
-    doc.save("Assets-Management-Components.pdf");
+    doc.save("Assets-Management-IncidentData.pdf");
   };
 
   // Table instance
@@ -772,7 +810,7 @@ const IncidentsData = () => {
 
       {showUserModal && selectedUser && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 animate-fade-in transition-all duration-300">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 animate-fade-in transition-all duration-300">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">
               User Details
             </h2>
@@ -813,7 +851,6 @@ const IncidentsData = () => {
                 </p>
               </div>
             </div>
-
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setShowUserModal(false)}
@@ -833,7 +870,7 @@ const IncidentsData = () => {
                 <div className="flex flex-col items-center justify-center">
                   <div className="rounded-xl px-6 py-6 flex flex-col items-center">
                     <svg
-                      className="w-16 h-16 text-blue-500 mb-4"
+                      className="w-16 h-16 text-blue-500 mb-4 animate-check"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 48 48"
@@ -863,13 +900,15 @@ const IncidentsData = () => {
                       You cannot assign it again.
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setChangeStatus(false)}
-                    className="px-6 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition"
-                  >
-                    Close
-                  </button>
+                  <div className="p-[2px] rounded-md bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 inline-block">
+                    <button
+                      type="button"
+                      onClick={() => setChangeStatus(false)}
+                      className="px-6 py-2 rounded-sm bg-white text-blue-600 hover:bg-gray-100 transition font-semibold"
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
               </>
             ) : (

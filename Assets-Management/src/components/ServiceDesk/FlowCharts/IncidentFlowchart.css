@@ -1,0 +1,67 @@
+.flowchart-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 90vh;
+  background: linear-gradient(to right bottom, #e0f7fa, #e8f5e9);
+  padding: 40px 20px;
+}
+
+.flowchart-card {
+  width: 100%;
+  max-width: 850px;
+  padding: 2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(173, 216, 230, 0.3);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.6s ease-out;
+  transition: transform 0.4s ease;
+}
+
+
+.flowchart-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.flowchart-icon {
+  font-size: 2rem;
+  color: #0077b6;
+}
+
+.flowchart-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #01579b;
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.flowchart-graph {
+  width: 100%;
+  overflow-x: auto;
+  transition: transform 0.5s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Optional responsiveness */
+@media (max-width: 768px) {
+  .flowchart-title {
+    font-size: 1.5rem;
+  }
+}

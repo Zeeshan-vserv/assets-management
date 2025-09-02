@@ -29,6 +29,9 @@ import {
 } from "../../../api/SuportDepartmentRequest";
 import { getAllUsers, getUserById } from "../../../api/AuthRequest";
 
+// 1. Import your timeline component
+import IncidentTimeline from "../TicketHistory/IncidentTimeline";
+
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
@@ -60,8 +63,10 @@ function ServiceRequest() {
   const [resolvedComments, setResolvedComments] = useState("");
   const [closureCode, setClosureCode] = useState("");
   const [allUsers, setAllUsers] = useState([]);
-  const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const [timelineRequest, setTimelineRequest] = useState(null); // For timeline modal
 
   const fetchService = useCallback(async () => {
     setIsLoading(true);
@@ -218,11 +223,39 @@ function ServiceRequest() {
     }
   };
 
+  // 3. Update Status column to be clickable and open timeline modal
   const columns = useMemo(
     () => [
       {
         accessorKey: "serviceId",
         header: "Service Req ID",
+      },
+      {
+        header: "Status",
+        accessorKey: "statusTimeline",
+        Cell: ({ row }) => {
+          const timeline = row.original.statusTimeline;
+          if (!Array.isArray(timeline)) return "No Timeline";
+          if (timeline.length === 0) return "No Status";
+          const lastStatus = timeline[timeline.length - 1];
+          return (
+            <span
+              style={{
+                color: "#2563eb",
+                cursor: "pointer",
+                textDecoration: "underline",
+                fontWeight: 500,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setTimelineRequest(row.original);
+              }}
+              title="View Timeline"
+            >
+              {lastStatus.status || "No Status"}
+            </span>
+          );
+        },
       },
       {
         accessorKey: "subject",
@@ -292,10 +325,6 @@ function ServiceRequest() {
           );
         },
       },
-      // {
-      //   accessorKey: "",
-      //   header: "Approval",
-      // },
       {
         accessorKey: "submitter.loggedInTime",
         header: "Logged Time",
@@ -306,26 +335,7 @@ function ServiceRequest() {
               })
             : "",
       },
-      // {
-      //   accessorKey: "",
-      //   header: "SLA",
-      // },
-      {
-        header: "Status",
-        accessorKey: "statusTimeline",
-        Cell: ({ row }) => {
-          const timeline = row.original.statusTimeline;
-          if (!Array.isArray(timeline)) return "No Timeline";
-          if (timeline.length === 0) return "No Status";
-          const lastStatus = timeline[timeline.length - 1];
-          return lastStatus.status || "No Status";
-        },
-      },
 
-      // {
-      //   accessorKey: "",
-      //   header: "TAT",
-      // },
       {
         id: "edit",
         header: "Edit",
@@ -644,6 +654,54 @@ function ServiceRequest() {
           ))}
         </div>
         <MaterialReactTable table={table} />
+
+        {/* 4. Timeline Modal */}
+        {/* {timelineRequest && (
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6 animate-fade-in transition-all duration-300 relative">
+              <button
+                onClick={() => setTimelineRequest(null)}
+                className="absolute top-3 right-3 text-gray-500 hover:text-blue-600 text-2xl font-bold"
+                title="Close"
+              >
+                &times;
+              </button>
+              <h2 className="text-xl font-semibold mb-4 text-blue-700">
+                Service Request Timeline: {timelineRequest.serviceId}
+              </h2>
+              <IncidentTimeline
+                timeline={timelineRequest.statusTimeline}
+                title="Service Request Timeline"
+              />
+            </div>
+          </div>
+        )} */}
+        {timelineRequest && (
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl animate-fade-in transition-all duration-300 relative">
+              {/* Fixed Close Button */}
+              <button
+                onClick={() => setTimelineRequest(null)}
+                className="absolute top-3 right-3 text-gray-500 hover:text-blue-600 text-2xl font-bold z-10"
+                title="Close"
+              >
+                &times;
+              </button>
+
+              {/* Scrollable Content */}
+              <div className="p-6 pt-12 max-h-96 overflow-y-auto">
+                <h2 className="text-xl font-semibold mb-4 text-blue-700">
+                  Service Request Timeline: {timelineRequest.serviceId}
+                </h2>
+                <IncidentTimeline 
+                  timeline={timelineRequest.statusTimeline}
+                  title="Service Request Timeline"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
         {showUserModal && selectedUser && (
           <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
             <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 animate-fade-in transition-all duration-300">

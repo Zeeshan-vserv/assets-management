@@ -32,6 +32,8 @@ import {
 } from "../../../api/SuportDepartmentRequest";
 import { getAllUsers, getUserById } from "../../../api/AuthRequest";
 import { useSelector } from "react-redux";
+import IncidentTimeline from "../TicketHistory/IncidentTimeline"; // or IncidentHistoryResponsive if you want the full card
+
 const csvConfig = mkConfig({
   fieldSeparator: ",",
   decimalSeparator: ".",
@@ -66,6 +68,7 @@ const IncidentsData = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [ticketType, setTicketType] = useState(ticketOptions[0]);
+  const [timelineIncident, setTimelineIncident] = useState(null);
 
   const fetchDepartment = useCallback(async () => {
     setIsLoading(true);
@@ -256,9 +259,27 @@ const IncidentsData = () => {
         accessorKey: "statusTimeline",
         Cell: ({ row }) => {
           const timeline = row.original.statusTimeline;
-          if (!Array.isArray(timeline) || timeline.length === 0)
-            return "No Status";
-          return timeline[timeline.length - 1]?.status || "No Status";
+          const status =
+            Array.isArray(timeline) && timeline.length > 0
+              ? timeline[timeline.length - 1]?.status
+              : "No Status";
+          return (
+            <span
+              style={{
+                color: "#2563eb",
+                cursor: "pointer",
+                textDecoration: "underline",
+                fontWeight: 500,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setTimelineIncident(row.original);
+              }}
+              title="View Timeline"
+            >
+              {status}
+            </span>
+          );
         },
       },
       { accessorKey: "subject", header: "Subject" },
@@ -727,6 +748,55 @@ const IncidentsData = () => {
         ))}
       </div>
       <MaterialReactTable table={table} />
+
+      {/* Timeline Modal */}
+      {/* {timelineIncident && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4 ">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl p-6 animate-fade-in transition-all duration-300 relative max-h-96 overflow-y-scroll">
+            <button
+              onClick={() => setTimelineIncident(null)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-blue-600 text-2xl font-bold"
+              title="Close"
+            >
+              &times;
+            </button>
+            <h2 className="text-xl font-semibold mb-4 text-blue-700">
+              Incident Timeline: {timelineIncident.incidentId}
+            </h2>
+            <IncidentTimeline
+              timeline={timelineIncident.statusTimeline}
+              title="Incident Timeline"
+            />
+          </div>
+        </div>
+      )} */}
+
+      {timelineIncident && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl animate-fade-in transition-all duration-300 relative">
+            {/* Fixed Close Button */}
+            <button
+              onClick={() => setTimelineIncident(null)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-blue-600 text-2xl font-bold z-10"
+              title="Close"
+            >
+              &times;
+            </button>
+
+            {/* Scrollable Content */}
+            <div className="p-6 pt-12 max-h-96 overflow-y-auto">
+              <h2 className="text-xl font-semibold mb-4 text-blue-700">
+                Incident Timeline: {timelineIncident.incidentId}
+              </h2>
+              <IncidentTimeline
+                timeline={timelineIncident.statusTimeline}
+                title="Incident Timeline"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {showUserModal && selectedUser && (
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center px-4">
           <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 animate-fade-in transition-all duration-300">
@@ -781,6 +851,7 @@ const IncidentsData = () => {
           </div>
         </div>
       )}
+
       {changeStatus && (
         <div className="fixed inset-0 bg-black/50 z-50 flex justify-center items-center">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-md:max-w-sm max-sm:max-w-xs p-6 animate-fade-in">
